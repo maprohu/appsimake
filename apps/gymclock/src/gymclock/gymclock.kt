@@ -1,6 +1,7 @@
 package gymclock
 
 import common.obj
+import common.res
 import kotlinx.html.ButtonType
 import kotlinx.html.InputType
 import kotlinx.html.dom.append
@@ -58,15 +59,14 @@ object Main {
         fun createAudio(name: String) =
                 document.create.audio {
                     source {
-                        src = "audio/$name.mp3"
+                        src = res("audio/$name.mp3")
                         type = "audio/mpeg"
                     }
                     source {
-                        src = "audio/$name.m4r"
+                        src = res("audio/$name.m4r")
                         type = "audio/x-m4r"
                     }
                 }
-
 
         val prepareAudio = createAudio("exquisite")
         val workAudio = createAudio("definite")
@@ -256,7 +256,7 @@ object Main {
 
             clockPanel = div(classes = "d-none w-100 h-100") {
                 div(classes = "w-100 h-100 d-flex flex-column") {
-                    div("bg-secondary p-2 border-bottom d-flex flex-row") {
+                    div("bg-secondary p-2 border-bottom d-flex flex-row align-items-stretch") {
                         button(type = ButtonType.button, classes = "btn btn-light") {
                             +"Back"
 
@@ -268,7 +268,7 @@ object Main {
                             }
                         }
                         div("flex-grow-1")
-                        form(classes = "form-inline bg-light border rounded px-2 $cursorPointer") {
+                        button(type = ButtonType.button, classes = "btn btn-light") {
                             div("form-check $pointerEventsNone") {
                                 input(InputType.checkBox, classes = "form-check-input") {
                                     id = "runningSounds"
@@ -286,6 +286,24 @@ object Main {
                                 sounds.now = !sounds.now
                             }
                         }
+//                        form(classes = "form-inline bg-light border rounded px-2 $cursorPointer") {
+//                            div("form-check $pointerEventsNone") {
+//                                input(InputType.checkBox, classes = "form-check-input") {
+//                                    id = "runningSounds"
+//                                }.also { cb ->
+//                                    sounds.forEach {
+//                                        cb.checked = it
+//                                    }
+//                                }
+//                                label("form-check-label") {
+//                                    attributes["for"] = "runningSounds"
+//                                    +"Sounds"
+//                                }
+//                            }
+//                            onClickFunction = {
+//                                sounds.now = !sounds.now
+//                            }
+//                        }
 
                     }
                     div(classes = "flex-grow-1 bg-warning position-relative") {

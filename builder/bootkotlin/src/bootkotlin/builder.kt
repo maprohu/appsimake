@@ -78,6 +78,7 @@ data class KotlinJsBin(
 
 
 fun extractFiles(from: File, destDir: File, filter: (ZipEntry) -> Boolean = { true }) {
+    if (destDir.exists()) return
     ZipFile(from).use { zip ->
         zip.entries().asSequence()
             .filter { !it.isDirectory && filter(it) }

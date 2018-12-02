@@ -50,9 +50,11 @@ object testapp : JsApp(
 
 object gymclock : JsApp(
     "apps/gymclock",
-    listOf(
-        bootstrap,
-        fontAwesome
+    css = listOf(
+        FileRes("gymclock.css")
+    ),
+    deps = listOf(
+        bootstrap
     )
 )
 
