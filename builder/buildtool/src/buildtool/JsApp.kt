@@ -3,6 +3,7 @@ package buildtool
 import bootkotlin.*
 import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
+import java.io.PrintWriter
 
 open class JsApp(
     path: String,
@@ -25,8 +26,10 @@ open class JsApp(
                 .toList()
 
         file.writer().use { osw ->
+            PrintWriter(osw).println("<!DOCTYPE html>")
             osw.appendHTML().html {
                 head {
+                    setupHtmlHead()
                     files.flatMap { it.testingCss }.forEach {dep ->
                         link(
                             rel = "stylesheet",
@@ -96,9 +99,11 @@ open class JsApp(
     val publicHtml by task {
         val file = PublicDir.resolve("$name.html")
         file.parentFile.mkdirs()
-        file.writer().use {
-            it.appendHTML().html {
+        file.writer().use { osw ->
+            PrintWriter(osw).println("<!DOCTYPE html>")
+            osw.appendHTML().html {
                 head {
+                    setupHtmlHead()
                     link(
                         rel = "stylesheet",
                         type = "text/css",
@@ -112,6 +117,22 @@ open class JsApp(
         }
 
         FileValue(file)
+    }
+
+    private fun HEAD.setupHtmlHead() {
+        meta(charset = "UTF-8")
+        meta(
+            name = "viewport",
+            content = "width=device-width, initial-scale=1, shrink-to-fit=no"
+        )
+        meta(
+            name = "mobile-web-app-capable",
+            content = "yes"
+        )
+        meta(
+            name = "apple-mobile-web-app-capable",
+            content = "yes"
+        )
     }
 
 }
