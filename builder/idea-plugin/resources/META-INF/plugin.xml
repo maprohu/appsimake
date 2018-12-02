@@ -1,0 +1,33 @@
+<idea-plugin>
+  <id>pullanapp.plugin</id>
+  <name>Pull an App</name>
+  <version>1.0</version>
+  <vendor email="maprohu@gmail.com" url="https://pullanapp.firebaseapp.com">Pull an App</vendor>
+
+  <description>
+    IDEA plugins for Pull an App development
+  </description>
+
+  <change-notes>
+    No changes.
+    Still I need to write at least 40 characters, so here I go.
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="173.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <extensions defaultExtensionNs="com.intellij">
+    <consoleFilterProvider implementation="outfilter.OutputLinkFilterProvider"/>
+  </extensions>
+
+  <actions>
+    <!-- Add your actions here -->
+  </actions>
+
+</idea-plugin>
