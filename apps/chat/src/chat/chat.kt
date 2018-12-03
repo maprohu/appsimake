@@ -77,9 +77,9 @@ class Chatting(val user: User) {
                     b().also { s -> alias.forEach { s.innerText = it }  }
                 }
 
-                form(classes = "d-flex flex-row flex-grow-0 flex-shrink-0") {
+                form(classes = "d-flex flex-row flex-grow-0 flex-shrink-0 input-group") {
                     val aliasInput = input(classes = "flex-grow-1 form-control", type = InputType.text)
-                    button(classes = "btn", type = ButtonType.submit) {+"Change alias"}
+                    button(classes = "btn input-group-append", type = ButtonType.submit) {+"Change alias"}
                     onSubmitFunction = {
                         it.preventDefault()
                         setAlias(aliasInput.value)
@@ -116,12 +116,12 @@ class Chatting(val user: User) {
                     }
                 }
 
-                form(classes = "d-flex flex-row flex-grow-0 flex-shrink-0") {
+                form(classes = "d-flex flex-row flex-grow-0 flex-shrink-0 input-group") {
                     val messageInput =
                         input(classes = "flex-grow-1 form-control", type = InputType.text).also {e ->
                             window.setTimeout( { e.focus() }, 0 )
                         }
-                    button(classes = "btn", type = ButtonType.submit) {+"Send"}
+                    button(classes = "btn input-group-append", type = ButtonType.submit) {+"Send"}
                     onSubmitFunction = {
                         it.preventDefault()
                         lastMessage.set(
