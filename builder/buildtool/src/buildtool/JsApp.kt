@@ -29,6 +29,10 @@ open class JsApp(
             PrintWriter(osw).println("<!DOCTYPE html>")
             osw.appendHTML().html {
                 head {
+                    link(
+                        rel="manifest",
+                        href=testingManifest
+                    )
                     setupHtmlHead()
                     files.flatMap { it.testingCss }.forEach {dep ->
                         link(
@@ -88,12 +92,34 @@ open class JsApp(
 
     val publicNocacheCss by task {
         PublicUncachedDir.resolve("$name.css").apply {
-            val path = publicMainCss.relativeTo(PublicDir).invariantSeparatorsPath
+            val p = publicMainCss.relativeTo(PublicDir).invariantSeparatorsPath
             parentFile.mkdirs()
             writeText(
-                "@import '../$path';"
+                "@import '../$p';"
             )
         }
+    }
+
+    val manifestText by task {
+        """
+            {
+              "gcm_sender_id": "103953800507"
+            }
+        """.trimIndent()
+    }
+
+    val publicManifest by task {
+        val targetFile = PublicDir.resolve("$name.manifest.json")
+        targetFile.parentFile.mkdirs()
+        targetFile.writeText(manifestText)
+        targetFile.relativeTo(PublicDir).invariantSeparatorsPath
+    }
+
+    val testingManifest by task {
+        val targetFile = TestingDir.resolve("$name.manifest.json")
+        targetFile.parentFile.mkdirs()
+        targetFile.writeText(manifestText)
+        targetFile.relativeTo(TestingDir).invariantSeparatorsPath
     }
 
     val publicHtml by task {
@@ -104,6 +130,10 @@ open class JsApp(
             osw.appendHTML().html {
                 head {
                     setupHtmlHead()
+                    link(
+                        rel="manifest",
+                        href=publicManifest
+                    )
                     link(
                         rel = "stylesheet",
                         type = "text/css",

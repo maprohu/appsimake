@@ -37,11 +37,12 @@ fun Element.replaceAt(position: Int, element: Element) {
 }
 
 fun Node.removeFromParent() {
-    parentElement!!.removeChild(this)
+    parentElement?.removeChild(this)
 }
 
 
 fun <T> obj() = js("{}") as T
+fun <T> obj(fn: T.() -> Unit) = obj<T>().apply(fn)
 
 open class Listeners {
 
@@ -82,6 +83,11 @@ class Killables : Listeners(), Killable {
             return super.add(listener)
         }
     }
+
+    operator fun plusAssign(listener: () -> Unit) {
+        add(listener)
+    }
+
 }
 
 class Panel(private val root: org.w3c.dom.Node) {

@@ -79,6 +79,23 @@ open class JsDownload(
 
     constructor(
         url: URL,
+        fileName: String,
+        jsPath: String,
+        cssPath: String,
+        deps: List<JsDep> = listOf()
+    ) : this(
+        url,
+        fileName,
+        ExtractInfo(
+            File(fileName).nameWithoutExtension,
+            jsPath = listOf(jsPath),
+            cssPath = listOf(cssPath)
+        ),
+        deps
+    )
+
+    constructor(
+        url: URL,
         deps: List<JsDep> = listOf()
     ) : this(
         url,
@@ -107,6 +124,20 @@ open class JsDownload(
 
     constructor(
         url: String,
+        fileName: String,
+        pathToFile: String,
+        pathToCss: String,
+        deps: List<JsDep> = listOf()
+    ) : this(
+        URL(url),
+        fileName,
+        pathToFile,
+        pathToCss,
+        deps
+    )
+
+    constructor(
+        url: String,
         deps: List<JsDep> = listOf()
     ) : this(URL(url), deps)
 
@@ -119,7 +150,7 @@ open class JsDownload(
             { downloaded }
         } else {
             {
-                val targetDir = ExtractedDir.resolve(extract.dir ?: url.extractDir())
+                val targetDir = ExtractedDir.resolve(extract.dir ?: File(fileName).nameWithoutExtension )
                 extractFiles(downloaded, targetDir)
                 targetDir
             }

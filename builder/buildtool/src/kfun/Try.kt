@@ -21,10 +21,12 @@ sealed class Try<out T> {
     abstract fun isFailure(): Boolean
 
     fun <U> map(f: (T) -> U): Try<U> {
+        @Suppress("UNCHECKED_CAST")
         return when (this) {
             is Success -> Try {
                 f(this.value)
             }
+
             is Failure -> this as Failure<U>
         }
     }

@@ -9,6 +9,7 @@ external interface Resmap {
 }
 
 // https://discuss.kotlinlang.org/t/js-interop-for-in-and-for-of-loop-of-dynamic-objects/7507/4
+@Suppress("NOTHING_TO_INLINE")
 inline fun objectKeys(json: dynamic) = js("Object").keys(json).unsafeCast<Array<String>>()
 
 fun res(path: String): String {

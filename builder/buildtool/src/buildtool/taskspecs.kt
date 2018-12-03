@@ -90,6 +90,8 @@ open class KotlinJsLib(
 ) : KotlinJsDep(deps) {
     constructor(maven: Maven) : this(maven, maven.artifactId)
 
+    val name = "${maven.artifactId}-${maven.version}"
+
     val downloaded by fileTask { maven.download() }
 
     override val jsFileValue by task {

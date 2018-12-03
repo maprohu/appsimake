@@ -5,6 +5,8 @@ import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.cli.js.K2JSCompiler
+import org.jetbrains.kotlin.config.Services
 import org.jetbrains.kotlin.incremental.makeJsIncrementally
 import java.io.File
 import java.nio.file.Files
@@ -12,7 +14,7 @@ import kotlin.streams.toList
 
 open class JsModule(
     val name: String,
-    moduleRoot: File,
+    val moduleRoot: File,
     outputDir: File,
     cachesDir: File,
     val css: List<Res>,
@@ -177,45 +179,33 @@ open class JsModule(
 
         log("Compiling...")
 
-        val mc = object : MessageCollector {
-            var hasErrors = false
 
-            override fun clear() {
-                hasErrors = false
-            }
+        val libs = libraryFileValues.map { it.file.metaJs.path }.joinToString(File.pathSeparator)
+        log("libs: $libs")
 
-            override fun hasErrors(): Boolean {
-                return hasErrors
-            }
-
-            override fun report(
-                severity: CompilerMessageSeverity,
-                message: String,
-                location: CompilerMessageLocation?
-            ) {
-                if (severity == CompilerMessageSeverity.OUTPUT) return
-                if (severity == CompilerMessageSeverity.ERROR) hasErrors = true
-
-                val locmsg = if (location != null) {
-                    "\n${location.path}:${location.line}:${location.column}: ${location.lineContent}"
-                } else ""
-
-                val out = if (severity == CompilerMessageSeverity.ERROR) ::err else ::log
-
-                out("$severity $message$locmsg")
-            }
-        }
-
-        makeJsIncrementally(
-            cachesDir,
-            listOf(source.file),
+        val options =
             K2JSCompilerArguments().apply {
                 this.outputFile = outputFileLocation.path
-                metaInfo = true
-                this.libraries = libraryFileValues.map { it.file.metaJs.path }.joinToString(File.pathSeparator)
-            },
-            mc
+                this.metaInfo = true
+                this.sourceMap = true
+                this.libraries = libs
+            }
+
+        val mc = SimpleMessageCollector(::log, ::err)
+
+        options.freeArgs = listOf(source.file.invariantSeparatorsPath)
+        K2JSCompiler().exec(
+            SimpleMessageCollector(),
+            Services.EMPTY,
+            options
         )
+
+//        makeJsIncrementally(
+//            cachesDir,
+//            listOf(source.file),
+//            options,
+//            mc
+//        )
 
         if (mc.hasErrors) {
             throw TaskFailedException("JsModule $sourceRoot: Compiling FAILED")

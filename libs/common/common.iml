@@ -7,7 +7,7 @@
     </content>
     <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="KotlinJavaScript" level="project" />
-    <orderEntry type="library" exported="" name="kotlinx-html-js-0.6.11" level="project" />
+    <orderEntry exported="" type="library" name="kotlin-stdlib" level="project" />
+    <orderEntry exported="" type="library" name="kotlinx-html-js-0.6.11" level="project"/>
   </component>
 </module>
