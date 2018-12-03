@@ -86,7 +86,7 @@ class Chatting(val user: User) {
                     }
                 }
 
-                val list = dl("flex-grow-1 $scrollVertical my-2 border") {}
+                val list = dl("flex-grow-1 $scrollVertical my-2 border px-2") {}
 
                 var first = true
                 lastMessage.onSnapshot { msg ->
