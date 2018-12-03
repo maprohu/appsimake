@@ -13,6 +13,7 @@ import kotlinx.html.dom.create
 import kotlinx.html.js.*
 import pullanappfb.app
 import rx.Var
+import styles.scrollVertical
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.dom.addClass
@@ -71,12 +72,12 @@ class Chatting(val user: User) {
 
         root.append {
             div("d-flex flex-column w-100 h-100 p-2") {
-                span {
+                span("flex-grow-0 flex-shrink-0") {
                     +"Your alias: "
                     b().also { s -> alias.forEach { s.innerText = it }  }
                 }
 
-                form(classes = "d-flex flex-row") {
+                form(classes = "d-flex flex-row flex-grow-0 flex-shrink-0") {
                     val aliasInput = input(classes = "flex-grow-1 form-control", type = InputType.text)
                     button(classes = "btn", type = ButtonType.submit) {+"Change alias"}
                     onSubmitFunction = {
@@ -85,9 +86,7 @@ class Chatting(val user: User) {
                     }
                 }
 
-                val list = dl("flex-grow-1") {
-
-                }
+                val list = dl("flex-grow-1 $scrollVertical my-2 border") {}
 
                 var first = true
                 lastMessage.onSnapshot { msg ->
@@ -113,10 +112,11 @@ class Chatting(val user: User) {
                                 + data.message
                             }
                         }
+                        list.scrollTop = (list.scrollHeight - list.clientHeight).toDouble()
                     }
                 }
 
-                form(classes = "d-flex flex-row") {
+                form(classes = "d-flex flex-row flex-grow-0 flex-shrink-0") {
                     val messageInput =
                         input(classes = "flex-grow-1 form-control", type = InputType.text).also {e ->
                             window.setTimeout( { e.focus() }, 0 )
