@@ -2,6 +2,7 @@ package firebase.firestore
 
 import common.*
 import firebase.FirebaseError
+import killable.Killables
 import org.w3c.dom.Element
 import rx.RxVal
 import rx.Var
@@ -69,35 +70,35 @@ data class OnSnapshot(
 }
 
 fun <T> Query.listen(
-        killables: Killables? = null,
-        onFirst: () -> Unit = {},
-        onError: (FirebaseError) -> Unit = { console.dir(it) }
+    killables: Killables? = null,
+    onFirst: () -> Unit = {},
+    onError: (FirebaseError) -> Unit = { console.dir(it) }
 ): ListenableList<RxVal<T>> {
     var first = true
 
     val list = ListenableMutableList<Var<T>>()
 
     onSnapshot(
-            {
+            { qs ->
                 if (first) {
                     first = false
                     onFirst()
                 }
 
-                it
+                qs
                         .docChanges()
-                        .forEach {
-                            when (it.typeEnum) {
+                        .forEach { dc ->
+                            when (dc.typeEnum) {
                                 DocumentChangeType.added -> {
-                                    list.add(it.newIndex, Var(it.doc.data()))
+                                    list.add(dc.newIndex, Var(dc.doc.data()))
                                 }
                                 DocumentChangeType.removed -> {
-                                    list.removeAt(it.oldIndex)
+                                    list.removeAt(dc.oldIndex)
                                 }
                                 DocumentChangeType.modified -> {
-                                    list[it.oldIndex].now = it.doc.data()
-                                    if (it.newIndex != it.oldIndex) {
-                                        list.move(it.oldIndex, it.newIndex)
+                                    list[dc.oldIndex].now = dc.doc.data()
+                                    if (dc.newIndex != dc.oldIndex) {
+                                        list.move(dc.oldIndex, dc.newIndex)
                                     }
                                 }
                             }
@@ -117,3 +118,73 @@ fun Firestore.withDefaultSettings(): Firestore {
     })
     return this
 }
+
+
+
+
+fun <T> Query.listen(
+    list: ListenableMutableList<T>,
+    create: (QueryDocumentSnapshot) -> T,
+    update: (T, QueryDocumentSnapshot) -> Unit,
+    onFirst: () -> Unit = {},
+    onError: (FirebaseError) -> Unit = { console.dir(it) }
+): () -> Unit {
+    require(list.isEmpty())
+
+    var onNext: (QuerySnapshot) -> Unit
+
+    val onEach: (QuerySnapshot) -> Unit = { qs ->
+
+        qs
+            .docChanges()
+            .forEach { dc ->
+                when (dc.typeEnum) {
+                    DocumentChangeType.added -> {
+                        list.add(dc.newIndex, create(dc.doc))
+                    }
+                    DocumentChangeType.removed -> {
+                        list.removeAt(dc.oldIndex)
+                    }
+                    DocumentChangeType.modified -> {
+                        update(list[dc.oldIndex], dc.doc)
+                        if (dc.newIndex != dc.oldIndex) {
+                            list.move(dc.oldIndex, dc.newIndex)
+                        }
+                    }
+                }
+            }
+
+    }
+
+    onNext = {
+        onFirst()
+        onNext = onEach
+        onNext(it)
+    }
+
+    return onSnapshot(
+        { qs -> onNext(qs) },
+        onError
+    )
+}
+
+class DocItem<T>(
+    val id: String,
+    val data: Var<T>
+)
+
+fun <T> Query.docItems(
+    list: ListenableMutableList<DocItem<T>>,
+    extract: (QueryDocumentSnapshot) -> T = { it.data() },
+    onFirst: () -> Unit = {},
+    onError: (FirebaseError) -> Unit = { console.dir(it) }
+): () -> Unit {
+    return listen(
+        list = list,
+        create = { DocItem(it.id, Var(extract(it))) },
+        update = { di, qs -> di.data.now = extract(qs) },
+        onFirst = onFirst,
+        onError = onError
+    )
+}
+

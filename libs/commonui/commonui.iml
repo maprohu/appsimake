@@ -8,6 +8,8 @@
     <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry exported="" type="library" name="kotlin-stdlib" level="project" />
+    <orderEntry exported="" type="module" module-name="bootstrap"/>
+    <orderEntry exported="" type="module" module-name="fontawesome"/>
     <orderEntry exported="" type="module" module-name="domx"/>
   </component>
 </module>

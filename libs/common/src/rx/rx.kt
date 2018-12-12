@@ -1,7 +1,6 @@
 package rx
 
-import common.Killables
-import common.Listeners
+import killable.Killable
 import org.w3c.dom.Element
 import kotlin.dom.addClass
 import kotlin.dom.removeClass
@@ -57,18 +56,6 @@ fun connect(parent: RxParent, child: RxChild) {
     }
 }
 
-interface Killable {
-    fun kill()
-
-    fun addTo(killables: Killables) {
-        killables.add(this)
-    }
-}
-
-
-fun Listeners.add(killable: Killable) {
-    this.add { killable.kill() }
-}
 
 class Obs<T>(
         private val parent: RxVal<T>,
@@ -279,3 +266,4 @@ fun Element.rxClasses(
             { removeClass(*it.toTypedArray()) }
     )
 }
+

@@ -1,7 +1,7 @@
-package buildtool
+package buildtool.runners
 
-import bootjava.BootJava
 import bootkotlin.KotlinLibDir
+import buildtool.*
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -12,12 +12,19 @@ fun main(args: Array<String>) {
 
     val modules = listOf(
         common,
+        htmlx,
+        domx,
         bootstrap,
         testapp,
         gymclock,
         tictactoe,
         firebase,
+        fontawesome,
+        commonui,
+        commonfb,
         pullanappfb,
+        index,
+        ideas,
         chat
     )
 

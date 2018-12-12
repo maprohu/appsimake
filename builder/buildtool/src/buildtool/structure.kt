@@ -2,12 +2,7 @@ package buildtool
 
 import bootkotlin.kotlinxHtmlJs
 import bootkotlin.kotlinxStdlibJs
-
-object firebaseMessagingServiceWorker {
-    val public by task {
-
-    }
-}
+import java.nio.file.Paths
 
 object kotlinxHtml : KotlinJsLib(kotlinxHtmlJs)
 
@@ -29,11 +24,19 @@ object firebaseUiJs : JsDownload(
     )
 )
 
-
-object fontAwesome : JsDownload(
-    "https://use.fontawesome.com/releases/v5.5.0/fontawesome-free-5.5.0-web.zip",
+private const val fontAwesomeVersion = "5.5.0"
+private const val fontAwesomeDirName = "fontawesome-free-$fontAwesomeVersion-web"
+object fontAwesomeDist : JsDownload(
+    "https://use.fontawesome.com/releases/v$fontAwesomeVersion/$fontAwesomeDirName.zip",
     ExtractInfo(
-        cssPath = listOf("fontawesome-free-5.5.0-web/css/all.css")
+        filter = { ze ->
+            Paths.get(ze.name).let {
+                it.nameCount >= 2 &&
+                        it.getName(1).toString() in setOf("css", "webfonts")
+            }
+        },
+        dirResources = listOf(fontAwesomeDirName),
+        cssPath = listOf("$fontAwesomeDirName/css/all.css")
     )
 )
 
@@ -47,17 +50,46 @@ object bootstrapDist : JsDownload(
 )
 
 object common : JsModule(
-    "libs/common",
+    "libs/common"
+)
+
+object htmlx : JsModule(
+    "libs/htmlx",
     listOf(
+        common,
         kotlinxHtml
+    )
+)
+
+object domx : JsModule(
+    "libs/domx",
+    listOf(
+        common
     )
 )
 
 object bootstrap : JsModule(
     "libs/bootstrap",
     listOf(
-        common,
-        bootstrapDist
+        bootstrapDist,
+        domx
+    )
+)
+
+object fontawesome : JsModule(
+    "libs/fontawesome",
+    listOf(
+        fontAwesomeDist,
+        domx
+    )
+)
+
+object commonui : JsModule(
+    "libs/commonui",
+    listOf(
+        bootstrap,
+        fontawesome,
+        domx
     )
 )
 
@@ -98,6 +130,14 @@ object pullanappfb : JsModule(
     )
 )
 
+object commonfb : JsModule(
+    "libs/commonfb",
+    listOf(
+        commonui,
+        firebase
+    )
+)
+
 object chat : JsApp(
     "apps/chat",
     listOf(
@@ -105,4 +145,20 @@ object chat : JsApp(
         bootstrap
     )
 )
+
+object index : JsApp(
+    "apps/index",
+    listOf(
+        bootstrap
+    )
+)
+
+object ideas : JsApp(
+    "apps/ideas",
+    listOf(
+        commonfb
+    )
+)
+
+
 

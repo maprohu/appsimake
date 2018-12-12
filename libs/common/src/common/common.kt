@@ -1,17 +1,11 @@
 package common
 
-import kotlinx.html.ButtonType
-import kotlinx.html.DIV
-import kotlinx.html.OL
-import kotlinx.html.TagConsumer
-import kotlinx.html.dom.create
-import kotlinx.html.js.*
+import killable.Killable
+import killable.Killables
 import org.w3c.dom.*
 import kotlin.browser.document
 import org.w3c.dom.events.Event
-import rx.Killable
 import rx.Rx
-import styles.add
 import kotlin.dom.addClass
 import kotlin.dom.removeClass
 
@@ -28,8 +22,24 @@ fun Element.insertAt(position: Int, element: Node) {
     }
 }
 
+fun Node.insertAt(position: Int, element: Node) {
+    val length = this.childNodes.length
+
+    require(position <= length) { "Requested position: $position is more than length: $length" }
+
+    if (length == position) {
+        this.appendChild(element)
+    } else {
+        this.insertBefore(element, this.childNodes.item(position))
+    }
+}
+
 fun Element.removeAt(position: Int): Node {
     return removeChild(children.item(position)!!)
+}
+
+fun Node.removeAt(position: Int): Node {
+    return removeChild(childNodes.item(position)!!)
 }
 
 fun Element.replaceAt(position: Int, element: Element) {
@@ -62,111 +72,8 @@ open class Listeners {
 
 }
 
-class Killables : Listeners(), Killable {
-    private var killed = false
-
-    override fun kill() {
-        fire()
-    }
-
-    override fun fire() {
-        super.fire()
-        listeners = listOf()
-        killed = true
-    }
-
-    override fun add(listener: () -> Unit): () -> Unit {
-        if (killed) {
-            listener()
-            return {}
-        } else {
-            return super.add(listener)
-        }
-    }
-
-    operator fun plusAssign(listener: () -> Unit) {
-        add(listener)
-    }
-
-}
-
-class Panel(private val root: org.w3c.dom.Node) {
-
-    private var current = Content(wrapper())
-
-    inner class Content(
-            val tab : HTMLElement
-    ) {
-        init {
-            root.appendChild(tab)
-        }
-
-        val killables = Killables()
-
-        internal fun kill() {
-            tab.removeFromParent()
-            killables.kill()
-        }
-    }
-
-    private fun wrapper() = document.create.div("w-100 h-100")
-
-    fun new(wrapper : HTMLElement = wrapper()): Content {
-        current.kill()
-        current = Content(wrapper)
-        return current
-    }
-
-}
-
-fun TagConsumer<HTMLElement>.topbar(
-        block : DIV.() -> Unit = {}
-) {
-    div("border-bottom d-flex flex-row bg-light align-items-center pr-1") {
-        block()
-    }
-}
-
-fun TagConsumer<HTMLElement>.insert(
-        node: Node
-) {
-    span().apply {
-        parentElement!!.appendChild(node)
-        removeFromParent()
-    }
-}
 
 
-fun TagConsumer<HTMLElement>.breadcrumb(
-        block : OL.() -> Unit = {}
-): HTMLOListElement {
-    return ol("breadcrumb mb-0 flex-grow-1 bg-transparent") {
-        block()
-    } as HTMLOListElement
-}
-
-fun TagConsumer<HTMLElement>.dropdown(
-        block : DIV.() -> Unit = {}
-): HTMLDivElement {
-    return div(classes = "dropdown") {
-        button(type = ButtonType.button, classes = "btn btn-light dropdown-toggle") {
-            attributes["data-toggle"] = "dropdown"
-        }
-        div(classes = "dropdown-menu dropdown-menu-right") {
-            block()
-        }
-    }
-}
-
-fun TagConsumer<HTMLElement>.menuitem(
-        label: String,
-        click: (Event) -> Unit
-): HTMLAnchorElement {
-    return a(classes = "dropdown-item", href = "#") {
-        +label
-        onClickFunction = click
-    }
-}
 
 fun HTMLAnchorElement.attachEnabler(enabled: Rx<Boolean>) : Killable {
     return enabled.forEach { en ->
@@ -295,3 +202,5 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
 
 
 }
+
+

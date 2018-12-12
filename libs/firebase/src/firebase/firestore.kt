@@ -32,6 +32,8 @@ external interface SetOptions {
 // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentReference?authuser=0
 external interface DocumentReference {
 
+    val id: String
+
     fun collection(path: String) : CollectionReference
 
     fun get(options: GetOptions = definedExternally) : Promise<DocumentSnapshot>
@@ -61,9 +63,13 @@ open external class Query {
 
 }
 
+// https://firebase.google.com/docs/reference/js/firebase.firestore.CollectionReference?authuser=0
 external class CollectionReference : Query {
 
     fun doc(path: String = definedExternally) : DocumentReference
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.CollectionReference?authuser=0#add
+    fun add(data: Any) : Promise<DocumentReference>
 
 
 }

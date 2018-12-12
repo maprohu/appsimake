@@ -6,8 +6,6 @@ import firebase.auth.GoogleAuthProvider
 import firebaseui.auth.AuthUI
 import firebaseui.auth.Callbacks
 import firebaseui.auth.Config
-import kotlinx.html.dom.create
-import kotlinx.html.js.div
 import org.w3c.dom.Element
 import kotlin.browser.document
 import kotlin.browser.window

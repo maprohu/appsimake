@@ -3,6 +3,7 @@ package buildtool
 import bootkotlin.*
 import java.io.File
 import java.net.URL
+import java.util.zip.ZipEntry
 
 class DirResource(
     val pathToDir: String,
@@ -10,6 +11,7 @@ class DirResource(
 )
 class ExtractInfo(
     val dir: String? = null,
+    val filter: (ZipEntry) -> Boolean = { true },
     val jsPath: List<String> = listOf(),
     val cssPath: List<String> = listOf(),
     val dirResources: List<String> = listOf()
@@ -151,7 +153,7 @@ open class JsDownload(
         } else {
             {
                 val targetDir = ExtractedDir.resolve(extract.dir ?: File(fileName).nameWithoutExtension )
-                extractFiles(downloaded, targetDir)
+                extractFiles(downloaded, targetDir, extract.filter)
                 targetDir
             }
         }
