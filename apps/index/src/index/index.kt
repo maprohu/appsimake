@@ -1,16 +1,17 @@
 package index
 
-import kotlinx.html.dom.append
-import kotlinx.html.js.a
-import kotlinx.html.js.li
-import kotlinx.html.js.ul
+import bootstrap.listAction
+import bootstrap.listGroup
+import bootstrap.padding2
 import kotlin.browser.document
 
 fun main(args: Array<String>) {
-    document.body!!.append {
-        ul("list-group") {
-            a(href = "ideas.html", classes = "list-group-item list-group-item-action") {
-                +"Ideas"
+    document.body!!.apply {
+        padding2()
+        listGroup {
+            listAction {
+                href = "ideas.html"
+                innerText = "Ideas"
             }
         }
     }
