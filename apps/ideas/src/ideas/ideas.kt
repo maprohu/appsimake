@@ -2,6 +2,7 @@ package ideas
 
 import bootstrap.*
 import commonui.CommonApp
+import commonui.LoggedInBase
 import domx.*
 import firebase.User
 import styles.scrollVertical
@@ -11,8 +12,6 @@ fun main(args: Array<String>) {
 }
 
 class Ideas : CommonApp("ideas") {
-
-    val usersRef = baseRef.collection("users")
 
     override fun loggedIn(user: User) {
         LoggedIn(this, user).main()
@@ -24,16 +23,14 @@ external interface Idea {
     var title: String
     var text: String
 }
-
 fun Idea.toIdeaData() = IdeaData(this)
 
 class LoggedIn(
-    val base: Ideas,
-    val user: User
-) {
+    base: Ideas,
+    user: User
+) : LoggedInBase<Ideas>(base, user) {
 
-    val userRef = base.usersRef.doc(user.uid)
-    val userIdeasRef = userRef.collection("ideas")
+    val userIdeasRef = privateRef.collection("ideas")
 
     fun main() {
         base.newRoot {

@@ -78,6 +78,12 @@ abstract class CommonApp(name: String) {
     abstract fun loggedIn(user: User)
 
 
+}
 
+open   class LoggedInBase<T: CommonApp>(
+    val base: T,
+    val user: User
+) {
+    val privateRef = base.baseRef.collection("private").doc(user.uid)
 
 }
