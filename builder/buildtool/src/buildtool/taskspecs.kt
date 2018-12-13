@@ -148,10 +148,6 @@ abstract class JsDep(
     open val publicCss : List<String> = listOf()
     open val testingCss : List<String> = listOf()
 
-//    open val cssFileValue: List<FileValue> = listOf()
-//    open val cssFile: List<File> = listOf()
-
-
     open val publicJsFile by publicTask { jsFileValue }
 
     val depChain : Sequence<JsDep>

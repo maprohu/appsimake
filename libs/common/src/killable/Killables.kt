@@ -28,4 +28,8 @@ class Killables : Listeners(), Killable {
         add(listener)
     }
 
+    operator fun plusAssign(killable: Killable) {
+        add(killable)
+    }
+
 }

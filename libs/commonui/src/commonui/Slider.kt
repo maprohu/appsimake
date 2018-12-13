@@ -4,8 +4,6 @@ import bootstrap.*
 import common.*
 import domx.*
 import fontawesome.chevronLeft
-import fontawesome.chevronRight
-import fontawesome.fa
 import killable.Killables
 import killable.add
 import org.w3c.dom.*
@@ -40,7 +38,7 @@ class Slider(
 
             topbar {
                 breadcrumbOL = breadcrumb {}
-                dropdownDiv = dropdown {}
+                dropdownDiv = dropdownDiv {}
             }
             relativeDiv = div {
                 classes += "flex-grow-1 position-relative"

@@ -253,8 +253,8 @@ fun Element.rxClassOpt(
         style: RxVal<String?>
 ) : Killable {
     return style.onOff(
-            { it?.let { addClass(it) } },
-            { it?.let { removeClass(it) } }
+            { it?.let { c -> addClass(c) } },
+            { it?.let { c -> removeClass(c) } }
     )
 }
 

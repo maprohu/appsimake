@@ -5,11 +5,12 @@ import killable.Killables
 import org.w3c.dom.*
 import rx.*
 import kotlin.browser.document
-import kotlin.dom.addClass
-import kotlin.dom.removeClass
 import common.*
 import domx.*
+import org.w3c.dom.events.MouseEvent
 import styles.overflowHidden
+import kotlin.dom.addClass
+import kotlin.dom.removeClass
 
 
 fun Node.topbar(
@@ -33,35 +34,55 @@ fun Node.breadcrumb(
     }
 }
 
-fun Node.dropdown(
+fun Node.dropdownToggleButton(fn: HTMLButtonElement.() -> Unit = {}) {
+    return btnButton {
+        classes += "dropdown-toggle"
+        attributes["data-toggle"] = "dropdown"
+        fn()
+    }
+}
+
+fun Node.dropdownDiv(
     block : HTMLDivElement.() -> Unit = {}
 ): HTMLDivElement {
     return div {
         classes += "dropdown"
-        button {
-            type = "button"
-            classes += "btn btn-light dropdown-toggle"
-            attributes["data-toggle"] = "dropdown"
-        }
+        dropdownToggleButton()
         div {
-            classes += "dropdown-menu dropdown-menu-right"
+            dropdownMenu()
             block()
         }
     }
 }
 
+fun Node.dropdownItemAnchor(
+    block : HTMLAnchorElement.() -> Unit = {}
+): HTMLAnchorElement {
+    return a {
+        dropdownItem()
+        href = "#"
+        block()
+    }
+}
 
+
+fun Node.listAction(
+    content: HTMLAnchorElement.() -> Unit
+): HTMLAnchorElement {
+    return a {
+        href = "#"
+        classes += "list-group-item list-group-item-action"
+        content()
+    }
+}
 
 
 fun Node.listButton(
         fn: () -> Unit = {},
         content: HTMLAnchorElement.() -> Unit
 ): HTMLAnchorElement {
-    return a {
-        href = "#"
-        classes += "list-group-item list-group-item-action"
-        onclick = {
-            it.preventDefault()
+    return listAction {
+        clickEvent {
             fn()
         }
         content()
@@ -109,8 +130,23 @@ fun Element.flexCenter() {
 fun HTMLElement.rxDisplay(rxVal: RxVal<Boolean>): Killable {
     return rxVal.forEach {
         this.style.cssText = if (it) "" else "display: none !important;"
-//        if (it) removeClass("d-none") else addClass("d-none")
     }
+}
+
+fun Element.rxAnchorEnabled(rxVal: RxVal<Boolean>): Killable {
+    val stl = Rx { if (rxVal()) null else "disabled" }
+    rxClassOpt(stl)
+    return stl
+}
+
+fun HTMLElement.rxAnchorClick(rxVal: RxVal<Boolean>, fn: (MouseEvent) -> Unit): Killable {
+    val rx = rxAnchorEnabled(rxVal)
+    clickEvent {
+        if (rxVal.now) {
+            fn(it)
+        }
+    }
+    return rx
 }
 
 fun HTMLElement.rxText(rxVal: RxVal<String>): Killable {
@@ -128,6 +164,8 @@ fun HTMLElement.rxText(fn: () -> String): Killable {
 fun setupFullScreen() {
     document.body!!.apply {
         fullSize()
+        flex()
+        flexColumn()
 
         parentElement!!.apply {
             fullSize()
@@ -165,7 +203,21 @@ class Panel(private val root: org.w3c.dom.Node) {
 
 }
 
-fun Node.btn(fn: HTMLButtonElement.() -> Unit) {
+fun Node.column(fn: HTMLDivElement.() -> Unit): HTMLDivElement {
+    return div {
+        flexColumn()
+        fn()
+    }
+}
+
+fun Node.row(fn: HTMLDivElement.() -> Unit): HTMLDivElement {
+    return div {
+        flexRow()
+        fn()
+    }
+}
+
+fun Node.btnButton(fn: HTMLButtonElement.() -> Unit) {
     button {
         type = "button"
         classes += "btn"
@@ -225,6 +277,15 @@ fun Element.formGroup() {
 }
 fun Element.formControl() {
     classes += "form-control"
+}
+fun Element.btnGroup() {
+    classes += "btn-group"
+}
+fun Element.dropdownMenu() {
+    classes += "dropdown-menu dropdown-menu-right"
+}
+fun Element.dropdownItem() {
+    classes += "dropdown-item"
 }
 
 

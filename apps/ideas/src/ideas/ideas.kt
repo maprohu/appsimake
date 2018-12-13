@@ -2,12 +2,8 @@ package ideas
 
 import bootstrap.*
 import commonui.CommonApp
-import commonui.hourglass
 import domx.*
 import firebase.User
-import fontawesome.spinner
-import rx.Rx
-import rx.Var
 import styles.scrollVertical
 
 fun main(args: Array<String>) {
@@ -29,7 +25,7 @@ external interface Idea {
     var text: String
 }
 
-
+fun Idea.toIdeaData() = IdeaData(this)
 
 class LoggedIn(
     val base: Ideas,
@@ -45,7 +41,7 @@ class LoggedIn(
             listGroup {
                 padding2()
                 commandButton("New Idea") {
-                    newIdea()
+                    editIdea()
                 }
                 commandButton("List Ideas") {
                     listIdeas()

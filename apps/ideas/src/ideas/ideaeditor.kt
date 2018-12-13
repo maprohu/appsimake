@@ -3,7 +3,8 @@ package ideas
 import bootstrap.*
 import common.obj
 import domx.*
-import firebase.firestore.DocumentReference
+import firebase.Promise
+import firebase.firestore.DocItem
 import fontawesome.spinner
 import killable.Killables
 import rx.Rx
@@ -25,12 +26,14 @@ data class IdeaData(
     }
 }
 
-fun LoggedIn.newIdea() {
-    val title = Var("")
-    val text = Var("")
+fun LoggedIn.editIdea(
+    item: DocItem<Idea>? = null,
+    onBack: () -> Unit = { main() }
+) {
+    val savedData = Var(item?.let { it.data.now.toIdeaData() })
+    val title = Var(savedData.now?.title ?: "")
+    val text = Var(savedData.now?.text ?: "")
     val isSaving = Var(false)
-    var savedDocRef : DocumentReference? = null
-    val savedData = Var<IdeaData?>(null)
     val editingData = Rx {
         IdeaData(
             title = title(),
@@ -39,54 +42,93 @@ fun LoggedIn.newIdea() {
     }
     val isSaved = Rx { editingData() == savedData() }
     val canSave = Rx { !isSaved() && !isSaving() && editingData().title.isNotBlank() }
+    val canDelete = Rx { savedData() != null && !isSaving() }
 
     val killables = Killables()
+
+
+    lateinit var savePromise : () -> Promise<*>
+    lateinit var deletePromise : () -> Promise<*>
+
+    fun setupSavedState(id: String) {
+        val ref = userIdeasRef.doc(id)
+        val toSave = editingData.now
+        savePromise = {
+            ref
+                .set(toSave.toIdea())
+                .then { savedData.now = toSave }
+        }
+        deletePromise = {
+            ref.delete()
+        }
+    }
 
     fun save() {
         if (canSave.now) {
             isSaving.now = true
-            val toSave = editingData.now
-
-            if (savedDocRef == null) {
-                userIdeasRef.add(
-                    toSave.toIdea()
-                ).then { docRef ->
-                    savedData.now = toSave
-                    savedDocRef = docRef
-
-                    savedDocRef!!
-                        .onSnapshot { d ->
-                            d.data<Idea>().also { i ->
-                                savedData.now = IdeaData(i)
-                            }
-                        }
-                        .also { reg -> killables.add(reg) }
-
-                    isSaving.now = false
-                }
-            } else {
-                savedDocRef!!
-                    .set(toSave.toIdea())
-                    .then { isSaving.now = false }
-            }
+            savePromise()
+                .then { isSaving.now = false }
         }
     }
 
+    fun saveNew(): Promise<*> {
+        val toSave = editingData.now
+
+        return userIdeasRef.add(
+            toSave.toIdea()
+        ).then { docRef ->
+            savedData.now = toSave
+
+            killables += docRef
+                .onSnapshot { d ->
+                    if (d.exists) {
+                        d.data<Idea>().also { i ->
+                            savedData.now = IdeaData(i)
+                        }
+                    } else {
+                        savedData.now = null
+                    }
+                }
+
+            setupSavedState(docRef.id)
+        }
+    }
+
+
+    if (item==null) {
+        savePromise = { saveNew() }
+    } else {
+        killables += item.data.forEach { savedData.now = it.toIdeaData() }
+        setupSavedState(item.id)
+    }
+
+    fun back() {
+        killables.kill()
+        onBack()
+    }
+
+    fun delete() {
+        isSaving.now = true
+        deletePromise()
+            .then {
+                isSaving.now = false
+                back()
+            }
+    }
+
+
     base.newRoot {
-        flexColumn()
-        div {
+        row {
             flexFixedSize()
-            flexRow()
             padding2()
             borderBottom()
             bgLigth()
-            btn {
+            btnButton {
                 flexFixedSize()
                 btnSecondary()
                 rxText { if (isSaved()) "Close" else "Cancel" }
                 clickEvent {
-                    killables.kill()
-                    main()
+                    back()
                 }
             }
             div {
@@ -98,25 +140,42 @@ fun LoggedIn.newIdea() {
                 padding2()
                 spinner()
             }
-            btn {
+            div {
                 flexFixedSize()
-                btnPrimary()
-                rxText {
-                    when {
-                        isSaved() -> "Saved"
-                        isSaving() -> "Saving..."
-                        else -> "Save"
+                btnGroup()
+                btnButton {
+                    btnPrimary()
+                    rxText {
+                        when {
+                            isSaving() -> "Saving..."
+                            isSaved() -> "Saved"
+                            else -> "Save"
+                        }
+                    }
+                    rxEnabled(canSave)
+                    clickEvent { save() }
+                }
+                div {
+                    btnGroup()
+                    dropdownToggleButton {
+                        btnPrimary()
+                    }
+                    div {
+                        dropdownMenu()
+                        dropdownItemAnchor {
+                            innerText = "Delete"
+                            rxAnchorClick(canDelete) {
+                                delete()
+                            }
+                        }
                     }
                 }
-                rxEnabled(canSave)
-                clickEvent { save() }
             }
         }
-        div {
+        column {
             classes += scrollVertical
             flexGrow1()
             padding2()
-            flexColumn()
             div {
                 formGroup()
                 flexFixedSize()
@@ -125,6 +184,7 @@ fun LoggedIn.newIdea() {
                 }
                 input {
                     type = "text"
+                    value = title.now
                     formControl()
                     rxInput(title)
                 }
@@ -136,6 +196,7 @@ fun LoggedIn.newIdea() {
             textarea {
                 flexGrow1()
                 formControl()
+                value = text.now
                 rxInput(text)
             }
         }

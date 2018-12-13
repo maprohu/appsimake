@@ -3,6 +3,7 @@ package commonui
 import bootstrap.flexCenter
 import bootstrap.fullSize
 import bootstrap.setupFullScreen
+import commonfb.RootPanel
 import domx.div
 import firebase.AppOptions
 import firebase.User
@@ -21,12 +22,19 @@ import kotlin.browser.document
 val app by lazy {
     firebase.initializeApp(
         AppOptions().apply {
-            apiKey= "AIzaSyCk4evdCJvWCYS8GpodbBotuYfebdwbqHE"
-            authDomain= "pullanapp.firebaseapp.com"
-            databaseURL= "https://pullanapp.firebaseio.com"
-            projectId= "pullanapp"
-            storageBucket= "pullanapp.appspot.com"
-            messagingSenderId= "778902419215"
+//            apiKey= "AIzaSyCk4evdCJvWCYS8GpodbBotuYfebdwbqHE"
+//            authDomain= "pullanapp.firebaseapp.com"
+//            databaseURL= "https://pullanapp.firebaseio.com"
+//            projectId= "pullanapp"
+//            storageBucket= "pullanapp.appspot.com"
+//            messagingSenderId= "778902419215"
+
+            apiKey = "AIzaSyDuHunYFDxjJVSvhk_3POXORpN8M49ubgU"
+            authDomain = "appsimake.firebaseapp.com"
+            databaseURL = "https://appsimake.firebaseio.com"
+            projectId = "appsimake"
+            storageBucket = ""
+            messagingSenderId = "850641545175"
         }
     )
 }
@@ -38,25 +46,13 @@ abstract class CommonApp(name: String) {
     val db = app.firestore().withDefaultSettings()
     val baseRef = db.collection("apps").doc(name)
 
-    val container = document.body!!
+    val root = RootPanel(document.body!!)
 
-    val currentRoot = KillableSeq()
+    val newRoot = root::newRoot
 
-    fun Node.setAsRoot() {
-        this.setTo(currentRoot)
-        container.appendChild(this)
-    }
-
-    fun newRoot(fn: HTMLDivElement.() -> Unit = {}): HTMLDivElement {
-        return document.div {
-            setAsRoot()
-            fullSize()
-            fn()
-        }
-    }
 
     fun signOut() {
-        showHourglass()
+        root.setHourglass()
 
         app.auth().signOut()
     }
@@ -64,26 +60,19 @@ abstract class CommonApp(name: String) {
     fun start() {
         setupFullScreen()
 
-        showHourglass()
+        root.setHourglass()
 
         val login by lazy { Login() }
 
         app.auth().onAuthStateChanged { user ->
             if (user == null) {
-                login.loginUi(newRoot())
+                login.loginUi(newRoot {})
             } else {
                 loggedIn(user)
             }
         }
 
 
-    }
-
-    private fun showHourglass() {
-        newRoot {
-            flexCenter()
-            spinner()
-        }
     }
 
     abstract fun loggedIn(user: User)

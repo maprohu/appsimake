@@ -81,16 +81,8 @@ open class JsModule(
 
     val dirResources by sources(dirResourcesRoot)
 
-//    override val testingCss by task {
-//        val fr by lazy { fileResources }
-//        val dr by lazy { dirResources }
-//        css.map {
-//            it.choose({fr}, {dr}).file.resolve(it.path)
-//        }
-//    }
-
-    val fileCss = css.filterIsInstance<FileRes>()
-    val dirCss = css.filterIsInstance<DirRes>()
+//    val fileCss = css.filterIsInstance<FileRes>()
+//    val dirCss = css.filterIsInstance<DirRes>()
 
     val publicFileMapping by task {
         Files
@@ -148,17 +140,17 @@ open class JsModule(
 
 
 
-    fun createFileValueCache() = createCache { f: File -> FileValue(f) }
-
-    val filesHashMap: (File) -> FileValue by task {
-        fileResources // clean cache if changed
-        createFileValueCache()
-    }
-
-    val dirsHashMap: (File) -> FileValue by task {
-        dirResources // clean cache if changed
-        createFileValueCache()
-    }
+//    fun createFileValueCache() = createCache { f: File -> FileValue(f) }
+//
+//    val filesHashMap: (File) -> FileValue by task {
+//        fileResources // clean cache if changed
+//        createFileValueCache()
+//    }
+//
+//    val dirsHashMap: (File) -> FileValue by task {
+//        dirResources // clean cache if changed
+//        createFileValueCache()
+//    }
 
     val libraryFileValues by task {
         kotlinDepChain
@@ -257,26 +249,24 @@ open class JsModule(
     }
 
     override val testingCss by task {
-        val fm by lazy { testingFileMapping }
-        val dm by lazy { testingDirMapping }
-        cssList(fm, dm)
+        cssList({ testingFileMapping }, { testingDirMapping })
     }
 
     private fun cssList(
-        fileMapping: Map<String, String>,
-        dirMapping: Map<String, String>
+        fileMapping: () -> Map<String, String>,
+        dirMapping: () -> Map<String, String>
     ): List<String> {
+        val fm by lazy { fileMapping() }
+        val dm by lazy { dirMapping() }
         return css.map { res ->
             when (res) {
-                is FileRes -> fileMapping.getValue(res.path)
-                is DirRes -> File(dirMapping.getValue(res.dir)).resolve(res.path).invariantSeparatorsPath
+                is FileRes -> fm.getValue(res.path)
+                is DirRes -> File(dm.getValue(res.dir)).resolve(res.path).invariantSeparatorsPath
             }
         }
     }
 
     override val publicCss by task {
-        val fm by lazy { publicFileMapping }
-        val dm by lazy { publicDirMapping }
-        cssList(fm, dm)
+        cssList({ publicFileMapping }, { publicDirMapping })
     }
 }

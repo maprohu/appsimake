@@ -2,6 +2,7 @@ package buildtool
 
 import bootkotlin.kotlinxHtmlJs
 import bootkotlin.kotlinxStdlibJs
+import java.net.URL
 import java.nio.file.Paths
 
 object kotlinxHtml : KotlinJsLib(kotlinxHtmlJs)
@@ -11,14 +12,23 @@ object jquery : JsDownload(
 )
 
 object firebaseJs : JsDownload(
-    "https://www.gstatic.com/firebasejs/5.6.0/firebase.js"
+    "https://www.gstatic.com/firebasejs/5.7.0/firebase.js"
 )
 
+val firebaseUiVersion = "3.4.1"
+val firebaseUiBaseName = "firebaseui-web-$firebaseUiVersion"
 object firebaseUiJs : JsDownload(
-    "https://github.com/firebase/firebaseui-web/archive/v3.4.1.zip",
-    "firebaseui-3.4.1.zip",
-    "firebaseui-web-3.4.1/dist/firebaseui.js",
-    "firebaseui-web-3.4.1/dist/firebaseui.css",
+    URL("https://github.com/firebase/firebaseui-web/archive/v$firebaseUiVersion.zip"),
+    "$firebaseUiBaseName.zip",
+    ExtractInfo(
+        jsPath = listOf(
+            "$firebaseUiBaseName/dist/firebaseui.js"
+        ),
+        cssPath = listOf(
+//            "firebaseui-web-3.4.1/dist/firebaseui.css"
+            "$firebaseUiBaseName/stylesheet/firebase-ui.css"
+        )
+    ),
     listOf(
         firebaseJs
     )
@@ -35,8 +45,12 @@ object fontAwesomeDist : JsDownload(
                         it.getName(1).toString() in setOf("css", "webfonts")
             }
         },
-        dirResources = listOf(fontAwesomeDirName),
-        cssPath = listOf("$fontAwesomeDirName/css/all.css")
+        dirResources = listOf(
+            DirResource(
+                fontAwesomeDirName,
+                listOf("css/all.css")
+            )
+        )
     )
 )
 

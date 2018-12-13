@@ -14,7 +14,7 @@ class ExtractInfo(
     val filter: (ZipEntry) -> Boolean = { true },
     val jsPath: List<String> = listOf(),
     val cssPath: List<String> = listOf(),
-    val dirResources: List<String> = listOf()
+    val dirResources: List<DirResource> = listOf()
 )
 open class JsDownload(
     url: URL,
@@ -182,11 +182,19 @@ open class JsDownload(
             { listOf<String>() }
         } else {
             {
-                extract.cssPath.map {
-                    FileValue(extracted.resolve(it))
-                        .publicFile()
-                        .relativeTo(PublicDir).invariantSeparatorsPath
-                }
+                val publicFiles =
+                extract
+                    .cssPath.map {
+                        FileValue(extracted.resolve(it)).publicFile()
+                    } +
+                        extract
+                            .dirResources
+                            .flatMap { dr ->
+                                val f = FileValue(extracted.resolve(dr.pathToDir)).publicFile()
+                                dr.cssPath.map { f.resolve(it) }
+                            }
+
+                publicFiles.map { it.relativeTo(PublicDir).invariantSeparatorsPath }
             }
         }
     )

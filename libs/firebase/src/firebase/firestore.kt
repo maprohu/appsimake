@@ -42,6 +42,9 @@ external interface DocumentReference {
 
     fun update(data: Any) : Promise<Unit>
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentReference?authuser=0#delete
+    fun delete() : Promise<Unit>
+
     fun onSnapshot(
             onNext: (DocumentSnapshot) -> Unit
     ) : () -> Unit

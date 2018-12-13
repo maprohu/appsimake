@@ -6,6 +6,8 @@ import org.w3c.dom.*
 import kotlin.browser.document
 import org.w3c.dom.events.Event
 import rx.Rx
+import rx.RxVal
+import rx.Var
 import kotlin.dom.addClass
 import kotlin.dom.removeClass
 
@@ -157,6 +159,13 @@ interface ListenableList<out T> : List<T> {
 
 class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
 
+    private val sizeVar = Var(0)
+
+    val sizeRx : RxVal<Int>
+        get() = sizeVar
+
+    val isEmptyRx = Rx { sizeVar() == 0 }
+
     override fun addListener(listener: ListenableList.Listener<T>): () -> Unit {
         listeners += listener
 
@@ -172,11 +181,13 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
 
     override fun add(index: Int, element: T) {
         delegate.add(index, element)
+        sizeVar.now = size
         listeners.forEach { it.added(index, element) }
     }
 
     override fun removeAt(index: Int): T {
         val v = delegate.removeAt(index)
+        sizeVar.now = size
         listeners.forEach { it.removed(index) }
         return v
     }
