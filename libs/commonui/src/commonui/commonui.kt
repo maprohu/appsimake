@@ -1,6 +1,6 @@
 package commonui
 
-import bootstrap.divCenter
+import bootstrap.centerDiv
 import bootstrap.flexGrow1
 import bootstrap.flexRow
 import bootstrap.listButton
@@ -25,7 +25,7 @@ fun Node.nextButton(label: HTMLDivElement.() -> Unit, fn: () -> Unit): HTMLAncho
 }
 
 fun Element.hourglass(): HTMLDivElement {
-    return divCenter {
+    return centerDiv {
         spinner()
     }
 }

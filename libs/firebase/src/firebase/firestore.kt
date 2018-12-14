@@ -1,19 +1,42 @@
 @file:JsQualifier("firebase.firestore")
 package firebase.firestore
 
+import common.obj
 import firebase.FirebaseError
-import firebase.Promise
+import kotlin.js.Date
+import kotlin.js.Promise
 
 external interface Settings {
     var timestampsInSnapshots : Boolean
 }
 
+// https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore
 external class Firestore {
 
     fun settings(s: Settings)
 
     fun collection(path: String) : CollectionReference
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#runTransaction
+    fun <T> runTransaction(fn: (Transaction) -> Any) : Promise<T>
+
+
+}
+
+// https://firebase.google.com/docs/reference/js/firebase.firestore.Transaction
+external interface Transaction {
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Transaction#get
+    fun get(ref: DocumentReference) : Promise<DocumentSnapshot>
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Transaction#delete
+    fun delete(ref: DocumentReference) : Transaction
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Transaction#set
+    fun set(ref: DocumentReference, data: Any, options: SetOptions = definedExternally) : Transaction
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Transaction#update
+    fun update(ref: DocumentReference, vararg value: Any) : Transaction
 
 }
 
@@ -26,7 +49,9 @@ external interface GetOptions {
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.SetOptions?authuser=0
 external interface SetOptions {
+    var merge : Boolean
 }
+
 
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentReference?authuser=0
@@ -52,7 +77,6 @@ external interface DocumentReference {
 
 }
 
-
 open external class Query {
     fun orderBy(
             fieldPath: String,
@@ -63,6 +87,14 @@ open external class Query {
             onNext: (QuerySnapshot) -> Unit,
             onError: (FirebaseError) -> Unit
     ) : () -> Unit
+
+    fun where(
+        fieldPath: String,
+        opStr: String,
+        value: Any?
+    ) : Query
+
+    fun get(options: GetOptions = definedExternally) : Promise<QuerySnapshot>
 
 }
 
@@ -94,7 +126,16 @@ external interface DocumentSnapshot {
 
     val exists : Boolean
 
+    val ref : DocumentReference
 
+    val metadata: SnapshotMetadata
+
+
+}
+
+external interface SnapshotMetadata {
+    val fromCache: Boolean
+    val hasPendingWrites: Boolean
 }
 
 external interface SnapshotOptions {
@@ -121,9 +162,31 @@ external interface DocumentChange {
 
 external interface QuerySnapshot {
 
+    val docs : Array<QueryDocumentSnapshot>
+
     fun docChanges(
             options: SnapshotOptions = definedExternally
     ) : Array<DocumentChange>
 
 }
 
+external class FieldValue {
+    companion object {
+        fun serverTimestamp() : Timestamp
+    }
+}
+
+// https://firebase.google.com/docs/reference/js/firebase.firestore.Timestamp
+external class Timestamp {
+    var nanoseconds: Long
+    var seconds: Long
+
+    fun toDate() : Date
+    fun toMillis() : Long
+
+    companion object {
+        fun fromDate(date: Date) : Timestamp
+        fun fromMillis(millis: Long) : Timestamp
+        fun now() : Timestamp
+    }
+}

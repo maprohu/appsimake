@@ -8,6 +8,7 @@
     <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry exported="" type="library" name="kotlin-stdlib" level="project" />
-
+    <orderEntry exported="" type="module" module-name="commonfb"/>
+    <orderEntry exported="" type="library" name="kotlinx-coroutines-core-js-1.0.1" level="project"/>
   </component>
 </module>

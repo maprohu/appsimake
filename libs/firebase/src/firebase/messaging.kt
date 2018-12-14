@@ -1,7 +1,7 @@
 @file:JsQualifier("firebase.messaging")
 package firebase.messaging
 
-import firebase.Promise
+import kotlin.js.Promise
 
 external interface Messaging {
 

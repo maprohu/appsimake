@@ -1,8 +1,9 @@
 @file:JsQualifier("firebase.auth")
 package firebase.auth
 
-import firebase.Promise
 import firebase.User
+import kotlin.js.Promise
+
 
 external class Auth {
 

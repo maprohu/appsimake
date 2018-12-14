@@ -114,7 +114,7 @@ fun Node.commandButton(label: String, fn: () -> Unit): HTMLAnchorElement {
     }
 }
 
-fun Node.divCenter(block : HTMLDivElement.() -> Unit): HTMLDivElement {
+fun Node.centerDiv(block : HTMLDivElement.() -> Unit): HTMLDivElement {
     return div {
         fullSize()
         flexCenter()
@@ -246,6 +246,12 @@ fun Element.margin2() {
 fun Element.padding2() {
     classes += "p-2"
 }
+fun Element.paddingRight2() {
+    classes += "pr-2"
+}
+fun Element.paddingLeft2() {
+    classes += "pl-2"
+}
 fun Element.flexGrow1() {
     classes += "flex-grow-1"
 }
@@ -262,7 +268,13 @@ fun Element.flexFixedSize() {
     flexShrink0()
     flexGrow0()
 }
+fun Element.alignItemsCenter() {
+    classes += "align-items-center"
+}
 
+fun Element.border() {
+    classes += "border"
+}
 fun Element.borderBottom() {
     classes += "border-bottom"
 }

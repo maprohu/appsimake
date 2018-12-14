@@ -13,6 +13,10 @@ fun main(args: Array<String>) {
                 href = "ideas.html"
                 innerText = "Ideas"
             }
+            listAction {
+                href = "tictactoe.html"
+                innerText = "Tic Tac Toe"
+            }
         }
     }
 }

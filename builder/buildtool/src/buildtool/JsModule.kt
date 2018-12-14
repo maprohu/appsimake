@@ -179,7 +179,7 @@ open class JsModule(
             K2JSCompilerArguments().apply {
                 this.outputFile = outputFileLocation.path
                 this.metaInfo = true
-                this.sourceMap = true
+                this.sourceMap = false
                 this.libraries = libs
             }
 

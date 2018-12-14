@@ -64,6 +64,13 @@ val kotlinxCoroutinesCore = Maven(
     "1.0.1"
 )
 
+val kotlinxCoroutinesCoreJs = Maven(
+    Central,
+    "org.jetbrains.kotlinx",
+    "kotlinx-coroutines-core-js",
+    "1.0.1"
+)
+
 val kotlinxCoroutinesCoreCommon = Maven(
     Central,
     "org.jetbrains.kotlinx",

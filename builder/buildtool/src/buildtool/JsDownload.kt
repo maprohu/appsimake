@@ -173,7 +173,20 @@ open class JsDownload(
         if (extract == null) {
             { listOf<String>() }
         } else {
-            { extract.cssPath.map { extracted.resolve(it).relativeTo(TestingDir).invariantSeparatorsPath }}
+            {
+                extract
+                    .cssPath
+                    .map { extracted.resolve(it) }
+                    .plus(
+                        extract.dirResources.flatMap { dr ->
+                            val dir = extracted.resolve(dr.pathToDir)
+                            dr.cssPath.map { css ->
+                                dir.resolve(css)
+                            }
+                        }
+                    )
+                    .map { it.relativeTo(TestingDir).invariantSeparatorsPath }
+            }
         }
     )
 

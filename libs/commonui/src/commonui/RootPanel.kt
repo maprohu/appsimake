@@ -1,11 +1,11 @@
-package commonfb
+package commonui
 
 import bootstrap.column
 import bootstrap.flexCenter
 import bootstrap.flexGrow1
+import common.removeFromParent
 import fontawesome.spinner
 import killable.KillableSeq
-import killable.setTo
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Node
 import kotlin.browser.document
@@ -15,18 +15,14 @@ class RootPanel(
 ) {
     private val currentRoot = KillableSeq()
 
-    private fun Node.setAsRoot() {
-        setRoot(this)
-    }
-
     fun setRoot(node: Node) {
-        node.setTo(currentRoot)
+        currentRoot.set { node.removeFromParent() }
         container.appendChild(node)
     }
 
     fun newRoot(fn: HTMLDivElement.() -> Unit = {}): HTMLDivElement {
         return document.column {
-            setAsRoot()
+            setRoot(this)
             flexGrow1()
             fn()
         }
@@ -41,7 +37,4 @@ class RootPanel(
 
 }
 
-fun Node.setToRoot(panel: RootPanel) {
-    panel.setRoot(this)
-}
 

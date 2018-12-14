@@ -2,6 +2,7 @@
 package firebaseui.auth
 
 import firebase.auth.Auth
+import firebase.auth.AuthProvider
 import firebase.auth.UserCredential
 import org.w3c.dom.Element
 
@@ -45,5 +46,9 @@ external class AuthUI(
     )
 }
 
-
+external class AnonymousAuthProvider : AuthProvider {
+    companion object {
+        val PROVIDER_ID : String
+    }
+}
 

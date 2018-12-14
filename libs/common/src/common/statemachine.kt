@@ -56,3 +56,44 @@ class LazySM0<T>(fn: () -> T) {
 
 }
 
+
+
+abstract class State<in I, S: State<I, S>> {
+
+    open fun enter() : () -> Unit = {}
+    abstract fun process(input: I) : S?
+
+}
+
+class StateMachine<I, S: State<I, S>>(
+    private var state: S
+) {
+    private var destroy : () -> Unit = state.enter()
+
+    fun update(input: I) {
+        val nextState = state.process(input)
+
+        if (nextState != null) {
+            destroy()
+            state = nextState
+            destroy = state.enter()
+        }
+    }
+
+    private fun alreadyShutdown() : Nothing {
+        throw RuntimeException("state machine already shut down")
+    }
+
+    private inner class AlreadyShutdown : State<I, S>() {
+        override fun process(input: I): S? = alreadyShutdown()
+    }
+
+    fun shutdown() {
+        destroy()
+        destroy = { alreadyShutdown() }
+        state = AlreadyShutdown() as S
+    }
+
+}
+
+

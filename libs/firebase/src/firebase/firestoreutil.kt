@@ -7,6 +7,9 @@ import org.w3c.dom.Element
 import rx.RxVal
 import rx.Var
 
+fun setOptionsMerge() = obj<SetOptions> { merge = true }
+
+
 fun Settings() : Settings = obj()
 
 enum class DocumentChangeType {
@@ -118,6 +121,11 @@ fun Firestore.withDefaultSettings(): Firestore {
     })
     return this
 }
+
+fun Query.onSnapshotNext(
+    onNext: (QuerySnapshot) -> Unit
+) : () -> Unit = onSnapshot(onNext, { console.dir(it) })
+
 
 
 

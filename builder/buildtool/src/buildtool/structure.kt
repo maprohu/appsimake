@@ -1,11 +1,17 @@
 package buildtool
 
+import bootkotlin.kotlinxCoroutinesCoreJs
 import bootkotlin.kotlinxHtmlJs
 import bootkotlin.kotlinxStdlibJs
 import java.net.URL
 import java.nio.file.Paths
 
 object kotlinxHtml : KotlinJsLib(kotlinxHtmlJs)
+
+object kotlinxCoroutines : KotlinJsLib(
+    kotlinxCoroutinesCoreJs,
+    "kotlinx-coroutines-core"
+)
 
 object jquery : JsDownload(
     "https://code.jquery.com/jquery-3.3.1.js"
@@ -124,10 +130,6 @@ object gymclock : JsApp(
     )
 )
 
-object tictactoe : JsApp(
-    "apps/tictactoe"
-)
-
 object firebase : JsModule(
     "libs/firebase",
     listOf(
@@ -173,6 +175,15 @@ object ideas : JsApp(
         commonfb
     )
 )
+
+object tictactoe : JsApp(
+    "apps/tictactoe",
+    listOf(
+        commonfb,
+        kotlinxCoroutines
+    )
+)
+
 
 
 

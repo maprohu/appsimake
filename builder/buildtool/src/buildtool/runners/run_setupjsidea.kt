@@ -15,16 +15,17 @@ fun main(args: Array<String>) {
         htmlx,
         domx,
         bootstrap,
-        testapp,
-        gymclock,
-        tictactoe,
         firebase,
         fontawesome,
         commonui,
         commonfb,
         pullanappfb,
+
         index,
+        testapp,
+        gymclock,
         ideas,
+        tictactoe,
         chat
     )
 

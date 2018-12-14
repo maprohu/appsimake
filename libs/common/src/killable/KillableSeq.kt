@@ -24,8 +24,6 @@ class KillableSeq(initial: () -> Unit = {}) : Killable {
             current = fn
         }
     }
+
 }
 
-fun Node.setTo(killableSeq: KillableSeq) {
-    killableSeq.set { removeFromParent() }
-}

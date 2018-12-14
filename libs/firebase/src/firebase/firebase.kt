@@ -49,7 +49,7 @@ external fun firestore(
 external class FirebaseError
 
 
-external interface Thenable<T> {
+external interface Thenable<out T> {
 
 //    fun <S> then(
 //            onResolve: (T) -> S,
@@ -58,15 +58,17 @@ external interface Thenable<T> {
 
 }
 
-external interface Promise<T> : Thenable<T> {
-
-    fun <S> then(
-            onResolve: (T) -> S
-    ) : Promise<S>
-
-    fun <S> then(
-            onResolve: (T) -> S,
-            onReject: (Any) -> Any
-    ) : Promise<S>
-
-}
+//external interface Promise<out T> : Thenable<T> {
+//
+//    fun <S> then(
+//            onResolve: (T) -> Any?
+//    ) : Promise<S>
+//
+//    fun <S> then(
+//            onResolve: (T) -> Any?,
+//            onReject: (Any) -> Any?
+//    ) : Promise<S>
+//
+//    fun <S> catch(error: (Error) -> Any?) : Promise<S>
+//
+//}
