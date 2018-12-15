@@ -135,7 +135,8 @@ object firebase : JsModule(
     listOf(
         common,
         firebaseJs,
-        firebaseUiJs
+        firebaseUiJs,
+        kotlinxCoroutines
     )
 )
 
@@ -179,8 +180,7 @@ object ideas : JsApp(
 object tictactoe : JsApp(
     "apps/tictactoe",
     listOf(
-        commonfb,
-        kotlinxCoroutines
+        commonfb
     )
 )
 

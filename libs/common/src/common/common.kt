@@ -8,9 +8,25 @@ import org.w3c.dom.events.Event
 import rx.Rx
 import rx.RxVal
 import rx.Var
+import kotlin.browser.window
 import kotlin.dom.addClass
 import kotlin.dom.removeClass
 
+val onResize by lazy {
+    val listeners = Listeners()
+
+    window.onresize = {
+        listeners.fire()
+    }
+
+    listeners
+}
+
+fun Window.resizeEvent(fn: () -> Unit) : () -> Unit {
+//    window.setTimeout(fn, 0)
+    fn()
+    return onResize.add(fn)
+}
 
 fun Element.insertAt(position: Int, element: Node) {
     val length = this.children.length
@@ -60,6 +76,10 @@ open class Listeners {
 
     protected var listeners = listOf<() -> Unit>()
 
+    operator fun plusAssign(listener: () -> Unit) {
+        add(listener)
+    }
+
     open fun add(listener: () -> Unit) : () -> Unit {
         listeners += listener
 
@@ -88,6 +108,8 @@ fun HTMLAnchorElement.attachEnabler(enabled: Rx<Boolean>) : Killable {
         }
     }
 }
+
+
 
 fun <T> linkedIterable(first: T?, next: (T) -> T?) : Iterable<T> {
     return object : Iterable<T> {

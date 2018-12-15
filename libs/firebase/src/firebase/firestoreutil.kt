@@ -3,9 +3,14 @@ package firebase.firestore
 import common.*
 import firebase.FirebaseError
 import killable.Killables
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.asDeferred
+import kotlinx.coroutines.async
 import org.w3c.dom.Element
 import rx.RxVal
 import rx.Var
+import kotlin.reflect.KProperty
 
 fun setOptionsMerge() = obj<SetOptions> { merge = true }
 
@@ -196,3 +201,14 @@ fun <T> Query.docItems(
     )
 }
 
+fun Query.orderBy(prop: KProperty<*>) = orderBy(prop.name)
+
+fun <T> Firestore.txDefer(fn: suspend (Transaction) -> T) : Deferred<T> {
+    return runTransaction<T> {
+        GlobalScope.async {
+            fn(it)
+        }
+    }.asDeferred()
+}
+
+suspend fun <T> Firestore.tx(fn: suspend (Transaction) -> T) : T = txDefer(fn).await()

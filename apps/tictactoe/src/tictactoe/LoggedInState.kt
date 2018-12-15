@@ -7,37 +7,14 @@ import killable.Killables
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 
-abstract class LoggedInState(val control: PlayerCtx) : State<Player?, LoggedInState>() {
-
-
-    fun createPlayer() {
-        control.fbCtx.db.runTransaction<Unit> { tx ->
-            GlobalScope.async {
-                val player = tx.get(control.playerRef).await()
-
-                if (!player.exists) {
-                    tx.set(
-                        control.playerRef,
-                        newPlayer()
-                    )
-                }
-            }.asPromise()
-        }
-    }
-
-}
+abstract class LoggedInState(val control: PlayerCtx) : State<Player?, LoggedInState>()
 
 class PlayerStateUnknown(control: PlayerCtx) : LoggedInState(control) {
-
-    override fun enter(): () -> Unit {
-        cleanupGames()
-        return {}
-    }
 
     override fun process(input: Player?): LoggedInState? {
         return when {
             input == null -> {
-                createPlayer()
+                control.createPlayer()
                 null
             }
             input.game != null -> StartPlayingState(control, input.game!!)
@@ -59,7 +36,7 @@ class PlayerInactive(control: PlayerCtx) : LoggedInState(control) {
     override fun process(input: Player?): LoggedInState? {
         return when {
             input == null -> {
-                createPlayer()
+                control.createPlayer()
                 null
             }
             input.game != null -> StartPlayingState(control, input.game!!)
@@ -74,21 +51,17 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
 
     override fun enter(): () -> Unit {
         waitingUI()
+        control.cleanupGames()
 
         val channel = Channel<DocumentChange>()
 
-        val killables = Killables()
-
         val processingJob = GlobalScope.launch {
+
             val ownGameRef = control.mainCtx.gamesRef.add(
                 obj<Game>{
                     players = arrayOf(control.playerId)
                 }
             ).await()
-
-            val dontDeleteGame = killables.add {
-                ownGameRef.delete()
-            }
 
             for (otherPlayerChange in channel) {
                 val started = control.fbCtx.db.runTransaction<Boolean> { tx ->
@@ -135,7 +108,6 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                 }.await()
 
                 if (started) {
-                    dontDeleteGame()
                     break
                 }
             }
@@ -153,7 +125,6 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
             }
 
         return {
-            killables.kill()
             stopQuerying()
             processingJob.cancel()
         }
@@ -162,10 +133,11 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
     override fun process(input: Player?): LoggedInState? {
         return when {
             input == null -> {
-                createPlayer()
+                control.createPlayer()
                 null
             }
             input.game != null -> StartPlayingState(control, input.game!!)
+            !input.active -> PlayerInactive(control)
             else -> null
         }
     }
@@ -181,9 +153,10 @@ class StartPlayingState(
     override fun process(input: Player?): LoggedInState? {
         return when {
             input == null -> {
-                createPlayer()
+                control.createPlayer()
                 PlayerActiveWaiting(control)
             }
+            input.game == null && !input.active -> PlayerInactive(control)
             input.game == null -> PlayerActiveWaiting(control)
             input.game != game -> StartPlayingState(control, input.game!!)
             else -> null

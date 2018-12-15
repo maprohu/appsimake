@@ -56,6 +56,8 @@ val overflowHidden by lazy {
 
 val scrollVertical by cls("overflow-y: auto;" )
 
+val flexBasis0 by cls("flex-basis: 0;" )
+
 val pointerEventsNone by lazy {
     add(
             "pointer-events-none",

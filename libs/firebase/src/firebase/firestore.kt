@@ -5,6 +5,7 @@ import common.obj
 import firebase.FirebaseError
 import kotlin.js.Date
 import kotlin.js.Promise
+import kotlin.reflect.KProperty
 
 external interface Settings {
     var timestampsInSnapshots : Boolean
@@ -33,7 +34,7 @@ external interface Transaction {
     fun delete(ref: DocumentReference) : Transaction
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Transaction#set
-    fun set(ref: DocumentReference, data: Any, options: SetOptions = definedExternally) : Transaction
+    fun set(ref: DocumentReference, data: dynamic, options: SetOptions = definedExternally) : Transaction
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Transaction#update
     fun update(ref: DocumentReference, vararg value: Any) : Transaction
@@ -97,6 +98,7 @@ open external class Query {
     fun get(options: GetOptions = definedExternally) : Promise<QuerySnapshot>
 
 }
+
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.CollectionReference?authuser=0
 external class CollectionReference : Query {

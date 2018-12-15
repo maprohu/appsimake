@@ -24,10 +24,6 @@ class Killables : Listeners(), Killable {
         }
     }
 
-    operator fun plusAssign(listener: () -> Unit) {
-        add(listener)
-    }
-
     operator fun plusAssign(killable: Killable) {
         add(killable)
     }

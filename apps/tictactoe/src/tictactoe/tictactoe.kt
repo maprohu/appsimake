@@ -1,6 +1,7 @@
 package tictactoe
 
 import common.StateMachine
+import common.obj
 import commonfb.LoggingInCtx
 import firebase.User
 
@@ -37,4 +38,6 @@ external interface Player {
 
 external interface Game {
     var players: Array<String>
+    var lastSequence: Int?
+
 }

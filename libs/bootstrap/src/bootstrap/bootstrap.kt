@@ -122,9 +122,20 @@ fun Node.centerDiv(block : HTMLDivElement.() -> Unit): HTMLDivElement {
     }
 }
 
+fun Element.flexJustifyContentCenter() {
+    flex()
+    classes += "justify-content-center"
+}
+
+fun Element.flexAlignItemsCenter() {
+    flex()
+    classes += "align-items-center"
+}
+
 fun Element.flexCenter() {
     flex()
-    classes += "align-items-center justify-content-center"
+    flexJustifyContentCenter()
+    flexAlignItemsCenter()
 }
 
 fun HTMLElement.rxDisplay(rxVal: RxVal<Boolean>): Killable {
@@ -240,8 +251,14 @@ fun Element.flexRow() {
     flex()
     classes += "flex-row"
 }
+fun Element.margin1() {
+    classes += "m-1"
+}
 fun Element.margin2() {
     classes += "m-2"
+}
+fun Element.padding1() {
+    classes += "p-1"
 }
 fun Element.padding2() {
     classes += "p-2"
@@ -261,8 +278,11 @@ fun Element.flexGrow0() {
 fun Element.flexShrink0() {
     classes += "flex-shrink-0"
 }
-fun Element.bgLigth() {
+fun Element.bgLight() {
     classes += "bg-light"
+}
+fun Element.bgDark() {
+    classes += "bg-dark"
 }
 fun Element.flexFixedSize() {
     flexShrink0()

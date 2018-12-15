@@ -13,14 +13,21 @@ import kotlin.dom.addClass
 import kotlin.dom.removeClass
 
 
-fun <T: Element> Node.tag(name: String, fn: T.() -> Unit = {}): T {
-    val t = document.createElement(name).unsafeCast<T>()
+fun <T: Element> Node.tagCreated(created: Element, fn: T.() -> Unit = {}): T {
+    val t = created.unsafeCast<T>()
     if (this !is Document) {
         this.appendChild(t)
     }
     return t.apply(fn)
 }
 
+fun <T: Element> Node.tag(name: String, fn: T.() -> Unit = {}): T {
+    return tagCreated(document.createElement(name), fn)
+}
+
+fun <T: Element> Node.tagNS(ns: String, name: String, fn: T.() -> Unit = {}): T {
+    return tagCreated(document.createElementNS(ns, name), fn)
+}
 
 
 val Element.classes
@@ -115,3 +122,4 @@ fun Node.button(fn: HTMLButtonElement.() -> Unit = {}) : HTMLButtonElement = tag
 fun Node.label(fn: HTMLLabelElement.() -> Unit = {}) : HTMLLabelElement = tag("label", fn)
 fun Node.textarea(fn: HTMLTextAreaElement.() -> Unit = {}) : HTMLTextAreaElement = tag("textarea", fn)
 fun Node.input(fn: HTMLInputElement.() -> Unit = {}) : HTMLInputElement = tag("input", fn)
+fun Node.h1(fn: HTMLHeadingElement.() -> Unit = {}) : HTMLHeadingElement = tag("h1", fn)
