@@ -1,9 +1,8 @@
-package ideas
+package tasks
 
 import bootstrap.*
 import common.ListenableMutableList
-import commonfb.RootPanel
-import commonfb.setToRoot
+import commonui.RootPanel
 import domx.*
 import firebase.firestore.DocItem
 import firebase.firestore.docItems
@@ -13,16 +12,16 @@ import rx.Var
 import styles.scrollVertical
 import kotlin.browser.document
 
-fun LoggedIn.listIdeas() {
+fun LoggedIn.listTasks() {
 
     val isBusy = Var(false)
 
     val killables = Killables()
 
 
-    base.newRoot {
+    root.newRoot {
         fun displayList() {
-            base.root.setRoot(this)
+            root.setRoot(this)
         }
 
         flexColumn()
@@ -31,7 +30,7 @@ fun LoggedIn.listIdeas() {
             flexRow()
             padding2()
             borderBottom()
-            bgLigth()
+            bgLight()
             btnButton {
                 flexFixedSize()
                 btnSecondary()
@@ -55,7 +54,7 @@ fun LoggedIn.listIdeas() {
                 btnPrimary()
                 innerText = "New"
                 clickEvent {
-                    editIdea {
+                    editTask {
                         displayList()
                     }
                 }
@@ -70,7 +69,7 @@ fun LoggedIn.listIdeas() {
         )
         listOrHourglassRoot.setHourglass()
 
-        val list = ListenableMutableList<DocItem<Idea>>()
+        val list = ListenableMutableList<DocItem<Task>>()
 
         val listOrEmptyDiv = document.column {
             flexGrow1()
@@ -97,7 +96,7 @@ fun LoggedIn.listIdeas() {
                         document.listAction {
                             rxText { item.data().title }
                             clickEvent {
-                                editIdea(item) {
+                                editTask(item) {
                                     displayList()
                                 }
                             }
@@ -111,18 +110,13 @@ fun LoggedIn.listIdeas() {
                     if (empty) emptyDiv else listDiv
                 )
             }
-
-
         }
 
-
-        killables += userIdeasRef.docItems(
+        killables += userTasksRef.docItems(
             list,
             onFirst = {
-                listOrEmptyDiv.setToRoot(listOrHourglassRoot)
+                listOrHourglassRoot.setRoot(listOrEmptyDiv)
             }
         )
-
     }
-
 }

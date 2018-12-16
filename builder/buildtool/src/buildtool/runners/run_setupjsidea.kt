@@ -24,7 +24,7 @@ fun main(args: Array<String>) {
         index,
         testapp,
         gymclock,
-        ideas,
+        tasks,
         tictactoe,
         chat
     )

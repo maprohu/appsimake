@@ -10,8 +10,8 @@ fun main(args: Array<String>) {
         padding2()
         listGroup {
             listAction {
-                href = "ideas.html"
-                innerText = "Ideas"
+                href = "tasks.html"
+                innerText = "Tasks"
             }
             listAction {
                 href = "tictactoe.html"

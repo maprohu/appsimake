@@ -170,8 +170,8 @@ object index : JsApp(
     )
 )
 
-object ideas : JsApp(
-    "apps/ideas",
+object tasks : JsApp(
+    "apps/tasks",
     listOf(
         commonfb
     )

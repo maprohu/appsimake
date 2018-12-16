@@ -1,41 +1,42 @@
-package ideas
+package tasks
 
 import bootstrap.*
 import common.obj
 import domx.*
-import firebase.Promise
 import firebase.firestore.DocItem
+import firebase.firestore.DocumentReference
 import fontawesome.spinner
 import killable.Killables
 import rx.Rx
 import rx.Var
 import styles.scrollVertical
+import kotlin.js.Promise
 
-data class IdeaData(
+data class TaskData(
     val title: String = "",
     val text: String = ""
 ) {
-    constructor(idea: Idea) : this(
-        title = idea.title,
-        text = idea.text
+    constructor(task: Task) : this(
+        title = task.title,
+        text = task.text
     )
 
-    fun toIdea() = obj<Idea>().also {
+    fun toTask() = obj<Task>().also {
         it.title = title
         it.text = text
     }
 }
 
-fun LoggedIn.editIdea(
-    item: DocItem<Idea>? = null,
+fun LoggedIn.editTask(
+    item: DocItem<Task>? = null,
     onBack: () -> Unit = { main() }
 ) {
-    val savedData = Var(item?.let { it.data.now.toIdeaData() })
+    val savedData = Var(item?.let { it.data.now.toTaskData() })
     val title = Var(savedData.now?.title ?: "")
     val text = Var(savedData.now?.text ?: "")
     val isSaving = Var(false)
     val editingData = Rx {
-        IdeaData(
+        TaskData(
             title = title(),
             text = text()
         )
@@ -50,12 +51,11 @@ fun LoggedIn.editIdea(
     lateinit var savePromise : () -> Promise<*>
     lateinit var deletePromise : () -> Promise<*>
 
-    fun setupSavedState(id: String) {
-        val ref = userIdeasRef.doc(id)
-        val toSave = editingData.now
+    fun setupSavedState(ref: DocumentReference) {
         savePromise = {
+            val toSave = editingData.now
             ref
-                .set(toSave.toIdea())
+                .set(toSave.toTask())
                 .then { savedData.now = toSave }
         }
         deletePromise = {
@@ -74,23 +74,23 @@ fun LoggedIn.editIdea(
     fun saveNew(): Promise<*> {
         val toSave = editingData.now
 
-        return userIdeasRef.add(
-            toSave.toIdea()
+        return userTasksRef.add(
+            toSave.toTask()
         ).then { docRef ->
             savedData.now = toSave
 
             killables += docRef
                 .onSnapshot { d ->
                     if (d.exists) {
-                        d.data<Idea>().also { i ->
-                            savedData.now = IdeaData(i)
+                        d.data<Task>().also { i ->
+                            savedData.now = TaskData(i)
                         }
                     } else {
                         savedData.now = null
                     }
                 }
 
-            setupSavedState(docRef.id)
+            setupSavedState(docRef)
         }
     }
 
@@ -98,8 +98,8 @@ fun LoggedIn.editIdea(
     if (item==null) {
         savePromise = { saveNew() }
     } else {
-        killables += item.data.forEach { savedData.now = it.toIdeaData() }
-        setupSavedState(item.id)
+        killables += item.data.forEach { savedData.now = it.toTaskData() }
+        setupSavedState(userTasksRef.doc(item.id))
     }
 
     fun back() {
@@ -117,12 +117,12 @@ fun LoggedIn.editIdea(
     }
 
 
-    base.newRoot {
+    root.newRoot {
         row {
             flexFixedSize()
             padding2()
             borderBottom()
-            bgLigth()
+            bgLight()
             btnButton {
                 flexFixedSize()
                 btnSecondary()
