@@ -68,6 +68,7 @@ enum class Turn {
     Check,
     Won,
     Lost,
+    Draw,
     Alone
 }
 
@@ -86,6 +87,11 @@ enum class MarkState {
     Visible
 }
 
+val FieldWidth = 3
+val FieldHeight = 3
+val ValidCoords = (0 until FieldWidth)
+    .flatMap { x -> (0 until FieldHeight).map { y -> Coords(x, y) } }
+
 fun PlayingCtx.playfieldUI(): () -> Unit {
     val tableRatio = 1.0
 
@@ -101,6 +107,15 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
     val turn = Var(if (weStart) Turn.Here else Turn.There)
 
     val ourTurn = Rx { turn() == Turn.Here }
+
+    val freeLeft = Rx {
+        ValidCoords.count {
+            state(it)() == FieldState.Free
+        }
+    }
+    val isDraw = Rx {
+        freeLeft() == 0
+    }
 
     fun SVGElement.fieldUI(x: Int, y: Int) {
         val state = state(x, y)
@@ -350,7 +365,6 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                     flexGrow1()
 
                     column {
-                        border()
                         padding2()
                         flexGrow1()
 
@@ -400,6 +414,7 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                         when (turn()) {
                             Turn.Won -> "You won!"
                             Turn.Lost -> "You lost."
+                            Turn.Draw -> "It's a draw."
                             Turn.Check -> "Waiting..."
                             Turn.There -> "Waiting for opponent..."
                             Turn.Here -> "Make a move!"
@@ -425,7 +440,12 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
 
     }
 
-    val gameOverStates = setOf(Turn.Won, Turn.Lost, Turn.Alone)
+    val gameOverStates = setOf(
+        Turn.Won,
+        Turn.Lost,
+        Turn.Draw,
+        Turn.Alone
+    )
     val isOver = Rx {
         turn() in gameOverStates
     }
@@ -491,7 +511,11 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                 val state = state(coords)
                 val party = party()
                 state.now = party.field
-                turn.now = if (coords.checkGameOver()) party.end else party.next
+                turn.now = when {
+                    coords.checkGameOver() -> party.end
+                    isDraw.now -> Turn.Draw
+                    else -> party.next
+                }
             }
             is Leave -> {
                 turn.now = Turn.Alone
