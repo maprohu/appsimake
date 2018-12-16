@@ -17,7 +17,7 @@ fun PlayerInactive.inactiveUI() {
         }
         btnButton {
             margin1()
-            innerText = "Enter waiting room"
+            innerText = "Enter Waiting Room"
             clickEvent {
                 control.playerRef.set(
                     obj<Player> { active = true },

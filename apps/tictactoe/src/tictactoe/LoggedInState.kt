@@ -6,6 +6,7 @@ import firebase.firestore.*
 import killable.Killables
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlin.random.Random
 
 abstract class LoggedInState(val control: PlayerCtx) : State<Player?, LoggedInState>()
 
@@ -96,6 +97,7 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                                 ownGameRef,
                                 obj<Game> {
                                     this.players = players.map { it.id }.toTypedArray()
+                                    this.firstPlayer = Random.nextInt(2)
                                 },
                                 obj {
                                     merge = true

@@ -5,6 +5,8 @@ import commonfb.FbCtx
 import commonfb.LoggedInCtx
 import firebase.User
 import firebase.firestore.DocumentReference
+import firebase.firestore.setOptionsMerge
+import firebase.firestore.tx
 import killable.Killables
 import kotlinx.coroutines.*
 
@@ -33,12 +35,13 @@ class PlayerCtx(
     fun cleanupGames() {
         GlobalScope.launch {
             mainCtx
-                .playersRef
+                .gamesRef
                 .where("players", "array-contains", playerId)
                 .get()
                 .await()
                 .docs
                 .forEach { doc ->
+                    console.dir(doc)
                     val gameRef = doc.ref
                     cleanupGame(gameRef)
                 }
@@ -120,17 +123,40 @@ class PlayerCtx(
         val killables = Killables()
         val playingRoot = playingUI()
         playingRoot.setHourglass()
-        val gameRef = mainCtx.gamesRef.doc(gameId)
-        gameRef.get().then {
-            val playingCtx = PlayingCtx(
-                this,
-                gameId,
-                it.data<Game>().players.indexOf(playerId),
-                playingRoot
-            )
-            killables += playingCtx.playfieldUI()
+        mainCtx.gamesRef.doc(gameId).get().then {
+            if (!it.exists) {
+                leaveGame(gameId)
+            } else {
+                val game = it.data<Game>()
+                val playerIndex = game.players.indexOf(playerId)
+                val weStart = playerIndex == game.firstPlayer
+                val playingCtx = PlayingCtx(
+                    this,
+                    gameId,
+                    playerIndex,
+                    weStart,
+                    playingRoot
+                )
+                killables += playingCtx.playfieldUI()
+            }
         }
         return { killables.kill() }
     }
 
+    fun leaveGame(gameId: String) {
+
+        GlobalScope.launch {
+            db.tx { tx ->
+                val player = tx.get(playerRef).await().data<Player>()
+
+                if (player.game == gameId) {
+                    player.game = null
+                }
+
+                tx.set(playerRef, player)
+            }
+
+            cleanupGames()
+        }
+    }
 }

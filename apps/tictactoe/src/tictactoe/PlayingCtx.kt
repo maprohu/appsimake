@@ -25,6 +25,7 @@ class PlayingCtx(
     val playerCtx: PlayerCtx,
     val gameId: String,
     val playerIndex: Int,
+    val weStart: Boolean,
     val root: RootPanel
 ) {
     val playerRef = playerCtx.playerRef
@@ -50,16 +51,12 @@ sealed class Move(o: dynamic) : Wrap(o) {
     }
 }
 
-
 class Placement(o: dynamic = obj()) : Move(o) {
     var x : Int by dyn()
     var y : Int by dyn()
 }
 
 class Leave(o: dynamic = obj()) : Move(o)
-
-
-
 
 fun PlayingCtx.move(m: Move) = GlobalScope.launch {
     db.tx { tx ->
@@ -76,20 +73,8 @@ fun PlayingCtx.move(m: Move) = GlobalScope.launch {
     }
 }
 
-fun PlayingCtx.leaveGame() = {
+fun PlayingCtx.leaveGame() {
     move(Leave())
 
-    GlobalScope.launch {
-        db.tx { tx ->
-            val player = tx.get(playerRef).await().data<Player>()
-
-            if (player.game == gameId) {
-                player.game = null
-            }
-
-            tx.set(playerRef, player)
-        }
-
-        playerCtx.cleanupGames()
-    }
+    playerCtx.leaveGame(gameId)
 }

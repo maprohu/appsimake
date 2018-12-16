@@ -23,7 +23,7 @@ val onResize by lazy {
 }
 
 fun Window.resizeEvent(fn: () -> Unit) : () -> Unit {
-//    window.setTimeout(fn, 0)
+    window.setTimeout(fn, 0)
     fn()
     return onResize.add(fn)
 }
@@ -94,6 +94,27 @@ open class Listeners {
 
 }
 
+open class Emitter<T> {
+
+    protected var listeners = listOf<(T) -> Unit>()
+
+    operator fun plusAssign(listener: (T) -> Unit) {
+        add(listener)
+    }
+
+    open fun add(listener: (T) -> Unit) : () -> Unit {
+        listeners += listener
+
+        return {
+            listeners -= listener
+        }
+    }
+
+    open fun fire(t: T) {
+        listeners.forEach { it(t) }
+    }
+
+}
 
 
 

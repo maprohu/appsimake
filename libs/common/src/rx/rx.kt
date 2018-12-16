@@ -1,7 +1,9 @@
 package rx
 
 import killable.Killable
+import killable.Killables
 import org.w3c.dom.Element
+import org.w3c.dom.GlobalEventHandlers
 import kotlin.dom.addClass
 import kotlin.dom.removeClass
 
@@ -247,6 +249,11 @@ fun Element.rxClass(
             { addClass(it) },
             { removeClass(it) }
     )
+}
+
+fun GlobalEventHandlers.rxHover(rx: Var<Boolean>) {
+    onmouseenter = { rx.now = true; null }
+    onmouseleave = { rx.now = false; null }
 }
 
 fun Element.rxClassOpt(

@@ -3,10 +3,7 @@ package firebase.firestore
 import common.*
 import firebase.FirebaseError
 import killable.Killables
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asDeferred
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import org.w3c.dom.Element
 import rx.RxVal
 import rx.Var
@@ -207,7 +204,7 @@ fun <T> Firestore.txDefer(fn: suspend (Transaction) -> T) : Deferred<T> {
     return runTransaction<T> {
         GlobalScope.async {
             fn(it)
-        }
+        }.asPromise()
     }.asDeferred()
 }
 

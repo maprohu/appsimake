@@ -298,6 +298,9 @@ fun Element.border() {
 fun Element.borderBottom() {
     classes += "border-bottom"
 }
+fun Element.borderTop() {
+    classes += "border-top"
+}
 fun Element.btnPrimary() {
     classes += "btn-primary"
 }

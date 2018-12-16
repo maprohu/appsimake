@@ -38,6 +38,6 @@ external interface Player {
 
 external interface Game {
     var players: Array<String>
+    var firstPlayer: Int
     var lastSequence: Int?
-
 }
