@@ -320,7 +320,10 @@ fun Element.btnGroup() {
     classes += "btn-group"
 }
 fun Element.dropdownMenu() {
-    classes += "dropdown-menu dropdown-menu-right"
+    classes += "dropdown-menu"
+}
+fun Element.dropdownMenuRight() {
+    classes += "dropdown-menu-right"
 }
 fun Element.dropdownItem() {
     classes += "dropdown-item"

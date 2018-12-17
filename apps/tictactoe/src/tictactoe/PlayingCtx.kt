@@ -26,7 +26,7 @@ class PlayingCtx(
     val gameId: String,
     val playerIndex: Int,
     val weStart: Boolean,
-    val root: RootPanel
+    val ui: PlayingUI
 ) {
     val playerRef = playerCtx.playerRef
     val playerId = playerCtx.playerId

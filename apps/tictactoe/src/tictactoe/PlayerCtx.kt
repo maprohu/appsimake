@@ -5,7 +5,6 @@ import commonfb.FbCtx
 import commonfb.LoggedInCtx
 import firebase.User
 import firebase.firestore.DocumentReference
-import firebase.firestore.setOptionsMerge
 import firebase.firestore.tx
 import killable.Killables
 import kotlinx.coroutines.*
@@ -121,8 +120,8 @@ class PlayerCtx(
 
     fun startPlaying(gameId: String) : () -> Unit {
         val killables = Killables()
-        val playingRoot = playingUI()
-        playingRoot.setHourglass()
+        val ui = playingUI()
+        ui.root.setHourglass()
         mainCtx.gamesRef.doc(gameId).get().then {
             if (!it.exists) {
                 leaveGame(gameId)
@@ -135,7 +134,7 @@ class PlayerCtx(
                     gameId,
                     playerIndex,
                     weStart,
-                    playingRoot
+                    ui
                 )
                 killables += playingCtx.playfieldUI()
             }

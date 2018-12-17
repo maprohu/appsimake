@@ -3,6 +3,7 @@ package tictactoe
 import bootstrap.*
 import common.Emitter
 import common.resizeEvent
+import commonui.aspectRatio
 import domx.*
 import domx.a as _
 import firebase.firestore.DocumentChangeType
@@ -14,32 +15,15 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.css.ElementCSSInlineStyle
 import org.w3c.dom.svg.SVGElement
 import org.w3c.dom.svg.SVGGElement
-import org.w3c.dom.svg.SVGLineElement
-import org.w3c.dom.svg.SVGSVGElement
 import rx.Rx
 import rx.Var
 import rx.rxClass
 import rx.rxHover
 import styles.flexBasis0
 import svgx.*
-import kotlin.browser.document
 import kotlin.browser.window
 
 
-enum class Orientation {
-    Horizontal,
-    Vertical
-}
-data class Size(
-    val width: Int,
-    val height: Int
-) {
-    val orientation =
-        if (width >= height) Orientation.Horizontal
-        else Orientation.Vertical
-
-    val ratio = if (height==0) 1.0 else width.toDouble() / height
-}
 
 data class Coords(
     val x: Int,
@@ -93,8 +77,6 @@ val ValidCoords = (0 until FieldWidth)
     .flatMap { x -> (0 until FieldHeight).map { y -> Coords(x, y) } }
 
 fun PlayingCtx.playfieldUI(): () -> Unit {
-    val tableRatio = 1.0
-
     val killables = Killables()
     val highlights = Emitter<Highlight>()
 
@@ -311,133 +293,29 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
         }
     }
 
-    root.newRoot {
-        div {
-            flex()
-            flexGrow1()
-            padding2()
-            div {
-                flexGrow1()
-                flex()
+    ui.root.newRoot {
+        padding2()
 
-                val size = Var(Size(offsetWidth, offsetHeight))
-                killables += window.resizeEvent {
-                    size.now = Size(offsetWidth, offsetHeight)
+        aspectRatio(killables) {
+            board()
+        }
+    }
+
+    ui.layout.top.middle {
+        flexCenter()
+        span {
+            rxText {
+                when (turn()) {
+                    Turn.Won -> "You won!"
+                    Turn.Lost -> "You lost."
+                    Turn.Draw -> "It's a draw."
+                    Turn.Check -> "Waiting..."
+                    Turn.There -> "Waiting for opponent..."
+                    Turn.Here -> "Make a move!"
+                    Turn.Alone -> "Opponent left."
                 }
-                val ratio = Rx {
-                    size().ratio
-                }
-                val flexOrientation = Rx {
-                    if (tableRatio >= ratio()) Orientation.Vertical
-                    else Orientation.Horizontal
-                }
-
-                val spacingGrow = Rx {
-                    val containerRatio = ratio()
-                    val tablePerContainer = if (tableRatio >= containerRatio) {
-                        containerRatio / tableRatio
-                    } else {
-                        tableRatio / containerRatio
-                    }
-                    val allSpacingPerContainer = 1.0 - tablePerContainer
-                    val allSpacingPerTable = allSpacingPerContainer / tablePerContainer
-                    val halfSpacingPerTable = allSpacingPerTable / 2.0
-                    halfSpacingPerTable
-                }
-
-                rxClass(
-                    Rx {
-                        when (flexOrientation()) {
-                            Orientation.Vertical -> "flex-column"
-                            Orientation.Horizontal -> "flex-row"
-                        }
-                    }
-                )
-
-                div {
-                    classes += flexBasis0
-                    spacingGrow.forEach {
-                        style.flexGrow = it.toString()
-                    }
-                }
-                column {
-                    classes += flexBasis0
-                    flexGrow1()
-
-                    column {
-                        padding2()
-                        flexGrow1()
-
-                        div {
-                            flexGrow1()
-                            style.position = "relative"
-
-                            board()
-                        }
-
-
-                    }
-
-                }
-                div {
-                    classes += flexBasis0
-                    spacingGrow.forEach {
-                        style.flexGrow = it.toString()
-                    }
-                }
-
             }
         }
-
-        row {
-            bgLight()
-            borderTop()
-            flexFixedSize()
-
-            row {
-                padding1()
-                flexFixedSize()
-                btnButton {
-                    margin1()
-                    innerText = "X"
-                }
-                span {
-                    margin1()
-                    innerText = "You"
-                }
-            }
-            div {
-                flexGrow1()
-                flexCenter()
-                span {
-                    rxText {
-                        when (turn()) {
-                            Turn.Won -> "You won!"
-                            Turn.Lost -> "You lost."
-                            Turn.Draw -> "It's a draw."
-                            Turn.Check -> "Waiting..."
-                            Turn.There -> "Waiting for opponent..."
-                            Turn.Here -> "Make a move!"
-                            Turn.Alone -> "Opponent left."
-                        }
-                    }
-                }
-            }
-            row {
-                padding1()
-                flexFixedSize()
-                span {
-                    margin1()
-                    innerText = "Opponent"
-                }
-                btnButton {
-                    margin1()
-                    innerText = "O"
-                }
-            }
-
-        }
-
     }
 
     val gameOverStates = setOf(
