@@ -5,33 +5,40 @@ import common.obj
 import commonui.RootPanel
 import commonui.screenLayout
 import domx.clickEvent
+import fontawesome.chevronLeft
 
 class PlayingUI(playerCtx: PlayerCtx) {
     val layout = playerCtx.appCtx.root.newRoot().screenLayout {
         top {
-            left.dropdownDiv {
-                dropdownItemAnchor {
-                    innerText = "Back to Waiting Room"
-                    clickEvent {
-                        playerCtx.playerRef
-                            .set(
-                                obj<Player> {
-                                    active = true
-                                    game = null
-                                }
-                            )
-                    }
+            left.dropdown {
+                button {
+                    chevronLeft()
                 }
-                dropdownItemAnchor {
-                    innerText = "Stop Playing"
-                    clickEvent {
-                        playerCtx.playerRef
-                            .set(
-                                obj<Player> {
-                                    active = false
-                                    game = null
-                                }
-                            )
+
+                menu {
+                    dropdownItemAnchor {
+                        innerText = "Back to Waiting Room"
+                        clickEvent {
+                            playerCtx.playerRef
+                                .set(
+                                    obj<Player> {
+                                        active = true
+                                        game = null
+                                    }
+                                )
+                        }
+                    }
+                    dropdownItemAnchor {
+                        innerText = "Stop Playing"
+                        clickEvent {
+                            playerCtx.playerRef
+                                .set(
+                                    obj<Player> {
+                                        active = false
+                                        game = null
+                                    }
+                                )
+                        }
                     }
                 }
             }

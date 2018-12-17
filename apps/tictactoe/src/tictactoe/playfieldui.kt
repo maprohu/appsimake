@@ -2,27 +2,26 @@ package tictactoe
 
 import bootstrap.*
 import common.Emitter
-import common.resizeEvent
 import commonui.aspectRatio
+import commonui.rxPanel
 import domx.*
 import domx.a as _
 import firebase.firestore.DocumentChangeType
 import firebase.firestore.onSnapshotNext
 import firebase.firestore.orderBy
 import firebase.firestore.typeEnum
+import fontawesome.chevronDown
 import killable.Killables
 import org.w3c.dom.HTMLDivElement
+import org.w3c.dom.HTMLElement
+import org.w3c.dom.Node
 import org.w3c.dom.css.ElementCSSInlineStyle
+import org.w3c.dom.svg.SVGCircleElement
 import org.w3c.dom.svg.SVGElement
 import org.w3c.dom.svg.SVGGElement
-import rx.Rx
-import rx.Var
-import rx.rxClass
-import rx.rxHover
-import styles.flexBasis0
+import rx.*
 import svgx.*
-import kotlin.browser.window
-
+import kotlin.browser.document
 
 
 data class Coords(
@@ -45,6 +44,14 @@ enum class Mark {
     X,
     O
 }
+
+val Mark.other
+    get() =
+        when (this) {
+            Mark.X -> Mark.O
+            Mark.O -> Mark.X
+        }
+
 
 enum class Turn {
     Here,
@@ -85,6 +92,7 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
     fun state(x: Int, y: Int) = state(Coords(x, y))
 
     val ourMark = Var(Mark.X)
+    val theirMark = Rx { ourMark().other }
 
     val turn = Var(if (weStart) Turn.Here else Turn.There)
 
@@ -98,6 +106,36 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
     val isDraw = Rx {
         freeLeft() == 0
     }
+
+    fun ElementCSSInlineStyle.markStyle() {
+        style.cssText = "stroke:black;stroke-width:0.1;fill:none;"
+    }
+
+    fun SVGElement.drawX(): SVGGElement {
+        return g {
+            markStyle()
+            line {
+                this.x1.baseVal.value = -.5f
+                this.y1.baseVal.value = -.5f
+                this.x2.baseVal.value = .5f
+                this.y2.baseVal.value = .5f
+            }
+            line {
+                this.x1.baseVal.value = -.5f
+                this.y1.baseVal.value = .5f
+                this.x2.baseVal.value = .5f
+                this.y2.baseVal.value = -.5f
+            }
+        }
+    }
+
+    fun SVGElement.drawO(): SVGCircleElement {
+        return circle {
+            markStyle()
+            r.baseVal.value = .5f
+        }
+    }
+
 
     fun SVGElement.fieldUI(x: Int, y: Int) {
         val state = state(x, y)
@@ -136,15 +174,10 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
             g {
 
                 g {
-                    transform.baseVal.appendItem(
-                        ownerSVGElement!!.createSVGTransform().apply {
-                            setScale(.8f, .8f)
-                        }
-                    )
-
-                    fun ElementCSSInlineStyle.stl() {
-                        style.cssText = "stroke:black;stroke-width:0.1;fill:none;"
+                    transform {
+                        setScale(.8f, .8f)
                     }
+
 
                     fun SVGGElement.markState(rx: Rx<MarkState>) {
                         rx.forEach {
@@ -161,28 +194,11 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                             }
                         }
                     }
-                    g {
+                    drawX().apply {
                         markState(xState)
-
-                        line {
-                            stl()
-                            this.x1.baseVal.value = -.5f
-                            this.y1.baseVal.value = -.5f
-                            this.x2.baseVal.value = .5f
-                            this.y2.baseVal.value = .5f
-                        }
-                        line {
-                            stl()
-                            this.x1.baseVal.value = -.5f
-                            this.y1.baseVal.value = .5f
-                            this.x2.baseVal.value = .5f
-                            this.y2.baseVal.value = -.5f
-                        }
                     }
-                    circle {
-                        stl()
+                    drawO().apply {
                         markState(oState)
-                        r.baseVal.value = .5f
                     }
                 }
 
@@ -230,14 +246,8 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                 bottom = "0"
                 minHeight = "0"
                 minWidth = "0"
-
-//                style.flexGrow = "1"
-
             }
-//                            width.baseVal.valueAsString = "100%"
-//                            height.baseVal.valueAsString = "100%"
             setAttribute("preserve-aspect-ratio", "none")
-
             setAttribute("viewBox", "0 0 3 3")
 
             fun stroke(
@@ -301,20 +311,69 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
         }
     }
 
+    fun Node.markSvg() =
+        svg {
+            width.baseVal.valueAsString = "1em"
+            height.baseVal.valueAsString = "1em"
+            viewBox(-.5, -.5, 1.0, 1.0)
+        }.g {
+            transform {
+                setScale(.8f, .8f)
+            }
+        }
+
+    fun Node.drawMark(rxv: RxVal<Mark>) =
+        markSvg().apply {
+            drawO().apply {
+                rxVisible { rxv() == Mark.O }
+            }
+            drawX().apply {
+                rxVisible { rxv() == Mark.X }
+            }
+        }
+
     ui.layout.top.middle {
         flexCenter()
         span {
-            rxText {
-                when (turn()) {
-                    Turn.Won -> "You won!"
-                    Turn.Lost -> "You lost."
-                    Turn.Draw -> "It's a draw."
-                    Turn.Check -> "Waiting..."
-                    Turn.There -> "Waiting for opponent..."
-                    Turn.Here -> "Make a move!"
-                    Turn.Alone -> "Opponent left."
+            rxPanel(turn) {
+                when (it) {
+                    Turn.Won -> "You won!".textNode
+                    Turn.Lost -> "You lost.".textNode
+                    Turn.Draw -> "It's a draw.".textNode
+                    Turn.Check -> "Waiting...".textNode
+                    Turn.There -> document.div {
+                        this + "Opponent placing "
+                        drawMark(theirMark)
+                    }
+                    Turn.Here -> document.div {
+                        this + "Place your "
+                        drawMark(ourMark)
+                    }
+                    Turn.Alone -> "Opponent left.".textNode
                 }
             }
+        }
+    }
+
+    ui.layout.top.right {
+        dropdown {
+            button {
+                chevronDown()
+            }
+
+            menu {
+                dropdownMenuRight()
+
+                dropdownItemAnchor {
+                    this + "Change mark to "
+                    drawMark(theirMark)
+
+                    clickEvent {
+                        ourMark.now = ourMark.now.other
+                    }
+                }
+            }
+
         }
     }
 

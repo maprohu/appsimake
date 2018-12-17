@@ -9,8 +9,6 @@ import common.*
 import domx.*
 import org.w3c.dom.events.MouseEvent
 import styles.overflowHidden
-import kotlin.dom.addClass
-import kotlin.dom.removeClass
 
 
 //fun Node.topbar(
@@ -34,13 +32,44 @@ fun Node.breadcrumb(
     }
 }
 
-fun Node.dropdownToggleButton(fn: HTMLButtonElement.() -> Unit = {}) {
+fun Node.dropdownToggleButton(fn: HTMLButtonElement.() -> Unit = {}): HTMLButtonElement {
     return btnButton {
+        btnSecondary()
         classes += "dropdown-toggle"
         attributes["data-toggle"] = "dropdown"
         fn()
     }
 }
+
+fun Element.dropdown() {
+    classes += "dropdown"
+}
+fun Element.dropdownToggle() {
+    classes += "dropdown-toggle"
+}
+
+class Dropdown(node: Node) {
+    val element = node.div {
+        dropdown()
+    }
+
+    val button  = element.btnButton {
+        btnSecondary()
+        attributes["data-toggle"] = "dropdown"
+    }
+
+    fun button(fn: HTMLButtonElement.() -> Unit) = button.apply(fn)
+
+    val menu = element.div {
+        dropdownMenu()
+    }
+}
+
+operator fun <T: Node> T.invoke(fn: T.() -> Unit) {
+    apply(fn)
+}
+
+fun Node.dropdown(fn: Dropdown.() -> Unit) = Dropdown(this).apply(fn)
 
 fun Node.dropdownDiv(
     block : HTMLDivElement.() -> Unit = {}
@@ -228,8 +257,8 @@ fun Node.row(fn: HTMLDivElement.() -> Unit): HTMLDivElement {
     }
 }
 
-fun Node.btnButton(fn: HTMLButtonElement.() -> Unit) {
-    button {
+fun Node.btnButton(fn: HTMLButtonElement.() -> Unit): HTMLButtonElement {
+    return button {
         type = "button"
         classes += "btn"
         fn()
@@ -283,6 +312,9 @@ fun Element.bgLight() {
 }
 fun Element.bgDark() {
     classes += "bg-dark"
+}
+fun Element.bgWhite() {
+    classes += "bg-white"
 }
 fun Element.flexFixedSize() {
     flexShrink0()

@@ -7,7 +7,7 @@ import domx.span
 import org.w3c.dom.*
 import kotlin.browser.document
 
-class ToolBar(node: Node, fn: ToolBar.() -> Unit = {}) {
+class ToolBar(node: Node) {
 
     val element = node.row {
         flexFixedSize()
@@ -25,7 +25,7 @@ class ToolBar(node: Node, fn: ToolBar.() -> Unit = {}) {
 
     fun left(fn: HTMLDivElement.() -> Unit) = left.apply(fn)
 
-    fun leftButton(fn: HTMLButtonElement.() -> Unit) {
+    fun leftButton(fn: HTMLButtonElement.() -> Unit): HTMLButtonElement {
         return left.btnButton {
             btnSecondary()
             fn()
@@ -65,17 +65,13 @@ class ToolBar(node: Node, fn: ToolBar.() -> Unit = {}) {
 
     fun right(fn: HTMLDivElement.() -> Unit) = right.apply(fn)
 
-    init {
-        fn(this)
-    }
-
 }
 
-fun Node.toolbar(fn: ToolBar.() -> Unit = {}) = ToolBar(this, fn)
+fun Node.toolbar(fn: ToolBar.() -> Unit = {}) = ToolBar(this).apply(fn)
 fun Node.topbar(fn: ToolBar.() -> Unit = {}) = toolbar(fn).also { it.element.borderBottom() }
 fun Node.bottombar(fn: ToolBar.() -> Unit = {}) = toolbar(fn).also { it.element.borderTop() }
 
-class ScreenLayout(val element: Element, fn: ScreenLayout.() -> Unit = {}) {
+class ScreenLayout(val element: Element) {
     init {
         element.apply {
             flex()
@@ -106,9 +102,6 @@ class ScreenLayout(val element: Element, fn: ScreenLayout.() -> Unit = {}) {
     fun bottom(fn: ToolBar.() -> Unit) = bottom.apply(fn)
 
 
-    init {
-        fn(this)
-    }
 }
-fun Element.screenLayout(fn: ScreenLayout.() -> Unit = {}) = ScreenLayout(this, fn)
+fun Element.screenLayout(fn: ScreenLayout.() -> Unit = {}) = ScreenLayout(this).apply(fn)
 

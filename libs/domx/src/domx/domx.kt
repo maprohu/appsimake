@@ -3,9 +3,12 @@ package domx
 import common.ListenableList
 import common.insertAt
 import common.removeAt
+import killable.Killable
 import org.w3c.dom.*
+import org.w3c.dom.css.ElementCSSInlineStyle
 import org.w3c.dom.events.InputEvent
 import org.w3c.dom.events.MouseEvent
+import rx.Rx
 import rx.RxVal
 import rx.Var
 import kotlin.browser.document
@@ -88,6 +91,15 @@ fun HTMLButtonElement.rxEnabled(rx: RxVal<Boolean>) {
     rx.forEach { disabled = !it }
 }
 
+fun ElementCSSInlineStyle.rxVisible(rxv: RxVal<Boolean>): Killable {
+    return rxv.forEach { style.visibility = if (it) "visible" else "collapse" }
+}
+
+fun ElementCSSInlineStyle.rxVisible(fn: () -> Boolean): Rx<Boolean> {
+    return Rx(fn).also { rxVisible(it) }
+}
+
+
 fun <T> Node.listenableList(
     list: ListenableList<T>,
     create: (T) -> Node
@@ -107,6 +119,13 @@ fun <T> Node.listenableList(
             }
         }
     )
+}
+
+val String.textNode
+    get() = document.createTextNode(this)
+
+operator fun Node.plus(string: String) {
+    appendChild(string.textNode)
 }
 
 

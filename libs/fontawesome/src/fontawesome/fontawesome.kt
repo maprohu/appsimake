@@ -16,4 +16,5 @@ fun Node.fa(name: String) = span {
 
 fun Node.chevronRight() = fa("chevron-right")
 fun Node.chevronLeft() = fa("chevron-left")
+fun Node.chevronDown() = fa("chevron-down")
 fun Node.spinner() = fa("spinner fa-spin")
