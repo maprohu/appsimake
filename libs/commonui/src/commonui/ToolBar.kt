@@ -19,7 +19,6 @@ class ToolBar(node: Node) {
         document.div {
             flex()
             flexFixedSize()
-            margin1()
         }.also { element.insertAt(0, it ) }
     }
 
@@ -27,6 +26,7 @@ class ToolBar(node: Node) {
 
     fun leftButton(fn: HTMLButtonElement.() -> Unit): HTMLButtonElement {
         return left.btnButton {
+            margin1()
             btnSecondary()
             fn()
         }
@@ -38,7 +38,6 @@ class ToolBar(node: Node) {
         element.div {
             flex()
             flexGrow1()
-            margin1()
         }
     }
 
@@ -48,6 +47,7 @@ class ToolBar(node: Node) {
         return middle {
             flexAlignItemsCenter()
         }.span {
+            margin1()
             style.fontSize = "1.25rem"
             fn()
         }
@@ -59,7 +59,6 @@ class ToolBar(node: Node) {
         element.div {
             flex()
             flexFixedSize()
-            margin1()
         }
     }
 

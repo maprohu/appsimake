@@ -5,12 +5,18 @@ import common.obj
 import commonui.RootPanel
 import commonui.screenLayout
 import domx.clickEvent
+import domx.div
 import fontawesome.chevronLeft
+import fontawesome.spinner
 
 class PlayingUI(playerCtx: PlayerCtx) {
     val layout = playerCtx.appCtx.root.newRoot().screenLayout {
         top {
             left.dropdown {
+                element {
+                    margin1()
+                }
+
                 button {
                     chevronLeft()
                 }
@@ -42,7 +48,16 @@ class PlayingUI(playerCtx: PlayerCtx) {
                     }
                 }
             }
+
         }
+    }
+
+    val spinner = layout.top.right {
+        flexRow()
+    }.div {
+        margin1()
+        flexCenter()
+        spinner()
     }
 
     val root = RootPanel(layout.main)

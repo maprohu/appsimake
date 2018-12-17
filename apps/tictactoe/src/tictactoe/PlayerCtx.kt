@@ -4,8 +4,7 @@ import common.obj
 import commonfb.FbCtx
 import commonfb.LoggedInCtx
 import firebase.User
-import firebase.firestore.DocumentReference
-import firebase.firestore.tx
+import firebase.firestore.*
 import killable.Killables
 import kotlinx.coroutines.*
 
@@ -40,7 +39,6 @@ class PlayerCtx(
                 .await()
                 .docs
                 .forEach { doc ->
-                    console.dir(doc)
                     val gameRef = doc.ref
                     cleanupGame(gameRef)
                 }
@@ -56,64 +54,62 @@ class PlayerCtx(
     }
 
     private fun cleanupGame(gameRef: DocumentReference) {
-        GlobalScope.launch {
-            db.runTransaction<Boolean> { tx ->
-                GlobalScope.async<Boolean> {
-                    val game = tx.get(gameRef).await()
+        launch {
+            db.txTry { tx ->
+                val game = tx.get(gameRef).await()
 
-                    if (game.exists) {
-                        val player = tx.get(playerRef).await()
+                if (game.exists) {
+                    val player = tx.get(playerRef).await()
 
-                        val playerToWrite = if (player.exists) {
-                            player.data()
-                        } else {
-                            newPlayer()
+                    val playerToWrite = if (player.exists) {
+                        player.data()
+                    } else {
+                        newPlayer()
+                    }
+
+                    if (playerToWrite.game != game.ref.id) {
+                        val gameData = game.data<Game>()
+
+                        gameData.apply {
+                            players = players.filterNot { it == playerId }.toTypedArray()
                         }
 
-                        if (playerToWrite.game != game.ref.id) {
-                            val gameData = game.data<Game>()
-
-                            gameData.apply {
-                                players = players.filterNot { it == playerId }.toTypedArray()
-                            }
-
-                            val deleted = if (gameData.players.isEmpty()) {
-                                tx.delete(game.ref)
-                                true
-                            } else {
-                                tx.update(game.ref, gameData)
-                                false
-                            }
-
-                            tx.set(playerRef, playerToWrite)
-
-                            deleted
+                        val deleted = if (gameData.players.isEmpty()) {
+                            tx.delete(game.ref)
+                            true
                         } else {
+                            tx.update(game.ref, gameData)
                             false
                         }
 
+                        tx.set(playerRef, playerToWrite)
+
+                        deleted
                     } else {
-                        false
+                        rollback()
                     }
-                }.asPromise()
-            }.await().let {
+
+                } else {
+                    rollback()
+                }
+            }.onRollback { false }.let {
                 if (it) deleteGameCollections(gameRef)
             }
         }
    }
 
     fun createPlayer() {
-        fbCtx.db.runTransaction<Unit> { tx ->
-            GlobalScope.async {
-                val player = tx.get(playerRef).await()
+        db.txDefer { tx ->
+            val player = tx.get(playerRef).await()
 
-                if (!player.exists) {
-                    tx.set(
-                        playerRef,
-                        newPlayer()
-                    )
-                }
-            }.asPromise()
+            if (!player.exists) {
+                tx.set(
+                    playerRef,
+                    newPlayer()
+                )
+            } else {
+                rollback()
+            }
         }
     }
 

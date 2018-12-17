@@ -12,6 +12,8 @@ import firebase.firestore.orderBy
 import firebase.firestore.typeEnum
 import fontawesome.chevronDown
 import killable.Killables
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
@@ -84,6 +86,8 @@ val ValidCoords = (0 until FieldWidth)
     .flatMap { x -> (0 until FieldHeight).map { y -> Coords(x, y) } }
 
 fun PlayingCtx.playfieldUI(): () -> Unit {
+    var expectingSequence = SequenceStartsFrom
+
     val killables = Killables()
     val highlights = Emitter<Highlight>()
 
@@ -95,6 +99,13 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
     val theirMark = Rx { ourMark().other }
 
     val turn = Var(if (weStart) Turn.Here else Turn.There)
+    val isWaiting = Rx {
+        when (turn()) {
+            Turn.Check, Turn.There -> true
+            else -> false
+        }
+    }
+    ui.spinner.rxDisplay(isWaiting)
 
     val ourTurn = Rx { turn() == Turn.Here }
 
@@ -213,12 +224,15 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                     if (canClick.now) {
                         turn.now = Turn.There
                         state.now = FieldState.Friend
-                        move(
-                            Placement().apply {
-                                this.x = x
-                                this.y = y
-                            }
-                        )
+                        GlobalScope.launch {
+                            move(
+                                expectingSequence,
+                                Placement().apply {
+                                    this.x = x
+                                    this.y = y
+                                }
+                            )
+                        }
                     }
                 }
                 rxHover(hover)
@@ -344,10 +358,12 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                     Turn.There -> document.div {
                         this + "Opponent placing "
                         drawMark(theirMark)
+                        this + " ..."
                     }
                     Turn.Here -> document.div {
                         this + "Place your "
                         drawMark(ourMark)
+                        this + " !"
                     }
                     Turn.Alone -> "Opponent left.".textNode
                 }
@@ -357,6 +373,10 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
 
     ui.layout.top.right {
         dropdown {
+            element {
+                margin1()
+            }
+
             button {
                 chevronDown()
             }
@@ -413,8 +433,6 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
     fun Coords.checkGameOver() : Boolean {
         val winner = state(this).now
 
-        console.dir(winner)
-
         if (winner == FieldState.Free) return false
 
         fun Dir.reach() =
@@ -440,7 +458,10 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
     }
 
     fun Move.process() {
+        if (sequence < expectingSequence) return
         if (isOver.now) return
+        if (sequence > expectingSequence) throw Error("expecting sequence $expectingSequence, got $sequence")
+        expectingSequence = sequence + 1
 
         when (this) {
             is Placement -> {
@@ -472,8 +493,10 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
         }
 
     return {
-        killables.kill()
-        stopListening()
-        leaveGame()
+        GlobalScope.launch {
+            leaveGame { expectingSequence }
+            killables.kill()
+            stopListening()
+        }
     }
 }

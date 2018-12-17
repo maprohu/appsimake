@@ -64,7 +64,7 @@ external interface DocumentReference {
 
     fun get(options: GetOptions = definedExternally) : Promise<DocumentSnapshot>
 
-    fun set(data: Any, options: SetOptions = definedExternally) : Promise<Unit>
+    fun set(data: dynamic, options: SetOptions = definedExternally) : Promise<Unit>
 
     fun update(data: Any) : Promise<Unit>
 

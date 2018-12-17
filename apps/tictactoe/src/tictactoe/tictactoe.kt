@@ -5,9 +5,14 @@ import common.obj
 import commonfb.LoggingInCtx
 import commonui.ToolBar
 import firebase.User
+import firebase.firestore.launch
+import firebase.firestore.rollback
+import firebase.firestore.tx
+import firebase.firestore.txTry
 
 fun main(args: Array<String>) {
-    TicTacToeLoggedOutControl().start()
+    val ttt = TicTacToeLoggedOutControl()
+    ttt.start()
 }
 
 fun ToolBar.ticTacToe() {
@@ -45,5 +50,5 @@ external interface Player {
 external interface Game {
     var players: Array<String>
     var firstPlayer: Int
-    var lastSequence: Int?
+//    var lastSequence: Int?
 }

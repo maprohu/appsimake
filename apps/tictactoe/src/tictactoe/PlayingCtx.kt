@@ -18,6 +18,7 @@ import rx.Var
 import rx.rxClass
 import styles.flexBasis0
 import kotlin.browser.window
+import kotlin.js.Promise
 import kotlin.math.max
 import kotlin.math.min
 
@@ -58,23 +59,35 @@ class Placement(o: dynamic = obj()) : Move(o) {
 
 class Leave(o: dynamic = obj()) : Move(o)
 
-fun PlayingCtx.move(m: Move) = GlobalScope.launch {
+class SequenceTakenException : Exception()
+
+const val SequenceStartsFrom = 0
+suspend fun PlayingCtx.move(seq: Int, m: Move) {
+    m.sequence = seq
+
     db.tx { tx ->
-        val game = tx.get(gameRef).await().data<Game>()
+        val moveRef = movesRef.doc(m.sequence.toString())
+        val currentMove = tx.get(moveRef).await()
 
-        val sequence = game.lastSequence?.let { it + 1 } ?: 0
-        m.player = playerIndex
-        m.sequence = sequence
-
-        game.lastSequence = sequence
-
-        tx.set(gameRef, game)
-        tx.set(movesRef.doc(sequence.toString()), m.wrapped)
+        if (!currentMove.exists) {
+            m.player = playerIndex
+            tx.set(moveRef, m.wrapped)
+        } else {
+            throw SequenceTakenException()
+        }
     }
 }
 
-fun PlayingCtx.leaveGame() {
-    move(Leave())
+suspend fun PlayingCtx.tryLeave(trySeq: Int, seq: () -> Int) {
+    try {
+        move(trySeq, Leave())
+    } catch (e: SequenceTakenException) {
+        tryLeave( max(seq(), trySeq + 1), seq)
+    }
+}
+
+suspend fun PlayingCtx.leaveGame(seq: () -> Int) {
+    tryLeave(seq(), seq)
 
     playerCtx.leaveGame(gameId)
 }

@@ -7,6 +7,7 @@ import kotlinx.coroutines.*
 import org.w3c.dom.Element
 import rx.RxVal
 import rx.Var
+import kotlin.js.Promise
 import kotlin.reflect.KProperty
 
 fun setOptionsMerge() = obj<SetOptions> { merge = true }
@@ -209,3 +210,16 @@ fun <T> Firestore.txDefer(fn: suspend (Transaction) -> T) : Deferred<T> {
 }
 
 suspend fun <T> Firestore.tx(fn: suspend (Transaction) -> T) : T = txDefer(fn).await()
+suspend fun <T> Firestore.txTry(fn: suspend (Transaction) -> T) : Try<T> = Try { tx(fn) }
+
+fun <T> Try<T>.onRollback(fn: () -> T) : T = fold({ if (it is RollbackException) fn() else throw it }, { it })
+
+class RollbackException : Exception()
+fun rollback() : Nothing = throw RollbackException()
+fun launch(fn: suspend () -> Unit) {
+    GlobalScope.launch {
+        try {
+            fn()
+        } catch (e: RollbackException) {}
+    }
+}

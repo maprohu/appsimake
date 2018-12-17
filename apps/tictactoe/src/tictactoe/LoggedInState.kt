@@ -65,49 +65,49 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
             ).await()
 
             for (otherPlayerChange in channel) {
-                val started = control.fbCtx.db.runTransaction<Boolean> { tx ->
-                    GlobalScope.async {
-                        var playersFree = true
+                val started = control.db.txTry { tx ->
+                    var playersFree = true
 
-                        val players = arrayOf(control.playerRef, otherPlayerChange.doc.ref)
+                    val players = arrayOf(control.playerRef, otherPlayerChange.doc.ref)
 
-                        for (player in players) {
-                            val ds = tx.get(player).await()
+                    for (player in players) {
+                        val ds = tx.get(player).await()
 
-                            if (!ds.exists || ds.data<Player>().let { !it.active || it.game != null } ) {
-                                playersFree = false
-                                break
-                            }
+                        if (!ds.exists || ds.data<Player>().let { !it.active || it.game != null } ) {
+                            playersFree = false
+                            break
                         }
+                    }
 
-                        if (playersFree) {
-                            players.forEach {
-                                tx.set(
-                                    it,
-                                    obj<Player> {
-                                        active = false
-                                        game = ownGameRef.id
-                                    },
-                                    obj {
-                                        merge = true
-                                    }
-                                )
-                            }
+                    if (playersFree) {
+                        players.forEach {
                             tx.set(
-                                ownGameRef,
-                                obj<Game> {
-                                    this.players = players.map { it.id }.toTypedArray()
-                                    this.firstPlayer = Random.nextInt(2)
+                                it,
+                                obj<Player> {
+                                    active = false
+                                    game = ownGameRef.id
                                 },
                                 obj {
                                     merge = true
                                 }
                             )
                         }
+                        tx.set(
+                            ownGameRef,
+                            obj<Game> {
+                                this.players = players.map { it.id }.toTypedArray()
+                                this.firstPlayer = Random.nextInt(2)
+                            },
+                            obj {
+                                merge = true
+                            }
+                        )
 
-                        playersFree
-                    }.asPromise()
-                }.await()
+                        true
+                    } else {
+                        rollback()
+                    }
+                }.onRollback { false }
 
                 if (started) {
                     break

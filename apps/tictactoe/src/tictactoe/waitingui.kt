@@ -41,6 +41,7 @@ fun PlayerActiveWaiting.waitingUI() {
                 row {
                     padding1()
                     input {
+                        padding1()
                         margin1()
                         flexGrow1()
                         value = window.location.href
