@@ -123,3 +123,8 @@ fun Node.label(fn: HTMLLabelElement.() -> Unit = {}) : HTMLLabelElement = tag("l
 fun Node.textarea(fn: HTMLTextAreaElement.() -> Unit = {}) : HTMLTextAreaElement = tag("textarea", fn)
 fun Node.input(fn: HTMLInputElement.() -> Unit = {}) : HTMLInputElement = tag("input", fn)
 fun Node.h1(fn: HTMLHeadingElement.() -> Unit = {}) : HTMLHeadingElement = tag("h1", fn)
+fun Node.h2(fn: HTMLHeadingElement.() -> Unit = {}) : HTMLHeadingElement = tag("h2", fn)
+fun Node.h3(fn: HTMLHeadingElement.() -> Unit = {}) : HTMLHeadingElement = tag("h3", fn)
+fun Node.h4(fn: HTMLHeadingElement.() -> Unit = {}) : HTMLHeadingElement = tag("h4", fn)
+fun Node.h5(fn: HTMLHeadingElement.() -> Unit = {}) : HTMLHeadingElement = tag("h5", fn)
+fun Node.h6(fn: HTMLHeadingElement.() -> Unit = {}) : HTMLHeadingElement = tag("h6", fn)

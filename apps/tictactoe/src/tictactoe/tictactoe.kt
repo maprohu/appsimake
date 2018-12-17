@@ -3,14 +3,20 @@ package tictactoe
 import common.StateMachine
 import common.obj
 import commonfb.LoggingInCtx
+import commonui.ToolBar
 import firebase.User
 
 fun main(args: Array<String>) {
     TicTacToeLoggedOutControl().start()
 }
 
+fun ToolBar.ticTacToe() {
+    middleTitle {
+        innerText = "Tic Tac Toe"
+    }
+}
 
-class TicTacToeLoggedOutControl: LoggingInCtx("tictactoe") {
+class TicTacToeLoggedOutControl: LoggingInCtx("tictactoe", "Tic Tac Toe") {
     override fun loggedIn(user: User): () -> Unit {
         val control = PlayerCtx(fbCtx, user)
 

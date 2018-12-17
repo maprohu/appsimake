@@ -13,16 +13,16 @@ import kotlin.dom.addClass
 import kotlin.dom.removeClass
 
 
-fun Node.topbar(
-    block : HTMLDivElement.() -> Unit = {}
-) {
-    div {
-        flexRow()
-        classes += "border-bottom bg-light align-items-center pr-1"
-
-        block()
-    }
-}
+//fun Node.topbar(
+//    block : HTMLDivElement.() -> Unit = {}
+//) {
+//    div {
+//        flexRow()
+//        classes += "border-bottom bg-light align-items-center pr-1"
+//
+//        block()
+//    }
+//}
 
 fun Node.breadcrumb(
     block : HTMLOListElement.() -> Unit = {}
@@ -300,6 +300,9 @@ fun Element.borderBottom() {
 }
 fun Element.borderTop() {
     classes += "border-top"
+}
+fun Element.btn() {
+    classes += "btn"
 }
 fun Element.btnPrimary() {
     classes += "btn-primary"

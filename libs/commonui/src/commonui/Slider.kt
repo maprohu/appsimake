@@ -37,8 +37,8 @@ class Slider(
             flexColumn()
 
             topbar {
-                breadcrumbOL = breadcrumb {}
-                dropdownDiv = dropdownDiv {}
+                breadcrumbOL = left.breadcrumb {}
+                dropdownDiv = right.dropdownDiv {}
             }
             relativeDiv = div {
                 classes += "flex-grow-1 position-relative"
