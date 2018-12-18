@@ -12,11 +12,10 @@ import firebaseui.Login
 import kotlin.browser.document
 
 abstract class LoggingInCtx(
-    val fbCtx: FbCtx,
-    val title: String
+    val fbCtx: FbCtx
 ) {
     constructor(name: String) : this(name, name)
-    constructor(name: String, title: String) : this(FbCtx(name), title)
+    constructor(name: String, title: String) : this(FbCtx(name, title))
 
     val appCtx = fbCtx.appCtx
 
@@ -41,7 +40,7 @@ abstract class LoggingInCtx(
                     }
                 }
                 middleTitle {
-                    innerText = this@LoggingInCtx.title
+                    innerText = appCtx.title
                 }
             }
         }.main.apply {

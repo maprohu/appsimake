@@ -105,6 +105,18 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
             else -> false
         }
     }
+
+    fun message(msg: String) = appCtx.notify(msg)
+
+    turn.forEach {
+        when (it) {
+            Turn.Here -> message("It's your turn!")
+            Turn.Won, Turn.Lost, Turn.Draw -> message("The game has ended.")
+            Turn.Alone -> message("Your opponent left the game.")
+            else -> {}
+        }
+    }
+
     ui.spinner.rxDisplay(isWaiting)
 
     val ourTurn = Rx { turn() == Turn.Here }

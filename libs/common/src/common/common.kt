@@ -12,6 +12,8 @@ import kotlin.browser.window
 import kotlin.dom.addClass
 import kotlin.dom.removeClass
 
+
+
 val onResize by lazy {
     val listeners = Listeners()
 

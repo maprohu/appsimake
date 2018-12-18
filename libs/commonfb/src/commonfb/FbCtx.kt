@@ -14,7 +14,7 @@ class FbCtx(
     val appCtx: AppCtx,
     name: String
 ) {
-    constructor(name: String) : this(AppCtx(), name)
+    constructor(name: String, title: String) : this(AppCtx(title), name)
 
     val app by lazy {
         firebase.initializeApp(

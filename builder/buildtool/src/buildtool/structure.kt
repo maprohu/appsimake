@@ -109,7 +109,8 @@ object commonui : JsModule(
     listOf(
         bootstrap,
         fontawesome,
-        domx
+        domx,
+        kotlinxCoroutines
     )
 )
 

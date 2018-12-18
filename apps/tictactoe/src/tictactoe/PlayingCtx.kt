@@ -34,6 +34,7 @@ class PlayingCtx(
     val gameRef = playerCtx.mainCtx.gamesRef.doc(gameId)
     val movesRef = moves(gameRef)
 
+    val fbCtx = playerCtx.fbCtx
     val appCtx = playerCtx.appCtx
     val db = playerCtx.db
 }

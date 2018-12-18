@@ -1,0 +1,36 @@
+(function(){
+  
+  function loadScript(src) {
+      return new Promise(function (resolve, reject) {
+          var s = document.createElement('script');
+          s.src = src;
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+      });
+  }
+  function loadScripts(srcs) {
+      if (srcs.length == 0) return;
+      var src = srcs.shift();
+      loadScript(src).then(function(){
+          loadScripts(srcs);
+      });
+  }
+  loadScripts([
+    "cache/kotlin-3BAEA41E6F19673D1A106F9D00A87D9AF128330FC06252CCA72868B8A512BEDE.js",
+    "cache/jquery-3.3.1-D8AA24ECC6CECB1A60515BC093F1C9DA38A0392612D9AB8AE0F7F36E6EEE1FAD.js",
+    "cache/bootstrap.bundle-3290AD3B8A579EF3BC11C67DAADDE34B8C60537E337AC6249885D85D13566363.js",
+    "cache/common-FCBA4288701ED008A226A3339D58661963594B9026E1913205C11EFB26F39147.js",
+    "cache/domx-672ABC90EC24CD9B49298B4A3354AA6F1BF38C52A6473B723100BFE82EED0DBB.js",
+    "cache/bootstrap-0416FD6073F4845C4453FAC7DFB89840F7F9BC4047081D439CB91F1871C8D1AB.js",
+    "cache/fontawesome-33A62D9AF0E1A78D3D174A57746B7933BA9E9A088B90192298210AF30E4DD812.js",
+    "cache/kotlinx-coroutines-core-7E349F04814E4728D8194011311BE6DF61A319163BC9CE1B3B94555731963A11.js",
+    "cache/commonui-6FE1BF604D15FDED4C42388CAE4E011365DFD5518AB2D0CB721C5F31889C0675.js",
+    "cache/firebase-3DEC084B7216B8898B31402DD40C0F5DD51934D138F285C448194872FE9E349E.js",
+    "cache/firebaseui-50A2C0450846CC0C283B254F23035BF51B7FABC002B93AFA0FCF61738C24512B.js",
+    "cache/firebase-1E5490BE24926EBA53F8A5BEB75A08106E42AFB6DDBB98DC58BE6E78C3EA887F.js",
+    "cache/commonfb-69E301F60C2B0D7DF774173A7B1DA3CF65A0875B90BB106A4D93B7740A804BE8.js",
+    "cache/tictactoe-86C4A5A49CD5BC623D338ECD11FB261DF77271A99B27DD67F47C1FBBDBFCC77B.js"
+  ]);
+  
+})();
