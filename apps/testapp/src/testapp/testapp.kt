@@ -1,15 +1,13 @@
 package testapp
 
-import kotlinx.html.dom.append
-import kotlinx.html.js.*
+import domx.div
 import kotlin.browser.document
+import kotlin.browser.window
 
 fun main(args: Array<String>) {
 
-    document.body!!.append {
-        div {
-            +"hello b"
-        }
+    document.body!!.div {
+        innerText = "hello b"
     }
 
 }

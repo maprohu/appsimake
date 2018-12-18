@@ -117,7 +117,7 @@ object commonui : JsModule(
 object testapp : JsApp(
     "apps/testapp",
     listOf(
-        common
+        domx
     )
 )
 
