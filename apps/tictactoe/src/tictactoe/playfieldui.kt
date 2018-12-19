@@ -2,8 +2,9 @@ package tictactoe
 
 import bootstrap.*
 import common.Emitter
-import commonui.aspectRatio
-import commonui.rxPanel
+import common.onResize
+import common.removeFromParent
+import commonui.*
 import domx.*
 import domx.a as _
 import firebase.firestore.DocumentChangeType
@@ -21,6 +22,7 @@ import org.w3c.dom.css.ElementCSSInlineStyle
 import org.w3c.dom.svg.SVGCircleElement
 import org.w3c.dom.svg.SVGElement
 import org.w3c.dom.svg.SVGGElement
+import org.w3c.notifications.*
 import rx.*
 import svgx.*
 import kotlin.browser.document
@@ -106,16 +108,16 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
         }
     }
 
-    fun message(msg: String) = appCtx.notify(msg)
-
-    turn.forEach {
-        when (it) {
-            Turn.Here -> message("It's your turn!")
-            Turn.Won, Turn.Lost, Turn.Draw -> message("The game has ended.")
-            Turn.Alone -> message("Your opponent left the game.")
-            else -> {}
-        }
-    }
+//    fun message(msg: String) = appCtx.notify(msg)
+//
+//    turn.forEach {
+//        when (it) {
+//            Turn.Here -> message("It's your turn!")
+//            Turn.Won, Turn.Lost, Turn.Draw -> message("The game has ended.")
+//            Turn.Alone -> message("Your opponent left the game.")
+//            else -> {}
+//        }
+//    }
 
     ui.spinner.rxDisplay(isWaiting)
 
@@ -330,10 +332,55 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
     }
 
     ui.root.newRoot {
-        padding2()
+        padding1()
 
         aspectRatio(killables) {
+            margin1()
+
             board()
+        }
+
+        if (Notification.shouldRequest()) {
+            column {
+                val askDiv = this
+                margin1()
+                flexFixedSize()
+                btnButton {
+                    val askButton = this
+                    btnPrimary()
+                    innerText = "Turn on Game Notifications"
+                    clickEvent {
+                        GlobalScope.launch {
+                            Notification.currentOrAsk()
+                            val permission = Notification.permission
+                            when (permission) {
+                                NotificationPermission.DENIED -> {
+                                    askButton.removeFromParent()
+                                    askDiv.div {
+                                        padding2()
+                                        alertWarning()
+                                        innerText = "Permission for sending notifications has been denied."
+                                        button {
+                                            classes += "close"
+                                            innerHTML = "&times;"
+                                            clickEvent {
+                                                askDiv.removeFromParent()
+                                                onResize.fire()
+                                            }
+                                        }
+                                    }
+                                    onResize.fire()
+                                }
+                                NotificationPermission.GRANTED -> {
+                                    askDiv.removeFromParent()
+                                    onResize.fire()
+                                    // TODO register for messages
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

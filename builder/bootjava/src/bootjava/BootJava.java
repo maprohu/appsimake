@@ -23,7 +23,10 @@ public class BootJava {
     public static final String KOTLIN_EXTRACTED_PATH = LIB_DIR + "/" + KOTLIN_FILE_BASE_NAME;
     public static final String KOTLIN_LIB_DIR = KOTLIN_EXTRACTED_PATH + "/kotlinc/lib";
 
-    public static final String IDEA_KOTLIN_LIBRARY_XML = ".idea/libraries/KotlinJavaRuntime.xml";
+
+    public static final String IDEA_DIR = ".idea";
+    public static final String IDEA_KOTLIN_LIBRARY_XML = IDEA_DIR + "/libraries/KotlinJavaRuntime.xml";
+    public static final String IDEA_KOTLIN_COMPILER_LIBRARY_XML = IDEA_DIR + "/libraries/kotlin_compiler.xml";
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         File targetFile = new File(DOWNLOADS_DIR, KOTLIN_ZIP_FILE_NAME);
@@ -57,7 +60,7 @@ public class BootJava {
         }
 
 
-        if (Paths.get(IDEA_KOTLIN_LIBRARY_XML).toFile().getParentFile().exists()) {
+        if (Paths.get(IDEA_DIR).toFile().exists()) {
             String xml = "<component name=\"libraryTable\">\n" +
                     "  <library name=\"KotlinJavaRuntime\">\n" +
                     "    <CLASSES>\n" +
@@ -79,6 +82,24 @@ public class BootJava {
                     "</component>";
 
             Files.write(Paths.get(IDEA_KOTLIN_LIBRARY_XML), xml.getBytes());
+
+            String compXml = "<component name=\"libraryTable\">\n" +
+                    "  <library name=\"kotlin-compiler\">\n" +
+                    "    <CLASSES>\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-compiler.jar!/\" />\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlinx-serialization-compiler-plugin.jar!/\" />\n" +
+                    "    </CLASSES>\n" +
+                    "    <JAVADOC />\n" +
+                    "    <SOURCES>\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/local/downloads/kotlin-"+KOTLIN_VERSION+".zip!/kotlin-"+KOTLIN_VERSION+"/compiler/incremental-compilation-impl/src\" />\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/local/downloads/kotlin-"+KOTLIN_VERSION+".zip!/kotlin-"+KOTLIN_VERSION+"/compiler/cli/cli-common/src\" />\n" +
+                    "    </SOURCES>\n" +
+                    "  </library>\n" +
+                    "</component>";
+
+            Files.write(Paths.get(IDEA_KOTLIN_COMPILER_LIBRARY_XML), compXml.getBytes());
+
+
         }
 
     }

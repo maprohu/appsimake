@@ -360,6 +360,12 @@ fun Element.dropdownMenuRight() {
 fun Element.dropdownItem() {
     classes += "dropdown-item"
 }
+fun Element.alert() {
+    classes += "alert"
+}
+fun Element.alertWarning() {
+    classes += "alert-warning"
+}
 
 
 

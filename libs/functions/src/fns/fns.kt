@@ -1,6 +1,3 @@
-
-
-//external fun require(name: String) : dynamic
 external val exports : dynamic
 
 /*

@@ -46,4 +46,10 @@ class FbCtx(
         auth.signOut()
     }
 
+    fun setupMessaging() {
+        val messaging = app.messaging()
+        messaging.usePublicVapidKey("BOgqeELuJyp5wv-HiXzqLsxA2tqGboVZRZdrHTDnrN_DzCCJYuMA_pVBQYB0afOFvtTXSUdHi20NuNGmmtP0fvU")
+
+    }
+
 }

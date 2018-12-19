@@ -87,7 +87,6 @@ fun HTMLElement.aspectRatio(
             flexGrow1()
 
             column {
-                padding2()
                 flexGrow1()
 
                 div {

@@ -3,22 +3,36 @@ package commonui
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
-import org.w3c.notifications.DENIED
-import org.w3c.notifications.GRANTED
-import org.w3c.notifications.Notification
-import org.w3c.notifications.NotificationPermission
+import org.w3c.notifications.*
+import rx.Var
+import kotlin.browser.window
 
 
-suspend fun Notification.Companion.grant(): Boolean {
-    return when (Notification.permission) {
-        NotificationPermission.GRANTED -> true
-        NotificationPermission.DENIED -> false
-        else -> Notification.requestPermission().await() == NotificationPermission.GRANTED
+suspend fun Notification.Companion.currentOrAsk(): NotificationPermission {
+    val permission = Notification.permission
+    return when (permission) {
+        NotificationPermission.DEFAULT -> Notification.requestPermission().await()
+        else -> permission
     }
 }
 
-fun Notification.Companion.ifGranted(fn: () -> Unit) {
-    GlobalScope.launch {
-        if (grant()) fn()
-    }
+suspend fun Notification.Companion.isGrantedOrAsk(): Boolean {
+    return currentOrAsk() == NotificationPermission.GRANTED
 }
+
+fun Notification.Companion.isSupported() : Boolean {
+    return window.asDynamic().Notification != null
+}
+
+fun Notification.Companion.notDenied() : Boolean {
+    return Notification.permission != NotificationPermission.DENIED
+}
+
+fun Notification.Companion.notGranted() : Boolean {
+    return Notification.permission != NotificationPermission.GRANTED
+}
+
+fun Notification.Companion.shouldRequest() : Boolean {
+    return isSupported() && notDenied() && notGranted()
+}
+
