@@ -3,6 +3,7 @@ package buildtool
 import bootkotlin.kotlinxCoroutinesCoreJs
 import bootkotlin.kotlinxHtmlJs
 import bootkotlin.kotlinxStdlibJs
+import java.io.File
 import java.net.URL
 import java.nio.file.Paths
 
@@ -73,14 +74,6 @@ object common : JsModule(
     "libs/common"
 )
 
-object htmlx : JsModule(
-    "libs/htmlx",
-    listOf(
-        common,
-        kotlinxHtml
-    )
-)
-
 object domx : JsModule(
     "libs/domx",
     listOf(
@@ -114,6 +107,7 @@ object commonui : JsModule(
     )
 )
 
+
 object testapp : JsApp(
     "apps/testapp",
     listOf(
@@ -141,13 +135,6 @@ object firebase : JsModule(
     )
 )
 
-object pullanappfb : JsModule(
-    "libs/pullanappfb",
-    listOf(
-        firebase
-    )
-)
-
 object commonfb : JsModule(
     "libs/commonfb",
     listOf(
@@ -159,7 +146,6 @@ object commonfb : JsModule(
 object chat : JsApp(
     "apps/chat",
     listOf(
-        pullanappfb,
         bootstrap
     )
 )

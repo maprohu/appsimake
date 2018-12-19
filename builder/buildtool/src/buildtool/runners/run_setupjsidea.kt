@@ -12,14 +12,13 @@ fun main(args: Array<String>) {
 
     val modules = listOf(
         common,
-        htmlx,
         domx,
         bootstrap,
         firebase,
         fontawesome,
         commonui,
         commonfb,
-        pullanappfb,
+        functions,
 
         index,
         testapp,
