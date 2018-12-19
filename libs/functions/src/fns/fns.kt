@@ -1,7 +1,7 @@
 
 
 //external fun require(name: String) : dynamic
-//external val exports : dynamic
+external val exports : dynamic
 
 /*
 const functions = require('firebase-functions');
@@ -14,7 +14,9 @@ exports.helloWorld = functions.https.onRequest((request, response) => {
 });
 */
 
-val helloWorld = functions.https.onRequest { _, response ->
-    response.send("hello from kotlin")
+private fun main(args: Array<String>) {
+    exports.helloWorld = functions.https.onRequest { _, response ->
+        response.send("hello from kotlin")
+    }
 }
 
