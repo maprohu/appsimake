@@ -6,15 +6,25 @@ import java.io.File
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
-fun String.startProcess(): Process {
-    println("Running CMD: $this")
-    return ProcessBuilder(*split(" ").toTypedArray())
+fun Array<String>.startProcess(): Process {
+    println("Running CMD: ${this.joinToString(" ")}")
+    return ProcessBuilder(*this)
         .redirectOutput(ProcessBuilder.Redirect.INHERIT)
         .redirectError(ProcessBuilder.Redirect.INHERIT)
         .start()!!
 }
 
+fun String.startProcess(): Process {
+    return split(" ").toTypedArray().startProcess()
+}
+
+
 fun String.runCommand() {
+    startProcess()
+        .waitFor(60, TimeUnit.MINUTES)
+}
+
+fun Array<String>.runCommand() {
     startProcess()
         .waitFor(60, TimeUnit.MINUTES)
 }
