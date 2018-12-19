@@ -56,27 +56,30 @@ public class BootJava {
             System.out.println("File already extracted: " + extractDir);
         }
 
-        String xml = "<component name=\"libraryTable\">\n" +
-                "  <library name=\"KotlinJavaRuntime\">\n" +
-                "    <CLASSES>\n" +
-                "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib.jar!/\" />\n" +
-                "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-reflect.jar!/\" />\n" +
-                "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-test.jar!/\" />\n" +
-                "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib-jdk7.jar!/\" />\n" +
-                "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib-jdk8.jar!/\" />\n" +
-                "    </CLASSES>\n" +
-                "    <JAVADOC />\n" +
-                "    <SOURCES>\n" +
-                "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib-sources.jar!/\" />\n" +
-                "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-reflect-sources.jar!/\" />\n" +
-                "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-test-sources.jar!/\" />\n" +
-                "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib-jdk7-sources.jar!/\" />\n" +
-                "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib-jdk8-sources.jar!/\" />\n" +
-                "    </SOURCES>\n" +
-                "  </library>\n" +
-                "</component>";
 
-        Files.write(Paths.get(IDEA_KOTLIN_LIBRARY_XML), xml.getBytes());
+        if (Paths.get(IDEA_KOTLIN_LIBRARY_XML).toFile().getParentFile().exists()) {
+            String xml = "<component name=\"libraryTable\">\n" +
+                    "  <library name=\"KotlinJavaRuntime\">\n" +
+                    "    <CLASSES>\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib.jar!/\" />\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-reflect.jar!/\" />\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-test.jar!/\" />\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib-jdk7.jar!/\" />\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib-jdk8.jar!/\" />\n" +
+                    "    </CLASSES>\n" +
+                    "    <JAVADOC />\n" +
+                    "    <SOURCES>\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib-sources.jar!/\" />\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-reflect-sources.jar!/\" />\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-test-sources.jar!/\" />\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib-jdk7-sources.jar!/\" />\n" +
+                    "      <root url=\"jar://$PROJECT_DIR$/"+KOTLIN_LIB_DIR+"/kotlin-stdlib-jdk8-sources.jar!/\" />\n" +
+                    "    </SOURCES>\n" +
+                    "  </library>\n" +
+                    "</component>";
+
+            Files.write(Paths.get(IDEA_KOTLIN_LIBRARY_XML), xml.getBytes());
+        }
 
     }
 
