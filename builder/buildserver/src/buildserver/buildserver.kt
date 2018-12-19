@@ -40,5 +40,7 @@ fun main(args: Array<String>) {
         executor = null
     }.start()
 
+    println("buildserver started")
+
 
 }
