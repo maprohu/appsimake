@@ -175,6 +175,10 @@ external interface QuerySnapshot {
 external class FieldValue {
     companion object {
         fun serverTimestamp() : Timestamp
+
+        fun <T> arrayUnion(vararg t: T) : Array<T>
+        fun <T> arrayRemove(vararg t: T) : Array<T>
+        fun <T> delete() : T
     }
 }
 

@@ -16,8 +16,7 @@ fun main(args: Array<String>) {
 class TasksMain : LoggingInCtx("tasks") {
 
     override fun loggedIn(user: User): () -> Unit {
-        LoggedIn(this, user).main()
-        return {}
+        return LoggedIn(this, user).main()
     }
 
 }
@@ -37,7 +36,7 @@ class LoggedIn(
     val userTasksRef = privateRef.collection("tasks")
     val root = base.appCtx.root
 
-    fun main() {
+    fun main(): () -> Unit {
         root.newRoot {
             classes += scrollVertical
             listGroup {
@@ -55,6 +54,10 @@ class LoggedIn(
                     base.fbCtx.signOut()
                 }
             }
+        }
+
+        return {
+            loggedInCtx.killables.kill()
         }
     }
 

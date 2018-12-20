@@ -29,6 +29,7 @@ class PlayingCtx(
     val weStart: Boolean,
     val ui: PlayingUI
 ) {
+    val loggedInCtx = playerCtx.loggedInCtx
     val playerRef = playerCtx.playerRef
     val playerId = playerCtx.playerId
     val gameRef = playerCtx.mainCtx.gamesRef.doc(gameId)

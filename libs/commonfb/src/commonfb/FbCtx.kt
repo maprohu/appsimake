@@ -8,6 +8,9 @@ import firebase.firestore.CollectionReference
 import firebase.firestore.DocumentReference
 import firebase.firestore.Firestore
 import firebase.firestore.withDefaultSettings
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
 import kotlin.browser.document
 
 class FbCtx(
@@ -38,6 +41,11 @@ class FbCtx(
 
     val db by lazy { app.firestore().withDefaultSettings() }
     val auth by lazy { app.auth() }
+    val messaging by lazy {
+        val msg = app.messaging()
+        msg.usePublicVapidKey("BOgqeELuJyp5wv-HiXzqLsxA2tqGboVZRZdrHTDnrN_DzCCJYuMA_pVBQYB0afOFvtTXSUdHi20NuNGmmtP0fvU")
+        msg
+    }
     val baseRef by lazy { db.collection("apps").doc(name) }
     val singletonsRef by lazy { baseRef.collection("singletons") }
 
@@ -46,10 +54,6 @@ class FbCtx(
         auth.signOut()
     }
 
-    fun setupMessaging() {
-        val messaging = app.messaging()
-        messaging.usePublicVapidKey("BOgqeELuJyp5wv-HiXzqLsxA2tqGboVZRZdrHTDnrN_DzCCJYuMA_pVBQYB0afOFvtTXSUdHi20NuNGmmtP0fvU")
 
-    }
 
 }

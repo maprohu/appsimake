@@ -27,7 +27,7 @@ abstract class Wrap(o: dynamic?) {
     val wrapped = o ?: obj()
 
     private val propInit : (String, Any?) -> Unit =
-        if (o == null) { { _, _ -> } }
+        if (o != null) { { _, _ -> } }
         else { { n, v -> o[n] = v } }
 
     protected fun <T> dyn() = Dyn<T>(wrapped)

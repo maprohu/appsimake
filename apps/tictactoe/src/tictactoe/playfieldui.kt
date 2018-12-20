@@ -340,49 +340,8 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
             board()
         }
 
-        if (Notification.shouldRequest()) {
-            column {
-                val askDiv = this
-                margin1()
-                flexFixedSize()
-                btnButton {
-                    val askButton = this
-                    btnPrimary()
-                    innerText = "Turn on Game Notifications"
-                    clickEvent {
-                        GlobalScope.launch {
-                            Notification.currentOrAsk()
-                            val permission = Notification.permission
-                            when (permission) {
-                                NotificationPermission.DENIED -> {
-                                    askButton.removeFromParent()
-                                    askDiv.div {
-                                        padding2()
-                                        alertWarning()
-                                        innerText = "Permission for sending notifications has been denied."
-                                        button {
-                                            classes += "close"
-                                            innerHTML = "&times;"
-                                            clickEvent {
-                                                askDiv.removeFromParent()
-                                                onResize.fire()
-                                            }
-                                        }
-                                    }
-                                    onResize.fire()
-                                }
-                                NotificationPermission.GRANTED -> {
-                                    askDiv.removeFromParent()
-                                    onResize.fire()
-                                    // TODO register for messages
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+        notificationUI(this)
+     }
 
     fun Node.markSvg() =
         svg {

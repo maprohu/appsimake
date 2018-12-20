@@ -9,4 +9,7 @@ external interface Messaging {
 
     fun requestPermission() : Promise<Unit>
 
+    fun getToken() : Promise<String>?
+
+    fun onTokenRefresh(fn: () -> Unit) : () -> Unit
 }

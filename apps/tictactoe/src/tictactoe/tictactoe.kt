@@ -44,6 +44,7 @@ class TicTacToeLoggedOutControl: LoggingInCtx("tictactoe", "Tic Tac Toe") {
         }
 
         return {
+            control.loggedInCtx.killables.kill()
             stopQuerying()
             stateMachine.shutdown()
         }

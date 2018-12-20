@@ -71,3 +71,4 @@ out
 build
 /*.iml
 local/
+/firebase-messaging-sw.js

@@ -19,6 +19,7 @@ fun main(args: Array<String>) {
         commonui,
         commonfb,
         functions,
+        firebaseMessagingSw,
 
         index,
         testapp,
