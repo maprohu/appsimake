@@ -22,3 +22,4 @@ val KotlinVersion = BootJava.KOTLIN_VERSION
 val PublicDir = File("public")
 val PublicCachedDir = PublicDir.resolve("cache")
 val PublicUncachedDir = PublicDir.resolve("nocache")
+val FunctionsDir = File("functions")

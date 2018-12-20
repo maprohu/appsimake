@@ -88,14 +88,14 @@ class LoggedInCtx(
 
         addToken(token).await()
 
-        var currentToken = token
-        val channel = Channel<String>()
+        var currentToken : String? = token
+        val channel = Channel<String?>()
 
         GlobalScope.launch {
             for (t in channel) {
                 coroutineScope<Unit> {
-                    removeToken(currentToken)
-                    addToken(t)
+                    currentToken?.let { removeToken(it) }
+                    t?.let { addToken(it) }
                 }
                 currentToken = t
             }

@@ -94,14 +94,16 @@ open class KotlinJsLib(
 
     val downloaded by fileTask { maven.download() }
 
-    override val jsFileValue by task {
+
+
+    override val jsOutputFileValue by task {
         val bin = extractJsBin(
             downloaded.file,
             scriptName,
             ExtractedDir.resolve(maven.groupId).resolve("${maven.artifactId}-${maven.version}")
         )
 
-        listOf(FileValue(bin.main))
+        listOf(JsOutputFileValue(bin.main))
     }
 
     override val jsFile by task { jsFileValue.map {it.file} }
@@ -142,13 +144,32 @@ fun ByteArray.toHexString() =
 abstract class JsDep(
     val deps: List<JsDep>
 ) {
-    abstract val jsFileValue: List<FileValue>
-    abstract val jsFile: List<File>
+    open val jsOutputFileValue: List<JsOutputFileValue> = listOf()
+    open val commonjsOutputFileValue: List<JsOutputFileValue> = listOf()
 
+    open val jsFileValue: List<FileValue> by task { jsOutputFileValue.map { it.js } }
+    open val jsFile: List<File> by task { jsFileValue.map { it.file } }
+
+    val jsMetaFileValue : List<FileValue> by task {
+        jsOutputFileValue.map { it.metaJs }
+    }
+    val commonjsMetaFileValue : List<FileValue> by task {
+        commonjsOutputFileValue.map { it.metaJs }
+    }
+
+    open val commonjsFileValue: List<FileValue> by task { commonjsOutputFileValue.map { it.js } }
     open val publicCss : List<String> = listOf()
     open val testingCss : List<String> = listOf()
 
     open val publicJsFile by publicTask { jsFileValue }
+    val publicCommonjsFile: List<File> by task {
+        commonjsFileValue.map {
+            val target = FunctionsDir.resolve(it.file.name)
+            target.parentFile.mkdirs()
+            it.file.copyTo(target, true)
+            target
+        }
+    }
 
     val depChain : Sequence<JsDep>
         get() = deps.asSequence().flatMap { it.depChain }.distinct() + this

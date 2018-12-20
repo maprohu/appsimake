@@ -11,6 +11,7 @@ public class OutputLinkFilterProvider
     @NotNull
     @Override
     public Filter[] getDefaultFilters(@NotNull Project project) {
+//        System.out.println("getDefaultFilters");
         Filter filter = new OutputLinkFilter(project);
         return new Filter[]{filter};
     }

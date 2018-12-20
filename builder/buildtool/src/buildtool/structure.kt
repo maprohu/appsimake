@@ -164,13 +164,41 @@ object tasks : JsApp(
     )
 )
 
+object tictactoelib : JsModule(
+    "libs/tictactoelib"
+)
+
 object tictactoe : JsApp(
     "apps/tictactoe",
     listOf(
-        commonfb
+        commonfb,
+        tictactoelib
     )
 )
 
+object functions : JsModule(
+    "libs/functions"
+)
 
+object tictactoefns : JsModule(
+    JsModuleConfig(
+        "libs/tictactoefns"
+    ).copy(
+        deps = listOf(
+            functions,
+            tictactoelib
+        )
+    )
+)
+
+object mainfns : JsModule(
+    JsModuleConfig(
+        "libs/mainfns"
+    ).copy(
+        deps = listOf(
+            tictactoefns
+        )
+    )
+)
 
 

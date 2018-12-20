@@ -3,25 +3,25 @@ package buildtool
 import bootkotlin.*
 import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
 import org.jetbrains.kotlin.cli.common.arguments.K2JsArgumentConstants
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.jetbrains.kotlin.config.Services
-import org.jetbrains.kotlin.incremental.makeJsIncrementally
 import java.io.File
+import java.io.Serializable
 import java.nio.file.Files
 import kotlin.streams.toList
 
 data class JsModuleConfig(
-    val name: String,
+    val simpleName: String,
     val moduleRoot: File,
     val outputDir: File,
     val css: List<Res> = listOf(),
     val deps: List<JsDep> = listOf(),
-    val metaInfo : Boolean = true,
-    val moduleKind : String = K2JsArgumentConstants.MODULE_PLAIN
+    val moduleNamePrefix : String = "appsimake-"
+//    val metaInfo : Boolean = true,
+//    val moduleKind : String = K2JsArgumentConstants.MODULE_PLAIN
 ) {
+    val name = "$moduleNamePrefix$simpleName"
+
     constructor(
         name: String,
         path: File
@@ -35,6 +35,16 @@ data class JsModuleConfig(
         path: String
     ) : this(File(path))
 }
+open class JsOutput<T>(
+    val js: T,
+    val metaJs: T
+) : Serializable
+class JsOutputFile(js: File, metaJs: File) : JsOutput<File>(js, metaJs)
+class JsOutputFileValue(js: FileValue, metaJs: FileValue) : JsOutput<FileValue>(js, metaJs) {
+    constructor(jsFile: File) : this(FileValue(jsFile), FileValue(jsFile.metaJs))
+}
+
+
 open class JsModule(
     val config: JsModuleConfig
 ) : KotlinJsDep(config.deps) {
@@ -57,6 +67,7 @@ open class JsModule(
     ))
 
     val outputFileLocation = config.outputDir.resolve("${config.name}.js")
+    val commonjsFileLocation = config.outputDir.resolve("commonjs").resolve("${config.name}.js")
     val testResmapFileLocation = config.outputDir.resolve("${config.name}.resmap.js")
 
     constructor(
@@ -189,10 +200,38 @@ open class JsModule(
         kotlinDepChain
             .filter { it != this }
             .toList()
-            .flatMap { it.jsFileValue }
+            .flatMap { it.jsMetaFileValue }
     }
 
-    override val jsFileValue by task {
+    val commonLibraryFileValues by task {
+        kotlinDepChain
+            .filter { it != this }
+            .toList()
+            .flatMap { it.commonjsMetaFileValue }
+    }
+
+
+    override val jsOutputFileValue by task {
+        listOf(JsOutputFileValue(compile()))
+    }
+
+    override val commonjsOutputFileValue by task {
+        listOf(JsOutputFileValue(compile(
+            commonjsFileLocation.path,
+            K2JsArgumentConstants.MODULE_COMMONJS,
+            commonLibraryFileValues
+        )))
+    }
+
+    private fun compile(
+        outputFile: String = outputFileLocation.path,
+        moduleKind: String = K2JsArgumentConstants.MODULE_PLAIN,
+        libFiles: List<FileValue> = libraryFileValues,
+        metaInfo: Boolean = true,
+        sourceMap: Boolean = false
+    ): File {
+        val compiledFile = File(outputFile)
+        compiledFile.parentFile.mkdirs()
 
         fun log(msg: String) {
             println("JsModule $sourceRoot: $msg")
@@ -205,16 +244,16 @@ open class JsModule(
         log("Compiling...")
 
 
-        val libs = libraryFileValues.map { it.file.metaJs.path }.joinToString(File.pathSeparator)
+        val libs = libFiles.joinToString(File.pathSeparator) { it.file.path }
         log("libs: $libs")
 
         val options =
             K2JSCompilerArguments().apply {
-                this.outputFile = outputFileLocation.path
-                this.metaInfo = config.metaInfo
-                this.sourceMap = false
+                this.outputFile = outputFile
+                this.metaInfo = metaInfo
+                this.sourceMap = sourceMap
                 this.libraries = libs
-                this.moduleKind = config.moduleKind
+                this.moduleKind = moduleKind
             }
 
         val mc = SimpleMessageCollector(::log, ::err)
@@ -239,7 +278,7 @@ open class JsModule(
             log("Compiling SUCCESSFUL")
         }
 
-        listOf(FileValue(outputFileLocation))
+        return compiledFile
     }
 
     override val jsFile by task {

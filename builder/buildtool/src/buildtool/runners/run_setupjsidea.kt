@@ -21,6 +21,10 @@ fun main(args: Array<String>) {
         functions,
         firebaseMessagingSw,
 
+        tictactoelib,
+        tictactoefns,
+        mainfns,
+
         index,
         testapp,
         gymclock,

@@ -6,8 +6,10 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -29,20 +31,27 @@ public class OutputLinkFilter
 
     @Override
     public Result applyFilter(String s, int endPoint) {
+//        System.out.println("<<<");
+//        System.out.println(s);
+//        System.out.println(">>>");
+
         int startPoint = endPoint - s.length();
         Matcher matcher = FILE_PATTERN.matcher(s);
 
         if (matcher.find()) {
-            String filePath = matcher.group(1).replaceAll("\\\\", "/");
+            String filePathString = matcher.group(1);
 
-            Optional<VirtualFile> fileOpt = Arrays.stream(
-                    ProjectRootManager
-                            .getInstance(project)
-                            .getContentRootsFromAllModules()
-            )
-                    .map(v -> v.findFileByRelativePath(filePath))
-                    .filter(f -> f != null)
-                    .findFirst();
+//            String filePath = filePathString.replaceAll("\\\\", "/");
+//            Optional<VirtualFile> fileOpt = Arrays.stream(
+//                    ProjectRootManager
+//                            .getInstance(project)
+//                            .getContentRootsFromAllModules()
+//            )
+//                    .map(v -> v.findFileByRelativePath(filePath))
+//                    .filter(f -> f != null)
+//                    .findFirst();
+
+            Optional<VirtualFile> fileOpt = Optional.ofNullable(LocalFileSystem.getInstance().findFileByIoFile(new File(filePathString)));
 
             if (fileOpt.isPresent()) {
 
