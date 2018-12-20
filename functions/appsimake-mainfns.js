@@ -12,18 +12,20 @@ function define(args, fn) {
     );
 }
 
-define(['exports', 'kotlin', 'firebase-functions'], function (_, Kotlin, $module$firebase_functions) {
+define(['exports', 'kotlin', 'firebase-functions', 'appsimake-tictactoefns'], function (_, Kotlin, $module$firebase_functions, $module$appsimake_tictactoefns) {
   'use strict';
   var Unit = Kotlin.kotlin.Unit;
   var onRequest = $module$firebase_functions.https.onRequest;
-  function main$lambda(f, response) {
+  var init = $module$appsimake_tictactoefns.tictactoefns.init_za3rmp$;
+  function init$lambda(f, response) {
     response.send('hello from kotlin');
     return Unit;
   }
-  function main(args) {
-    exports.helloWorld = onRequest(main$lambda);
+  function init_0(exports) {
+    exports.helloWorld = onRequest(init$lambda);
+    init(exports);
   }
-  main([]);
+  _.init_za3rmp$ = init_0;
   Kotlin.defineModule('appsimake-mainfns', _);
   return _;
 });

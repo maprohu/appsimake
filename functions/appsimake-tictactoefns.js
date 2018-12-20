@@ -17,14 +17,15 @@ define(['exports', 'kotlin', 'firebase-functions', 'appsimake-tictactoelib'], fu
   var Unit = Kotlin.kotlin.Unit;
   var onCall = $module$firebase_functions.https.onCall;
   var tictactoelib = $module$appsimake_tictactoelib.tictactoelib;
-  function main$lambda(move, ctx) {
+  function init$lambda(move, ctx) {
     console.log('move: ' + move.text);
     return Unit;
   }
-  function main(args) {
-    exports[tictactoelib.moveFunctionName] = onCall(main$lambda);
+  function init(exports) {
+    exports[tictactoelib.moveFunctionName] = onCall(init$lambda);
   }
-  main([]);
+  var package$tictactoefns = _.tictactoefns || (_.tictactoefns = {});
+  package$tictactoefns.init_za3rmp$ = init;
   Kotlin.defineModule('appsimake-tictactoefns', _);
   return _;
 });
