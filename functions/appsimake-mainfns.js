@@ -25,7 +25,7 @@ define(['exports', 'kotlin', 'firebase-functions', 'appsimake-tictactoefns'], fu
     exports.helloWorld = onRequest(init$lambda);
     init(exports);
   }
-  _.init_za3rmp$ = init_0;
+  _.init = init_0;
   Kotlin.defineModule('appsimake-mainfns', _);
   return _;
 });
