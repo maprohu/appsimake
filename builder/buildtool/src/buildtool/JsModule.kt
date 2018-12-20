@@ -215,11 +215,37 @@ open class JsModule(
         listOf(JsOutputFileValue(compile()))
     }
 
+    val outputPrefixFile by lazy {
+        val file = LocalDir.resolve("temp").resolve("${config.moduleNamePrefix}.js.prefix")
+        file.writeText(
+            """
+                function define(args, fn) {
+                    fn(
+                        args.map(function(a) {
+                            if (a == 'exports') {
+                                return module.exports;
+                            } else if (a.startsWith('${config.moduleNamePrefix}')) {
+                                return require('./' + a);
+                            } else {
+                                return require(a);
+                            }
+                        })
+                    );
+                }
+
+
+            """.trimIndent()
+        )
+        file
+    }
+
     override val commonjsOutputFileValue by task {
         listOf(JsOutputFileValue(compile(
             commonjsFileLocation.path,
-            K2JsArgumentConstants.MODULE_COMMONJS,
-            commonLibraryFileValues
+            K2JsArgumentConstants.MODULE_AMD,
+//            K2JsArgumentConstants.MODULE_COMMONJS,
+            commonLibraryFileValues,
+            outputPrefixFile
         )))
     }
 
@@ -227,6 +253,7 @@ open class JsModule(
         outputFile: String = outputFileLocation.path,
         moduleKind: String = K2JsArgumentConstants.MODULE_PLAIN,
         libFiles: List<FileValue> = libraryFileValues,
+        prefixFile: File? = null,
         metaInfo: Boolean = true,
         sourceMap: Boolean = false
     ): File {
@@ -254,6 +281,7 @@ open class JsModule(
                 this.sourceMap = sourceMap
                 this.libraries = libs
                 this.moduleKind = moduleKind
+                prefixFile?.let { this.outputPrefix = prefixFile.invariantSeparatorsPath }
             }
 
         val mc = SimpleMessageCollector(::log, ::err)
