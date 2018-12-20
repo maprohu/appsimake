@@ -17,7 +17,7 @@ open class JsApp(
     ) : this(path, listOf(), deps)
 
     val testHtml by task {
-        val file = TestingDir.resolve("$name.html")
+        val file = TestingDir.resolve("$simpleName.html")
         file.parentFile.mkdirs()
 
         val files =
@@ -109,21 +109,21 @@ open class JsApp(
     }
 
     val publicManifest by task {
-        val targetFile = PublicDir.resolve("$name.manifest.json")
+        val targetFile = PublicDir.resolve("$simpleName.manifest.json")
         targetFile.parentFile.mkdirs()
         targetFile.writeText(manifestText)
         targetFile.relativeTo(PublicDir).invariantSeparatorsPath
     }
 
     val testingManifest by task {
-        val targetFile = TestingDir.resolve("$name.manifest.json")
+        val targetFile = TestingDir.resolve("$simpleName.manifest.json")
         targetFile.parentFile.mkdirs()
         targetFile.writeText(manifestText)
         targetFile.relativeTo(TestingDir).invariantSeparatorsPath
     }
 
     val publicHtml by task {
-        val file = PublicDir.resolve("$name.html")
+        val file = PublicDir.resolve("$simpleName.html")
         file.parentFile.mkdirs()
         file.writer().use { osw ->
             PrintWriter(osw).println("<!DOCTYPE html>")

@@ -4,6 +4,7 @@ package firebase
 import firebase.app.App
 import firebase.auth.Auth
 import firebase.firestore.Firestore
+import firebase.functions.Functions
 import firebase.messaging.Messaging
 
 external interface AppOptions {
@@ -45,6 +46,11 @@ external fun messaging() : Messaging
 external fun firestore(
         app: App = definedExternally
 ) : Firestore
+
+external fun functions(
+    app: App = definedExternally
+) : Functions
+
 
 external class FirebaseError
 

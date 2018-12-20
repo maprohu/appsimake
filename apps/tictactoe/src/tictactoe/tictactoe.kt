@@ -17,9 +17,15 @@ import org.w3c.notifications.DENIED
 import org.w3c.notifications.GRANTED
 import org.w3c.notifications.Notification
 import org.w3c.notifications.NotificationPermission
+import tictactoelib.MoveData
 
 fun main(args: Array<String>) {
     val ttt = TicTacToeLoggedOutControl()
+    ttt.fbCtx.app.functions().httpsCallable(tictactoelib.moveFunctionName)(
+        obj<MoveData>().apply {
+            text = "boo!"
+        }
+    )
     ttt.start()
 }
 

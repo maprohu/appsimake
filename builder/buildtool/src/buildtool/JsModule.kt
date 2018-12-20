@@ -49,6 +49,7 @@ open class JsModule(
     val config: JsModuleConfig
 ) : KotlinJsDep(config.deps) {
 
+    val simpleName = config.simpleName
     val name = config.name
     val moduleRoot = config.moduleRoot
 
