@@ -221,7 +221,7 @@ open class JsModule(
             """
                 function define(args, fn) {
                     fn(
-                        args.map(function(a) {
+                        ...args.map(function(a) {
                             if (a == 'exports') {
                                 return module.exports;
                             } else if (a.startsWith('${config.moduleNamePrefix}')) {

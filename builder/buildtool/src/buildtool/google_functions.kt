@@ -10,7 +10,7 @@ object fns {
         file.parentFile.mkdirs()
         file.writeText(
             mainfns.depChain.toList().flatMap { it.publicCommonjsFile }.map {
-                "require.cache[\"${it.nameWithoutExtension}\"] = require(\"./${it.relativeTo(file.parentFile).invariantSeparatorsPath}\");"
+                "require(\"./${it.relativeTo(file.parentFile).invariantSeparatorsPath}\");"
             }.joinToString("\n")
         )
 
