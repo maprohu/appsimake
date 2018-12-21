@@ -14,6 +14,19 @@ function define(args, fn) {
 
 define(['exports', 'kotlin'], function (_, Kotlin) {
   'use strict';
+  var lazy = Kotlin.kotlin.lazy_klfg04$;
+  function admin$lambda() {
+    return require('firebase-admin');
+  }
+  var admin;
+  function get_admin() {
+    return admin.value;
+  }
+  var package$firebaseadmin = _.firebaseadmin || (_.firebaseadmin = {});
+  Object.defineProperty(package$firebaseadmin, 'admin', {
+    get: get_admin
+  });
+  admin = lazy(admin$lambda);
   Kotlin.defineModule('appsimake-functions', _);
   return _;
 });

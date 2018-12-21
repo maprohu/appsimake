@@ -12,9 +12,9 @@ function define(args, fn) {
     );
 }
 
-define(['exports', 'kotlin', 'firebase-admin', 'firebase-functions', 'appsimake-tictactoefns'], function (_, Kotlin, $module$firebase_admin, $module$firebase_functions, $module$appsimake_tictactoefns) {
+define(['exports', 'kotlin', 'appsimake-functions', 'firebase-functions', 'appsimake-tictactoefns'], function (_, Kotlin, $module$appsimake_functions, $module$firebase_functions, $module$appsimake_tictactoefns) {
   'use strict';
-  var initializeApp = $module$firebase_admin.initializeApp;
+  var firebaseadmin = $module$appsimake_functions.firebaseadmin;
   var Unit = Kotlin.kotlin.Unit;
   var onRequest = $module$firebase_functions.https.onRequest;
   var init = $module$appsimake_tictactoefns.tictactoefns.init_za3rmp$;
@@ -23,7 +23,7 @@ define(['exports', 'kotlin', 'firebase-admin', 'firebase-functions', 'appsimake-
     return Unit;
   }
   function init_0(exports) {
-    initializeApp();
+    firebaseadmin.admin.initializeApp();
     exports.helloWorld = onRequest(init$lambda);
     init(exports);
   }

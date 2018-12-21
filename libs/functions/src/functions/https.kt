@@ -2,9 +2,9 @@
 @file:JsQualifier("https")
 package functions.https
 
-import admin.auth.DecodedIdToken
 import express.Request
 import express.Response
+import firebaseadmin.auth.DecodedIdToken
 import functions.HttpsFunction
 
 external fun onRequest(handler: (Request, Response) -> Unit): HttpsFunction
