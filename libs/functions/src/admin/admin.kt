@@ -1,16 +1,25 @@
-@file:JsModule("firebase-admin")
+//@file:JsModule("firebase-admin")
+
+package firebaseadmin
+
+import firebaseadmin.app.App
+import firebaseadmin.app.AppOptions
+import firebaseadmin.messaging.Messaging
+
+
 // https://firebase.google.com/docs/reference/admin/node/admin
-package admin
+val admin by lazy { js("require('firebase-admin')").unsafeCast<AdminModule>() }
 
-import admin.app.App
-import admin.app.AppOptions
-import admin.messaging.Messaging
+external interface AdminModule {
 
-// https://firebase.google.com/docs/reference/admin/node/admin.messaging#messaging
-external fun messaging(app: App = definedExternally) : Messaging
+    // https://firebase.google.com/docs/reference/admin/node/admin.messaging#messaging
+    fun messaging(app: App = definedExternally) : Messaging
 
-// https://firebase.google.com/docs/reference/admin/node/admin#.initializeApp
-external fun initializeApp(
-    options: AppOptions = definedExternally,
-    name: String = definedExternally
-): App
+    // https://firebase.google.com/docs/reference/admin/node/admin#.initializeApp
+    fun initializeApp(
+        options: AppOptions = definedExternally,
+        name: String = definedExternally
+    ): App
+
+}
+

@@ -1,6 +1,7 @@
 package tictactoefns
 
 import common.obj
+import firebaseadmin.admin
 import tictactoelib.MoveData
 import tictactoelib.moveFunctionName
 

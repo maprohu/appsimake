@@ -1,6 +1,6 @@
-@file:JsModule("firebase-admin")
-@file:JsQualifier("app")
-package admin.app
+//@file:JsModule("firebase-admin")
+//@file:JsQualifier("app")
+package firebaseadmin.app
 
 external interface App
 

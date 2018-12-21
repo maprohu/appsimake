@@ -1,7 +1,7 @@
-@file:JsModule("firebase-admin")
-@file:JsQualifier("messaging")
-// https://firebase.google.com/docs/reference/admin/node/admin.messaging
-package admin.messaging
+//@file:JsModule("firebase-admin")
+//@file:JsQualifier("messaging")
+//// https://firebase.google.com/docs/reference/admin/node/admin.messaging
+package firebaseadmin.messaging
 
 import kotlin.js.Promise
 
