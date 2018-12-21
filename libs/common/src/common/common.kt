@@ -71,8 +71,6 @@ fun Node.removeFromParent() {
 }
 
 
-fun <T> obj() = js("{}") as T
-fun <T> obj(fn: T.() -> Unit) = obj<T>().apply(fn)
 
 open class Listeners {
 

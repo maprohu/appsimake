@@ -1,11 +1,23 @@
 package tictactoefns
 
+import common.obj
 import tictactoelib.MoveData
 import tictactoelib.moveFunctionName
 
 fun init(exports: dynamic) {
     exports[moveFunctionName] = functions.https.onCall { move:MoveData, ctx ->
-        console.log("move: ${move.text}")
+
+        admin.messaging().send(
+            obj {
+                token = move.fcmToken
+                webpush = obj {
+                    notification = obj {
+                        body = "hello from FCM"
+                    }
+                }
+            }
+        )
+
     }
 }
 

@@ -9,6 +9,8 @@ import firebase.messaging.Messaging
 import killable.Killables
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import rx.RxVal
+import rx.Var
 import kotlin.js.Promise
 
 
@@ -67,6 +69,10 @@ class LoggedInCtx(
 
     }
 
+    private var currentFcmToken0 = Var<String?>(null)
+    val currentFcmToken: RxVal<String?>
+        get() = currentFcmToken0
+
     private suspend fun setupMessagingGranted(
         tokenPromise: Promise<String>
     ) {
@@ -88,16 +94,17 @@ class LoggedInCtx(
 
         addToken(token).await()
 
-        var currentToken : String? = token
+        currentFcmToken0.now = token
+
         val channel = Channel<String?>()
 
         GlobalScope.launch {
             for (t in channel) {
                 coroutineScope<Unit> {
-                    currentToken?.let { removeToken(it) }
+                    currentFcmToken0.now?.let { removeToken(it) }
                     t?.let { addToken(it) }
                 }
-                currentToken = t
+                currentFcmToken0.now = t
             }
         }
 

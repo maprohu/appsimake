@@ -70,8 +70,15 @@ object bootstrapDist : JsDownload(
     )
 )
 
+object commonshr : JsModule(
+    "libs/commonshr"
+)
+
 object common : JsModule(
-    "libs/common"
+    "libs/common",
+    listOf(
+        commonshr
+    )
 )
 
 object domx : JsModule(
@@ -177,7 +184,10 @@ object tictactoe : JsApp(
 )
 
 object functions : JsModule(
-    "libs/functions"
+    "libs/functions",
+    listOf(
+        commonshr
+    )
 )
 
 object tictactoefns : JsModule(

@@ -2,30 +2,18 @@ package tictactoe
 
 import common.StateMachine
 import common.obj
+import commonfb.LoggedInCtx
 import commonfb.LoggingInCtx
 import commonui.ToolBar
 import firebase.User
-import firebase.firestore.launch
-import firebase.firestore.rollback
-import firebase.firestore.tx
-import firebase.firestore.txTry
+import killable.Killables
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asDeferred
-import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
-import org.w3c.notifications.DENIED
-import org.w3c.notifications.GRANTED
-import org.w3c.notifications.Notification
-import org.w3c.notifications.NotificationPermission
 import tictactoelib.MoveData
 
 fun main(args: Array<String>) {
     val ttt = TicTacToeLoggedOutControl()
-    ttt.fbCtx.app.functions().httpsCallable(tictactoelib.moveFunctionName)(
-        obj<MoveData>().apply {
-            text = "boo!"
-        }
-    )
+
     ttt.start()
 }
 
@@ -37,7 +25,28 @@ fun ToolBar.ticTacToe() {
 
 class TicTacToeLoggedOutControl: LoggingInCtx("tictactoe", "Tic Tac Toe") {
     override fun loggedIn(user: User): () -> Unit {
-        val control = PlayerCtx(fbCtx, user)
+        val loggedInCtx = LoggedInCtx(fbCtx, user)
+        val killables = Killables()
+
+        GlobalScope.launch {
+            loggedInCtx.setupMessaging()
+
+            loggedInCtx.currentFcmToken.now?.let { token ->
+                fbCtx.app.functions().httpsCallable(tictactoelib.moveFunctionName)(
+                    obj<MoveData>().apply {
+                        text = "boo!"
+                        fcmToken = token
+                    }
+                )
+            }
+        }
+
+//        killables += startStateMachine(loggedInCtx)
+
+        return { killables.kill() }
+    }
+    fun startStateMachine(user: LoggedInCtx): () -> Unit {
+        val control = PlayerCtx(MainCtx(fbCtx), user)
 
         val stateMachine = StateMachine(
             PlayerStateUnknown(control)

@@ -11,6 +11,7 @@ import kotlin.streams.toList
 fun main(args: Array<String>) {
 
     val modules = listOf(
+        commonshr,
         common,
         domx,
         bootstrap,
@@ -67,7 +68,7 @@ fun main(args: Array<String>) {
 
     fun JsDep.depEntryAttrs(): Iterable<String> {
         return when (this) {
-            is JsModule -> listOf( "type=\"module\" module-name=\"$name\"" )
+            is JsModule -> listOf( "type=\"module\" module-name=\"$simpleName\"" )
             is KotlinJsLib -> listOf( "type=\"library\" name=\"$name\" level=\"project\"" )
             else -> listOf()
         }
@@ -108,7 +109,7 @@ ${
         .forEach { m ->
             when (m) {
                 is JsModule -> {
-                    val iml = m.moduleRoot.resolve("${m.name}.iml")
+                    val iml = m.moduleRoot.resolve("${m.simpleName}.iml")
                     iml.writeText(
                         createModuleIML(m.deps)
                     )
