@@ -7,6 +7,7 @@ object fns {
         val file = File("functions/index.js")
 
         mainfns.depChain.toList().flatMap { it.publicCommonjsFile }
+            .forEach { require(it.exists()) }
 
         file.parentFile.mkdirs()
         file.writeText(
