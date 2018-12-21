@@ -132,11 +132,20 @@ object gymclock : JsApp(
     )
 )
 
+object firebasektjs : JsModule(
+    "libs/firebasektjs",
+    listOf(
+        commonshr,
+        firebaseJs,
+        kotlinxCoroutines
+    )
+)
+
 object firebase : JsModule(
     "libs/firebase",
     listOf(
         common,
-        firebaseJs,
+        firebasektjs,
         firebaseUiJs,
         kotlinxCoroutines
     )

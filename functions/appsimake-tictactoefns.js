@@ -15,6 +15,7 @@ function define(args, fn) {
 define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'firebase-functions', 'appsimake-tictactoelib'], function (_, Kotlin, $module$appsimake_functions, $module$appsimake_commonshr, $module$firebase_functions, $module$appsimake_tictactoelib) {
   'use strict';
   var firebaseadmin = $module$appsimake_functions.firebaseadmin;
+  var toString = Kotlin.toString;
   var Unit = Kotlin.kotlin.Unit;
   var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
   var onCall = $module$firebase_functions.https.onCall;
@@ -40,6 +41,8 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
     };
   }
   function init$lambda(move, ctx) {
+    firebaseadmin.admin.firestore().doc('/apps/tictactoe/private/' + toString(ctx.auth.uid));
+    ctx.auth.uid;
     return firebaseadmin.admin.messaging().send(obj(init$lambda$lambda(move)));
   }
   function init(exports) {

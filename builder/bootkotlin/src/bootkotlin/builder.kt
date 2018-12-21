@@ -10,8 +10,10 @@ import java.security.MessageDigest
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
+fun newSha256() = MessageDigest.getInstance("SHA-256")
+
 fun File.sha256(): ByteArray {
-    val md = MessageDigest.getInstance("SHA-256")
+    val md = newSha256()
     update(md)
     return md.digest()
 

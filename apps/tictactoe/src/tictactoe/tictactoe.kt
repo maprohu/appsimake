@@ -31,6 +31,10 @@ class TicTacToeLoggedOutControl: LoggingInCtx("tictactoe", "Tic Tac Toe") {
         GlobalScope.launch {
             loggedInCtx.setupMessaging()
 
+            fbCtx.messaging.onMessage { m ->
+                console.log(m)
+            }
+
             loggedInCtx.currentFcmToken.now?.let { token ->
                 fbCtx.app.functions().httpsCallable(tictactoelib.moveFunctionName)(
                     obj<MoveData>().apply {

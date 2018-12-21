@@ -15,6 +15,7 @@ fun main(args: Array<String>) {
         common,
         domx,
         bootstrap,
+        firebasektjs,
         firebase,
         fontawesome,
         commonui,
