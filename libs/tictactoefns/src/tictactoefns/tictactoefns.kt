@@ -11,6 +11,9 @@ fun init(exports: dynamic) {
         admin.messaging().send(
             obj {
                 token = move.fcmToken
+                data = obj {
+                    boo = "xyz"
+                }
                 webpush = obj {
                     notification = obj {
                         body = "hello from FCM"

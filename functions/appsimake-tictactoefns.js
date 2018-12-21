@@ -19,18 +19,23 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
   var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
   var onCall = $module$firebase_functions.https.onCall;
   var tictactoelib = $module$appsimake_tictactoelib.tictactoelib;
+  function init$lambda$lambda$lambda($receiver) {
+    $receiver.boo = 'xyz';
+    return Unit;
+  }
   function init$lambda$lambda$lambda$lambda($receiver) {
     $receiver.body = 'hello from FCM';
     return Unit;
   }
-  function init$lambda$lambda$lambda($receiver) {
+  function init$lambda$lambda$lambda_0($receiver) {
     $receiver.notification = obj(init$lambda$lambda$lambda$lambda);
     return Unit;
   }
   function init$lambda$lambda(closure$move) {
     return function ($receiver) {
       $receiver.token = closure$move.fcmToken;
-      $receiver.webpush = obj(init$lambda$lambda$lambda);
+      $receiver.data = obj(init$lambda$lambda$lambda);
+      $receiver.webpush = obj(init$lambda$lambda$lambda_0);
       return Unit;
     };
   }
