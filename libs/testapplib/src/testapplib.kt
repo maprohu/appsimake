@@ -5,7 +5,10 @@ import commonlib.Lib
 
 val testapp by named { Lib(it) }
 
-val sendMessage by testapp.function<String, Unit>()
+external interface Msg {
+    var message: String
+}
+val sendMessage by testapp.function<Msg, Unit>()
 
 val tokensCollectionName = "tokens"
 val tokensPath = "${testapp.firestoreBasePath}/$tokensCollectionName"

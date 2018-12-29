@@ -23,29 +23,10 @@ define(['exports', 'kotlin', 'appsimake-testapplib', 'appsimake-functions', 'kot
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var implementAsync = $module$appsimake_functions.commonfns.implementAsync_5bcz1w$;
-  function init$lambda$lambda$lambda$lambda(closure$msg) {
-    return function ($receiver) {
-      $receiver.message = closure$msg;
-      return Unit;
-    };
-  }
-  function init$lambda$lambda$lambda$lambda$lambda(closure$msg) {
-    return function ($receiver) {
-      $receiver.body = closure$msg;
-      return Unit;
-    };
-  }
-  function init$lambda$lambda$lambda$lambda_0(closure$msg) {
-    return function ($receiver) {
-      $receiver.notification = obj(init$lambda$lambda$lambda$lambda$lambda(closure$msg));
-      return Unit;
-    };
-  }
   function init$lambda$lambda$lambda(closure$qds, closure$msg) {
     return function ($receiver) {
       $receiver.token = closure$qds.id;
-      $receiver.data = obj(init$lambda$lambda$lambda$lambda(closure$msg));
-      $receiver.webpush = obj(init$lambda$lambda$lambda$lambda_0(closure$msg));
+      $receiver.data = closure$msg;
       return Unit;
     };
   }

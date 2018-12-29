@@ -90,7 +90,7 @@ fun testUI(
 
             onsubmit = {
                 it.preventDefault()
-                fbCtx.call(sendMessage, msginput.value)
+                fbCtx.call(sendMessage, obj { message = msginput.value })
                 msginput.value = ""
                 null
             }

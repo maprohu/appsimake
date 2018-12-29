@@ -20,24 +20,13 @@ fun init(exports: dynamic) {
             .get()
             .await()
             .forEach { qds ->
-
                 admin.messaging().send(
                     obj {
                         token = qds.id
-                        data = obj {
-                            message = msg
-                        }
-                        webpush = obj {
-                            notification = obj {
-                                body = msg
-                            }
-                        }
+                        data = msg
                     }
                 )
-
-
             }
-
     }
 
 
