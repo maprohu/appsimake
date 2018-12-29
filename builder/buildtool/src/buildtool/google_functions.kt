@@ -6,7 +6,11 @@ object fns {
     val indexJs by task {
         val file = File("functions/index.js")
 
-        mainfns.depChain.toList().flatMap { it.publicCommonjsFile }
+        mainfns
+            .depChain
+            .toList()
+            .filterIsInstance<JsModule>()
+            .flatMap { it.publicCommonjsFile }
             .forEach { require(it.exists()) }
 
         file.parentFile.mkdirs()
