@@ -23,6 +23,9 @@ fun main(args: Array<String>) {
         functions,
         firebaseMessagingSw,
 
+        commonlib,
+        testapplib,
+        testappfns,
         tictactoelib,
         tictactoefns,
         mainfns,

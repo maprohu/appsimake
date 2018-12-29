@@ -118,7 +118,8 @@ object commonui : JsModule(
 object testapp : JsApp(
     "apps/testapp",
     listOf(
-        domx
+        commonfb,
+        testapplib
     )
 )
 
@@ -155,7 +156,15 @@ object commonfb : JsModule(
     "libs/commonfb",
     listOf(
         commonui,
+        commonlib,
         firebase
+    )
+)
+
+object commonlib : JsModule(
+    "libs/commonlib",
+    listOf(
+        commonshr
     )
 )
 
@@ -180,8 +189,19 @@ object tasks : JsApp(
     )
 )
 
+
+object testapplib : JsModule(
+    "libs/testapplib",
+    listOf(
+        commonlib
+    )
+)
+
 object tictactoelib : JsModule(
-    "libs/tictactoelib"
+    "libs/tictactoelib",
+    listOf(
+            commonlib
+    )
 )
 
 object tictactoe : JsApp(
@@ -195,7 +215,20 @@ object tictactoe : JsApp(
 object functions : JsModule(
     "libs/functions",
     listOf(
-        commonshr
+        commonshr,
+        commonlib,
+        kotlinxCoroutines
+    )
+)
+
+object testappfns : JsModule(
+    JsModuleConfig(
+        "libs/testappfns"
+    ).copy(
+        deps = listOf(
+            functions,
+            testapplib
+        )
     )
 )
 
@@ -215,7 +248,8 @@ object mainfns : JsModule(
         "libs/mainfns"
     ).copy(
         deps = listOf(
-            tictactoefns
+            tictactoefns,
+            testappfns
         )
     )
 )

@@ -8,8 +8,7 @@
     <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry exported="" type="library" name="kotlin-stdlib" level="project" />
-    <orderEntry exported="" type="module" module-name="commonui"/>
-    <orderEntry exported="" type="module" module-name="commonlib"/>
-    <orderEntry exported="" type="module" module-name="firebase"/>
+    <orderEntry exported="" type="module" module-name="functions"/>
+    <orderEntry exported="" type="module" module-name="testapplib"/>
   </component>
 </module>

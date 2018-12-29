@@ -49,24 +49,11 @@ class LoggedInCtx(
         fbCtx.messaging
     }
 
-
-    suspend fun trySetupMessaging(): Boolean {
-        val tokenPromise = messaging.getToken()
-
-        return if (tokenPromise == null) {
-            false
-        } else {
-            setupMessagingGranted(tokenPromise)
-            true
-        }
-    }
     suspend fun setupMessaging() {
-        messaging.requestPermission().await()
-
-        val tokenPromise = messaging.getToken()!!
-
-        setupMessagingGranted(tokenPromise)
-
+        fbCtx.setupMessaging(::setupMessagingGranted)
+    }
+    suspend fun trySetupMessaging(): Boolean {
+        return fbCtx.trySetupMessaging(::setupMessagingGranted)
     }
 
     private var currentFcmToken0 = Var<String?>(null)

@@ -9,14 +9,18 @@ fun main(args: Array<String>) {
     document.body!!.apply {
         padding2()
         listGroup {
-            listAction {
-                href = "tasks.html"
-                innerText = "Tasks"
+            fun app(
+                id: String,
+                title: String
+            ) {
+                listAction {
+                    href = "../$id/"
+                    innerText = title
+                }
             }
-            listAction {
-                href = "tictactoe.html"
-                innerText = "Tic Tac Toe"
-            }
+
+            app("tasks", "Tasks")
+            app("tictactoe", "Tic Tac Toe")
         }
     }
 }

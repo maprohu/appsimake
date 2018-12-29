@@ -11,7 +11,8 @@ class Dyn<T>(private val o: dynamic) : ReadWriteProperty<Any, T> {
 
 class Binder<T>(
     private val o: dynamic,
-    private val init : (String) -> Unit) {
+    private val init : (String) -> Unit
+) {
     operator fun provideDelegate(
         thisRef: Any,
         prop: KProperty<*>

@@ -16,6 +16,10 @@ external class Firestore {
 
     fun settings(s: Settings)
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#doc
+    fun doc(path: String): DocumentReference
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#collection
     fun collection(path: String) : CollectionReference
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#runTransaction

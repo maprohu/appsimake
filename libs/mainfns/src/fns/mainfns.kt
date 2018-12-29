@@ -10,5 +10,6 @@ fun init(exports: dynamic) {
         response.send("hello from kotlin")
     }
 
+    testappfns.init(exports)
     tictactoefns.init(exports)
 }

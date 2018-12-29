@@ -9,7 +9,6 @@ fun init(exports: dynamic) {
     exports[moveFunctionName] = functions.https.onCall { move:MoveData, ctx ->
 
         admin.firestore().doc("/apps/tictactoe/private/${ctx.auth.uid}")
-        ctx.auth.uid
 
         admin.messaging().send(
             obj {

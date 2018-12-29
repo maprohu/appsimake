@@ -141,6 +141,7 @@ fun Node.button(fn: HTMLButtonElement.() -> Unit = {}) : HTMLButtonElement = tag
 fun Node.label(fn: HTMLLabelElement.() -> Unit = {}) : HTMLLabelElement = tag("label", fn)
 fun Node.textarea(fn: HTMLTextAreaElement.() -> Unit = {}) : HTMLTextAreaElement = tag("textarea", fn)
 fun Node.input(fn: HTMLInputElement.() -> Unit = {}) : HTMLInputElement = tag("input", fn)
+fun Node.form(fn: HTMLFormElement.() -> Unit = {}) : HTMLFormElement = tag("form", fn)
 fun Node.h1(fn: HTMLHeadingElement.() -> Unit = {}) : HTMLHeadingElement = tag("h1", fn)
 fun Node.h2(fn: HTMLHeadingElement.() -> Unit = {}) : HTMLHeadingElement = tag("h2", fn)
 fun Node.h3(fn: HTMLHeadingElement.() -> Unit = {}) : HTMLHeadingElement = tag("h3", fn)

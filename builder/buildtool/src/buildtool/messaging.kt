@@ -15,7 +15,16 @@ object firebaseMessagingSw : JsModule(
 ) {
     val fileName = "firebase-messaging-sw.js"
 
+
     fun toDir(targetDir: File, hash: ((JsDep) -> List<FileValue>)? = null, fn: (JsDep) -> List<File>): File {
+        return writeFile(
+            targetDir.resolve(fileName),
+            hash,
+            fn
+        )
+    }
+
+    fun writeFile(targetFile: File, hash: ((JsDep) -> List<FileValue>)? = null, fn: (JsDep) -> List<File>): File {
         val depList =
             listOf(kotlinStdlib)
                 .plus(depChain)
@@ -28,16 +37,25 @@ object firebaseMessagingSw : JsModule(
         } else {
             ""
         }
-        return targetDir.resolve(fileName).also {
+        targetFile.parentFile.mkdirs()
+        return targetFile.also {
             it.writeText(
                 depList
                     .flatMap(fn)
-                    .map { d -> d.relativeTo(targetDir).invariantSeparatorsPath }
+                    .map { d -> d.hrefFrom(targetFile) }
                     .map { p -> "importScripts(\"$p\");" }
                     .plus("// $hashString")
                     .joinToString("\n")
             )
         }
+    }
+
+    fun writeTestingFile(file: File): File {
+        return writeFile(file, {it.jsFileValue} ) { it.jsFile }
+    }
+
+    fun writePublicFile(file: File): File {
+        return writeFile(file) { it.publicJsFile }
     }
 
     val testSw by task {

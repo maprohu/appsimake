@@ -67,6 +67,7 @@ open class JsModule(
         deps
     ))
 
+
     val outputFileLocation = config.outputDir.resolve("${config.name}.js")
     val commonjsFileLocation = config.outputDir.resolve("commonjs").resolve("${config.name}.js")
     val testResmapFileLocation = config.outputDir.resolve("${config.name}.resmap.js")
@@ -164,7 +165,7 @@ open class JsModule(
             .filter { it.isFile }
             .map {
                 it.relativeTo(fileResourcesRoot).invariantSeparatorsPath to
-                        it.relativeTo(TestingDir).invariantSeparatorsPath
+                        it.relativeTo(TestingDir).fromApp().invariantSeparatorsPath
             }
             .toMap()
     }
@@ -175,7 +176,7 @@ open class JsModule(
             .listFiles()
             .map {
                 it.relativeTo(dirResourcesRoot).invariantSeparatorsPath to
-                        it.relativeTo(TestingDir).invariantSeparatorsPath
+                        it.relativeTo(TestingDir).fromApp().invariantSeparatorsPath
             }
             .toMap()
     }

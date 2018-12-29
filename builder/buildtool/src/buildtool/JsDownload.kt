@@ -185,7 +185,7 @@ open class JsDownload(
                             }
                         }
                     )
-                    .map { it.relativeTo(TestingDir).invariantSeparatorsPath }
+                    .map { it.relativeTo(TestingDir).fromApp().invariantSeparatorsPath }
             }
         }
     )
@@ -207,7 +207,7 @@ open class JsDownload(
                                 dr.cssPath.map { f.resolve(it) }
                             }
 
-                publicFiles.map { it.relativeTo(PublicDir).invariantSeparatorsPath }
+                publicFiles.map { it.relativeTo(PublicDir).fromApp().invariantSeparatorsPath }
             }
         }
     )

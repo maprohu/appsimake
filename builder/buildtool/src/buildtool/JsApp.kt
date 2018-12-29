@@ -17,7 +17,7 @@ open class JsApp(
     ) : this(path, listOf(), deps)
 
     val testHtml by task {
-        val file = TestingDir.resolve("$simpleName.html")
+        val file = TestingDir.resolve(simpleName).resolve("index.html")
         file.parentFile.mkdirs()
 
         val files =
@@ -31,7 +31,7 @@ open class JsApp(
                 head {
                     link(
                         rel="manifest",
-                        href=testingManifest
+                        href=testingManifest.hrefFrom(file)
                     )
                     setupHtmlHead()
                     files.flatMap { it.testingCss }.forEach {dep ->
@@ -45,7 +45,7 @@ open class JsApp(
                 body {
                     files.flatMap { f -> f.jsFile }.forEach {dep ->
                         script(
-                            src = dep.relativeTo(file.parentFile).invariantSeparatorsPath
+                            src = dep.hrefFrom(file)
                         ) {}
                     }
                 }
@@ -60,7 +60,7 @@ open class JsApp(
             listOf(kotlinStdlib)
                 .plus(depChain)
                 .flatMap { it.publicJsFile }
-                .map { it.relativeTo(PublicDir) }
+                .map { it.relativeTo(PublicDir).fromApp() }
 
         publicTextFile("$name-main", "js", loadScriptsJs(files))
     }
@@ -70,7 +70,7 @@ open class JsApp(
             parentFile.mkdirs()
             writeText(
                 loadScriptsJs(
-                    listOf(publicMainJs.relativeTo(PublicDir))
+                    listOf(publicMainJs.relativeTo(PublicDir).fromApp())
                 )
             )
         }
@@ -92,10 +92,10 @@ open class JsApp(
 
     val publicNocacheCss by task {
         PublicUncachedDir.resolve("$name.css").apply {
-            val p = publicMainCss.relativeTo(PublicDir).invariantSeparatorsPath
+            val p = publicMainCss.relativeTo(PublicUncachedDir).invariantSeparatorsPath
             parentFile.mkdirs()
             writeText(
-                "@import '../$p';"
+                "@import '$p';"
             )
         }
     }
@@ -109,21 +109,21 @@ open class JsApp(
     }
 
     val publicManifest by task {
-        val targetFile = PublicDir.resolve("$simpleName.manifest.json")
+        val targetFile = PublicDir.resolve(simpleName).resolve("manifest.json")
         targetFile.parentFile.mkdirs()
         targetFile.writeText(manifestText)
-        targetFile.relativeTo(PublicDir).invariantSeparatorsPath
+        targetFile
     }
 
     val testingManifest by task {
-        val targetFile = TestingDir.resolve("$simpleName.manifest.json")
+        val targetFile = TestingDir.resolve(simpleName).resolve("manifest.json")
         targetFile.parentFile.mkdirs()
         targetFile.writeText(manifestText)
-        targetFile.relativeTo(TestingDir).invariantSeparatorsPath
+        targetFile
     }
 
     val publicHtml by task {
-        val file = PublicDir.resolve("$simpleName.html")
+        val file = PublicDir.resolve(simpleName).resolve("index.html")
         file.parentFile.mkdirs()
         file.writer().use { osw ->
             PrintWriter(osw).println("<!DOCTYPE html>")
@@ -132,21 +132,34 @@ open class JsApp(
                     setupHtmlHead()
                     link(
                         rel="manifest",
-                        href=publicManifest
+                        href=publicManifest.hrefFrom(file)
                     )
                     link(
                         rel = "stylesheet",
                         type = "text/css",
-                        href = publicNocacheCss.relativeTo(file.parentFile).invariantSeparatorsPath
+                        href = publicNocacheCss.hrefFrom(file)
                     )
                 }
                 body {
-                    script(src = publicNocacheJs.relativeTo(PublicDir).invariantSeparatorsPath) {}
+                    script(
+                        src = publicNocacheJs.hrefFrom(file)
+                    ) {}
                 }
             }
         }
 
         FileValue(file)
+    }
+
+
+    val testSW by task {
+        val file = TestingDir.resolve(simpleName).resolve(serviceWorkerFileName)
+        firebaseMessagingSw.writeTestingFile(file)
+    }
+
+    val publicSW by task {
+        val file = PublicDir.resolve(simpleName).resolve(serviceWorkerFileName)
+        firebaseMessagingSw.writePublicFile(file)
     }
 
     private fun HEAD.setupHtmlHead() {
@@ -165,4 +178,7 @@ open class JsApp(
         )
     }
 
+    companion object {
+        val serviceWorkerFileName = "service-worker.js"
+    }
 }

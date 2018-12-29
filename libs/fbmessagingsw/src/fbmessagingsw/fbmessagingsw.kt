@@ -18,12 +18,13 @@ fun main(args: Array<String>) {
         }
     )
 
-    val messaging = app.messaging()
+    app.messaging()
 
-    messaging.setBackgroundMessageHandler { msg ->
-        sw.registration.showNotification(
-            "hello"
-        )
-    }
+//    val messaging = app.messaging()
+//    messaging.setBackgroundMessageHandler { msg ->
+//        sw.registration.showNotification(
+//            "hello"
+//        )
+//    }
 
 }
