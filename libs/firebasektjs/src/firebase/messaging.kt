@@ -1,6 +1,7 @@
 @file:JsQualifier("firebase.messaging")
 package firebase.messaging
 
+import org.w3c.workers.ServiceWorkerRegistration
 import kotlin.js.Promise
 
 // https://firebase.google.com/docs/reference/js/firebase.messaging.Messaging
@@ -19,4 +20,7 @@ external interface Messaging {
 
     // https://firebase.google.com/docs/reference/js/firebase.messaging.Messaging#setBackgroundMessageHandler
     fun setBackgroundMessageHandler(fn: (dynamic) -> Promise<Any?>)
+
+    // https://firebase.google.com/docs/reference/js/firebase.messaging.Messaging#useServiceWorker
+    fun useServiceWorker(registration: ServiceWorkerRegistration)
 }

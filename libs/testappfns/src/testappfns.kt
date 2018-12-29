@@ -1,6 +1,7 @@
 package testappfns
 
 import common.obj
+import commonfns.firestore
 import commonfns.implement
 import commonfns.implementAsync
 import firebaseadmin.admin
@@ -14,8 +15,7 @@ import testapplib.tokensPath
 
 fun init(exports: dynamic) {
     sendMessage.implementAsync(exports) { msg, ctx ->
-        admin
-            .firestore()
+        firestore
             .collection(tokensPath)
             .get()
             .await()

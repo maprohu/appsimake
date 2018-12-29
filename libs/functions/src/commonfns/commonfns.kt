@@ -1,6 +1,8 @@
 package commonfns
 
+import common.obj
 import commonlib.Function
+import firebaseadmin.admin
 import functions.https.CallableContext
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asPromise
@@ -22,4 +24,16 @@ fun <I, O> Function<I, O>.implementSync(exports: dynamic, fn: (I, CallableContex
 }
 fun <I, O> Function<I, O>.implementAny(exports: dynamic, fn: (I, CallableContext) -> Any?) {
     exports[qualifiedName] = functions.https.onCall(fn)
+}
+
+val firestore by lazy {
+    admin
+        .firestore()
+        .apply {
+            settings(
+                obj {
+                    timestampsInSnapshots = true
+                }
+            )
+        }
 }

@@ -1,6 +1,7 @@
 package testapp
 
 import bootstrap.*
+import buildenv.serviceWorkerFileName
 import common.obj
 import commonfb.FbCtx
 import domx.button
@@ -20,12 +21,14 @@ import kotlin.dom.clear
 
 fun main(args: Array<String>) {
 
+
     val fbCtx = FbCtx(
         testapp,
         "Test App"
     )
 
     GlobalScope.launch {
+
         fbCtx.setupMessaging {
             val token = it.await()
 

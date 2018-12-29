@@ -95,9 +95,9 @@ class LoggedInCtx(
             }
         }
 
-        killables += messaging.onTokenRefresh {
+        killables += messaging.await().onTokenRefresh {
             GlobalScope.launch {
-                val t = messaging.getToken()!!.await()
+                val t = messaging.await().getToken()!!.await()
                 channel.send(t)
             }
         }

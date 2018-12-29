@@ -1,12 +1,16 @@
 package commonfb
 
+import buildenv.serviceWorkerFileName
 import commonlib.Function
 import commonlib.Lib
 import commonui.AppCtx
 import firebase.AppOptions
 import firebase.app.firestore
 import firebase.firestore.withDefaultSettings
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.await
+import kotlin.browser.window
 import kotlin.js.Promise
 
 class FbCtx(
@@ -40,9 +44,14 @@ class FbCtx(
     val db by lazy { app.firestore().withDefaultSettings() }
     val auth by lazy { app.auth() }
     val messaging by lazy {
-        val msg = app.messaging()
-        msg.usePublicVapidKey("BOgqeELuJyp5wv-HiXzqLsxA2tqGboVZRZdrHTDnrN_DzCCJYuMA_pVBQYB0afOFvtTXSUdHi20NuNGmmtP0fvU")
-        msg
+        GlobalScope.async {
+            val registration = appCtx.serviceWorker.await()
+
+            val msg = app.messaging()
+            msg.useServiceWorker(registration)
+            msg.usePublicVapidKey("BOgqeELuJyp5wv-HiXzqLsxA2tqGboVZRZdrHTDnrN_DzCCJYuMA_pVBQYB0afOFvtTXSUdHi20NuNGmmtP0fvU")
+            msg
+        }
     }
     val baseRef by lazy { db.doc(lib.firestoreBasePath) }
     val singletonsRef by lazy { db.collection(lib.firestoreSingletonsPath) }
@@ -53,15 +62,15 @@ class FbCtx(
     }
 
     suspend fun setupMessaging(setupMessagingGranted: suspend (Promise<String>) -> Unit) {
-        messaging.requestPermission().await()
+        messaging.await().requestPermission().await()
 
-        val tokenPromise = messaging.getToken()!!
+        val tokenPromise = messaging.await().getToken()!!
 
         setupMessagingGranted(tokenPromise)
     }
 
     suspend fun trySetupMessaging(setupMessagingGranted: suspend (Promise<String>) -> Unit): Boolean {
-        val tokenPromise = messaging.getToken()
+        val tokenPromise = messaging.await().getToken()
 
         return if (tokenPromise == null) {
             false

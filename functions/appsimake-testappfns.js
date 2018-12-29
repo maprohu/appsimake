@@ -15,8 +15,9 @@ function define(args, fn) {
 define(['exports', 'kotlin', 'appsimake-testapplib', 'appsimake-functions', 'kotlinx-coroutines-core', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_testapplib, $module$appsimake_functions, $module$kotlinx_coroutines_core, $module$appsimake_commonshr) {
   'use strict';
   var testapplib = $module$appsimake_testapplib.testapplib;
-  var firebaseadmin = $module$appsimake_functions.firebaseadmin;
+  var commonfns = $module$appsimake_functions.commonfns;
   var await_0 = $module$kotlinx_coroutines_core.kotlinx.coroutines.await_t11jrl$;
+  var firebaseadmin = $module$appsimake_functions.firebaseadmin;
   var Unit = Kotlin.kotlin.Unit;
   var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
@@ -79,7 +80,7 @@ define(['exports', 'kotlin', 'appsimake-testapplib', 'appsimake-functions', 'kot
         switch (this.state_0) {
           case 0:
             this.state_0 = 2;
-            this.result_0 = await_0(firebaseadmin.admin.firestore().collection(testapplib.tokensPath).get(), this);
+            this.result_0 = await_0(commonfns.firestore.collection(testapplib.tokensPath).get(), this);
             if (this.result_0 === COROUTINE_SUSPENDED)
               return COROUTINE_SUSPENDED;
             continue;

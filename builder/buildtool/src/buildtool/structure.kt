@@ -70,6 +70,10 @@ object bootstrapDist : JsDownload(
     )
 )
 
+object buildenv : JsModule(
+    "libs/buildenv"
+)
+
 object commonshr : JsModule(
     "libs/commonshr"
 )
@@ -77,7 +81,8 @@ object commonshr : JsModule(
 object common : JsModule(
     "libs/common",
     listOf(
-        commonshr
+        commonshr,
+        buildenv
     )
 )
 

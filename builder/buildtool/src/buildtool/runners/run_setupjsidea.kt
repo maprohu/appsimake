@@ -11,6 +11,7 @@ import kotlin.streams.toList
 fun main(args: Array<String>) {
 
     val modules = listOf(
+        buildenv,
         commonshr,
         common,
         domx,

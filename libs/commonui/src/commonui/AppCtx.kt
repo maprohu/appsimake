@@ -1,6 +1,7 @@
 package commonui
 
 import bootstrap.setupFullScreen
+import buildenv.serviceWorkerFileName
 import killable.KillableValue
 import killable.Killables
 import kotlinx.coroutines.*
@@ -107,5 +108,9 @@ class AppCtx(
 //            // what to do if window is active
 //        }
 //    }
+
+    val serviceWorker by lazy {
+        window.navigator.serviceWorker.register(serviceWorkerFileName)
+    }
 
 }

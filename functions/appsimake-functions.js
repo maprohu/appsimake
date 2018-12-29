@@ -12,7 +12,7 @@ function define(args, fn) {
     );
 }
 
-define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions'], function (_, Kotlin, $module$kotlinx_coroutines_core, $module$firebase_functions) {
+define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'appsimake-commonshr'], function (_, Kotlin, $module$kotlinx_coroutines_core, $module$firebase_functions, $module$appsimake_commonshr) {
   'use strict';
   var lazy = Kotlin.kotlin.lazy_klfg04$;
   var coroutines = $module$kotlinx_coroutines_core.kotlinx.coroutines;
@@ -21,6 +21,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions'], f
   var async = $module$kotlinx_coroutines_core.kotlinx.coroutines.async_pda6u4$;
   var asPromise = $module$kotlinx_coroutines_core.kotlinx.coroutines.asPromise_ge6odz$;
   var onCall = $module$firebase_functions.https.onCall;
+  var Unit = Kotlin.kotlin.Unit;
+  var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
   function admin$lambda() {
     return require('firebase-admin');
   }
@@ -99,6 +101,19 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions'], f
   function implementAny($receiver, exports, fn) {
     exports[$receiver.qualifiedName] = onCall(fn);
   }
+  function firestore$lambda$lambda$lambda($receiver) {
+    $receiver.timestampsInSnapshots = true;
+    return Unit;
+  }
+  function firestore$lambda() {
+    var $receiver = get_admin().firestore();
+    $receiver.settings(obj(firestore$lambda$lambda$lambda));
+    return $receiver;
+  }
+  var firestore;
+  function get_firestore() {
+    return firestore.value;
+  }
   var package$firebaseadmin = _.firebaseadmin || (_.firebaseadmin = {});
   Object.defineProperty(package$firebaseadmin, 'admin', {
     get: get_admin
@@ -108,7 +123,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions'], f
   package$commonfns.implementAsync_5bcz1w$ = implementAsync;
   package$commonfns.implementSync_i37kts$ = implementSync;
   package$commonfns.implementAny_w6celz$ = implementAny;
+  Object.defineProperty(package$commonfns, 'firestore', {
+    get: get_firestore
+  });
   admin = lazy(admin$lambda);
+  firestore = lazy(firestore$lambda);
   Kotlin.defineModule('appsimake-functions', _);
   return _;
 });

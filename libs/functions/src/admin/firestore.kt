@@ -10,6 +10,14 @@ external interface Firestore {
 
     // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/Firestore#collection
     fun collection(path: String): CollectionReference
+
+    // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/Firestore#settings
+    fun settings(s: FirestoreSettings)
+}
+
+external interface FirestoreSettings {
+    var timestampsInSnapshots : Boolean
+
 }
 
 // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/DocumentReference
