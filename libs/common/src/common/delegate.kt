@@ -16,4 +16,4 @@ class LazyDelegate<out T>(private val fn: (Any?, KProperty<*>) -> T) {
 
 }
 
-fun <T> named(fn: (String) -> T) = LazyDelegate { _, p -> fn(p.name) }
+fun <T> lazyNamed(fn: (String) -> T) = LazyDelegate { _, p -> fn(p.name) }

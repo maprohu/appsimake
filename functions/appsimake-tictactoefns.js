@@ -42,7 +42,6 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
   }
   function init$lambda(move, ctx) {
     firebaseadmin.admin.firestore().doc('/apps/tictactoe/private/' + toString(ctx.auth.uid));
-    ctx.auth.uid;
     return firebaseadmin.admin.messaging().send(obj(init$lambda$lambda(move)));
   }
   function init(exports) {

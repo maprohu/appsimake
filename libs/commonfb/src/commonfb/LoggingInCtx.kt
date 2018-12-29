@@ -4,18 +4,18 @@ import bootstrap.btn
 import bootstrap.btnSecondary
 import bootstrap.flexCenter
 import common.StateMachine
+import commonlib.Lib
 import commonui.screenLayout
 import domx.a
 import domx.div
 import firebase.User
 import firebaseui.Login
-import kotlin.browser.document
 
 abstract class LoggingInCtx(
     val fbCtx: FbCtx
 ) {
-    constructor(name: String) : this(name, name)
-    constructor(name: String, title: String) : this(FbCtx(name, title))
+//    constructor(name: String) : this(name, name)
+    constructor(lib: Lib, title: String) : this(FbCtx(lib, title))
 
     val appCtx = fbCtx.appCtx
 

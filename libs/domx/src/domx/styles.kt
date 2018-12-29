@@ -1,13 +1,9 @@
 package styles
 
-import common.named
+import common.lazyNamed
 import domx.styleTag
-import org.w3c.dom.Element
-import org.w3c.dom.Node
 import kotlin.browser.document
-import kotlin.dom.addClass
 import kotlin.dom.appendText
-import kotlin.reflect.KProperty
 
 val styleElement by lazy {
     document.head!!.styleTag()
@@ -119,6 +115,6 @@ val animCenter by lazy {
     )
 }
 
-fun cls(txt: String) = named { add(it, txt) }
+fun cls(txt: String) = lazyNamed { add(it, txt) }
 
 

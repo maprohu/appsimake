@@ -106,6 +106,9 @@ open class KotlinJsLib(
         listOf(JsOutputFileValue(bin.main))
     }
 
+    override val commonjsOutputFileValue: List<JsOutputFileValue>
+        get() = jsOutputFileValue
+
     override val jsFile by task { jsFileValue.map {it.file} }
 
 
