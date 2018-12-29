@@ -4,14 +4,13 @@ import bootstrap.*
 import buildenv.serviceWorkerFileName
 import common.obj
 import commonfb.FbCtx
-import domx.button
-import domx.div
-import domx.form
-import domx.input
+import domx.*
 import firebase.firestore.setOptionsMerge
+import firebase.messaging.Messaging
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
+import styles.scrollVertical
 import testapplib.sendMessage
 import testapplib.testapp
 import testapplib.tokensPath
@@ -38,13 +37,38 @@ fun main(args: Array<String>) {
                 .doc(token)
                 .set(obj(), setOptionsMerge())
         }
-    }
 
+        val messaging = fbCtx.messaging.await()
+
+        testUI(fbCtx, messaging)
+    }
+}
+
+fun testUI(
+    fbCtx: FbCtx,
+    messaging: Messaging
+) {
     fbCtx.appCtx.root.newRoot {
-        padding1()
-        div {
-            margin1()
+        column {
+            classes += scrollVertical
             flexGrow1()
+            padding1()
+            div {
+                margin1()
+                flexGrow1()
+
+                listGroup {
+                    messaging.onMessage {
+                        listGroupItem {
+                            innerText = it.data.message
+                            scrollIntoView()
+                        }
+                    }
+                }
+
+
+            }
+
         }
         form {
             flexFixedSize()

@@ -81,7 +81,7 @@ open class JsApp(
             .toList()
             .flatMap { it.publicCss }
             .map {
-                "@import '../$it';"
+                "@import '$it';"
             }
             .joinToString("\n")
 

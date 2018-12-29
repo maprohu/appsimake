@@ -138,7 +138,7 @@ open class JsModule(
             .filter { it.isFile }
             .map {
                 it.relativeTo(fileResourcesRoot).invariantSeparatorsPath to
-                        FileValue(it).publicFile().relativeTo(PublicDir).invariantSeparatorsPath
+                        FileValue(it).publicFile().relativeTo(PublicDir).fromApp().invariantSeparatorsPath
             }
             .toMap()
     }
@@ -149,7 +149,7 @@ open class JsModule(
             .listFiles()
             .map {
                 it.relativeTo(dirResourcesRoot).invariantSeparatorsPath to
-                        FileValue(it).publicFile().relativeTo(PublicDir).invariantSeparatorsPath
+                        FileValue(it).publicFile().relativeTo(PublicDir).fromApp().invariantSeparatorsPath
             }
             .toMap()
     }
