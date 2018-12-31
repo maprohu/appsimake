@@ -18,23 +18,26 @@ fun main(args: Array<String>) {
     messaging.setBackgroundMessageHandler {
         @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
         val data = it.data as Msg
-//        console.dir(sw)
+        console.dir(it)
+        console.dir(sw)
         sw.registration.showNotification(
             data.message,
             NotificationOptions(
-                actions = arrayOf(
-                    NotificationAction(
-                        "show",
-                        "Show"
-                    )
-                )
-//                data = obj<dynamic> {
-//                    this.FCM_MSG = obj {
-//                        this.notification = obj {
-//                            this.click_action = "http://localhost:8000/local/derived/testing/testapp/"
-//                        }
-//                    }
-//                }
+//                actions = arrayOf(
+//                    NotificationAction(
+//                        "show",
+//                        "Show"
+//                    )
+//                )
+                data = obj<dynamic> {
+//                    this.data = data
+                    this.FCM_MSG = obj {
+                        this.data = data
+                        this.notification = obj {
+                            this.click_action = sw.registration.scope
+                        }
+                    }
+                }
             )
 //            obj {
 //                actions = arrayOf(
