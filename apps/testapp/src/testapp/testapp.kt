@@ -2,8 +2,10 @@ package testapp
 
 import bootstrap.*
 import buildenv.serviceWorkerFileName
+import common.Listeners
 import common.obj
 import commonfb.FbCtx
+import commonui.screenLayout
 import domx.*
 import firebase.firestore.setOptionsMerge
 import firebase.messaging.Messaging
@@ -29,6 +31,7 @@ fun main(args: Array<String>) {
     GlobalScope.launch {
 
         fbCtx.setupMessaging {
+
             val token = it.await()
 
             fbCtx
@@ -48,52 +51,69 @@ fun testUI(
     fbCtx: FbCtx,
     messaging: Messaging
 ) {
-    fbCtx.appCtx.root.newRoot {
-        column {
-            classes += scrollVertical
-            flexGrow1()
-            padding1()
-            div {
-                margin1()
-                flexGrow1()
+    fbCtx.appCtx.root.newRoot().screenLayout {
+        top.apply {
+            middleTitle {
+                innerText = fbCtx.appCtx.title
+            }
+        }
 
-                listGroup {
-                    messaging.onMessage {
-                        listGroupItem {
-                            innerText = it.data.message
-                            scrollIntoView()
-                        }
+        main.apply {
+            classes += scrollVertical
+            flexColumn()
+            flexGrow1()
+            listGroup {
+                margin2()
+                flexGrow1()
+                displayBlock()
+                messaging.onMessage {
+                    listGroupItem {
+                        innerText = it.data.message
+                        scrollIntoView()
                     }
                 }
-
-
             }
-
         }
-        form {
-            flexFixedSize()
-            flexRow()
 
-            val msginput = input {
-                formControl()
-                margin1()
-                flexGrow1()
-                autofocus = true
-            }
-            btnButton {
-                type = "submit"
-                margin1()
-                btnPrimary()
-                flexFixedSize()
-                innerText = "Send"
+        val submit = Listeners()
+
+        bottom.apply {
+            middle.apply {
+                form {
+                    flexRow()
+                    flexGrow1()
+                    input {
+                        formControl()
+                        margin1()
+                        flexGrow1()
+                        autofocus = true
+
+                        submit += {
+                            fbCtx.call(sendMessage, obj { message = value })
+                            value = ""
+                            focus()
+                        }
+                    }
+
+                    onsubmit = {
+                        it.preventDefault()
+                        submit.fire()
+                    }
+                }
             }
 
-            onsubmit = {
-                it.preventDefault()
-                fbCtx.call(sendMessage, obj { message = msginput.value })
-                msginput.value = ""
-                null
+            right.apply {
+                btnButton {
+                    margin1()
+                    btnPrimary()
+                    innerText = "Send"
+                    onclick = { submit.fire() }
+                }
             }
+
+//                    onsubmit = {
+//                        it.preventDefault()
+//                    }
 
         }
 

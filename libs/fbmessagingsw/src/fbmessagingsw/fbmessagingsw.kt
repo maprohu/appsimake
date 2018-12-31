@@ -8,17 +8,23 @@ import org.w3c.workers.ServiceWorkerGlobalScope
 
 val sw = js("self").unsafeCast<ServiceWorkerGlobalScope>()
 
-fun main(args: Array<String>) {
-
-    console.log("Updating service worker...")
-
-    val app = firebase.initializeApp(
+val app by lazy {
+    firebase.initializeApp(
         obj {
             messagingSenderId = "850641545175"
         }
     )
+}
 
+val messaging by lazy {
     app.messaging()
+}
+
+fun main(args: Array<String>) {
+
+    console.log("Updating service worker...")
+
+    messaging
 
 //    val messaging = app.messaging()
 //    messaging.setBackgroundMessageHandler { msg ->

@@ -16,12 +16,14 @@ class ExtractInfo(
     val cssPath: List<String> = listOf(),
     val dirResources: List<DirResource> = listOf()
 )
+
 open class JsDownload(
     url: URL,
     fileName: String,
     extract: ExtractInfo?,
     deps: List<JsDep> = listOf()
 ): JsDep(deps) {
+
 
     companion object {
         fun URL.extractDir() =

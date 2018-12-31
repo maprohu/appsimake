@@ -283,8 +283,14 @@ fun Element.flexRow() {
 fun Element.margin1() {
     classes += "m-1"
 }
+fun Element.marginBottom1() {
+    classes += "mb-1"
+}
 fun Element.margin2() {
     classes += "m-2"
+}
+fun Element.displayBlock() {
+    classes += "d-block"
 }
 fun Element.padding1() {
     classes += "p-1"

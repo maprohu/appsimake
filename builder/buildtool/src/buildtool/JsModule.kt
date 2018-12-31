@@ -372,4 +372,39 @@ open class JsModule(
     override val publicCss by task {
         cssList({ publicFileMapping }, { publicDirMapping })
     }
+
+    fun writeServiceWorkerJS(targetFile: File, hash: ((JsDep) -> List<FileValue>)? = null, fn: (JsDep) -> List<File>): File {
+        val depList =
+            listOf(kotlinStdlib)
+                .plus(depChain)
+        val hashString = if (hash != null) {
+            val md = newSha256()
+            depList
+                .flatMap(hash)
+                .forEach { md.update(it.hash) }
+            md.digest().toHexString()
+        } else {
+            ""
+        }
+        targetFile.parentFile.mkdirs()
+        return targetFile.also {
+            it.writeText(
+                depList
+                    .flatMap(fn)
+                    .map { d -> d.hrefFrom(targetFile) }
+                    .map { p -> "importScripts(\"$p\");" }
+                    .plus("// $hashString")
+                    .joinToString("\n")
+            )
+        }
+    }
+
+    fun writeTestingServiceWorkerJS(file: File): File {
+        return writeServiceWorkerJS(file, {it.jsFileValue} ) { it.jsFile }
+    }
+
+    fun writePublicServiceWorkerJS(file: File): File {
+        return writeServiceWorkerJS(file) { it.publicJsFile }
+    }
+
 }

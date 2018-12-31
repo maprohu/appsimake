@@ -23,6 +23,8 @@ fun main(args: Array<String>) {
         commonfb,
         functions,
         firebaseMessagingSw,
+        testappsw0,
+        testappsw,
 
         commonlib,
         testapplib,

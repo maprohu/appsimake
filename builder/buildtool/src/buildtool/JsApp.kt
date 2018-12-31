@@ -8,13 +8,15 @@ import java.io.PrintWriter
 open class JsApp(
     path: String,
     css: List<Res>,
-    deps: List<JsDep> = listOf()
+    deps: List<JsDep> = listOf(),
+    serviceWorker: JsModule = firebaseMessagingSw
 ) : JsModule(path, css, deps) {
 
     constructor(
         path: String,
-        deps: List<JsDep> = listOf()
-    ) : this(path, listOf(), deps)
+        deps: List<JsDep> = listOf(),
+        serviceWorker: JsModule = firebaseMessagingSw
+    ) : this(path, listOf(), deps, serviceWorker)
 
     val testHtml by task {
         val file = TestingDir.resolve(simpleName).resolve("index.html")
@@ -154,12 +156,13 @@ open class JsApp(
 
     val testSW by task {
         val file = TestingDir.resolve(simpleName).resolve(serviceWorkerFileName)
-        firebaseMessagingSw.writeTestingFile(file)
+
+        serviceWorker.writeTestingServiceWorkerJS(file)
     }
 
     val publicSW by task {
         val file = PublicDir.resolve(simpleName).resolve(serviceWorkerFileName)
-        firebaseMessagingSw.writePublicFile(file)
+        serviceWorker.writePublicServiceWorkerJS(file)
     }
 
     private fun HEAD.setupHtmlHead() {

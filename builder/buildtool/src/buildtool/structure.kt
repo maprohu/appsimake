@@ -18,8 +18,22 @@ object jquery : JsDownload(
     "https://code.jquery.com/jquery-3.3.1.js"
 )
 
+val firebaseVersion = "5.7.2"
+val firebaseBaseName = "firebase-bower-$firebaseVersion"
 object firebaseJs : JsDownload(
-    "https://www.gstatic.com/firebasejs/5.7.0/firebase.js"
+    url = URL("https://codeload.github.com/firebase/firebase-bower/zip/v$firebaseVersion"),
+    fileName = "$firebaseBaseName.zip",
+    extract = ExtractInfo(
+        jsPath = listOf(
+            "$firebaseBaseName/firebase-app.js",
+            "$firebaseBaseName/firebase-auth.js",
+            "$firebaseBaseName/firebase-firestore.js",
+            "$firebaseBaseName/firebase-functions.js",
+            "$firebaseBaseName/firebase-messaging.js",
+            "$firebaseBaseName/firebase-storage.js"
+        )
+    )
+//    "https://www.gstatic.com/firebasejs/5.7.0/firebase.js"
 )
 
 val firebaseUiVersion = "3.4.1"
@@ -119,13 +133,29 @@ object commonui : JsModule(
     )
 )
 
+object testappsw0 : JsModule(
+    "libs/testappsw0",
+    listOf(
+        testapplib
+    )
+)
+
+object testappsw : JsModule(
+    "libs/testappsw",
+    listOf(
+        testappsw0,
+        firebaseMessagingSw,
+        testapplib
+    )
+)
 
 object testapp : JsApp(
     "apps/testapp",
     listOf(
         commonfb,
         testapplib
-    )
+    ),
+    testappsw
 )
 
 object gymclock : JsApp(
