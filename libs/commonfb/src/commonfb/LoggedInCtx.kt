@@ -23,7 +23,7 @@ class LoggedInCtx(
     val user: User
 ) {
     val lib = fbCtx.lib
-//    val privateRef = fbCtx.baseRef.collection("private").doc(user.uid)
+    val privateRef = fbCtx.db.doc(lib.firestorePrivateUserPath(user.uid))
 
     val fcmTokensRef = fbCtx.db.collection(lib.firestoreFcmTokensPath(user.uid))
 

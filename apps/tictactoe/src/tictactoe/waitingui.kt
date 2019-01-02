@@ -3,16 +3,48 @@ package tictactoe
 import bootstrap.*
 import common.obj
 import common.removeFromParent
+import commonfb.FcmControl
 import commonui.screenLayout
 import domx.*
 import firebase.firestore.setOptionsMerge
 import fontawesome.fa
 import fontawesome.fas
 import killable.Killables
+import org.w3c.dom.HTMLElement
 import rx.Rx
 import styles.pointerEventsNone
 import kotlin.browser.document
 import kotlin.browser.window
+
+fun HTMLElement.toggleNotificationButton(
+    killables: Killables,
+    fcmControl: FcmControl
+) {
+    flexRow()
+    val fcmState = Rx { fcmControl.enabled() }
+    killables += fcmState
+    flexAlignItemsCenter()
+    input {
+        classes += pointerEventsNone
+        margin1()
+        type = "checkbox"
+        fcmState.forEach {
+            checked = it == true
+        }
+        rxDisplay { fcmState() != null }
+    }
+    div {
+        spinnerBorderSm()
+        rxDisplay { fcmState() == null }
+    }
+    div {
+        margin1()
+        innerText = "Send me notifications"
+    }
+    clickEvent {
+        fcmControl.toggle { console.log(it) }
+    }
+}
 
 fun PlayerActiveWaiting.waitingUI() : () -> Unit {
     val killables = Killables()
@@ -43,33 +75,14 @@ fun PlayerActiveWaiting.waitingUI() : () -> Unit {
                             margin1()
                             innerText = "Waiting for opponent..."
                         }
-                        row {
-                            val fcmState = Rx { control.loggedInCtx.fcmControl.enabled() }
-                            killables += fcmState
+                        div {
                             padding1()
                             btn()
                             btnPrimary()
-                            flexAlignItemsCenter()
-                            input {
-                                classes += pointerEventsNone
-                                margin1()
-                                type = "checkbox"
-                                fcmState.forEach {
-                                    checked = it == true
-                                }
-                                rxDisplay { fcmState() != null }
-                            }
-                            div {
-                                spinnerBorderSm()
-                                rxDisplay { fcmState() == null }
-                            }
-                            div {
-                                margin1()
-                                innerText = "Send me notifications"
-                            }
-                            clickEvent {
-                                control.loggedInCtx.fcmControl.toggle { console.log(it) }
-                            }
+                            toggleNotificationButton(
+                                killables,
+                                control.loggedInCtx.fcmControl
+                            )
                         }
                     }
                 }

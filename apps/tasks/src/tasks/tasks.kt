@@ -3,8 +3,10 @@ package tasks
 import bootstrap.commandButton
 import bootstrap.listGroup
 import bootstrap.padding2
+import common.named
 import commonfb.LoggedInCtx
 import commonfb.LoggingInCtx
+import commonlib.Lib
 import domx.classes
 import firebase.User
 import styles.scrollVertical
@@ -13,7 +15,9 @@ fun main(args: Array<String>) {
     TasksMain().start()
 }
 
-class TasksMain : LoggingInCtx("tasks") {
+val tasks by named { Lib(it) }
+
+class TasksMain : LoggingInCtx(tasks, "Tasks") {
 
     override fun loggedIn(user: User): () -> Unit {
         return LoggedIn(this, user).main()

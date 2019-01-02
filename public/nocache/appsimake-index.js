@@ -17,7 +17,7 @@
       });
   }
   loadScripts([
-    "../cache/appsimake-tictactoe-main-A8F390339FDD6EB8DAB139641ADD73C2F985776B536EC7D1F6C41F9C5D134D94.js"
+    "../cache/appsimake-index-main-97EC8793147542D765E15D4C200FD007EB34C741CC2AC7C2C4E9A0740C9561B1.js"
   ]);
   
 })();

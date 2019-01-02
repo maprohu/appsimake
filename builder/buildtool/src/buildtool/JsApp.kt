@@ -7,6 +7,7 @@ import java.io.PrintWriter
 
 open class JsApp(
     path: String,
+    title: String,
     css: List<Res>,
     deps: List<JsDep> = listOf(),
     serviceWorker: JsModule = firebaseMessagingSw
@@ -14,9 +15,10 @@ open class JsApp(
 
     constructor(
         path: String,
+        title: String,
         deps: List<JsDep> = listOf(),
         serviceWorker: JsModule = firebaseMessagingSw
-    ) : this(path, listOf(), deps, serviceWorker)
+    ) : this(path, title, listOf(), deps, serviceWorker)
 
     val testHtml by task {
         val file = TestingDir.resolve(simpleName).resolve("index.html")
@@ -105,7 +107,8 @@ open class JsApp(
     val manifestText by task {
         """
             {
-              "gcm_sender_id": "103953800507"
+                "name": "$title",
+                "gcm_sender_id": "103953800507"
             }
         """.trimIndent()
     }

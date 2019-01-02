@@ -344,7 +344,7 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
             board()
         }
 
-        notificationUI(this)
+//        notificationUI(this)
      }
 
     fun Node.markSvg() =
@@ -413,6 +413,13 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                     clickEvent {
                         ourMark.now = ourMark.now.other
                     }
+                }
+
+                dropdownItemAnchor {
+                    toggleNotificationButton(
+                        killables,
+                        loggedInCtx.fcmControl
+                    )
                 }
             }
 

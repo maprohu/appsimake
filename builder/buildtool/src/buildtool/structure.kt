@@ -154,6 +154,7 @@ object tictactoesw : JsModule(
 
 object testapp : JsApp(
     "apps/testapp",
+    "Test App",
     listOf(
         commonfb,
         testapplib
@@ -163,6 +164,7 @@ object testapp : JsApp(
 
 object testapp2 : JsApp(
     "apps/testapp2",
+    "Test App 2",
     listOf(
         commonfb,
         testapplib
@@ -172,6 +174,7 @@ object testapp2 : JsApp(
 
 object gymclock : JsApp(
     "apps/gymclock",
+    "Gym Clock",
     css = listOf(
         FileRes("gymclock.css")
     ),
@@ -217,6 +220,7 @@ object commonlib : JsModule(
 
 object chat : JsApp(
     "apps/chat",
+    "Chat",
     listOf(
         bootstrap
     )
@@ -224,6 +228,7 @@ object chat : JsApp(
 
 object index : JsApp(
     "apps/index",
+    "Apps I Make",
     listOf(
         bootstrap
     )
@@ -231,6 +236,7 @@ object index : JsApp(
 
 object tasks : JsApp(
     "apps/tasks",
+    "Tasks",
     listOf(
         commonfb
     )
@@ -253,6 +259,7 @@ object tictactoelib : JsModule(
 
 object tictactoe : JsApp(
     "apps/tictactoe",
+    "Tic Tac Toe",
     listOf(
         commonfb,
         tictactoelib
