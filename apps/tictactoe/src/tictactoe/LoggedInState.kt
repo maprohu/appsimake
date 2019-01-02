@@ -99,6 +99,7 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                         }
                         val game = obj<Game> {
                             this.players = players.map { it.id }.toTypedArray()
+                            originalPlayers = this.players.copyOf()
 //                            this.firstPlayer = firstPlayerIndex
                         }
                         tx.set(
@@ -107,22 +108,35 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                             setOptionsMerge()
                         )
 
+                        val seq = SequenceStartsFrom
+                        val moveRef = ownGameRef.collection(firestoreMovesCollectionName)
+                            .doc(seq.toString())
+                        tx.set(
+                            moveRef,
+                            Start().apply {
+                                sequence = seq
+                                player = Random.nextInt(2)
+                            }.wrapped
+                        )
+
                         true
                     } else {
                         rollback()
                     }
                 }.onRollback { false }
 
+                console.log(started)
+
                 if (started) {
-                    val seq = SequenceStartsFrom
-                    ownGameRef.collection(firestoreMovesCollectionName)
-                        .doc(seq.toString())
-                        .set(
-                            Start().apply {
-                                sequence = SequenceStartsFrom
-                                player = Random.nextInt(2)
-                            }.wrapped
-                        )
+//                    val seq = SequenceStartsFrom
+//                    ownGameRef.collection(firestoreMovesCollectionName)
+//                        .doc(seq.toString())
+//                        .set(
+//                            Start().apply {
+//                                sequence = SequenceStartsFrom
+//                                player = Random.nextInt(2)
+//                            }.wrapped
+//                        )
 
                     break
                 }

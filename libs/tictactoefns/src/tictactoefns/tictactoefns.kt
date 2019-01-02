@@ -27,10 +27,8 @@ fun init(exports: dynamic) {
                         if (gameDS.exists) {
                             val game = gameDS.data() as Game
 
-                            val sendTo = if (game.players.size < 2) {
-                                game.players.toList()
-                            } else {
-                                game.players.filterIndexed { index, _ -> index != move.player }
+                            val sendTo = game.originalPlayers.filterIndexed { index, id ->
+                                index != move.player && id in game.players
                             }
 
                             for (player in sendTo) {

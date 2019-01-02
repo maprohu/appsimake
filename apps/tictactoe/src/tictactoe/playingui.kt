@@ -9,7 +9,9 @@ import domx.div
 import fontawesome.chevronLeft
 import fontawesome.spinner
 
-class PlayingUI(playerCtx: PlayerCtx) {
+class PlayingUI(
+    playerCtx: PlayerCtx
+) {
     val layout = playerCtx.appCtx.root.newRoot().screenLayout {
         top {
             left.dropdown {

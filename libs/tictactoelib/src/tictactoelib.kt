@@ -20,6 +20,7 @@ fun firestoreMovesRef(gameId: String) = "${firestoreGameRef(gameId)}/$firestoreM
 
 external interface Game {
     var players: Array<String>
+    var originalPlayers: Array<String>
 //    var firstPlayer: Int
 //    var lastSequence: Int?
 }

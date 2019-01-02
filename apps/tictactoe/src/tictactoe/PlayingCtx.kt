@@ -72,8 +72,12 @@ suspend fun PlayingCtx.tryLeave(trySeq: Int, seq: () -> Int) {
     }
 }
 
-suspend fun PlayingCtx.leaveGame(seq: () -> Int) {
+suspend fun PlayingCtx.leaveGameMove(seq: () -> Int) {
     tryLeave(seq(), seq)
 
+    leaveGame()
+}
+
+fun PlayingCtx.leaveGame() {
     playerCtx.leaveGame(gameId)
 }

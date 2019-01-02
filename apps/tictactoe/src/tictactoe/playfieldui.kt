@@ -2,8 +2,6 @@ package tictactoe
 
 import bootstrap.*
 import common.Emitter
-import common.onResize
-import common.removeFromParent
 import commonui.*
 import domx.*
 import domx.a as _
@@ -16,13 +14,11 @@ import killable.Killables
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.w3c.dom.HTMLDivElement
-import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import org.w3c.dom.css.ElementCSSInlineStyle
 import org.w3c.dom.svg.SVGCircleElement
 import org.w3c.dom.svg.SVGElement
 import org.w3c.dom.svg.SVGGElement
-import org.w3c.notifications.*
 import rx.*
 import svgx.*
 import tictactoelib.Leave
@@ -240,7 +236,7 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                 }
                 clickEvent {
                     if (canClick.now) {
-                        turn.now = Turn.There
+                        turn.now = Turn.Check
                         state.now = FieldState.Friend
                         GlobalScope.launch {
                             move(
@@ -526,7 +522,11 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
 
     return {
         GlobalScope.launch {
-            leaveGame { expectingSequence }
+            if (isOver.now) {
+                leaveGame()
+            } else {
+                leaveGameMove { expectingSequence }
+            }
             killables.kill()
             stopListening()
         }

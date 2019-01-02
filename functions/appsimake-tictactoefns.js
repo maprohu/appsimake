@@ -21,7 +21,7 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
   var Move = $module$appsimake_tictactoelib.tictactoelib.Move;
   var coroutines = $module$kotlinx_coroutines_core.kotlinx.coroutines;
   var await_0 = $module$kotlinx_coroutines_core.kotlinx.coroutines.await_t11jrl$;
-  var toList = Kotlin.kotlin.collections.toList_us0mfu$;
+  var contains = Kotlin.kotlin.collections.contains_mjy6jw$;
   var tictactoelib = $module$appsimake_tictactoelib.tictactoelib;
   var firebaseadmin = $module$appsimake_functions.firebaseadmin;
   var Any = Object;
@@ -63,8 +63,8 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
     this.local$closure$gameRef = closure$gameRef_0;
     this.local$closure$move = closure$move_0;
     this.local$closure$firestore = closure$firestore_0;
+    this.local$tmp$_0 = void 0;
     this.local$tmp$_1 = void 0;
-    this.local$tmp$_2 = void 0;
     this.local$qdss = void 0;
   }
   Coroutine$init$lambda$lambda.$metadata$ = {
@@ -79,7 +79,7 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
       try {
         switch (this.state_0) {
           case 0:
-            var tmp$, tmp$_0;
+            var tmp$;
             this.state_0 = 2;
             this.result_0 = await_0(this.local$closure$gameRef.get(), this);
             if (this.result_0 === COROUTINE_SUSPENDED)
@@ -91,24 +91,18 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
             var gameDS = this.result_0;
             if (gameDS.exists) {
               var game = Kotlin.isType(tmp$ = gameDS.data(), Object) ? tmp$ : throwCCE();
-              if (game.players.length < 2) {
-                tmp$_0 = toList(game.players);
+              var $receiver = game.originalPlayers;
+              var destination = ArrayList_init();
+              var tmp$_0, tmp$_0_0;
+              var index = 0;
+              for (tmp$_0 = 0; tmp$_0 !== $receiver.length; ++tmp$_0) {
+                var item = $receiver[tmp$_0];
+                var closure$move = this.local$closure$move;
+                if ((tmp$_0_0 = index, index = tmp$_0_0 + 1 | 0, tmp$_0_0) !== closure$move.player && contains(game.players, item))
+                  destination.add_11rb$(item);
               }
-               else {
-                var $receiver = game.players;
-                var destination = ArrayList_init();
-                var tmp$_1, tmp$_0_0;
-                var index = 0;
-                for (tmp$_1 = 0; tmp$_1 !== $receiver.length; ++tmp$_1) {
-                  var item = $receiver[tmp$_1];
-                  var closure$move = this.local$closure$move;
-                  if ((tmp$_0_0 = index, index = tmp$_0_0 + 1 | 0, tmp$_0_0) !== closure$move.player)
-                    destination.add_11rb$(item);
-                }
-                tmp$_0 = destination;
-              }
-              var sendTo = tmp$_0;
-              this.local$tmp$_1 = sendTo.iterator();
+              var sendTo = destination;
+              this.local$tmp$_0 = sendTo.iterator();
               this.state_0 = 3;
               continue;
             }
@@ -118,12 +112,12 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
             }
 
           case 3:
-            if (!this.local$tmp$_1.hasNext()) {
+            if (!this.local$tmp$_0.hasNext()) {
               this.state_0 = 9;
               continue;
             }
 
-            var player = this.local$tmp$_1.next();
+            var player = this.local$tmp$_0.next();
             console.log('notifying player: ' + player);
             this.state_0 = 4;
             this.result_0 = await_0(this.local$closure$firestore.collection(tictactoelib.tictactoe.firestoreFcmTokensPath_61zpoe$(player)).get(), this);
@@ -132,16 +126,16 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
             continue;
           case 4:
             this.local$qdss = this.result_0.docs;
-            this.local$tmp$_2 = 0;
+            this.local$tmp$_1 = 0;
             this.state_0 = 5;
             continue;
           case 5:
-            if (this.local$tmp$_2 === this.local$qdss.length) {
+            if (this.local$tmp$_1 === this.local$qdss.length) {
               this.state_0 = 8;
               continue;
             }
 
-            var qds = this.local$qdss[this.local$tmp$_2];
+            var qds = this.local$qdss[this.local$tmp$_1];
             console.log('notifying token: ' + qds.id);
             this.state_0 = 6;
             this.result_0 = await_0(firebaseadmin.admin.messaging().send(obj(init$lambda$lambda$lambda(qds, this.local$closure$move))), this);
@@ -152,7 +146,7 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
             this.state_0 = 7;
             continue;
           case 7:
-            ++this.local$tmp$_2;
+            ++this.local$tmp$_1;
             this.state_0 = 5;
             continue;
           case 8:
