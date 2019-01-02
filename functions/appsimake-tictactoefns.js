@@ -28,18 +28,13 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
   var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
-  var launch = $module$kotlinx_coroutines_core.kotlinx.coroutines.launch_s496o7$;
+  var async = $module$kotlinx_coroutines_core.kotlinx.coroutines.async_pda6u4$;
+  var asPromise = $module$kotlinx_coroutines_core.kotlinx.coroutines.asPromise_ge6odz$;
   var gameIdParam;
-  function init$lambda$lambda$lambda$lambda(closure$qds, closure$move) {
+  function init$lambda$lambda$lambda(closure$qds, closure$move) {
     return function ($receiver) {
       $receiver.token = closure$qds.id;
       $receiver.data = closure$move.wrapped;
-      return Unit;
-    };
-  }
-  function init$lambda$lambda$lambda(closure$move) {
-    return function (qds) {
-      firebaseadmin.admin.messaging().send(obj(init$lambda$lambda$lambda$lambda(qds, closure$move)));
       return Unit;
     };
   }
@@ -61,6 +56,8 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
     this.local$closure$move = closure$move_0;
     this.local$closure$firestore = closure$firestore_0;
     this.local$tmp$_1 = void 0;
+    this.local$tmp$_2 = void 0;
+    this.local$qdss = void 0;
   }
   Coroutine$init$lambda$lambda.$metadata$ = {
     kind: Kotlin.Kind.CLASS,
@@ -108,30 +105,55 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
               continue;
             }
              else {
-              this.state_0 = 6;
+              this.state_0 = 10;
               continue;
             }
 
           case 3:
             if (!this.local$tmp$_1.hasNext()) {
-              this.state_0 = 5;
+              this.state_0 = 9;
               continue;
             }
 
             var player = this.local$tmp$_1.next();
+            console.log('notifying player: ' + player);
             this.state_0 = 4;
             this.result_0 = await_0(this.local$closure$firestore.collection(tictactoelib.tictactoe.firestoreFcmTokensPath_61zpoe$(player)).get(), this);
             if (this.result_0 === COROUTINE_SUSPENDED)
               return COROUTINE_SUSPENDED;
             continue;
           case 4:
-            this.result_0.forEach(init$lambda$lambda$lambda(this.local$closure$move));
-            this.state_0 = 3;
+            this.local$qdss = this.result_0.docs;
+            this.local$tmp$_2 = 0;
+            this.state_0 = 5;
             continue;
           case 5:
+            if (this.local$tmp$_2 === this.local$qdss.length) {
+              this.state_0 = 8;
+              continue;
+            }
+
+            var qds = this.local$qdss[this.local$tmp$_2];
+            console.log('notifying token: ' + qds.id);
             this.state_0 = 6;
+            this.result_0 = await_0(firebaseadmin.admin.messaging().send(obj(init$lambda$lambda$lambda(qds, this.local$closure$move))), this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
             continue;
           case 6:
+            this.state_0 = 7;
+            continue;
+          case 7:
+            ++this.local$tmp$_2;
+            this.state_0 = 5;
+            continue;
+          case 8:
+            this.state_0 = 3;
+            continue;
+          case 9:
+            this.state_0 = 10;
+            continue;
+          case 10:
             return Unit;
           default:this.state_0 = 1;
             throw new Error('State Machine Unreachable execution');
@@ -154,8 +176,7 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
     var firestore = documentSnapshot.ref.firestore;
     var gameRef = firestore.doc(firestoreGameRef(typeof (tmp$ = eventContext.params[gameIdParam]) === 'string' ? tmp$ : throwCCE()));
     var move = Move.Companion.of(documentSnapshot.data());
-    launch(coroutines.GlobalScope, void 0, void 0, init$lambda$lambda(gameRef, move, firestore));
-    return Unit;
+    return asPromise(async(coroutines.GlobalScope, void 0, void 0, init$lambda$lambda(gameRef, move, firestore)));
   }
   function init(exports) {
     exports[tictactoelib.tictactoe.qualified_61zpoe$('onMove')] = document(firestoreMovesRef('{gameId}') + '/{moveId}').onCreate(init$lambda);

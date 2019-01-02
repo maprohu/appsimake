@@ -3,9 +3,7 @@ package tictactoefns
 import common.obj
 import commonfns.firestore
 import firebaseadmin.admin
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.await
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import tictactoelib.*
 
 const val gameIdParam = "gameId"
@@ -23,7 +21,7 @@ fun init(exports: dynamic) {
 
                     val move = Move.of(documentSnapshot.data())
 
-                    GlobalScope.launch {
+                    GlobalScope.async {
                         val gameDS = gameRef.get().await()
 
                         if (gameDS.exists) {
@@ -36,22 +34,27 @@ fun init(exports: dynamic) {
                             }
 
                             for (player in sendTo) {
-                                firestore
+                                console.log("notifying player: $player")
+
+                                val qdss = firestore
                                     .collection(tictactoe.firestoreFcmTokensPath(player))
                                     .get()
                                     .await()
-                                    .forEach { qds ->
-                                        admin.messaging().send(
-                                            obj {
-                                                token = qds.id
-                                                data = move.wrapped
-                                            }
-                                        )
-                                    }
+                                    .docs
+
+                                for (qds in qdss) {
+                                    console.log("notifying token: ${qds.id}")
+                                    admin.messaging().send(
+                                        obj {
+                                            token = qds.id
+                                            data = move.wrapped
+                                        }
+                                    ).await()
+                                }
                             }
                         }
 
-                    }
+                    }.asPromise()
                 }
 }
 

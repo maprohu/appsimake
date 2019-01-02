@@ -44,6 +44,9 @@ external interface CollectionReference : Query {
 // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/QuerySnapshot
 external interface QuerySnapshot {
 
+    // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/QuerySnapshot#docs
+    val docs : Array<QueryDocumentSnapshot>
+
     // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/QuerySnapshot#forEach
     fun forEach(fn: (QueryDocumentSnapshot) -> Unit)
 }

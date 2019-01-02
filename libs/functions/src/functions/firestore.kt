@@ -12,7 +12,7 @@ external fun document(path: String) : DocumentBuilder
 external interface DocumentBuilder {
 
     // https://firebase.google.com/docs/reference/functions/functions.firestore.DocumentBuilder#onCreate
-    fun onCreate(handler: (DocumentSnapshot, EventContext) -> Unit) : CloudFunction
+    fun onCreate(handler: (DocumentSnapshot, EventContext) -> Any?) : CloudFunction
 
 }
 
