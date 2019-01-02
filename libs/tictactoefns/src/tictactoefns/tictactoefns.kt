@@ -13,7 +13,7 @@ const val gameIdParam = "gameId"
 fun init(exports: dynamic) {
     exports[moveFunctionName] = functions.https.onCall { move:MoveData, ctx ->
 
-        admin.firestore().doc("/apps/tictactoe/private/${ctx.auth.uid}")
+        firestore.doc("/apps/tictactoe/private/${ctx.auth.uid}")
 
         admin.messaging().send(
             obj {
@@ -35,7 +35,7 @@ fun init(exports: dynamic) {
             functions.firestore
                 .document("${firestoreMovesRef("{$gameIdParam}")}/{moveId}")
                 .onCreate { documentSnapshot, eventContext ->
-                    val gameRef = admin.firestore().doc(
+                    val gameRef = firestore.doc(
                         firestoreGameRef(eventContext.params[gameIdParam] as String)
                     )
 

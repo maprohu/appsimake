@@ -14,8 +14,9 @@ function define(args, fn) {
 
 define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'firebase-functions', 'appsimake-tictactoelib', 'kotlinx-coroutines-core'], function (_, Kotlin, $module$appsimake_functions, $module$appsimake_commonshr, $module$firebase_functions, $module$appsimake_tictactoelib, $module$kotlinx_coroutines_core) {
   'use strict';
-  var firebaseadmin = $module$appsimake_functions.firebaseadmin;
+  var commonfns = $module$appsimake_functions.commonfns;
   var toString = Kotlin.toString;
+  var firebaseadmin = $module$appsimake_functions.firebaseadmin;
   var Unit = Kotlin.kotlin.Unit;
   var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
   var onCall = $module$firebase_functions.https.onCall;
@@ -28,7 +29,6 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
   var coroutines = $module$kotlinx_coroutines_core.kotlinx.coroutines;
   var await_0 = $module$kotlinx_coroutines_core.kotlinx.coroutines.await_t11jrl$;
   var toList = Kotlin.kotlin.collections.toList_us0mfu$;
-  var commonfns = $module$appsimake_functions.commonfns;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var launch = $module$kotlinx_coroutines_core.kotlinx.coroutines.launch_s496o7$;
@@ -54,7 +54,7 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
     };
   }
   function init$lambda(move, ctx) {
-    firebaseadmin.admin.firestore().doc('/apps/tictactoe/private/' + toString(ctx.auth.uid));
+    commonfns.firestore.doc('/apps/tictactoe/private/' + toString(ctx.auth.uid));
     return firebaseadmin.admin.messaging().send(obj(init$lambda$lambda(move)));
   }
   function init$lambda$lambda$lambda$lambda_0(closure$qds, closure$move) {
@@ -177,7 +177,7 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
   };
   function init$lambda_0(documentSnapshot, eventContext) {
     var tmp$;
-    var gameRef = firebaseadmin.admin.firestore().doc(firestoreGameRef(typeof (tmp$ = eventContext.params[gameIdParam]) === 'string' ? tmp$ : throwCCE()));
+    var gameRef = commonfns.firestore.doc(firestoreGameRef(typeof (tmp$ = eventContext.params[gameIdParam]) === 'string' ? tmp$ : throwCCE()));
     var move = Move.Companion.of(documentSnapshot.data());
     launch(coroutines.GlobalScope, void 0, void 0, init$lambda$lambda_0(gameRef, move));
     return Unit;
