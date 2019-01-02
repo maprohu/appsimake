@@ -17,6 +17,7 @@ import rx.Rx
 import rx.Var
 import rx.rxClass
 import styles.flexBasis0
+import tictactoelib.Game
 import tictactoelib.Leave
 import tictactoelib.Move
 import kotlin.browser.window
@@ -51,16 +52,27 @@ const val SequenceStartsFrom = 0
 suspend fun PlayingCtx.move(seq: Int, m: Move) {
     m.sequence = seq
 
-    db.tx { tx ->
-        val moveRef = movesRef.doc(m.sequence.toString())
-        val currentMove = tx.get(moveRef).await()
+    try {
+        db.tx { tx ->
+            val moveRef = movesRef.doc(m.sequence.toString())
+            val game = tx.get(gameRef).await()
 
-        if (!currentMove.exists) {
-            m.player = playerIndex
-            tx.set(moveRef, m.wrapped)
-        } else {
-            throw SequenceTakenException()
+            if (game.data<Game>().isOver) {
+                rollback()
+            }
+
+            val currentMove = tx.get(moveRef).await()
+
+            if (!currentMove.exists) {
+                m.player = playerIndex
+                tx.set(gameRef, obj(), setOptionsMerge())
+                tx.set(moveRef, m.wrapped)
+            } else {
+                throw SequenceTakenException()
+            }
         }
+    } catch (_: RollbackException) {
+        // game over, no more moves
     }
 }
 

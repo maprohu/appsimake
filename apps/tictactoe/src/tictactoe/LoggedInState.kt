@@ -65,6 +65,7 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
             val ownGameRef = control.mainCtx.gamesRef.add(
                 obj<Game>{
                     players = arrayOf(control.playerId)
+                    isOver = false
                 }
             ).await()
 
@@ -124,8 +125,6 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                         rollback()
                     }
                 }.onRollback { false }
-
-                console.log(started)
 
                 if (started) {
 //                    val seq = SequenceStartsFrom

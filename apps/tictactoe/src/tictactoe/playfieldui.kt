@@ -2,13 +2,11 @@ package tictactoe
 
 import bootstrap.*
 import common.Emitter
+import common.obj
 import commonui.*
 import domx.*
+import firebase.firestore.*
 import domx.a as _
-import firebase.firestore.DocumentChangeType
-import firebase.firestore.onSnapshotNext
-import firebase.firestore.orderBy
-import firebase.firestore.typeEnum
 import fontawesome.chevronDown
 import killable.Killables
 import kotlinx.coroutines.GlobalScope
@@ -21,10 +19,7 @@ import org.w3c.dom.svg.SVGElement
 import org.w3c.dom.svg.SVGGElement
 import rx.*
 import svgx.*
-import tictactoelib.Leave
-import tictactoelib.Move
-import tictactoelib.Placement
-import tictactoelib.Start
+import tictactoelib.*
 import kotlin.browser.document
 
 
@@ -508,6 +503,15 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
             }
         }
 
+        if (isOver.now) {
+            gameRef.set(
+                obj<Game> {
+                    this.isOver = true
+                },
+                setOptionsMerge()
+            )
+        }
+
     }
 
     val stopListening = movesRef
@@ -522,11 +526,7 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
 
     return {
         GlobalScope.launch {
-            if (isOver.now) {
-                leaveGame()
-            } else {
-                leaveGameMove { expectingSequence }
-            }
+            leaveGameMove { expectingSequence }
             killables.kill()
             stopListening()
         }
