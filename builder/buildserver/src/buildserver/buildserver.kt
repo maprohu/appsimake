@@ -31,13 +31,17 @@ fun Array<String>.runCommand() {
 
 fun main(args: Array<String>) {
 
-    val build = HttpHandler { e ->
-        "git pull".runCommand()
-        "firebase deploy --project appsimake".runCommand()
+    fun handler(extra: String = "") =
+        HttpHandler { e ->
+            "git pull".runCommand()
+            "firebase deploy --project appsimake $extra".runCommand()
 
-        e.sendResponseHeaders(200, 0)
-        e.responseBody.bufferedWriter().also{ it.write("OK") }.close()
-    }
+            e.sendResponseHeaders(200, 0)
+            e.responseBody.bufferedWriter().also{ it.write("OK") }.close()
+        }
+
+    val build = handler()
+    val hosting = handler("--only hosting")
 
     HttpServer.create(
         InetSocketAddress(
@@ -47,6 +51,7 @@ fun main(args: Array<String>) {
         0
     ).apply {
         createContext("/build", build)
+        createContext("/hosting", hosting)
         executor = null
     }.start()
 
