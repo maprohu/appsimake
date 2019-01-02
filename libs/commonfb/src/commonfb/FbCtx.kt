@@ -15,7 +15,7 @@ import kotlin.js.Promise
 
 class FbCtx(
     val appCtx: AppCtx,
-    lib: Lib
+    val lib: Lib
 ) {
     val name = lib.name
 

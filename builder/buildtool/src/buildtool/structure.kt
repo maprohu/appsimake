@@ -75,10 +75,12 @@ object fontAwesomeDist : JsDownload(
     )
 )
 
+val bootstrapVersion = "4.2.1"
+val bootstrapBaseName = "bootstrap-$bootstrapVersion-dist"
 object bootstrapDist : JsDownload(
-    "https://github.com/twbs/bootstrap/releases/download/v4.1.3/bootstrap-4.1.3-dist.zip",
-    "js/bootstrap.bundle.js",
-    "css/bootstrap.css",
+    "https://github.com/twbs/bootstrap/releases/download/v$bootstrapVersion/$bootstrapBaseName.zip",
+    "$bootstrapBaseName/js/bootstrap.bundle.js",
+    "$bootstrapBaseName/css/bootstrap.css",
     listOf(
         jquery
     )
@@ -133,24 +135,34 @@ object commonui : JsModule(
     )
 )
 
-object testappsw0 : JsModule(
-    "libs/testappsw0",
-    listOf(
-        testapplib
-    )
-)
 
 object testappsw : JsModule(
     "libs/testappsw",
     listOf(
-        testappsw0,
         firebaseMessagingSw,
         testapplib
     )
 )
 
+object tictactoesw : JsModule(
+    "libs/tictactoesw",
+    listOf(
+        firebaseMessagingSw,
+        tictactoelib
+    )
+)
+
 object testapp : JsApp(
     "apps/testapp",
+    listOf(
+        commonfb,
+        testapplib
+    ),
+    testappsw
+)
+
+object testapp2 : JsApp(
+    "apps/testapp2",
     listOf(
         commonfb,
         testapplib
@@ -244,7 +256,8 @@ object tictactoe : JsApp(
     listOf(
         commonfb,
         tictactoelib
-    )
+    ),
+    tictactoesw
 )
 
 object functions : JsModule(

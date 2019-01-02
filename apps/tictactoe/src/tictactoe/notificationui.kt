@@ -31,7 +31,7 @@ fun PlayingCtx.notificationUI(f: HTMLDivElement) {
                                 GlobalScope.launch {
 
                                     try {
-                                        loggedInCtx.setupMessaging()
+//                                        loggedInCtx.setupMessaging()
                                         askDiv.removeFromParent()
                                         onResize.fire()
                                     } catch (e: dynamic) {

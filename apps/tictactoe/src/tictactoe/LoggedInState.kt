@@ -6,6 +6,10 @@ import firebase.firestore.*
 import killable.Killables
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import tictactoelib.Game
+import tictactoelib.Start
+import tictactoelib.firestoreMovesCollectionName
+import tictactoelib.firestoreMovesRef
 import kotlin.random.Random
 
 abstract class LoggedInState(val control: PlayerCtx) : State<Player?, LoggedInState>()
@@ -51,7 +55,7 @@ class PlayerInactive(control: PlayerCtx) : LoggedInState(control) {
 class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
 
     override fun enter(): () -> Unit {
-        waitingUI()
+        val killUI = waitingUI()
         control.cleanupGames()
 
         val channel = Channel<DocumentChange>()
@@ -65,6 +69,7 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
             ).await()
 
             for (otherPlayerChange in channel) {
+                val firstPlayerIndex = Random.nextInt(2)
                 val started = control.db.txTry { tx ->
                     var playersFree = true
 
@@ -92,15 +97,14 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                                 }
                             )
                         }
+                        val game = obj<Game> {
+                            this.players = players.map { it.id }.toTypedArray()
+//                            this.firstPlayer = firstPlayerIndex
+                        }
                         tx.set(
                             ownGameRef,
-                            obj<Game> {
-                                this.players = players.map { it.id }.toTypedArray()
-                                this.firstPlayer = Random.nextInt(2)
-                            },
-                            obj {
-                                merge = true
-                            }
+                            game,
+                            setOptionsMerge()
                         )
 
                         true
@@ -110,6 +114,14 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                 }.onRollback { false }
 
                 if (started) {
+                    ownGameRef.collection(firestoreMovesCollectionName)
+                        .add(
+                            Start().apply {
+                                sequence = SequenceStartsFrom
+                                player = 1 - firstPlayerIndex
+                            }.wrapped
+                        )
+
                     break
                 }
             }
@@ -127,6 +139,7 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
             }
 
         return {
+            killUI()
             stopQuerying()
             processingJob.cancel()
         }

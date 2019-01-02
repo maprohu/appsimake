@@ -25,6 +25,10 @@ import org.w3c.dom.svg.SVGGElement
 import org.w3c.notifications.*
 import rx.*
 import svgx.*
+import tictactoelib.Leave
+import tictactoelib.Move
+import tictactoelib.Placement
+import tictactoelib.Start
 import kotlin.browser.document
 
 
@@ -100,7 +104,7 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
     val ourMark = Var(Mark.X)
     val theirMark = Rx { ourMark().other }
 
-    val turn = Var(if (weStart) Turn.Here else Turn.There)
+    val turn = Var(Turn.Check)
     val isWaiting = Rx {
         when (turn()) {
             Turn.Check, Turn.There -> true
@@ -482,6 +486,9 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
         expectingSequence = sequence + 1
 
         when (this) {
+            is Start -> {
+                turn.now = if (this.player == playerIndex) Turn.There else Turn.Here
+            }
             is Placement -> {
                 val coords = Coords(x, y)
                 val state = state(coords)

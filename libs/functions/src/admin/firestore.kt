@@ -48,6 +48,9 @@ external interface QuerySnapshot {
 // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/DocumentSnapshot
 external interface DocumentSnapshot {
 
+    // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/DocumentSnapshot#exists
+    val exists : Boolean
+
     // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/DocumentSnapshot#id
     val id : String
 

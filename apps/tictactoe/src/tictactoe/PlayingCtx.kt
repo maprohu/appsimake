@@ -17,6 +17,8 @@ import rx.Rx
 import rx.Var
 import rx.rxClass
 import styles.flexBasis0
+import tictactoelib.Leave
+import tictactoelib.Move
 import kotlin.browser.window
 import kotlin.js.Promise
 import kotlin.math.max
@@ -26,7 +28,7 @@ class PlayingCtx(
     val playerCtx: PlayerCtx,
     val gameId: String,
     val playerIndex: Int,
-    val weStart: Boolean,
+//    val weStart: Boolean,
     val ui: PlayingUI
 ) {
     val loggedInCtx = playerCtx.loggedInCtx
@@ -42,24 +44,6 @@ class PlayingCtx(
 
 fun moves(gameRef: DocumentReference) = gameRef.collection("moves")
 
-sealed class Move(o: dynamic) : Wrap(o) {
-    var sequence: Int by dyn()
-    var player: Int by dyn()
-
-    companion object {
-        val of = wrapper<Move>(
-            Placement::class,
-            Leave::class
-        )
-    }
-}
-
-class Placement(o: dynamic = obj()) : Move(o) {
-    var x : Int by dyn()
-    var y : Int by dyn()
-}
-
-class Leave(o: dynamic = obj()) : Move(o)
 
 class SequenceTakenException : Exception()
 

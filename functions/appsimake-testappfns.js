@@ -36,14 +36,14 @@ define(['exports', 'kotlin', 'appsimake-testapplib', 'appsimake-functions', 'kot
       return Unit;
     };
   }
-  function init$lambda(msg_0, ctx, continuation_0, suspended) {
-    var instance = new Coroutine$init$lambda(msg_0, ctx, continuation_0);
+  function init$lambda(msg_0, f, continuation_0, suspended) {
+    var instance = new Coroutine$init$lambda(msg_0, f, continuation_0);
     if (suspended)
       return instance;
     else
       return instance.doResume(null);
   }
-  function Coroutine$init$lambda(msg_0, ctx, continuation_0) {
+  function Coroutine$init$lambda(msg_0, f, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
     this.exceptionState_0 = 1;
     this.local$msg = msg_0;

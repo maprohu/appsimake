@@ -10,7 +10,7 @@ class KillableSeq(initial: () -> Unit = {}) : Killable {
 
     override fun kill() {
         if (!killed) {
-            killed = false
+            killed = true
             current()
             current = {}
         }

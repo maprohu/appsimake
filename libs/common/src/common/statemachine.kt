@@ -8,6 +8,10 @@ interface State0<out O> {
     operator fun invoke() : Pair<State0<O>?, O>
 }
 
+interface AsyncState0<out O> {
+    suspend operator fun invoke() : Pair<AsyncState0<O>?, O>
+}
+
 fun <I, O> state1(fn: (I) -> Pair<State1<I, O>?, O>) : State1<I, O> {
     return object : State1<I, O> {
         override fun invoke(input: I): Pair<State1<I, O>?, O> = fn(input)
@@ -17,6 +21,12 @@ fun <I, O> state1(fn: (I) -> Pair<State1<I, O>?, O>) : State1<I, O> {
 fun <O> state0(fn: () -> Pair<State0<O>?, O>) : State0<O> {
     return object : State0<O> {
         override fun invoke(): Pair<State0<O>?, O> = fn()
+    }
+}
+
+fun <O> asyncState0(fn: () -> Pair<AsyncState0<O>?, O>) : AsyncState0<O> {
+    return object : AsyncState0<O> {
+        override suspend fun invoke() = fn()
     }
 }
 
@@ -36,6 +46,17 @@ class StateMachine0<O>(initial: State0<O>) {
     internal var state = initial
 
     fun process(): O {
+        val out = state()
+        out.first?.let { state = it }
+        return out.second
+    }
+}
+
+class AsyncStateMachine0<O>(initial: AsyncState0<O>) {
+
+    internal var state = initial
+
+    suspend fun process(): O {
         val out = state()
         out.first?.let { state = it }
         return out.second

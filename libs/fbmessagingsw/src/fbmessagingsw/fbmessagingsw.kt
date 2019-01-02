@@ -4,7 +4,9 @@ import common.obj
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asPromise
 import kotlinx.coroutines.async
+import org.w3c.notifications.NotificationOptions
 import org.w3c.workers.ServiceWorkerGlobalScope
+import kotlin.js.Promise
 
 val sw = js("self").unsafeCast<ServiceWorkerGlobalScope>()
 
@@ -20,17 +22,39 @@ val messaging by lazy {
     app.messaging()
 }
 
+val appName = run {
+    val scope = sw.registration.scope
+
+    scope.substringBeforeLast('/').substringAfterLast('/')
+}
+
+var messageTitle : (dynamic) -> String = {
+    "$appName: message arrived"
+}
+
+var messageHandler : (dynamic) -> Promise<Any?> = { msg ->
+    sw.registration.showNotification(
+        messageTitle(msg),
+        NotificationOptions(
+            data = obj<dynamic> {
+                this.FCM_MSG = obj {
+                    this.data = msg
+                    this.notification = obj {
+                        this.click_action = sw.registration.scope
+                    }
+                }
+            } as? Any
+        )
+
+    )
+}
+
 fun main(args: Array<String>) {
 
     console.log("Updating service worker...")
 
-    messaging
-
-//    val messaging = app.messaging()
-//    messaging.setBackgroundMessageHandler { msg ->
-//        sw.registration.showNotification(
-//            "hello"
-//        )
-//    }
+    messaging.setBackgroundMessageHandler {
+        messageHandler(it)
+    }
 
 }

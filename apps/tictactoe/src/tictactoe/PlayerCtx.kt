@@ -7,6 +7,7 @@ import firebase.User
 import firebase.firestore.*
 import killable.Killables
 import kotlinx.coroutines.*
+import tictactoelib.Game
 
 class PlayerCtx(
     val mainCtx: MainCtx,
@@ -124,12 +125,12 @@ class PlayerCtx(
             } else {
                 val game = it.data<Game>()
                 val playerIndex = game.players.indexOf(playerId)
-                val weStart = playerIndex == game.firstPlayer
+//                val weStart = playerIndex == game.firstPlayer
                 val playingCtx = PlayingCtx(
                     this,
                     gameId,
                     playerIndex,
-                    weStart,
+//                    weStart,
                     ui
                 )
                 killables += playingCtx.playfieldUI()

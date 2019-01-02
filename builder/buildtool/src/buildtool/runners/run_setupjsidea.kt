@@ -23,8 +23,8 @@ fun main(args: Array<String>) {
         commonfb,
         functions,
         firebaseMessagingSw,
-        testappsw0,
         testappsw,
+        tictactoesw,
 
         commonlib,
         testapplib,
@@ -35,6 +35,7 @@ fun main(args: Array<String>) {
 
         index,
         testapp,
+        testapp2,
         gymclock,
         tasks,
         tictactoe,

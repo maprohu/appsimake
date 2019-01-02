@@ -87,27 +87,13 @@ class AppCtx(
         root.setHourglass()
     }
 
-//    fun notify(msg: String, fn: () -> Unit = {}) = GlobalScope.launch {
-//        if (!windowActive.now) {
-//            if( Notification.grant()) {
-//                Notification(
-//                    title,
-//                    NotificationOptions(
-//                        body = msg
-//                    )
-//                ).apply {
-//                    onclick = {
-//                        window.focus()
-//                        fn()
-//                    }
-//                }
-//            } else {
-//                // play sound if notifications are not granted
-//            }
-//        } else {
-//            // what to do if window is active
-//        }
-//    }
+    val isServiceWorkerSupported by lazy {
+        window.navigator.serviceWorker as? Any != null
+    }
+
+    val isFcmSupported by lazy {
+        isServiceWorkerSupported
+    }
 
     val serviceWorker by lazy {
         window.navigator.serviceWorker.register(serviceWorkerFileName)

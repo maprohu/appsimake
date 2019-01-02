@@ -4,7 +4,7 @@ import buildtool.*
 import kotlinx.coroutines.channels.ticker
 
 fun main(args: Array<String>) = runTask {
-    tictactoe.testHtml
     fns.indexJs
-//    firebaseMessagingSw.testSw
+    tictactoe.testHtml
+    tictactoe.testSW
 }

@@ -1,7 +1,10 @@
 @file:JsModule("firebase-functions")
 package functions
 
-external interface EventContext
+// https://firebase.google.com/docs/reference/functions/functions.EventContext
+external interface EventContext {
+    val params: dynamic
+}
 
 external interface HttpsFunction
 

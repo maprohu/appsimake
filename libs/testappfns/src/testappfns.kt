@@ -14,7 +14,7 @@ import testapplib.testapp
 import testapplib.tokensPath
 
 fun init(exports: dynamic) {
-    sendMessage.implementAsync(exports) { msg, ctx ->
+    sendMessage.implementAsync(exports) { msg, _ ->
         firestore
             .collection(tokensPath)
             .get()

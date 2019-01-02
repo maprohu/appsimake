@@ -20,7 +20,14 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     this.name = name;
     this.firestoreBasePath = 'apps/' + this.name;
     this.firestoreSingletonsPath = this.firestoreBasePath + '/singletons';
+    this.firestorePrivatePath = this.firestoreBasePath + '/private';
   }
+  Lib.prototype.firestorePrivateUserPath_61zpoe$ = function (uid) {
+    return this.firestorePrivatePath + '/' + uid;
+  };
+  Lib.prototype.firestoreFcmTokensPath_61zpoe$ = function (uid) {
+    return this.firestorePrivateUserPath_61zpoe$(uid) + '/fcmtokens';
+  };
   function Lib$function$lambda(this$Lib) {
     return function (it) {
       return new Function(this$Lib, it);
@@ -28,6 +35,9 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   }
   Lib.prototype.function_q3lmfv$ = function () {
     return named(Lib$function$lambda(this));
+  };
+  Lib.prototype.qualified_61zpoe$ = function (simpleName) {
+    return this.name + '_' + simpleName;
   };
   Lib.$metadata$ = {
     kind: Kind_CLASS,
@@ -37,7 +47,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   function Function(lib, name) {
     this.lib = lib;
     this.name = name;
-    this.qualifiedName = this.lib.name + '_' + this.name;
+    this.qualifiedName = this.lib.qualified_61zpoe$(this.name);
   }
   Function.$metadata$ = {
     kind: Kind_CLASS,

@@ -167,6 +167,11 @@ fun Element.flexCenter() {
     flexAlignItemsCenter()
 }
 
+fun HTMLElement.rxDisplay(rxVal: () ->Boolean): Killable {
+    val rxv = Rx { rxVal() }
+    rxDisplay(rxv)
+    return rxv
+}
 fun HTMLElement.rxDisplay(rxVal: RxVal<Boolean>): Killable {
     return rxVal.forEach {
         this.style.cssText = if (it) "" else "display: none !important;"
@@ -354,6 +359,9 @@ fun Element.formGroup() {
 fun Element.formControl() {
     classes += "form-control"
 }
+fun Element.formCheckInput() {
+    classes += "form-check-input"
+}
 fun Element.btnGroup() {
     classes += "btn-group"
 }
@@ -372,6 +380,14 @@ fun Element.alert() {
 fun Element.alertWarning() {
     classes += "alert-warning"
 }
+fun Element.spinnerBorder() {
+    classes += "spinner-border"
+}
+fun Element.spinnerBorderSm() {
+    spinnerBorder()
+    classes += "spinner-border-sm"
+}
+
 
 
 

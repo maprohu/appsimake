@@ -110,7 +110,7 @@ external class CollectionReference : Query {
     fun doc(path: String = definedExternally) : DocumentReference
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.CollectionReference?authuser=0#add
-    fun add(data: Any) : Promise<DocumentReference>
+    fun add(data: dynamic) : Promise<DocumentReference>
 
 
 }

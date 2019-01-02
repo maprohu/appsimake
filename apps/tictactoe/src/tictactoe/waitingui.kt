@@ -8,10 +8,14 @@ import domx.*
 import firebase.firestore.setOptionsMerge
 import fontawesome.fa
 import fontawesome.fas
+import killable.Killables
+import rx.Rx
+import styles.pointerEventsNone
 import kotlin.browser.document
 import kotlin.browser.window
 
-fun PlayerActiveWaiting.waitingUI() {
+fun PlayerActiveWaiting.waitingUI() : () -> Unit {
+    val killables = Killables()
     control.appCtx.root.newRoot {
         screenLayout {
             top {
@@ -33,12 +37,45 @@ fun PlayerActiveWaiting.waitingUI() {
                     flex()
                     flexGrow1()
                     flexCenter()
-                    span {
-                        innerText = "Waiting for opponent..."
+                    column {
+                        flexAlignItemsCenter()
+                        span {
+                            margin1()
+                            innerText = "Waiting for opponent..."
+                        }
+                        row {
+                            val fcmState = Rx { control.loggedInCtx.fcmControl.enabled() }
+                            killables += fcmState
+                            padding1()
+                            btn()
+                            btnPrimary()
+                            flexAlignItemsCenter()
+                            input {
+                                classes += pointerEventsNone
+                                margin1()
+                                type = "checkbox"
+                                fcmState.forEach {
+                                    checked = it == true
+                                }
+                                rxDisplay { fcmState() != null }
+                            }
+                            div {
+                                spinnerBorderSm()
+                                rxDisplay { fcmState() == null }
+                            }
+                            div {
+                                margin1()
+                                innerText = "Send me notifications"
+                            }
+                            clickEvent {
+                                control.loggedInCtx.fcmControl.toggle { console.log(it) }
+                            }
+                        }
                     }
                 }
 
                 row {
+                    flexFixedSize()
                     padding1()
                     input {
                         padding1()
@@ -64,5 +101,6 @@ fun PlayerActiveWaiting.waitingUI() {
             }
         }
     }
+    return { killables.kill() }
 }
 

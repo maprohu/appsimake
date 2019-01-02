@@ -10,6 +10,7 @@ import killable.Killables
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tictactoelib.MoveData
+import tictactoelib.tictactoe
 
 fun main(args: Array<String>) {
     val ttt = TicTacToeLoggedOutControl()
@@ -23,29 +24,29 @@ fun ToolBar.ticTacToe() {
     }
 }
 
-class TicTacToeLoggedOutControl: LoggingInCtx("tictactoe", "Tic Tac Toe") {
+class TicTacToeLoggedOutControl: LoggingInCtx(tictactoe, "Tic Tac Toe") {
     override fun loggedIn(user: User): () -> Unit {
         val loggedInCtx = LoggedInCtx(fbCtx, user)
         val killables = Killables()
 
-        GlobalScope.launch {
-            loggedInCtx.setupMessaging()
+//        GlobalScope.launch {
+//            loggedInCtx.setupMessaging()
+//
+//            fbCtx.messaging.onMessage { m ->
+//                console.log(m)
+//            }
+//
+//            loggedInCtx.currentFcmToken.now?.let { token ->
+//                fbCtx.app.functions().httpsCallable(tictactoelib.moveFunctionName)(
+//                    obj<MoveData>().apply {
+//                        text = "boo!"
+//                        fcmToken = token
+//                    }
+//                )
+//            }
+//        }
 
-            fbCtx.messaging.onMessage { m ->
-                console.log(m)
-            }
-
-            loggedInCtx.currentFcmToken.now?.let { token ->
-                fbCtx.app.functions().httpsCallable(tictactoelib.moveFunctionName)(
-                    obj<MoveData>().apply {
-                        text = "boo!"
-                        fcmToken = token
-                    }
-                )
-            }
-        }
-
-//        killables += startStateMachine(loggedInCtx)
+        killables += startStateMachine(loggedInCtx)
 
         return { killables.kill() }
     }
@@ -75,8 +76,3 @@ external interface Player {
     var game: String?
 }
 
-external interface Game {
-    var players: Array<String>
-    var firstPlayer: Int
-//    var lastSequence: Int?
-}
