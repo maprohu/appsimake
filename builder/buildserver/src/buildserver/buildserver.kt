@@ -31,14 +31,21 @@ fun Array<String>.runCommand() {
 
 fun main(args: Array<String>) {
 
-    fun handler(extra: String = "") =
-        HttpHandler { e ->
-            "git pull".runCommand()
-            "firebase deploy --project appsimake $extra".runCommand()
+    fun pull() {
+        "git pull".runCommand()
+    }
 
+    fun handler(fn: () -> Unit) =
+        HttpHandler { e ->
+            fn()
             e.sendResponseHeaders(200, 0)
             e.responseBody.bufferedWriter().also{ it.write("OK") }.close()
         }
+
+    fun handler(extra: String = "") = handler {
+        pull()
+        "firebase deploy --project appsimake $extra".runCommand()
+    }
 
     val build = handler()
     val hosting = handler("--only hosting")
@@ -52,6 +59,7 @@ fun main(args: Array<String>) {
     ).apply {
         createContext("/build", build)
         createContext("/hosting", hosting)
+        createContext("/pull", handler { pull() })
         executor = null
     }.start()
 
