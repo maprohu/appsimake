@@ -37,7 +37,7 @@ fun main(args: Array<String>) {
                     this.FCM_MSG = obj {
                         this.data = msg
                         this.notification = obj {
-                            this.click_action = fbmessagingsw.sw.registration.scope
+                            this.click_action = sw.registration.scope
                         }
                     }
                 } as? Any
