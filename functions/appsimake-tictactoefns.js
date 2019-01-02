@@ -24,6 +24,7 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
   var toList = Kotlin.kotlin.collections.toList_us0mfu$;
   var tictactoelib = $module$appsimake_tictactoelib.tictactoelib;
   var firebaseadmin = $module$appsimake_functions.firebaseadmin;
+  var Any = Object;
   var Unit = Kotlin.kotlin.Unit;
   var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
@@ -31,16 +32,11 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
   var async = $module$kotlinx_coroutines_core.kotlinx.coroutines.async_pda6u4$;
   var asPromise = $module$kotlinx_coroutines_core.kotlinx.coroutines.asPromise_ge6odz$;
   var gameIdParam;
-  function init$lambda$lambda$lambda$lambda(closure$move) {
-    return function ($receiver) {
-      $receiver.data = closure$move.wrapped;
-      return Unit;
-    };
-  }
   function init$lambda$lambda$lambda(closure$qds, closure$move) {
     return function ($receiver) {
+      var tmp$;
       $receiver.token = closure$qds.id;
-      $receiver.webpush = obj(init$lambda$lambda$lambda$lambda(closure$move));
+      $receiver.data = JSON.stringify(Kotlin.isType(tmp$ = closure$move.wrapped, Any) ? tmp$ : null);
       return Unit;
     };
   }
