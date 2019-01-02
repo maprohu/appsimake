@@ -69,7 +69,7 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
             ).await()
 
             for (otherPlayerChange in channel) {
-                val firstPlayerIndex = Random.nextInt(2)
+//                val firstPlayerIndex = Random.nextInt(2)
                 val started = control.db.txTry { tx ->
                     var playersFree = true
 
@@ -120,7 +120,7 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                         .set(
                             Start().apply {
                                 sequence = SequenceStartsFrom
-                                player = 1 - firstPlayerIndex
+                                player = Random.nextInt(2)
                             }.wrapped
                         )
 
