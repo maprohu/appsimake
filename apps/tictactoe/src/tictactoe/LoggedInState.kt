@@ -114,8 +114,10 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                 }.onRollback { false }
 
                 if (started) {
+                    val seq = SequenceStartsFrom
                     ownGameRef.collection(firestoreMovesCollectionName)
-                        .add(
+                        .doc(seq.toString())
+                        .set(
                             Start().apply {
                                 sequence = SequenceStartsFrom
                                 player = 1 - firstPlayerIndex

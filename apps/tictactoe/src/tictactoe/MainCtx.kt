@@ -8,7 +8,7 @@ class MainCtx(
     val fbCtx: FbCtx
 ) {
 
-    val playersRef = fbCtx.baseRef.collection(firestorePlayersPath)
+    val playersRef = fbCtx.db.collection(firestorePlayersPath)
     val gamesRef = fbCtx.db.collection(firestoreGamesPath)
 
 }

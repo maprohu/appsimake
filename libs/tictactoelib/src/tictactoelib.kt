@@ -5,8 +5,6 @@ import common.named
 import common.wrapper
 import commonlib.Lib
 
-const val moveFunctionName = "tictactoeMove"
-
 val tictactoe by named { Lib(it) }
 
 external interface MoveData {

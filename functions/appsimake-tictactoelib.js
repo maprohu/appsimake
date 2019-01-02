@@ -30,7 +30,6 @@ define(['exports', 'kotlin', 'appsimake-commonlib', 'appsimake-commonshr'], func
   Placement.prototype.constructor = Placement;
   Leave.prototype = Object.create(Move.prototype);
   Leave.prototype.constructor = Leave;
-  var moveFunctionName;
   function tictactoe$lambda(it) {
     return new Lib(it);
   }
@@ -144,11 +143,6 @@ define(['exports', 'kotlin', 'appsimake-commonlib', 'appsimake-commonshr'], func
     interfaces: [Move]
   };
   var package$tictactoelib = _.tictactoelib || (_.tictactoelib = {});
-  Object.defineProperty(package$tictactoelib, 'moveFunctionName', {
-    get: function () {
-      return moveFunctionName;
-    }
-  });
   Object.defineProperty(package$tictactoelib, 'tictactoe', {
     get: get_tictactoe
   });
@@ -176,7 +170,6 @@ define(['exports', 'kotlin', 'appsimake-commonlib', 'appsimake-commonshr'], func
   package$tictactoelib.Start = Start;
   package$tictactoelib.Placement = Placement;
   package$tictactoelib.Leave = Leave;
-  moveFunctionName = 'tictactoeMove';
   tictactoe = named(tictactoe$lambda).provideDelegate_d6mtq7$(this, tictactoe_metadata);
   firestoreGamesPath = get_tictactoe().firestoreBasePath + '/games';
   firestorePlayersPath = get_tictactoe().firestoreBasePath + '/players';

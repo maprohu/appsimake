@@ -11,26 +11,6 @@ import tictactoelib.*
 const val gameIdParam = "gameId"
 
 fun init(exports: dynamic) {
-    exports[moveFunctionName] = functions.https.onCall { move:MoveData, ctx ->
-
-        firestore.doc("/apps/tictactoe/private/${ctx.auth.uid}")
-
-        admin.messaging().send(
-            obj {
-                token = move.fcmToken
-                data = obj {
-                    boo = "xyz"
-                }
-                webpush = obj {
-                    notification = obj {
-                        body = "hello from FCM"
-                    }
-                }
-            }
-        )
-
-    }
-
     exports[tictactoe.qualified("onMove")] =
             functions.firestore
                 .document("${firestoreMovesRef("{$gameIdParam}")}/{moveId}")

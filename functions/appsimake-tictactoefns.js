@@ -12,15 +12,8 @@ function define(args, fn) {
     );
 }
 
-define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'firebase-functions', 'appsimake-tictactoelib', 'kotlinx-coroutines-core'], function (_, Kotlin, $module$appsimake_functions, $module$appsimake_commonshr, $module$firebase_functions, $module$appsimake_tictactoelib, $module$kotlinx_coroutines_core) {
+define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'kotlinx-coroutines-core', 'appsimake-functions', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_tictactoelib, $module$firebase_functions, $module$kotlinx_coroutines_core, $module$appsimake_functions, $module$appsimake_commonshr) {
   'use strict';
-  var commonfns = $module$appsimake_functions.commonfns;
-  var toString = Kotlin.toString;
-  var firebaseadmin = $module$appsimake_functions.firebaseadmin;
-  var Unit = Kotlin.kotlin.Unit;
-  var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
-  var onCall = $module$firebase_functions.https.onCall;
-  var tictactoelib = $module$appsimake_tictactoelib.tictactoelib;
   var firestoreMovesRef = $module$appsimake_tictactoelib.tictactoelib.firestoreMovesRef_61zpoe$;
   var document = $module$firebase_functions.firestore.document;
   var throwCCE = Kotlin.throwCCE;
@@ -29,49 +22,29 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
   var coroutines = $module$kotlinx_coroutines_core.kotlinx.coroutines;
   var await_0 = $module$kotlinx_coroutines_core.kotlinx.coroutines.await_t11jrl$;
   var toList = Kotlin.kotlin.collections.toList_us0mfu$;
+  var tictactoelib = $module$appsimake_tictactoelib.tictactoelib;
+  var firebaseadmin = $module$appsimake_functions.firebaseadmin;
+  var Unit = Kotlin.kotlin.Unit;
+  var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var launch = $module$kotlinx_coroutines_core.kotlinx.coroutines.launch_s496o7$;
   var gameIdParam;
-  function init$lambda$lambda$lambda($receiver) {
-    $receiver.boo = 'xyz';
-    return Unit;
-  }
-  function init$lambda$lambda$lambda$lambda($receiver) {
-    $receiver.body = 'hello from FCM';
-    return Unit;
-  }
-  function init$lambda$lambda$lambda_0($receiver) {
-    $receiver.notification = obj(init$lambda$lambda$lambda$lambda);
-    return Unit;
-  }
-  function init$lambda$lambda(closure$move) {
-    return function ($receiver) {
-      $receiver.token = closure$move.fcmToken;
-      $receiver.data = obj(init$lambda$lambda$lambda);
-      $receiver.webpush = obj(init$lambda$lambda$lambda_0);
-      return Unit;
-    };
-  }
-  function init$lambda(move, ctx) {
-    commonfns.firestore.doc('/apps/tictactoe/private/' + toString(ctx.auth.uid));
-    return firebaseadmin.admin.messaging().send(obj(init$lambda$lambda(move)));
-  }
-  function init$lambda$lambda$lambda$lambda_0(closure$qds, closure$move) {
+  function init$lambda$lambda$lambda$lambda(closure$qds, closure$move) {
     return function ($receiver) {
       $receiver.token = closure$qds.id;
       $receiver.data = closure$move.wrapped;
       return Unit;
     };
   }
-  function init$lambda$lambda$lambda_1(closure$move) {
+  function init$lambda$lambda$lambda(closure$move) {
     return function (qds) {
-      firebaseadmin.admin.messaging().send(obj(init$lambda$lambda$lambda$lambda_0(qds, closure$move)));
+      firebaseadmin.admin.messaging().send(obj(init$lambda$lambda$lambda$lambda(qds, closure$move)));
       return Unit;
     };
   }
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
-  function init$lambda$lambda_0(closure$gameRef_0, closure$move_0, closure$firestore_0) {
+  function init$lambda$lambda(closure$gameRef_0, closure$move_0, closure$firestore_0) {
     return function ($receiver, continuation_0, suspended) {
       var instance = new Coroutine$init$lambda$lambda(closure$gameRef_0, closure$move_0, closure$firestore_0, $receiver, this, continuation_0);
       if (suspended)
@@ -152,7 +125,7 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
               return COROUTINE_SUSPENDED;
             continue;
           case 4:
-            this.result_0.forEach(init$lambda$lambda$lambda_1(this.local$closure$move));
+            this.result_0.forEach(init$lambda$lambda$lambda(this.local$closure$move));
             this.state_0 = 3;
             continue;
           case 5:
@@ -176,17 +149,16 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
       }
      while (true);
   };
-  function init$lambda_0(documentSnapshot, eventContext) {
+  function init$lambda(documentSnapshot, eventContext) {
     var tmp$;
     var firestore = documentSnapshot.ref.firestore;
     var gameRef = firestore.doc(firestoreGameRef(typeof (tmp$ = eventContext.params[gameIdParam]) === 'string' ? tmp$ : throwCCE()));
     var move = Move.Companion.of(documentSnapshot.data());
-    launch(coroutines.GlobalScope, void 0, void 0, init$lambda$lambda_0(gameRef, move, firestore));
+    launch(coroutines.GlobalScope, void 0, void 0, init$lambda$lambda(gameRef, move, firestore));
     return Unit;
   }
   function init(exports) {
-    exports[tictactoelib.moveFunctionName] = onCall(init$lambda);
-    exports[tictactoelib.tictactoe.qualified_61zpoe$('onMove')] = document(firestoreMovesRef('{gameId}') + '/{moveId}').onCreate(init$lambda_0);
+    exports[tictactoelib.tictactoe.qualified_61zpoe$('onMove')] = document(firestoreMovesRef('{gameId}') + '/{moveId}').onCreate(init$lambda);
   }
   var package$tictactoefns = _.tictactoefns || (_.tictactoefns = {});
   Object.defineProperty(package$tictactoefns, 'gameIdParam', {
