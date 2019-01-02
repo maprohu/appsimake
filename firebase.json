@@ -12,11 +12,6 @@
         "source": "/",
         "destination": "/index/",
         "type": 301
-      },
-      {
-        "source": "",
-        "destination": "/index/",
-        "type": 301
       }
     ],
     "headers": [
