@@ -47,7 +47,9 @@ fun init(exports: dynamic) {
                                     admin.messaging().send(
                                         obj {
                                             token = qds.id
-                                            data = JSON.stringify(move.wrapped as? Any)
+                                            data = obj {
+                                                json = JSON.stringify(move.wrapped as? Any)
+                                            }
                                         }
                                     ).await()
                                 }
