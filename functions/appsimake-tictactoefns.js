@@ -31,10 +31,16 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
   var async = $module$kotlinx_coroutines_core.kotlinx.coroutines.async_pda6u4$;
   var asPromise = $module$kotlinx_coroutines_core.kotlinx.coroutines.asPromise_ge6odz$;
   var gameIdParam;
+  function init$lambda$lambda$lambda$lambda(closure$move) {
+    return function ($receiver) {
+      $receiver.data = closure$move.wrapped;
+      return Unit;
+    };
+  }
   function init$lambda$lambda$lambda(closure$qds, closure$move) {
     return function ($receiver) {
       $receiver.token = closure$qds.id;
-      $receiver.data = closure$move.wrapped;
+      $receiver.webpush = obj(init$lambda$lambda$lambda$lambda(closure$move));
       return Unit;
     };
   }

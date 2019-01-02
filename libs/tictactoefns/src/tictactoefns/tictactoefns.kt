@@ -47,7 +47,9 @@ fun init(exports: dynamic) {
                                     admin.messaging().send(
                                         obj {
                                             token = qds.id
-                                            data = move.wrapped
+                                            webpush = obj {
+                                                data = move.wrapped
+                                            }
                                         }
                                     ).await()
                                 }
