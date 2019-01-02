@@ -23,6 +23,9 @@ external interface FirestoreSettings {
 // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/DocumentReference
 external interface DocumentReference {
 
+    // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/DocumentReference#firestore
+    val firestore : Firestore
+
     // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/DocumentReference#get
     fun get(): Promise<DocumentSnapshot>
 }

@@ -71,21 +71,22 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
     };
   }
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
-  function init$lambda$lambda_0(closure$gameRef_0, closure$move_0) {
+  function init$lambda$lambda_0(closure$gameRef_0, closure$move_0, closure$firestore_0) {
     return function ($receiver, continuation_0, suspended) {
-      var instance = new Coroutine$init$lambda$lambda(closure$gameRef_0, closure$move_0, $receiver, this, continuation_0);
+      var instance = new Coroutine$init$lambda$lambda(closure$gameRef_0, closure$move_0, closure$firestore_0, $receiver, this, continuation_0);
       if (suspended)
         return instance;
       else
         return instance.doResume(null);
     };
   }
-  function Coroutine$init$lambda$lambda(closure$gameRef_0, closure$move_0, $receiver, controller, continuation_0) {
+  function Coroutine$init$lambda$lambda(closure$gameRef_0, closure$move_0, closure$firestore_0, $receiver, controller, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
     this.$controller = controller;
     this.exceptionState_0 = 1;
     this.local$closure$gameRef = closure$gameRef_0;
     this.local$closure$move = closure$move_0;
+    this.local$closure$firestore = closure$firestore_0;
     this.local$tmp$_1 = void 0;
   }
   Coroutine$init$lambda$lambda.$metadata$ = {
@@ -146,7 +147,7 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
 
             var player = this.local$tmp$_1.next();
             this.state_0 = 4;
-            this.result_0 = await_0(commonfns.firestore.collection(tictactoelib.tictactoe.firestoreFcmTokensPath_61zpoe$(player)).get(), this);
+            this.result_0 = await_0(this.local$closure$firestore.collection(tictactoelib.tictactoe.firestoreFcmTokensPath_61zpoe$(player)).get(), this);
             if (this.result_0 === COROUTINE_SUSPENDED)
               return COROUTINE_SUSPENDED;
             continue;
@@ -177,9 +178,10 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'fire
   };
   function init$lambda_0(documentSnapshot, eventContext) {
     var tmp$;
-    var gameRef = commonfns.firestore.doc(firestoreGameRef(typeof (tmp$ = eventContext.params[gameIdParam]) === 'string' ? tmp$ : throwCCE()));
+    var firestore = documentSnapshot.ref.firestore;
+    var gameRef = firestore.doc(firestoreGameRef(typeof (tmp$ = eventContext.params[gameIdParam]) === 'string' ? tmp$ : throwCCE()));
     var move = Move.Companion.of(documentSnapshot.data());
-    launch(coroutines.GlobalScope, void 0, void 0, init$lambda$lambda_0(gameRef, move));
+    launch(coroutines.GlobalScope, void 0, void 0, init$lambda$lambda_0(gameRef, move, firestore));
     return Unit;
   }
   function init(exports) {

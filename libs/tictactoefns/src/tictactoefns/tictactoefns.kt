@@ -35,6 +35,8 @@ fun init(exports: dynamic) {
             functions.firestore
                 .document("${firestoreMovesRef("{$gameIdParam}")}/{moveId}")
                 .onCreate { documentSnapshot, eventContext ->
+                    val firestore = documentSnapshot.ref.firestore
+
                     val gameRef = firestore.doc(
                         firestoreGameRef(eventContext.params[gameIdParam] as String)
                     )

@@ -2,6 +2,7 @@
 @file:JsQualifier("firestore")
 package functions.firestore
 
+import firebaseadmin.firestore.DocumentReference
 import functions.CloudFunction
 import functions.EventContext
 
@@ -19,6 +20,9 @@ external interface DocumentBuilder {
 external interface DocumentSnapshot {
     // https://firebase.google.com/docs/reference/functions/functions.firestore.DocumentSnapshot#data
     fun data() : dynamic
+
+    // https://firebase.google.com/docs/reference/functions/functions.firestore.DocumentSnapshot#ref
+    val ref : DocumentReference
 }
 
 
