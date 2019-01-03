@@ -5,4 +5,5 @@ import buildtool.runTask
 
 fun main(args: Array<String>) = runTask {
     gymclock.testHtml
+    gymclock.testSW
 }

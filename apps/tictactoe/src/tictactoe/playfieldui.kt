@@ -367,7 +367,7 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                     Turn.Won -> "You won!".textNode
                     Turn.Lost -> "You lost.".textNode
                     Turn.Draw -> "It's a draw.".textNode
-                    Turn.Check -> "Waiting...".textNode
+                    Turn.Check -> "Please wait...".textNode
                     Turn.There -> document.div {
                         this + "Opponent placing "
                         drawMark(theirMark)

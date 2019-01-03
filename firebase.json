@@ -16,24 +16,6 @@
     ],
     "headers": [
       {
-        "source": "/*",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "max-age=31556926"
-          }
-        ]
-      },
-      {
-        "source": "/nocache/**",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache"
-          }
-        ]
-      },
-      {
         "source": "/cache/**",
         "headers": [
           {

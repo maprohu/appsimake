@@ -184,20 +184,6 @@ open class JsModule(
     val testingMapping
         get() = testingFileMapping + testingDirMapping
 
-
-
-//    fun createFileValueCache() = createCache { f: File -> FileValue(f) }
-//
-//    val filesHashMap: (File) -> FileValue by task {
-//        fileResources // clean cache if changed
-//        createFileValueCache()
-//    }
-//
-//    val dirsHashMap: (File) -> FileValue by task {
-//        dirResources // clean cache if changed
-//        createFileValueCache()
-//    }
-
     val libraryFileValues by task {
         kotlinDepChain
             .filter { it != this }
@@ -373,38 +359,64 @@ open class JsModule(
         cssList({ publicFileMapping }, { publicDirMapping })
     }
 
-    fun writeServiceWorkerJS(targetFile: File, hash: ((JsDep) -> List<FileValue>)? = null, fn: (JsDep) -> List<File>): File {
+    fun writeServiceWorkerJS(targetFile: File, res: List<File>, fn: (JsDep) -> List<File>): File {
+        val resString = """
+            self.appsimakeResources = [
+                ${
+                    res.joinToString(",\n                ") {
+                        "'${it.relativeTo(targetFile.parentFile).invariantSeparatorsPath}'"
+                    }
+                }
+            ];
+
+        """.trimIndent()
         val depList =
             listOf(kotlinStdlib)
                 .plus(depChain)
-        val hashString = if (hash != null) {
-            val md = newSha256()
-            depList
-                .flatMap(hash)
-                .forEach { md.update(it.hash) }
-            md.digest().toHexString()
-        } else {
-            ""
-        }
         targetFile.parentFile.mkdirs()
         return targetFile.also {
             it.writeText(
+                resString +
                 depList
                     .flatMap(fn)
                     .map { d -> d.hrefFrom(targetFile) }
-                    .map { p -> "importScripts(\"$p\");" }
-                    .plus("// $hashString")
-                    .joinToString("\n")
+                    .joinToString("\n") { p -> "importScripts(\"$p\");" }
             )
         }
     }
 
-    fun writeTestingServiceWorkerJS(file: File): File {
-        return writeServiceWorkerJS(file, {it.jsFileValue} ) { it.jsFile }
+    fun writeTestingServiceWorkerJS(file: File, app: JsApp): File {
+        val res = app.depChainWithKotlin.toList().flatMap {
+            it.jsFile + it.testingResources
+        } + app.testingManifest
+
+        return writeServiceWorkerJS(file, res) { it.jsFile }
     }
 
-    fun writePublicServiceWorkerJS(file: File): File {
-        return writeServiceWorkerJS(file) { it.publicJsFile }
+    fun writePublicServiceWorkerJS(file: File, app: JsApp): File {
+        val res = app.depChainWithKotlin.toList().flatMap {
+            it.publicJsFile + it.publicResources
+        } + app.publicManifest
+
+        return writeServiceWorkerJS(file, res) { it.publicJsFile }
     }
 
+    fun resourceList(fm: Map<String, String>, dm: Map<String, String>, baseDir: File): List<File> {
+        return listOf(
+            fm.values.map {
+                baseDir.appDir().resolve(it)
+            },
+            dm.values.flatMap { dp ->
+                baseDir.appDir().resolve(dp).walk().filter { it.isFile }.toList()
+            }
+        ).flatten()
+    }
+
+    override val testingResources by task {
+        resourceList(testingFileMapping, testingDirMapping, TestingDir)
+    }
+
+    override val publicResources by task {
+        resourceList(publicFileMapping, publicDirMapping, PublicDir)
+    }
 }

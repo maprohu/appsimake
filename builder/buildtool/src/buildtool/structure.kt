@@ -172,6 +172,27 @@ object testapp2 : JsApp(
     testappsw
 )
 
+object cachingsw : JsModule(
+    JsModuleConfig(
+        "libs/cachingsw"
+    ).copy(
+        deps = listOf(
+            buildenv,
+            kotlinxCoroutines
+        )
+    )
+)
+
+object gymclocksw : JsModule(
+    JsModuleConfig(
+        "libs/gymclocksw"
+    ).copy(
+        deps = listOf(
+            cachingsw
+        )
+    )
+)
+
 object gymclock : JsApp(
     "apps/gymclock",
     "Gym Clock",
@@ -179,8 +200,9 @@ object gymclock : JsApp(
         FileRes("gymclock.css")
     ),
     deps = listOf(
-        bootstrap
-    )
+        commonui
+    ),
+    serviceWorker = gymclocksw
 )
 
 object firebasektjs : JsModule(
@@ -230,8 +252,9 @@ object index : JsApp(
     "apps/index",
     "Apps I Make",
     listOf(
-        bootstrap
-    )
+        commonui
+    ),
+    serviceWorker = cachingsw
 )
 
 object tasks : JsApp(

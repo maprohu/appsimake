@@ -59,50 +59,50 @@ open class JsApp(
         FileValue(file)
     }
 
-    val publicMainJs by task {
-        val files =
-            listOf(kotlinStdlib)
-                .plus(depChain)
-                .flatMap { it.publicJsFile }
-                .map { it.relativeTo(PublicDir).fromApp() }
+//    val publicMainJs by task {
+//        val files =
+//            listOf(kotlinStdlib)
+//                .plus(depChain)
+//                .flatMap { it.publicJsFile }
+//                .map { it.relativeTo(PublicDir).fromApp() }
+//
+//        publicTextFile("$name-main", "js", loadScriptsJs(files))
+//    }
 
-        publicTextFile("$name-main", "js", loadScriptsJs(files))
-    }
+//    val publicNocacheJs by task {
+//        PublicUncachedDir.resolve("$simpleName.js").apply {
+//            parentFile.mkdirs()
+//            writeText(
+//                loadScriptsJs(
+//                    listOf(publicMainJs.relativeTo(PublicDir).fromApp())
+//                )
+//            )
+//        }
+//    }
 
-    val publicNocacheJs by task {
-        PublicUncachedDir.resolve("$name.js").apply {
-            parentFile.mkdirs()
-            writeText(
-                loadScriptsJs(
-                    listOf(publicMainJs.relativeTo(PublicDir).fromApp())
-                )
-            )
-        }
-    }
+//    val publicMainCss by task {
+//        val text = depChain
+//            .toList()
+//            .flatMap { it.publicCss }
+//            .map {
+//                "@import '$it';"
+//            }
+//            .joinToString("\n")
+//
+//        publicTextFile(
+//            "$name-main", "css", text
+//        )
+//    }
 
-    val publicMainCss by task {
-        val text = depChain
-            .toList()
-            .flatMap { it.publicCss }
-            .map {
-                "@import '$it';"
-            }
-            .joinToString("\n")
-
-        publicTextFile(
-            "$name-main", "css", text
-        )
-    }
-
-    val publicNocacheCss by task {
-        PublicUncachedDir.resolve("$name.css").apply {
-            val p = publicMainCss.relativeTo(PublicUncachedDir).invariantSeparatorsPath
-            parentFile.mkdirs()
-            writeText(
-                "@import '$p';"
-            )
-        }
-    }
+//    val publicNocacheCss by task {
+//        PublicUncachedDir.resolve("$simpleName.css").apply {
+//            val p = publicMainCss.relativeTo(PublicUncachedDir).invariantSeparatorsPath
+//            parentFile.mkdirs()
+//            writeText(
+//                "@import '$p';"
+//            )
+//        }
+//    }
 
     val manifestText by task {
         """
@@ -114,17 +114,22 @@ open class JsApp(
     }
 
     val publicManifest by task {
-        val targetFile = PublicDir.resolve(simpleName).resolve("manifest.json")
-        targetFile.parentFile.mkdirs()
-        targetFile.writeText(manifestText)
-        targetFile
+//        val targetFile = PublicDir.resolve(simpleName).resolve("manifest.json")
+//        targetFile.parentFile.mkdirs()
+//        targetFile.writeText(manifestText)
+//        targetFile
+        testingManifestFileValue.publicFile()
     }
 
-    val testingManifest by task {
+    val testingManifestFileValue by task {
         val targetFile = TestingDir.resolve(simpleName).resolve("manifest.json")
         targetFile.parentFile.mkdirs()
         targetFile.writeText(manifestText)
-        targetFile
+        FileValue(targetFile)
+
+    }
+    val testingManifest by task {
+        testingManifestFileValue.file
     }
 
     val publicHtml by task {
@@ -139,16 +144,28 @@ open class JsApp(
                         rel="manifest",
                         href=publicManifest.hrefFrom(file)
                     )
-                    link(
-                        rel = "stylesheet",
-                        type = "text/css",
-                        href = publicNocacheCss.hrefFrom(file)
-                    )
+
+                    depChainWithKotlin
+                        .toList()
+                        .flatMap { it.publicCss }
+                        .forEach { css ->
+                            link(
+                                rel = "stylesheet",
+                                type = "text/css",
+                                href = css
+                            )
+                        }
+
                 }
                 body {
-                    script(
-                        src = publicNocacheJs.hrefFrom(file)
-                    ) {}
+                    depChainWithKotlin
+                        .toList()
+                        .flatMap { it.publicJsFile }
+                        .forEach { js ->
+                            script(
+                                src = js.hrefFrom(file)
+                            ) {}
+                        }
                 }
             }
         }
@@ -160,12 +177,12 @@ open class JsApp(
     val testSW by task {
         val file = TestingDir.resolve(simpleName).resolve(serviceWorkerFileName)
 
-        serviceWorker.writeTestingServiceWorkerJS(file)
+        serviceWorker.writeTestingServiceWorkerJS(file, this)
     }
 
     val publicSW by task {
         val file = PublicDir.resolve(simpleName).resolve(serviceWorkerFileName)
-        serviceWorker.writePublicServiceWorkerJS(file)
+        serviceWorker.writePublicServiceWorkerJS(file, this)
     }
 
     private fun HEAD.setupHtmlHead() {

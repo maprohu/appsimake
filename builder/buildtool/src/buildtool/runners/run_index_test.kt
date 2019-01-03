@@ -5,4 +5,5 @@ import kotlinx.coroutines.channels.ticker
 
 fun main(args: Array<String>) = runTask {
     index.testHtml
+    index.testSW
 }

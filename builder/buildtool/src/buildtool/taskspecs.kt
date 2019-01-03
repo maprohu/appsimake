@@ -178,6 +178,9 @@ abstract class JsDep(
     val depChain : Sequence<JsDep>
         get() = deps.asSequence().flatMap { it.depChain }.distinct() + this
 
+    val depChainWithKotlin : Sequence<JsDep>
+        get() = sequenceOf(kotlinStdlib) + depChain
+
     fun depChainOf(filter: (JsDep) -> Boolean) : Sequence<JsDep> =
             deps
                 .asSequence()
@@ -186,6 +189,8 @@ abstract class JsDep(
                 .distinct()
                 .plus(listOf(this).filter(filter))
 
+    open val testingResources: List<File> = listOf()
+    open val publicResources: List<File> = listOf()
 }
 
 abstract class KotlinJsDep(deps: List<JsDep>) : JsDep(deps) {

@@ -58,6 +58,7 @@ abstract class Wrap(o: dynamic) {
 
 }
 
+@Suppress("UNUSED_PARAMETER")
 inline fun <T : Any> jsNew(
     constr: JsClass<T>,
     param: dynamic

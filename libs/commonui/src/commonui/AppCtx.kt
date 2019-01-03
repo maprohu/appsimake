@@ -99,4 +99,9 @@ class AppCtx(
         window.navigator.serviceWorker.register(serviceWorkerFileName)
     }
 
+    fun registerServiceWorker() {
+        if (isServiceWorkerSupported) {
+            serviceWorker
+        }
+    }
 }

@@ -22,9 +22,11 @@ fun main(args: Array<String>) {
         commonui,
         commonfb,
         functions,
+        cachingsw,
         firebaseMessagingSw,
         testappsw,
         tictactoesw,
+        gymclocksw,
 
         commonlib,
         testapplib,

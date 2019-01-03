@@ -194,6 +194,36 @@ open class JsDownload(
         }
     )
 
+    val publicDirs : Map<String, File> by task(
+        if (extract == null) {
+            { mapOf<String, File>() }
+        } else {
+            {
+                extract
+                    .dirResources
+                    .map { dr ->
+                        val f = FileValue(extracted.resolve(dr.pathToDir)).publicFile()
+                        dr.pathToDir to f
+                    }
+                    .toMap()
+            }
+        }
+    )
+
+    val publicCssFiles : Map<String, File> by task(
+        if (extract == null) {
+            { mapOf<String, File>() }
+        } else {
+            {
+                extract
+                    .cssPath.map {
+                        it to FileValue(extracted.resolve(it)).publicFile()
+                    }
+                    .toMap()
+            }
+        }
+    )
+
     override val publicCss by task(
         if (extract == null) {
             { listOf<String>() }
@@ -202,16 +232,44 @@ open class JsDownload(
                 val publicFiles =
                 extract
                     .cssPath.map {
-                        FileValue(extracted.resolve(it)).publicFile()
+                        publicCssFiles.getValue(it)
                     } +
                         extract
                             .dirResources
                             .flatMap { dr ->
-                                val f = FileValue(extracted.resolve(dr.pathToDir)).publicFile()
+                                val f = publicDirs.getValue(dr.pathToDir)
                                 dr.cssPath.map { f.resolve(it) }
                             }
 
                 publicFiles.map { it.relativeTo(PublicDir).fromApp().invariantSeparatorsPath }
+            }
+        }
+    )
+
+    override val testingResources by task(
+        if (extract == null) {
+            { listOf<File>() }
+        } else {
+            {
+                extract
+                    .cssPath
+                    .map { extracted.resolve(it) }
+                    .plus(
+                        extract.dirResources.flatMap { dr ->
+                            extracted.resolve(dr.pathToDir).walk().filter { it.isFile }.toList()
+                        }
+                    )
+            }
+        }
+    )
+
+    override val publicResources by task(
+        if (extract == null) {
+            { listOf<File>() }
+        } else {
+            {
+                publicDirs.values.flatMap { d -> d.walk().filter { it.isFile }.toList() } +
+                        extract.cssPath.map { extracted.resolve(it) }
             }
         }
     )

@@ -138,8 +138,10 @@ abstract class TaskBaseDelegate<T>(
     internal lateinit var propertySource : PropertySource
 
     private fun connectDown(other: TaskDelegate<*>) {
-        this.downs += other
-        other.ups += TaskDelegate.Up(this, currentToken)
+        if (other !in this.downs) {
+            this.downs += other
+            other.ups += TaskDelegate.Up(this, currentToken)
+        }
     }
 
     private var initialized = false
