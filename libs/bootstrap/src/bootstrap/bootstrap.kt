@@ -359,6 +359,9 @@ fun Element.formGroup() {
 fun Element.formControl() {
     classes += "form-control"
 }
+fun Element.formCheck() {
+    classes += "form-check"
+}
 fun Element.formCheckInput() {
     classes += "form-check-input"
 }

@@ -6,6 +6,7 @@ import common.removeAt
 import killable.Killable
 import org.w3c.dom.*
 import org.w3c.dom.css.ElementCSSInlineStyle
+import org.w3c.dom.events.Event
 import org.w3c.dom.events.InputEvent
 import org.w3c.dom.events.MouseEvent
 import rx.Rx
@@ -14,6 +15,8 @@ import rx.Var
 import kotlin.browser.document
 import kotlin.dom.addClass
 import kotlin.dom.removeClass
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 
 fun <T: Element> Node.tagCreated(created: Element, fn: T.() -> Unit = {}): T {
@@ -75,6 +78,13 @@ fun GlobalEventHandlers.inputEvent(fn: (InputEvent) -> Unit) {
     }
 }
 
+fun GlobalEventHandlers.changeEvent(fn: (Event) -> Unit) {
+    onchange = {
+        it.preventDefault()
+        fn(it)
+    }
+}
+
 fun HTMLTextAreaElement.rxInput(rx: Var<String>) {
     inputEvent {
         rx.now = value
@@ -128,6 +138,42 @@ operator fun Node.plus(string: String) {
     appendChild(string.textNode)
 }
 
+class Attrs(val element: Element) {
+    operator fun set(key: String, value: String) {
+        element.setAttribute(key, value)
+    }
+    operator fun get(key: String): String? {
+        return element.getAttribute(key)
+    }
+}
+
+val Element.attr
+    get() = Attrs(this)
+
+class Attr : ReadWriteProperty<Element, String?> {
+    override fun getValue(thisRef: Element, property: KProperty<*>): String? {
+        return thisRef.getAttribute(property.name)
+    }
+
+    override fun setValue(thisRef: Element, property: KProperty<*>, value: String?) {
+        if (value == null) {
+            thisRef.removeAttribute(property.name)
+        } else {
+            thisRef.setAttribute(property.name, value)
+        }
+    }
+}
+
+private var nextId = 0
+
+val Element.ref
+    get() = run {
+        if (id.isNullOrBlank()) {
+            id = "$tagName-${nextId++}"
+        }
+
+        "$id"
+    }
 
 fun Node.div(fn: HTMLDivElement.() -> Unit = {}) : HTMLDivElement = tag("div", fn)
 fun Node.nav(fn: HTMLElement.() -> Unit = {}) : HTMLElement = tag("nav", fn)

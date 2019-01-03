@@ -359,17 +359,33 @@ open class JsModule(
         cssList({ publicFileMapping }, { publicDirMapping })
     }
 
-    fun writeServiceWorkerJS(targetFile: File, res: List<File>, fn: (JsDep) -> List<File>): File {
-        val resString = """
-            self.appsimakeResources = [
-                ${
-                    res.joinToString(",\n                ") {
-                        "'${it.relativeTo(targetFile.parentFile).invariantSeparatorsPath}'"
-                    }
-                }
-            ];
+
+    fun cacheConfigString(vararg content: String): String {
+        return """
+            self.appsimakeResources = {
+                ${ content.joinToString(",\n").prependIndent("                ").trim() }
+            };
 
         """.trimIndent()
+    }
+
+    fun cacheConfigDisabled(): String {
+        return cacheConfigString(""""enabled": false""")
+    }
+
+    fun cacheConfig(targetFile: File, name: String, res: List<File>, enabled: Boolean = true): String {
+        return cacheConfigString(
+            "'enabled': $enabled",
+            "'name': '$name'",
+            """
+                'files': [
+                    ${ res.joinToString(",\n") { "'${it.relativeTo(targetFile.parentFile).invariantSeparatorsPath}'" }.prependIndent("                    ").trim() }
+                 ]
+            """.trimIndent()
+        )
+    }
+
+    fun writeServiceWorkerJS(targetFile: File, resString: String, fn: (JsDep) -> List<File>): File {
         val depList =
             listOf(kotlinStdlib)
                 .plus(depChain)
@@ -390,7 +406,7 @@ open class JsModule(
             it.jsFile + it.testingResources
         } + app.testingManifest
 
-        return writeServiceWorkerJS(file, res) { it.jsFile }
+        return writeServiceWorkerJS(file, cacheConfig(file, app.simpleName, res, false)) { it.jsFile }
     }
 
     fun writePublicServiceWorkerJS(file: File, app: JsApp): File {
@@ -398,7 +414,7 @@ open class JsModule(
             it.publicJsFile + it.publicResources
         } + app.publicManifest
 
-        return writeServiceWorkerJS(file, res) { it.publicJsFile }
+        return writeServiceWorkerJS(file, cacheConfig(file, app.simpleName, res)) { it.publicJsFile }
     }
 
     fun resourceList(fm: Map<String, String>, dm: Map<String, String>, baseDir: File): List<File> {

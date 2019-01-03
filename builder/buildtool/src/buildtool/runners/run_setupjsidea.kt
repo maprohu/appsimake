@@ -14,6 +14,7 @@ fun main(args: Array<String>) {
         buildenv,
         commonshr,
         common,
+        indexeddb,
         domx,
         bootstrap,
         firebasektjs,

@@ -94,6 +94,17 @@ object commonshr : JsModule(
     "libs/commonshr"
 )
 
+object indexeddb : JsModule(
+    JsModuleConfig(
+        "libs/indexeddb"
+    ).copy(
+        deps = listOf(
+            kotlinxCoroutines,
+            commonshr
+        )
+    )
+)
+
 object common : JsModule(
     "libs/common",
     listOf(
@@ -178,7 +189,9 @@ object cachingsw : JsModule(
     ).copy(
         deps = listOf(
             buildenv,
-            kotlinxCoroutines
+            kotlinxCoroutines,
+            commonshr,
+            indexeddb
         )
     )
 )
