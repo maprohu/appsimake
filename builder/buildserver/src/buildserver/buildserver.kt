@@ -15,7 +15,7 @@ fun Array<String>.startProcess(): Process {
 }
 
 fun String.startProcess(): Process {
-    return split(" ").toTypedArray().startProcess()
+    return trim().split("\\s+".toRegex()).toTypedArray().startProcess()
 }
 
 
