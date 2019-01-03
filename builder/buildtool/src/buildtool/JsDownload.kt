@@ -269,7 +269,7 @@ open class JsDownload(
         } else {
             {
                 publicDirs.values.flatMap { d -> d.walk().filter { it.isFile }.toList() } +
-                        extract.cssPath.map { extracted.resolve(it) }
+                        publicCssFiles.values
             }
         }
     )
