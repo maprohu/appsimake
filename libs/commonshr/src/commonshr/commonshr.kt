@@ -5,8 +5,10 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
-fun <T> obj() = js("{}").unsafeCast<T>()
-fun <T> obj(fn: T.() -> Unit) = obj<T>().apply(fn)
+inline fun dyn() = js("{}")
+inline fun <T> obj() = dyn().unsafeCast<T>()
+inline fun dyn(fn: dynamic.() -> Unit) = (dyn() as Any?).apply(fn)
+inline fun <T> obj(fn: T.() -> Unit) = obj<T>().apply(fn)
 
 class NamedDelegate<T>(
     private val init : (String) -> T
@@ -77,3 +79,4 @@ fun <T> wrapper(vararg classes: KClass<*>) : (dynamic) -> T {
             .let { jsNew(it, d) as T }
     }
 }
+

@@ -288,6 +288,9 @@ fun Element.flexRow() {
 fun Element.margin1() {
     classes += "m-1"
 }
+fun Element.marginRight2() {
+    classes += "mr-2"
+}
 fun Element.marginBottom1() {
     classes += "mb-1"
 }
@@ -320,6 +323,18 @@ fun Element.flexShrink0() {
 }
 fun Element.bgLight() {
     classes += "bg-light"
+}
+val bgTransparent = "bg-transparent"
+fun Element.bgTransparent() {
+    classes += bgTransparent
+}
+val bgWarning = "bg-warning"
+fun Element.bgWarning() {
+    classes += bgWarning
+}
+val bgSucess = "bg-success"
+fun Element.bgSuccess() {
+    classes += bgSucess
 }
 fun Element.bgDark() {
     classes += "bg-dark"
@@ -390,6 +405,13 @@ fun Element.spinnerBorderSm() {
     spinnerBorder()
     classes += "spinner-border-sm"
 }
+fun Element.positionAbsolute() {
+    classes += "position-absolute"
+}
+fun Element.positionRelative() {
+    classes += "position-relative"
+}
+
 
 
 

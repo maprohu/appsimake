@@ -11,7 +11,7 @@ import styles.cursorPointer
 import styles.pointerEventsNone
 
 fun main(args: Array<String>) {
-    Main.menu()
+    Form.show()
 }
 
 object Main {
@@ -19,95 +19,6 @@ object Main {
         registerServiceWorker()
     }
 
-    fun menu() {
-        appCtx.root.newRoot {
-            screenLayout {
-                top {
-                    middleTitle {
-                        innerText = "Gym Clock"
-                    }
-                }
-
-                main {
-                    flexColumn()
-                    padding2()
-                    form {
-                        div {
-                            formGroup()
-                            val l = label {
-                                innerText = "Work (seconds)"
-                            }
-                            input {
-                                formControl()
-                                type = "number"
-                                l.htmlFor = this.ref
-                                value = model.work.now.toString()
-                                val rxs = Var(value)
-                                inputEvent {
-                                    console.log(it)
-                                    rxs.now = value
-                                }
-                                val rxn = Rx {
-                                    try { rxs().toInt() } catch (_:Throwable) { null }
-                                }
-                                rxClassOpt(Rx { if (rxn() == null) "is-invalid" else null })
-                            }
-
-                        }
-                        div {
-                            formGroup()
-                            val l = label {
-                                innerText = "Rest (seconds)"
-                            }
-                            input {
-                                formControl()
-                                type = "number"
-                                l.htmlFor = this.ref
-                                value = model.rest.now.toString()
-                            }
-
-                        }
-                        div {
-                            formGroup()
-                            val l = label {
-                                innerText = "Delay (seconds)"
-                            }
-                            input {
-                                formControl()
-                                type = "number"
-                                l.htmlFor = this.ref
-                                value = model.delay.now.toString()
-                            }
-                        }
-                        a {
-                            classes += cursorPointer
-                            val i = input {
-                                margin1()
-                                classes += pointerEventsNone
-                                type = "checkbox"
-                                model.sounds.forEach {
-                                    checked = it
-                                }
-                            }
-                            label {
-                                classes += pointerEventsNone
-                                innerText = "Sounds"
-                                htmlFor = i.ref
-                            }
-                            clickEvent {
-                                model.sounds.now = !model.sounds.now
-                            }
-                        }
-                    }
-                    btnButton {
-                        btnPrimary()
-                        innerText = "Start"
-                    }
-                }
-            }
-        }
-
-    }
 }
 
 

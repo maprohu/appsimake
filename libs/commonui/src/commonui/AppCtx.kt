@@ -2,6 +2,7 @@ package commonui
 
 import bootstrap.setupFullScreen
 import buildenv.serviceWorkerFileName
+import common.named
 import killable.KillableValue
 import killable.Killables
 import kotlinx.coroutines.*
@@ -22,12 +23,14 @@ class AppCtx(
     val killables = Killables()
 
     val visible by lazy<RxVal<Boolean>> {
-        val hidden = "hidden"
-        val visibilitychange = "visibilitychange"
+        val hidden by named { it }
+        val visible by named { it }
+        val visibilitychange by named { it }
+        val visibilityState by named { it }
 
         fun isVisible() : Boolean {
-            val hiddenValue = document.asDynamic()[hidden]
-            return hiddenValue == null || hiddenValue == false
+            val dd = document.asDynamic()
+            return dd[hidden] == false || dd[visibilityState] == visible
         }
 
         val rxv = Var(isVisible())

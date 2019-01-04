@@ -16,7 +16,7 @@ external interface Settings {
 
 const val SettingsKey = "gymclock-settings"
 
-object model {
+object Model {
 
     var settings =
         window.localStorage[SettingsKey]?.let { JSON.parse<Settings>(it) } ?: obj {

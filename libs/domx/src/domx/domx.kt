@@ -175,6 +175,15 @@ val Element.ref
         "$id"
     }
 
+fun Node.checkbox(fn: HTMLInputElement.() -> Unit) = input {
+    type = "checkbox"
+    fn()
+}
+
+fun Element.pointerEventsNone() {
+    classes += styles.pointerEventsNone
+}
+
 fun Node.div(fn: HTMLDivElement.() -> Unit = {}) : HTMLDivElement = tag("div", fn)
 fun Node.nav(fn: HTMLElement.() -> Unit = {}) : HTMLElement = tag("nav", fn)
 fun Node.span(fn: HTMLSpanElement.() -> Unit = {}) : HTMLSpanElement = tag("span", fn)
