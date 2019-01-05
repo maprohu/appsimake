@@ -65,8 +65,8 @@ class Dropdown(node: Node) {
     }
 }
 
-operator fun <T: Node> T.invoke(fn: T.() -> Unit) {
-    apply(fn)
+operator fun <T: Node> T.invoke(fn: T.() -> Unit): T {
+    return apply(fn)
 }
 
 fun Node.dropdown(fn: Dropdown.() -> Unit) = Dropdown(this).apply(fn)

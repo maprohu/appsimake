@@ -10,6 +10,7 @@ import rx.Var
 import rx.rxClassOpt
 import styles.cursorPointer
 import styles.pointerEventsNone
+import styles.scrollVertical
 import kotlin.browser.document
 
 object Form {
@@ -26,6 +27,7 @@ object Form {
                 }
 
                 main {
+                    classes += scrollVertical
                     flexColumn()
                     padding2()
 
@@ -112,6 +114,7 @@ object Form {
                         }
                     }
                     btnButton {
+                        flexFixedSize()
                         btnPrimary()
                         innerText = "Start"
                         val canSubmit = Rx {

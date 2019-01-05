@@ -5,11 +5,13 @@ import animate.ElementAnimate
 import bootstrap.*
 import common.dyn
 import common.obj
+import common.res
 import commonui.screenLayout
 import domx.*
 import killable.Killable
 import killable.KillableSeq
 import killable.Killables
+import org.w3c.dom.HTMLAudioElement
 import org.w3c.dom.HTMLDivElement
 import rx.Var
 import rx.rxClass
@@ -24,7 +26,8 @@ object Clock {
 
     class Phase(
         val length: Int,
-        val style: String
+        val style: String,
+        val audio: HTMLAudioElement
     )
 
     class PhasePos(
@@ -47,6 +50,8 @@ object Clock {
 
     fun show() {
         val killables = Killables()
+
+        killables += Main.appCtx.keepAwake()
 
         Main.appCtx.root.newRoot {
             screenLayout {
@@ -92,6 +97,25 @@ object Clock {
         }
     }
 
+
+    private fun createAudio(name: String): HTMLAudioElement {
+        return document.audio {
+            source {
+                src = res("audio/$name.mp3")
+                type = "audio/mpeg"
+            }
+            source {
+                src = res("audio/$name.m4r")
+                type = "audio/x-m4r"
+            }
+        }
+    }
+
+    val prepareAudio = createAudio("exquisite")
+    val workAudio = createAudio("definite")
+    val restAudio = createAudio("not-bad")
+
+
     fun timer(
         timerDiv: HTMLDivElement
     ): Killable {
@@ -99,7 +123,6 @@ object Clock {
 
         timerDiv.apply {
             positionRelative()
-
         }
 
         val counter = Var(-1)
@@ -142,18 +165,21 @@ object Clock {
         val init = listOf(
             Phase(
                 Model.delay.now,
-                bgWarning
+                bgWarning,
+                restAudio
             )
         ).nonZeroes().toPhaseList()
 
         val repeatPhases = listOf(
             Phase(
                 Model.work.now,
-                bgSucess
+                bgSucess,
+                workAudio
             ),
             Phase(
                 Model.rest.now,
-                bgWarning
+                bgWarning,
+                restAudio
             )
         ).nonZeroes()
         val repeat = repeatPhases.toPhaseList()
@@ -219,9 +245,15 @@ object Clock {
                 if (c == 0) {
                     val first = next.next()
                     first.applyStyle()
+                    if (Model.sounds.now) {
+                        first.audio.replay()
+                    }
                     counter.now = first.length
                 } else {
                     counter.now = c
+                    if (Model.sounds.now && c in 1..3) {
+                        prepareAudio.replay()
+                    }
                 }
             }
 

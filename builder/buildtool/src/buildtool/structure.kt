@@ -209,9 +209,6 @@ object gymclocksw : JsModule(
 object gymclock : JsApp(
     "apps/gymclock",
     "Gym Clock",
-    css = listOf(
-        FileRes("gymclock.css")
-    ),
     deps = listOf(
         commonui
     ),
