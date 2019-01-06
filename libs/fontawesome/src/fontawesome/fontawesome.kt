@@ -1,7 +1,6 @@
 package fontawesome
 
-import domx.classes
-import domx.span
+import domx.*
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import styles.lineHeightInherit
@@ -18,3 +17,12 @@ fun Node.chevronRight() = fa("chevron-right")
 fun Node.chevronLeft() = fa("chevron-left")
 fun Node.chevronDown() = fa("chevron-down")
 fun Node.spinner() = fa("spinner fa-spin")
+
+val Cls.fas by css()
+val Cls.faSearch by css()
+val Cls.faPen by css()
+val Cls.faPlus by css()
+val Cls.faPlusSquare by css()
+val Cls.faChevronLeft by css()
+val Cls.faChevronRight by css()
+val Cls.faChevronDown by css()

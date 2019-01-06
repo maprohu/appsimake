@@ -1,9 +1,10 @@
 package commonui
 
-import bootstrap.column
-import bootstrap.flexCenter
-import bootstrap.flexGrow1
+import bootstrap.*
 import common.removeFromParent
+import domx.cls
+import domx.div
+import domx.invoke
 import fontawesome.spinner
 import killable.KillableSeq
 import org.w3c.dom.HTMLDivElement
@@ -25,15 +26,22 @@ class RootPanel(
     fun newRoot(fn: HTMLDivElement.() -> Unit = {}): HTMLDivElement {
         return document.column {
             setRoot(this)
-            flexGrow1()
+            cls.flexGrow1
             fn()
         }
     }
 
-    fun setHourglass() {
-        newRoot {
-            flexCenter()
-            spinner()
+    fun setHourglass(): HTMLDivElement {
+        return newRoot {
+            cls {
+                dFlex
+                flexColumn
+                alignItemsCenter
+                justifyContentCenter
+            }
+            div {
+                cls.spinnerBorder
+            }
         }
     }
 

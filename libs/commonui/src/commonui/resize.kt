@@ -7,6 +7,7 @@ import bootstrap.padding2
 import common.resizeEvent
 import domx.classes
 import domx.div
+import domx.invoke
 import killable.Killables
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLDivElement

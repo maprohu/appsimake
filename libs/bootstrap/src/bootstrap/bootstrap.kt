@@ -9,6 +9,8 @@ import common.*
 import domx.*
 import org.w3c.dom.events.MouseEvent
 import styles.overflowHidden
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 
 
 //fun Node.topbar(
@@ -63,10 +65,6 @@ class Dropdown(node: Node) {
     val menu = element.div {
         dropdownMenu()
     }
-}
-
-operator fun <T: Node> T.invoke(fn: T.() -> Unit): T {
-    return apply(fn)
 }
 
 fun Node.dropdown(fn: Dropdown.() -> Unit) = Dropdown(this).apply(fn)
@@ -155,6 +153,7 @@ fun Element.flexJustifyContentCenter() {
     flex()
     classes += "justify-content-center"
 }
+
 
 fun Element.flexAlignItemsCenter() {
     flex()
@@ -265,7 +264,9 @@ fun Node.row(fn: HTMLDivElement.() -> Unit): HTMLDivElement {
 fun Node.btnButton(fn: HTMLButtonElement.() -> Unit): HTMLButtonElement {
     return button {
         type = "button"
-        classes += "btn"
+        cls {
+            btn
+        }
         fn()
     }
 }
@@ -302,6 +303,9 @@ fun Element.displayBlock() {
 }
 fun Element.padding1() {
     classes += "p-1"
+}
+fun Element.card() {
+    classes += "card"
 }
 fun Element.padding2() {
     classes += "p-2"
@@ -415,5 +419,48 @@ fun Element.positionRelative() {
 
 
 
+val Cls.border by css()
+val Cls.borderBottom by css()
+val Cls.rounded by css()
+val Cls.close by css()
+val Cls.card by css()
+val Cls.cardHeader by css()
+val Cls.cardFooter by css()
+val Cls.cardBody by css()
+val Cls.cardTitle by css()
+val Cls.spinnerBorder by css()
+val Cls.spinnerBorderSm by css()
+val Cls.spinnerGrow by css()
+val Cls.m0 by css()
+val Cls.m1 by css()
+val Cls.m2 by css()
+val Cls.p1 by css()
+val Cls.p2 by css()
+val Cls.btnGroup by css()
+val Cls.btnSecondary by css()
+val Cls.btnPrimary by css()
+val Cls.btn by css()
+val Cls.dFlex by css()
+val Cls.flexRow by css()
+val Cls.flexColumn by css()
+val Cls.flexGrow1 by css()
+val Cls.flexGrow0 by css()
+val Cls.flexShrink0 by css()
+val Cls.justifyContentStart by css()
+val Cls.justifyContentCenter by css()
+val Cls.alignItemsCenter by css()
+val Cls.alignItemsStretch by css()
+val Cls.listGroup by css()
+val Cls.listGroupItem by css()
+val Cls.listGroupFlush by css()
+val Cls.navbarBrand by css()
+val Cls.formInline by css()
+val Cls.formControl by css()
+val Cls.inputGroup by css()
 
+fun Cls.flexCenter() {
+    dFlex
+    justifyContentCenter
+    alignItemsCenter
+}
 

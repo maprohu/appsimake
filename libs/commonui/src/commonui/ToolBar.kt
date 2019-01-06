@@ -2,9 +2,11 @@ package commonui
 
 import bootstrap.*
 import common.insertAt
-import domx.div
-import domx.span
+import domx.*
+import fontawesome.faChevronLeft
+import fontawesome.fas
 import org.w3c.dom.*
+import styles.cls
 import kotlin.browser.document
 
 class ToolBar(node: Node) {
@@ -26,11 +28,25 @@ class ToolBar(node: Node) {
 
     fun leftButton(fn: HTMLButtonElement.() -> Unit): HTMLButtonElement {
         return left.btnButton {
-            margin1()
-            btnSecondary()
+            cls {
+                btnSecondary
+            }
             fn()
         }
     }
+
+    fun backButton(fn: () -> Unit): HTMLButtonElement {
+        return leftButton {
+            cls {
+                fas
+                faChevronLeft
+                clickEvent {
+                    fn()
+                }
+            }
+        }
+    }
+
 
 
 
@@ -43,22 +59,24 @@ class ToolBar(node: Node) {
 
     fun middle(fn: HTMLDivElement.() -> Unit) = middle.apply(fn)
 
-    fun middleTitle(fn: HTMLSpanElement.() -> Unit): HTMLSpanElement {
+    fun middleTitle(fn: HTMLElement.() -> Unit): HTMLElement {
         return middle {
             flexAlignItemsCenter()
-        }.span {
-            margin1()
-            style.fontSize = "1.25rem"
+        }.h5 {
+            cls {
+                m2
+            }
             fn()
         }
     }
 
-
     val right by lazy {
         middle
         element.div {
-            flex()
-            flexFixedSize()
+            cls {
+                dFlex
+                flexFixedSize()
+            }
         }
     }
 

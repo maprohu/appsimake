@@ -4,4 +4,5 @@ import buildtool.*
 
 fun main(args: Array<String>) = runTask {
     tasks.testHtml
+    tasks.testSW
 }

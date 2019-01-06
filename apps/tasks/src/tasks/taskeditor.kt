@@ -5,47 +5,36 @@ import common.obj
 import domx.*
 import firebase.firestore.DocItem
 import firebase.firestore.DocumentReference
+import firebase.firestore.FieldValue
 import fontawesome.spinner
 import killable.Killables
 import rx.Rx
 import rx.Var
 import styles.scrollVertical
+import taskslib.Task
 import kotlin.js.Promise
 
-data class TaskData(
-    val title: String = "",
-    val text: String = ""
-) {
-    constructor(task: Task) : this(
-        title = task.title,
-        text = task.text
-    )
-
-    fun toTask() = obj<Task>().also {
-        it.title = title
-        it.text = text
-    }
-}
 
 fun LoggedIn.editTask(
     item: DocItem<Task>? = null,
     onBack: () -> Unit = { main() }
 ) {
-    val savedData = Var(item?.let { it.data.now.toTaskData() })
+    val savedData = Var(item?.let { it.data.now })
     val title = Var(savedData.now?.title ?: "")
     val text = Var(savedData.now?.text ?: "")
     val isSaving = Var(false)
-    val editingData = Rx {
-        TaskData(
-            title = title(),
-            text = text()
-        )
-    }
-    val isSaved = Rx { editingData() == savedData() }
-    val canSave = Rx { !isSaved() && !isSaving() && editingData().title.isNotBlank() }
+    val isSaved = Rx { title() == savedData()?.title && text() == savedData()?.text }
+    val canSave = Rx { !isSaved() && !isSaving() && title().isNotBlank() }
     val canDelete = Rx { savedData() != null && !isSaving() }
 
     val killables = Killables()
+
+
+    fun editingData() = Task().apply {
+        this.title = title.now
+        this.text = text.now
+        this.ts = FieldValue.serverTimestamp()
+    }
 
 
     lateinit var savePromise : () -> Promise<*>
@@ -53,9 +42,9 @@ fun LoggedIn.editTask(
 
     fun setupSavedState(ref: DocumentReference) {
         savePromise = {
-            val toSave = editingData.now
+            val toSave = editingData()
             ref
-                .set(toSave.toTask())
+                .set(toSave.wrapped)
                 .then { savedData.now = toSave }
         }
         deletePromise = {
@@ -72,18 +61,18 @@ fun LoggedIn.editTask(
     }
 
     fun saveNew(): Promise<*> {
-        val toSave = editingData.now
+        val toSave = editingData()
 
         return userTasksRef.add(
-            toSave.toTask()
+            toSave.wrapped
         ).then { docRef ->
             savedData.now = toSave
 
             killables += docRef
                 .onSnapshot { d ->
                     if (d.exists) {
-                        d.data<Task>().also { i ->
-                            savedData.now = TaskData(i)
+                        d.data<Any>().also { i ->
+                            savedData.now = Task(i)
                         }
                     } else {
                         savedData.now = null
@@ -98,7 +87,7 @@ fun LoggedIn.editTask(
     if (item==null) {
         savePromise = { saveNew() }
     } else {
-        killables += item.data.forEach { savedData.now = it.toTaskData() }
+        killables += item.data.forEach { savedData.now = it }
         setupSavedState(userTasksRef.doc(item.id))
     }
 

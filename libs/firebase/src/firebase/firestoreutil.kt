@@ -1,6 +1,7 @@
 package firebase.firestore
 
 import common.*
+import commonlib.CollectionWrap
 import firebase.FirebaseError
 import killable.Killables
 import kotlinx.coroutines.*
@@ -9,6 +10,8 @@ import rx.RxVal
 import rx.Var
 import kotlin.js.Promise
 import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty0
+import kotlin.reflect.KProperty1
 
 fun setOptionsMerge() = obj<SetOptions> { merge = true }
 
@@ -173,10 +176,17 @@ fun <T> Query.listen(
         onNext(it)
     }
 
-    return onSnapshot(
-        { qs -> onNext(qs) },
+
+    val killables = Killables()
+
+    killables += onSnapshot(
+        { qs ->
+            onNext(qs)
+        },
         onError
     )
+
+    return { killables.kill() }
 }
 
 class DocItem<T>(
@@ -222,4 +232,33 @@ fun launch(fn: suspend () -> Unit) {
             fn()
         } catch (e: RollbackException) {}
     }
+}
+
+
+class Prop<in T, out R>(
+    val name: String
+)
+val <T, R> KProperty1<T, R>.cast
+    get() = Prop<T, R>(name)
+
+class QueryBuilder<T>(
+    var query : Query
+) {
+
+    infix fun <P> KProperty1<T, P>.eq(v: P) = cast eq v
+    fun <P> KProperty1<T, P>.asc() = cast.asc()
+    fun <P> KProperty1<T, P>.desc() = cast.desc()
+
+    infix fun <P> Prop<T, P>.eq(v: P) {
+        query = query.where(name, "==", v)
+    }
+    fun <P> Prop<T, P>.asc() {
+        query = query.orderBy(name)
+    }
+    fun <P> Prop<T, P>.desc() {
+        query = query.orderBy(name, "desc")
+    }
+}
+fun <T> CollectionWrap<T>.query(db: Firestore, fn:  QueryBuilder<T>.() -> Unit): Query {
+    return QueryBuilder<T>(db.collection(path)).apply(fn).query
 }

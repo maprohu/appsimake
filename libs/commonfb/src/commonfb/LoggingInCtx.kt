@@ -45,7 +45,7 @@ abstract class LoggingInCtx(
             }
         }.main.apply {
             flexCenter()
-        }.div()
+        }.div
 
     abstract fun loggedIn(user: User) : () -> Unit
 

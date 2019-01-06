@@ -72,27 +72,6 @@ fun Node.removeFromParent() {
 
 
 
-open class Listeners {
-
-    protected var listeners = listOf<() -> Unit>()
-
-    operator fun plusAssign(listener: () -> Unit) {
-        add(listener)
-    }
-
-    open fun add(listener: () -> Unit) : () -> Unit {
-        listeners += listener
-
-        return {
-            listeners -= listener
-        }
-    }
-
-    open fun fire() {
-        listeners.forEach { it() }
-    }
-
-}
 
 open class Emitter<T> {
 

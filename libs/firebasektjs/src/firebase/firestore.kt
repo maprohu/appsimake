@@ -119,6 +119,7 @@ external interface DocumentData {
 
 }
 
+// https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentSnapshot?authuser=0
 external interface DocumentSnapshot {
 
     fun <T> data(
@@ -148,6 +149,7 @@ external interface SnapshotOptions {
     var serverTimestamps : String
 }
 
+// https://firebase.google.com/docs/reference/js/firebase.firestore.QueryDocumentSnapshot?authuser=0
 external interface QueryDocumentSnapshot : DocumentSnapshot {
     val id: String
 
@@ -156,8 +158,10 @@ external interface QueryDocumentSnapshot : DocumentSnapshot {
 
 }
 
+// https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentChange?authuser=0
 external interface DocumentChange {
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentChange?authuser=0#doc
     val doc: QueryDocumentSnapshot
     val newIndex : Int
     val oldIndex : Int
@@ -166,9 +170,12 @@ external interface DocumentChange {
 
 }
 
+// https://firebase.google.com/docs/reference/js/firebase.firestore.QuerySnapshot?authuser=0
 external interface QuerySnapshot {
 
     val docs : Array<QueryDocumentSnapshot>
+
+    val size : Int
 
     fun docChanges(
             options: SnapshotOptions = definedExternally
@@ -187,12 +194,13 @@ external class FieldValue {
 }
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.Timestamp
-external class Timestamp {
-    var nanoseconds: Long
-    var seconds: Long
+external class Timestamp : firebaseshr.firestore.Timestamp {
 
-    fun toDate() : Date
-    fun toMillis() : Long
+    override var nanoseconds: Long
+    override var seconds: Long
+
+    override fun toDate() : Date
+    override fun toMillis() : Long
 
     companion object {
         fun fromDate(date: Date) : Timestamp

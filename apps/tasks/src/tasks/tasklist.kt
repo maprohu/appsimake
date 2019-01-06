@@ -2,17 +2,24 @@ package tasks
 
 import bootstrap.*
 import common.ListenableMutableList
+import commonfb.stringClickListUI
 import commonui.RootPanel
+import commonui.screenLayout
 import domx.*
 import firebase.firestore.DocItem
 import firebase.firestore.docItems
+import firebase.firestore.query
+import fontawesome.faChevronLeft
+import fontawesome.faPlus
+import fontawesome.fas
 import fontawesome.spinner
 import killable.Killables
 import rx.Var
 import styles.scrollVertical
+import taskslib.Task
 import kotlin.browser.document
 
-fun LoggedIn.listTasks() {
+fun LoggedIn.listTasks(after: () -> Unit) {
 
     val isBusy = Var(false)
 
@@ -20,103 +27,95 @@ fun LoggedIn.listTasks() {
 
 
     root.newRoot {
+
         fun displayList() {
             root.setRoot(this)
         }
 
-        flexColumn()
-        div {
-            flexFixedSize()
-            flexRow()
-            padding2()
-            borderBottom()
-            bgLight()
-            btnButton {
-                flexFixedSize()
-                btnSecondary()
-                innerText = "Back"
-                clickEvent {
-                    killables.kill()
-                    main()
-                }
-            }
-            div {
-                flexGrow1()
-            }
-            div {
-                rxDisplay(isBusy)
-                flexCenter()
-                padding2()
-                spinner()
-            }
-            btnButton {
-                flexFixedSize()
-                btnPrimary()
-                innerText = "New"
-                clickEvent {
-                    editTask {
-                        displayList()
+        screenLayout {
+            top {
+                left{
+                    button {
+                        cls {
+                            btn
+                            btnSecondary
+                            fas
+                            faChevronLeft
+                            clickEvent {
+                                killables.kill()
+                                after()
+                            }
+                        }
+
                     }
                 }
-            }
-        }
+                middle {
 
-        val listOrHourglassRoot = RootPanel(
-            column {
-                flexGrow1()
-                padding2()
-            }
-        )
-        listOrHourglassRoot.setHourglass()
+                    cls {
+                        flexRow
+                        alignItemsCenter
+                    }
 
-        val list = ListenableMutableList<DocItem<Task>>()
+                    h5 {
+                        cls {
+                            flexGrow1
+                            m2
+                        }
 
-        val listOrEmptyDiv = document.column {
-            flexGrow1()
-
-            val listOrEmptyRoot = RootPanel(
-                column {
-                    flexGrow1()
+                        innerText = "Task Search"
+                    }
+                    div {
+                        cls {
+                            flexGrow0
+                            flexShrink0
+                            spinnerBorder
+                            spinnerBorderSm
+                        }
+                        rxDisplay(isBusy)
+                    }
                 }
-            )
-
-            val emptyDiv = document.column {
-                flexCenter()
-                flexGrow1()
-                span {
-                    innerText = "The list is empty"
-                }
-            }
-
-            val listDiv = document.column {
-                classes += scrollVertical
-                flexGrow1()
-                listGroup {
-                    listenableList(list) { item ->
-                        document.listAction {
-                            rxText { item.data().title }
-                            clickEvent {
-                                editTask(item) {
-                                    displayList()
-                                }
+                right {
+                    btnButton {
+                        cls {
+                            fas
+                            faPlus
+                            btn
+                            btnPrimary
+                        }
+                        clickEvent {
+                            editTask {
+                                displayList()
                             }
                         }
                     }
                 }
             }
+            main {
+                val listRoot = RootPanel(this)
 
-            list.isEmptyRx.forEach { empty ->
-                listOrEmptyRoot.setRoot(
-                    if (empty) emptyDiv else listDiv
-                )
+
+                killables += userTasks
+                    .query(db) {
+                        Task::title.asc()
+                    }
+                    .stringClickListUI(
+                        listRoot,
+                        extract = { Task(it.data()) },
+                        itemText = { it.title },
+                        ulDecor = {
+                            cls {
+                                listGroupFlush
+                                borderBottom
+                            }
+                        },
+                        onClick = {
+                            viewTask(it) {
+                                displayList()
+                            }
+                        }
+                    )
+
             }
         }
-
-        killables += userTasksRef.docItems(
-            list,
-            onFirst = {
-                listOrHourglassRoot.setRoot(listOrEmptyDiv)
-            }
-        )
     }
 }

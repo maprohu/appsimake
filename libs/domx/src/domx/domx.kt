@@ -196,31 +196,66 @@ fun HTMLAudioElement.replay() {
     play()
 }
 
+class CssClass(val name: String) : ReadOnlyProperty<Cls, String> {
+    override fun getValue(thisRef: Cls, property: KProperty<*>) : String {
+        thisRef.element { classes += name }
+        return name
+    }
+}
+fun String.toCss() =
+    this
+        .replace("[A-Z]".toRegex()) { "-${it.value.toLowerCase()}" }
+        .replace("\\d+".toRegex()) { "-${it.value}" }
+
+class CssClassProvider {
+    operator fun provideDelegate(
+        thisRef: Nothing?,
+        prop: KProperty<*>
+    ) = CssClass(prop.name.toCss())
+}
+
+open class Cls(val element: (Element.() -> Unit) -> Unit = {}) {
+    operator fun invoke(fn: Cls.() -> Unit) = this.apply(fn)
+    companion object : Cls()
+}
+val Element.cls
+    get() = Cls { this.apply(it) }
+
+fun css(name: String) = CssClass(name)
+fun css() = CssClassProvider()
 class TagDelegate<T : Element> : ReadOnlyProperty<Node, T> {
     override fun getValue(thisRef: Node, property: KProperty<*>): T = thisRef.tag(property.name)
 }
 
 fun <T: Element> elem() = TagDelegate<T>()
 
-fun Node.div(fn: HTMLDivElement.() -> Unit = {}) : HTMLDivElement = tag("div", fn)
+operator fun <T: Node> T.invoke(fn: T.() -> Unit): T {
+    return apply(fn)
+}
+
 fun Node.nav(fn: HTMLElement.() -> Unit = {}) : HTMLElement = tag("nav", fn)
-fun Node.span(fn: HTMLSpanElement.() -> Unit = {}) : HTMLSpanElement = tag("span", fn)
+//fun Node.span(fn: HTMLSpanElement.() -> Unit = {}) : HTMLSpanElement = tag("span", fn)
 fun Node.styleTag(fn: HTMLStyleElement.() -> Unit = {}) : HTMLStyleElement = tag("style", fn)
 fun Node.ul(fn: HTMLUListElement.() -> Unit = {}) : HTMLUListElement = tag("ul", fn)
 fun Node.a(fn: HTMLAnchorElement.() -> Unit = {}) : HTMLAnchorElement = tag("a", fn)
 fun Node.ol(fn: HTMLOListElement.() -> Unit = {}) : HTMLOListElement = tag("ol", fn)
 fun Node.li(fn: HTMLLIElement.() -> Unit = {}) : HTMLLIElement = tag("li", fn)
-fun Node.button(fn: HTMLButtonElement.() -> Unit = {}) : HTMLButtonElement = tag("button", fn)
 fun Node.label(fn: HTMLLabelElement.() -> Unit = {}) : HTMLLabelElement = tag("label", fn)
 fun Node.textarea(fn: HTMLTextAreaElement.() -> Unit = {}) : HTMLTextAreaElement = tag("textarea", fn)
-fun Node.input(fn: HTMLInputElement.() -> Unit = {}) : HTMLInputElement = tag("input", fn)
 fun Node.form(fn: HTMLFormElement.() -> Unit = {}) = tag("form", fn)
-fun Node.h1(fn: HTMLHeadingElement.() -> Unit = {}) = tag("h1", fn)
-fun Node.h2(fn: HTMLHeadingElement.() -> Unit = {}) = tag("h2", fn)
-fun Node.h3(fn: HTMLHeadingElement.() -> Unit = {}) = tag("h3", fn)
-fun Node.h4(fn: HTMLHeadingElement.() -> Unit = {}) = tag("h4", fn)
-fun Node.h5(fn: HTMLHeadingElement.() -> Unit = {}) = tag("h5", fn)
-fun Node.h6(fn: HTMLHeadingElement.() -> Unit = {})  = tag("h6", fn)
 fun Node.video(fn: HTMLVideoElement.() -> Unit = {})  = tag("video", fn)
+val Node.div by elem<HTMLDivElement>()
 val Node.source by elem<HTMLSourceElement>()
 val Node.audio by elem<HTMLAudioElement>()
+val Node.span by elem<HTMLSpanElement>()
+val Node.button by elem<HTMLButtonElement>()
+val Node.h1 by elem<HTMLHeadingElement>()
+val Node.h2 by elem<HTMLHeadingElement>()
+val Node.h3 by elem<HTMLHeadingElement>()
+val Node.h4 by elem<HTMLHeadingElement>()
+val Node.h5 by elem<HTMLHeadingElement>()
+val Node.h6 by elem<HTMLHeadingElement>()
+val Node.dl by elem<HTMLDListElement>()
+val Node.dt by elem<HTMLElement>()
+val Node.dd by elem<HTMLElement>()
+val Node.input by elem<HTMLInputElement>()

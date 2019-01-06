@@ -53,8 +53,8 @@ class FbCtx(
             msg
         }
     }
-    val baseRef by lazy { db.doc(lib.firestoreBasePath) }
-    val singletonsRef by lazy { db.collection(lib.firestoreSingletonsPath) }
+//    val baseRef by lazy { db.doc(lib.firestoreBasePath) }
+//    val singletonsRef by lazy { db.collection(lib.firestoreSingletonsPath) }
 
     fun signOut() {
         appCtx.hourglass()

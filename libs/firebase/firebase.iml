@@ -9,6 +9,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry exported="" type="library" name="kotlin-stdlib" level="project" />
     <orderEntry exported="" type="module" module-name="common"/>
+    <orderEntry exported="" type="module" module-name="commonlib"/>
     <orderEntry exported="" type="module" module-name="firebasektjs"/>
     <orderEntry exported="" type="library" name="kotlinx-coroutines-core-js-1.1.0" level="project"/>
   </component>

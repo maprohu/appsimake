@@ -29,7 +29,9 @@ fun main(args: Array<String>) {
         tictactoesw,
         gymclocksw,
 
+        firebaseshr,
         commonlib,
+        taskslib,
         testapplib,
         testappfns,
         tictactoelib,

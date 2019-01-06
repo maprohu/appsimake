@@ -1,7 +1,5 @@
 package killable
 
-import common.removeFromParent
-import org.w3c.dom.Node
 
 class KillableSeq(initial: () -> Unit = {}) : Killable {
 

@@ -2,6 +2,8 @@ package commonfb
 
 import common.Wrap
 import common.obj
+import commonlib.fcmtokens
+import commonlib.private
 import firebase.User
 import firebase.firestore.*
 import firebase.messaging
@@ -23,9 +25,13 @@ class LoggedInCtx(
     val user: User
 ) {
     val lib = fbCtx.lib
-    val privateRef = fbCtx.db.doc(lib.firestorePrivateUserPath(user.uid))
+    val appCtx = fbCtx.appCtx
+    val fcmTokensRef = fbCtx.db.collection(
+        lib.app.private.doc(user.uid).fcmtokens.path
+    )
 
-    val fcmTokensRef = fbCtx.db.collection(lib.firestoreFcmTokensPath(user.uid))
+
+
 
     val killables = Killables()
 

@@ -215,10 +215,15 @@ object gymclock : JsApp(
     serviceWorker = gymclocksw
 )
 
+object firebaseshr : JsModule(
+    "libs/firebaseshr"
+)
+
 object firebasektjs : JsModule(
     "libs/firebasektjs",
     listOf(
         commonshr,
+        firebaseshr,
         firebaseJs,
         kotlinxCoroutines
     )
@@ -228,6 +233,7 @@ object firebase : JsModule(
     "libs/firebase",
     listOf(
         common,
+        commonlib,
         firebasektjs,
         firebaseUiJs,
         kotlinxCoroutines
@@ -246,7 +252,8 @@ object commonfb : JsModule(
 object commonlib : JsModule(
     "libs/commonlib",
     listOf(
-        commonshr
+        commonshr,
+        firebaseshr
     )
 )
 
@@ -267,10 +274,18 @@ object index : JsApp(
     serviceWorker = cachingsw
 )
 
+object taskslib : JsModule(
+    "libs/taskslib",
+    listOf(
+        commonlib
+    )
+)
+
 object tasks : JsApp(
     "apps/tasks",
     "Tasks",
     listOf(
+        taskslib,
         commonfb
     )
 )

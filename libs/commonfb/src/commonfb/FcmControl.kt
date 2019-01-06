@@ -75,6 +75,7 @@ class FcmControl(
                             }
                         }
 
+
                         killableSeq.set {
                             stopPolling()
                             stopTokenListener()
