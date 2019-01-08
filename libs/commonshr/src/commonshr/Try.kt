@@ -93,18 +93,35 @@ sealed class Optional<out T> {
         fun <T : Any> toOptional(value: T?): Optional<T> = if (value == null) None else Some(value)
     }
 
+    abstract fun isEmpty(): Boolean
     abstract fun get() : T
-
+    abstract fun <U> map(fn: (T) -> U) : Optional<U>
+    abstract fun orElse(default: Optional<@UnsafeVariance T>): Optional<T>
+    abstract fun any(fn: (T) -> Boolean) : Boolean
+    abstract fun forEach(fn: (T) -> Unit) : Unit
+    abstract fun getOrElse(default: () -> @UnsafeVariance T) : T
 }
 
 data class Some<out T>(val value: T) : Optional<T>() {
+    override fun isEmpty(): Boolean = false
     override fun toString() = "Some($value)"
     override fun get(): T = value
+    override fun orElse(default: Optional<@UnsafeVariance T>) = this
+    override fun <U> map(fn: (T) -> U): Optional<U> = Some(fn(value))
+    override fun any(fn: (T) -> Boolean) = fn(value)
+    override fun forEach(fn: (T) -> Unit) { fn(value) }
+    override fun getOrElse(default: () -> @UnsafeVariance T): T = value
 }
 
 object None : Optional<Nothing>() {
+    override fun isEmpty(): Boolean = true
     override fun toString() = "None"
     override fun get(): Nothing = throw NoSuchElementException()
+    override fun orElse(default: Optional<Nothing>) = default
+    override fun <U> map(fn: (Nothing) -> U): Optional<U> = None
+    override fun any(fn: (Nothing) -> Boolean) = false
+    override fun forEach(fn: (Nothing) -> Unit) {}
+    override fun getOrElse(default: () -> Nothing): Nothing = default()
 }
 
 /**

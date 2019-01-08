@@ -74,7 +74,7 @@ class Obs<T>(
 
 }
 
-interface RxIface<T> {
+interface RxIface<out T> {
 
     val now : T
 

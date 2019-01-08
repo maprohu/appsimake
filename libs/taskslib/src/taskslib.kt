@@ -1,8 +1,12 @@
 package taskslib
 
+import common.Some
 import common.Wrap
 import common.named
 import commonlib.*
+import commonshr.enum
+import commonshr.o
+import commonshr.scalar
 import firebaseshr.firestore.Timestamp
 
 val tasks by named { Lib(it) }
@@ -42,10 +46,10 @@ fun <T> Array<T>.subs(min: Int, max: Int): List<List<T>> {
 val MaxTagIndexSize = 4
 
 
-class Task(o: dynamic = null) : Wrap<Task>(o) {
-    var title : String by dyn()
-    var text : String by dyn()
-    var status: TaskStatus by enum(TaskStatus.New)
+class Task {
+    val title by o.scalar<String>().prop()
+    val text by o.scalar<String>().prop()
+    val status by o.scalar<TaskStatus>().withDefault(TaskStatus.New).enum().prop()
     var tags: Array<String> by dyn(arrayOf())
     var ts: Timestamp by dyn()
 

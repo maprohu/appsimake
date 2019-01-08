@@ -43,6 +43,11 @@ fun LoggedIn.editTask(
         this.ts = FieldValue.serverTimestamp()
     }
 
+    data class State(
+        val x : String = ""
+    )
+    var state = State()
+
     lateinit var savePromise : () -> Promise<*>
     lateinit var deletePromise : () -> Promise<*>
 

@@ -7,7 +7,6 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty0
 import kotlin.reflect.KProperty1
 
 @Suppress("NOTHING_TO_INLINE")
@@ -19,16 +18,16 @@ inline fun dyn(fn: dynamic.() -> Unit) = (dyn() as Any?).apply(fn)
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T> obj(fn: T.() -> Unit) = obj<T>().apply(fn)
 
-class NamedDelegate<T>(
+class NamedDelegate<out T>(
     private val init : (String) -> T
 ) {
     operator fun provideDelegate(
-        thisRef: Nothing?,
+        thisRef: Any?,
         prop: KProperty<*>
-    ): ReadOnlyProperty<Nothing?, T> {
+    ): ReadOnlyProperty<Any?, T> {
         val value = init(prop.name)
-        return object : ReadOnlyProperty<Nothing?, T> {
-            override fun getValue(thisRef: Nothing?, property: KProperty<*>): T = value
+        return object : ReadOnlyProperty<Any?, T> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>): T = value
         }
     }
 }
@@ -38,14 +37,15 @@ fun <T> named(fn: (String) -> T) = NamedDelegate(fn)
 abstract class DynRx<T>(
     internal val o: dynamic,
     val name: String,
-    internal val gs: GetSet<T>
+    internal val gs: GetSet<T>,
+    val defaultValue: Optional<T>
 ) : ReadOnlyProperty<Any, T> {
     abstract val rxv: RxVal<T>
-    fun getValue(): T = gs.get(o[name])
-    override fun getValue(thisRef: Any, property: KProperty<*>): T = getValue()
-    val original by lazy { Var(rxv.now) }
+    fun extract(): T = gs.get(o[name])
+    override fun getValue(thisRef: Any, property: KProperty<*>): T = rxv.now
+    val original = Var(gs.opt(o, name))
     val isDirty by lazy { Rx { rxv() != original() } }
-    fun clearDirty() { original.now = rxv.now }
+    fun clearDirty() { original.now = Some(rxv.now) }
 }
 
 class Dyn<T>(
@@ -66,6 +66,22 @@ class Dyn<T>(
     }
 }
 
+
+class AutoDyn<T>(
+    o: dynamic,
+    name: String,
+    gs: GetSet<T>,
+    fn: () -> T
+) : DynRx<T>(o, name, gs) {
+    override val rxv: RxVal<T> by lazy {
+        val rxv = Rx { fn() }
+        rxv.forEach {
+            o[name] = gs.set(it)
+        }
+        rxv
+    }
+}
+
 class Binder<T>(
     private val wrap: Wrap<*>,
     private val o: dynamic,
@@ -78,21 +94,6 @@ class Binder<T>(
     ): ReadWriteProperty<Any, T> {
         init(prop.name)
         return Dyn(o, prop.name, getSet).also { wrap.add(it) }
-    }
-}
-
-class AutoDyn<T>(
-    o: dynamic,
-    name: String,
-    gs: GetSet<T>,
-    fn: () -> T
-) : DynRx<T>(o, name, gs) {
-    override val rxv: RxVal<T> = Rx { fn() }
-
-    init {
-        rxv.forEach {
-            o[name] = gs.set(it)
-        }
     }
 }
 
@@ -111,6 +112,7 @@ class AutoBinder<T>(
 interface GetSet<T> {
     fun get(v: dynamic) : T = v.unsafeCast<T>()
     fun set(v: T) : dynamic = v.asDynamic()
+    fun opt(o: dynamic, name: String) = if (hasOwnProperty(o, name)) Some(get(o[name])) else None
 
     companion object : GetSet<Any>
 }
@@ -134,27 +136,56 @@ abstract class Wrap<W: Wrap<W>>(o: dynamic) {
 
     // KProperty.getDelegate is not yet supported in javascript...
     internal val props = mutableMapOf<String, DynRx<*>>()
-    internal fun <T> add(p: DynRx<T>) { props[p.name] = p }
+    private var isFrozen = false
+    private fun freeze() {
+        isFrozen = true
+    }
+    private val dyns by lazy {
+        freeze()
+        props.values.filterIsInstance<Dyn<*>>()
+    }
+    internal fun <T> add(p: DynRx<T>) {
+        require(!isFrozen)
+        props[p.name] = p
+    }
 
-    val wrapped = o ?: obj()
+    private val w = o ?: obj()
 
     private val propInit : (String, GetSet<Any?>, Any?) -> Unit =
-        if (o != null) { { n, gs, v -> if (wrapped[n] == null) wrapped[n] = gs.set(v) } }
-        else { { n, gs, v -> wrapped[n] = gs.set(v) } }
+        if (o != null) {
+            { n, gs, v ->
+                if (w[n] == null) w[n] = gs.set(v)
+            }
+        } else {
+            { n, gs, v ->
+                w[n] = gs.set(v)
+            }
+        }
 
-    protected fun <T> dyn(gs: GetSet<T> = GetSet()) = Binder(this, wrapped, gs) {}
-    protected fun <T> dyn(v: T, gs: GetSet<T> = GetSet()) = Binder(this, wrapped, gs) { propInit(it, gs as GetSet<Any?>, v) }
+    protected fun <T> dyn(gs: GetSet<T> = GetSet()) = Binder(this, w, gs) {}
+    protected fun <T> dyn(v: T, gs: GetSet<T> = GetSet()) = Binder(this, w, gs) { propInit(it, gs as GetSet<Any?>, v) }
     protected inline fun <reified T: Enum<T>> enum() = dyn<T>(enumGetSet())
     protected inline fun <reified T: Enum<T>> enum(v: T) = dyn(v, enumGetSet())
+    fun <T> auto(gs: GetSet<T> = GetSet(), fn: Wrap<W>.() -> T) = AutoBinder(this, w, gs) { fn(this) }
 
 
     fun <T> Prop<W, T>.prop() = props.getValue(name) as DynRx<T>
     fun <T> KProperty1<W, T>.prop() = cast.prop()
     fun <T> KProperty1<W, T>.rxv() = prop().rxv()
 
-    fun <T> auto(gs: GetSet<T> = GetSet(), fn: Wrap<W>.() -> T) = AutoBinder(this, wrapped, gs) { fn(this) }
 
     val type : String by dyn(this::class.simpleName!!)
+
+    val isDirty by lazy {
+        freeze()
+        Rx {
+            dyns.any { it.isDirty() }
+        }
+    }
+
+    fun clearDirty() {
+        dyns.forEach { it.clearDirty() }
+    }
 
 }
 

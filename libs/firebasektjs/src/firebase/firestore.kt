@@ -183,6 +183,7 @@ external interface QuerySnapshot {
 
 }
 
+// https://firebase.google.com/docs/reference/js/firebase.firestore.FieldValue
 external class FieldValue {
     companion object {
         fun serverTimestamp() : Timestamp
