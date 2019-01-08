@@ -43,7 +43,7 @@ var messageHandler : (dynamic) -> Promise<Any?> = { msg ->
                         this.click_action = sw.registration.scope
                     }
                 }
-            } as? Any
+            }.unsafeCast<Any?>()
         )
 
     )

@@ -5,12 +5,34 @@ import common.Listeners
 interface Killable {
     fun kill()
 
-    fun addTo(killables: Killables) {
-        killables.add(this)
-    }
 
     companion object {
-        fun of(fn: () -> Unit) = Killables().also { it += fn }
+        fun once(fn: () -> Unit) = OnceKillable(fn)
+        fun of(fn: () -> Unit) = object : Killable {
+            override fun kill() {
+                fn()
+            }
+        }
+
+        val empty = object : Killable {
+            override fun kill() {}
+        }
+    }
+
+}
+
+fun <K: Killable> K.addedTo(killables: Killables): K {
+    killables.add(this)
+    return this
+}
+
+class OnceKillable(private val fn: () -> Unit) : Killable {
+    private var killed = false
+    override fun kill() {
+        if (!killed) {
+            killed = true
+            fn()
+        }
     }
 
 }
@@ -18,13 +40,13 @@ interface Killable {
 operator fun Killable.invoke() = kill()
 
 
-fun Listeners.add(killable: Killable) {
-    this.add { killable.kill() }
+fun Listeners.add(killable: Killable): () -> Unit {
+    return this.add { killable.kill() }
 }
 
 class KillableValue<T>(
     val value: T,
     val killable: Killable
 ) {
-    constructor(value: T, fn: () -> Unit) : this(value, Killable.of(fn))
+    constructor(value: T, fn: () -> Unit) : this(value, Killable.once(fn))
 }

@@ -10,9 +10,11 @@ class Killables : Listeners(), Killable {
     }
 
     override fun fire() {
-        super.fire()
-        listeners = listOf()
-        killed = true
+        if (!killed) {
+            killed = true
+            super.fire()
+            listeners = listOf()
+        }
     }
 
     override fun add(listener: () -> Unit): () -> Unit {
@@ -27,5 +29,9 @@ class Killables : Listeners(), Killable {
     operator fun plusAssign(killable: Killable) {
         add(killable)
     }
+
+
+    fun killables() = Killables().also { add(it) }
+    fun seq() = KillableSeq().also { add(it) }
 
 }

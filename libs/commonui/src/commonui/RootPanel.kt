@@ -6,6 +6,7 @@ import domx.cls
 import domx.div
 import domx.invoke
 import fontawesome.spinner
+import killable.Killable
 import killable.KillableSeq
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Node
@@ -14,13 +15,34 @@ import rx.RxVal
 import kotlin.browser.document
 
 class RootPanel(
-    private val container: Node
-) {
-    private val currentRoot = KillableSeq()
+    internal val container: Node,
+    private val currentRoot : KillableSeq = KillableSeq()
+) : Killable {
+
+    private var subs = listOf<Killable>()
+
+    private fun killSubs() {
+        val s = subs
+        subs = listOf()
+        s.forEach { it.kill() }
+    }
+
+
+    private var killed = false
+
+    override fun kill() {
+        if (!killed) {
+            killed = true
+            killSubs()
+        }
+    }
 
     fun setRoot(node: Node) {
-        currentRoot.set { node.removeFromParent() }
-        container.appendChild(node)
+        if (!killed) {
+            killSubs()
+            currentRoot.set { node.removeFromParent() }
+            container.appendChild(node)
+        }
     }
 
     fun newRoot(fn: HTMLDivElement.() -> Unit = {}): HTMLDivElement {
@@ -45,7 +67,18 @@ class RootPanel(
         }
     }
 
+    fun sub(): RootPanel {
+        val s = RootPanel(container, currentRoot)
+        if (killed) {
+            s.kill()
+        } else {
+            subs += s
+        }
+        return s
+    }
+
 }
+
 
 fun <T> Node.rxPanel(rxv: RxVal<T>, fn: (T) -> Node): () -> Unit {
     val map = mutableMapOf<T, Node>()

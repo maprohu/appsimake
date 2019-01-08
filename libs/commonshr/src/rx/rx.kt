@@ -243,6 +243,15 @@ open class Var<T>(
 }
 
 fun Element.rxClass(
+    style: () -> String
+) : Killable {
+    val rxv = Rx(style)
+    rxClass(rxv)
+    return rxv
+}
+
+
+fun Element.rxClass(
         style: RxVal<String>
 ) : Killable {
     return style.onOff(
@@ -265,8 +274,14 @@ fun Element.rxClassOpt(
     )
 }
 
+fun <T> (() -> T).toRx() = Rx(this)
+
 fun Element.rxClasses(
-        style: RxVal<Set<String>>
+    style: () -> Collection<String>
+) : Killable  = rxClasses(style.toRx())
+
+fun Element.rxClasses(
+        style: RxVal<Collection<String>>
 ) : Killable {
     return style.onOff(
             { addClass(*it.toTypedArray()) },

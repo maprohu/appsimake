@@ -1,41 +1,47 @@
 package tasks
 
 import bootstrap.*
-import common.obj
+import commonui.RootPanel
+import commonui.faButton
+import commonui.faButtonSpan
+import commonui.screenLayout
 import domx.*
 import firebase.firestore.DocItem
 import firebase.firestore.DocumentReference
 import firebase.firestore.FieldValue
-import fontawesome.spinner
+import fontawesome.*
 import killable.Killables
 import rx.Rx
 import rx.Var
+import rx.rxClass
+import rx.rxClasses
 import styles.scrollVertical
 import taskslib.Task
 import kotlin.js.Promise
 
 
 fun LoggedIn.editTask(
+    panel: RootPanel,
     item: DocItem<Task>? = null,
-    onBack: () -> Unit = { main() }
-) {
+    close: () -> Unit
+) : () -> Unit {
     val savedData = Var(item?.let { it.data.now })
     val title = Var(savedData.now?.title ?: "")
     val text = Var(savedData.now?.text ?: "")
     val isSaving = Var(false)
-    val isSaved = Rx { title() == savedData()?.title && text() == savedData()?.text }
+    val isSaved = Rx { title() == savedData()?.title ?: "" && text() == savedData()?.text ?: "" }
     val canSave = Rx { !isSaved() && !isSaving() && title().isNotBlank() }
+    val showDelete = Rx { savedData() != null }
+    val showDropDown = Rx { showDelete() }
     val canDelete = Rx { savedData() != null && !isSaving() }
 
     val killables = Killables()
-
 
     fun editingData() = Task().apply {
         this.title = title.now
         this.text = text.now
         this.ts = FieldValue.serverTimestamp()
     }
-
 
     lateinit var savePromise : () -> Promise<*>
     lateinit var deletePromise : () -> Promise<*>
@@ -92,8 +98,7 @@ fun LoggedIn.editTask(
     }
 
     fun back() {
-        killables.kill()
-        onBack()
+        close()
     }
 
     fun delete() {
@@ -105,89 +110,168 @@ fun LoggedIn.editTask(
             }
     }
 
-
-    root.newRoot {
-        row {
-            flexFixedSize()
-            padding2()
-            borderBottom()
-            bgLight()
-            btnButton {
-                flexFixedSize()
-                btnSecondary()
-                rxText { if (isSaved()) "Close" else "Cancel" }
-                clickEvent {
-                    back()
-                }
-            }
-            div {
-                flexGrow1()
-            }
-            div {
-                rxDisplay(isSaving)
-                flexCenter()
-                padding2()
-                spinner()
-            }
-            div {
-                flexFixedSize()
-                btnGroup()
-                btnButton {
-                    btnPrimary()
-                    rxText {
-                        when {
-                            isSaving() -> "Saving..."
-                            isSaved() -> "Saved"
-                            else -> "Save"
+    panel.newRoot {
+        screenLayout {
+            top {
+                left.btnButton {
+                    rxClasses {
+                        if (isSaved()) {
+                            listOf(Cls.btnSecondary)
+                        } else {
+                            listOf(Cls.btnDanger)
                         }
                     }
-                    rxEnabled(canSave)
-                    clickEvent { save() }
-                }
-                div {
-                    btnGroup()
-                    dropdownToggleButton {
-                        btnPrimary()
-                    }
-                    div {
-                        dropdownMenu()
-                        dropdownItemAnchor {
-                            innerText = "Delete"
-                            rxAnchorClick(canDelete) {
-                                delete()
+                    faButtonSpan {
+                        rxClasses {
+                            if (isSaved()) {
+                                listOf(Cls.faChevronLeft)
+                            } else {
+                                listOf(Cls.faUndo)
                             }
                         }
                     }
+                    clickEvent {
+                        back()
+                    }
                 }
+                middleTitle {
+                    innerText = "Edit Task"
+                }
+                right {
+                    cls {
+                        dFlex
+                        flexRow
+                        alignItemsCenter
+                    }
+                    div {
+                        cls {
+                            m1
+                            spinnerBorder
+                            spinnerBorderSm
+                        }
+                        rxDisplayed(isSaving)
+                    }
+                    div {
+                        cls {
+                            btnGroup
+                        }
+                        faButton(Cls.faSave) {
+                            cls.btnPrimary
+                            rxEnabled(canSave)
+                            clickEvent { save() }
+                        }
+                        div {
+                            rxDisplayed(showDropDown)
+                            cls {
+                                btnGroup
+                                dropdown
+                            }
+                            attr["data-toggle"] = "dropdown"
+                            button {
+                                cls {
+                                    btn
+                                    btnPrimary
+                                    dropdownToggle
+                                }
+                            }
+                            div {
+                                cls {
+                                    dropdownMenu
+                                    dropdownMenuRight
+                                }
+                                a {
+                                    rxDisplayed(showDelete)
+                                    cls {
+                                        dropdownItem
+                                        textDanger
+                                    }
+                                    span {
+                                        cls {
+                                            fas
+                                            faTrashAlt
+                                            mr2
+                                        }
+                                    }
+                                    span {
+                                        innerText = "Delete"
+                                    }
+                                    rxAnchorClick(canDelete) {
+                                        delete()
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+                }
+            }
+            main {
+                cls {
+                    dFlex
+                    flexColumn
+                }
+                classes += scrollVertical
+
+                div {
+                    cls {
+                        m2
+                        dFlex
+                        flexColumn
+                    }
+                    form {
+                        div {
+                            cls.formGroup
+                            label {
+                                innerText = "Title"
+                            }
+                            input {
+                                cls {
+                                    formControl
+                                }
+                                type = "text"
+                                value = title.now
+                                rxInput(title)
+                            }
+                        }
+
+                        div {
+                            cls.formGroup
+                            label {
+                                innerText = "Text"
+                            }
+                            textarea {
+                                cls {
+                                    formControl
+                                }
+                                rows = 5
+                                value = text.now
+                                rxInput(text)
+                            }
+                        }
+                        div {
+                            cls.formGroup
+                            label {
+                                innerText = "Status"
+                            }
+                            select {
+                                cls {
+                                    customSelect
+                                }
+                                option {
+                                    innerText = "Csuf"
+                                }
+
+                            }
+                        }
+
+                    }
+                }
+
             }
         }
-        column {
-            classes += scrollVertical
-            flexGrow1()
-            padding2()
-            div {
-                formGroup()
-                flexFixedSize()
-                label {
-                    innerText = "Title"
-                }
-                input {
-                    type = "text"
-                    value = title.now
-                    formControl()
-                    rxInput(title)
-                }
-            }
-            label {
-                flexFixedSize()
-                innerText = "Text"
-            }
-            textarea {
-                flexGrow1()
-                formControl()
-                value = text.now
-                rxInput(text)
-            }
-        }
+
     }
+
+    return { killables.kill() }
 }

@@ -2,6 +2,7 @@ package tasks
 
 import bootstrap.*
 import common.removeFromParent
+import commonfb.ListUIConfig
 import commonfb.listUI
 import commonui.RootPanel
 import commonui.screenLayout
@@ -10,7 +11,6 @@ import domx.*
 import firebase.firestore.DocItem
 import firebase.firestore.query
 import fontawesome.faPen
-import fontawesome.faPlus
 import fontawesome.fas
 import killable.KillableSeq
 import killable.Killables
@@ -20,21 +20,22 @@ import taskslib.Task
 import taskslib.notes
 
 fun LoggedIn.viewTask(
+    panel: RootPanel,
     task: DocItem<Task>,
-    after: () -> Unit
-) {
+    close: () -> Unit
+) : () -> Unit {
     val killables = Killables()
 
     val taskWrap = userTasks.doc(task.id)
     val notesWrap = taskWrap.notes
 
-    root.newRoot {
+    panel.newRoot {
         fun displayViewer() {
-            root.setRoot(this)
+            panel.setRoot(this)
         }
         screenLayout {
             top {
-                backButton(after)
+                backButton(close)
                 middleTitle {
                     innerText = "Task"
                 }
@@ -46,8 +47,11 @@ fun LoggedIn.viewTask(
                             faPen
                         }
                         clickEvent {
-                            editTask(task) {
-                                displayViewer()
+                            val k = Killables().apply {
+                                add { displayViewer() }
+                            }
+                            k += editTask(panel.sub(), task) {
+                                k.kill()
                             }
                         }
                     }
@@ -91,7 +95,7 @@ fun LoggedIn.viewTask(
                                             button {
                                                 cls {
                                                     m1
-                                                    close
+                                                    this.close
                                                 }
                                             }
                                         }
@@ -104,24 +108,27 @@ fun LoggedIn.viewTask(
                             div {
                                 cls {
                                     border
+                                    p1
                                 }
                                 val notesRoot = RootPanel(this)
-                                notesWrap
+                                killables += notesWrap
                                     .query(db) {
                                         Note::ts.desc()
                                     }
                                     .listUI(
-                                        root = notesRoot,
-                                        extract = { Note(it.data()) },
-                                        itemFactory = {
-                                            li {
-                                                cls {
-                                                    listGroupItem
+                                        ListUIConfig(
+                                            root = notesRoot,
+                                            extract = { Note(it.data()) },
+                                            itemFactory = {
+                                                li {
+                                                    cls {
+                                                        listGroupItem
+                                                    }
+                                                    rxText { it.data().text }
                                                 }
-                                                rxText { it.data().text }
-                                            }
 
-                                        }
+                                            }
+                                        )
                                     )
 
                             }
@@ -135,5 +142,7 @@ fun LoggedIn.viewTask(
 
         }
     }
+
+    return { killables.kill() }
 
 }

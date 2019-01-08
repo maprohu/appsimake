@@ -27,10 +27,9 @@ class Function<in I, out O>(
 
 open class DocWrap<in D, C>(
     val id: String,
-    val parent: CollectionWrap<D>?
+    parent: CollectionWrap<D>?
 ) {
     val path : String = "${parent?.path ?: ""}/$id"
-    inline fun <D2: D> cast() = this as DocWrap<D2, C>
 }
 
 fun <D2> coll() = object : ReadOnlyProperty<DocWrap<*, *>, CollectionWrap<D2>> {
@@ -39,7 +38,7 @@ fun <D2> coll() = object : ReadOnlyProperty<DocWrap<*, *>, CollectionWrap<D2>> {
 }
 open class CollectionWrap<in D>(
     val id: String,
-    val parent: DocWrap<*, *>?
+    parent: DocWrap<*, *>?
 ) {
     val path : String = "${parent?.path ?: ""}/$id"
 

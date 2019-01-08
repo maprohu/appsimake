@@ -3,6 +3,7 @@ package domx
 import common.ListenableList
 import common.insertAt
 import common.removeAt
+import common.removeFromParent
 import killable.Killable
 import org.w3c.dom.*
 import org.w3c.dom.css.ElementCSSInlineStyle
@@ -233,21 +234,98 @@ operator fun <T: Node> T.invoke(fn: T.() -> Unit): T {
     return apply(fn)
 }
 
+private const val domxNodesAttributeName = "domxNodeExt"
+
+class NodeExt(
+    val owner: Node
+) {
+
+    inner class ChildRole(
+        val parent: NodeExt,
+        val previous: ChildRole?
+    ) {
+        val owner
+            get() = this@NodeExt.owner
+
+        val isDisplayed
+            get() = owner.isDisplayed
+    }
+
+    private var lastKnownChild: ChildRole? = null
+
+    fun updateChildren(): ChildRole? {
+        val lastKnownVisibleChildExt = lastKnownChild.previousChain().find { it.isDisplayed }
+        val firstUnknownChild = lastKnownVisibleChildExt?.owner ?: owner.firstChild
+
+        firstUnknownChild.nextSeq().forEach {
+            lastKnownChild = it.nodeExt.makeChild(this, lastKnownChild)
+        }
+
+        return lastKnownChild
+    }
+
+    var childRole: ChildRole? = null
+    fun asChild() = childRole!!
+    fun makeChild(parent: NodeExt, previous: ChildRole?): ChildRole? {
+        require(childRole == null)
+        childRole = ChildRole(parent, previous)
+        return childRole
+    }
+
+}
+
+val Node.isDisplayed : Boolean
+    get() = parentNode != null
+
+fun NodeExt.ChildRole?.previousChain() = generateSequence(this) { it.previous }
+fun Node?.nextSeq() = generateSequence(this) { it.nextSibling }
+
+internal val Node.nodeExt
+    get() =
+        this.asDynamic()[domxNodesAttributeName].unsafeCast<NodeExt?>() ?:
+        NodeExt(this)
+            .also { this.asDynamic()[domxNodesAttributeName] = it }
+
+fun Node.rxDisplayed(rxv: RxVal<Boolean>): Killable {
+    val parent = parentNode!!
+    val parentNodeExt = parent.nodeExt
+    parentNodeExt.updateChildren()!!
+    val childRole = nodeExt.asChild()
+    require(childRole.parent.owner == parent)
+    return rxv.forEach {  v ->
+        if (v) {
+            if (!isDisplayed) {
+                val previousDisplayed = childRole.previousChain().drop(1).find { it.isDisplayed }
+                val nextDisplayed = if (previousDisplayed == null) {
+                    parent.firstChild
+                } else {
+                    previousDisplayed.owner.nextSibling
+                }
+                parent.insertBefore(
+                    this,
+                    nextDisplayed
+                )
+
+            }
+        } else {
+            removeFromParent()
+        }
+    }
+}
+
 fun Node.nav(fn: HTMLElement.() -> Unit = {}) : HTMLElement = tag("nav", fn)
 //fun Node.span(fn: HTMLSpanElement.() -> Unit = {}) : HTMLSpanElement = tag("span", fn)
 fun Node.styleTag(fn: HTMLStyleElement.() -> Unit = {}) : HTMLStyleElement = tag("style", fn)
 fun Node.ul(fn: HTMLUListElement.() -> Unit = {}) : HTMLUListElement = tag("ul", fn)
-fun Node.a(fn: HTMLAnchorElement.() -> Unit = {}) : HTMLAnchorElement = tag("a", fn)
+//fun Node.a(fn: HTMLAnchorElement.() -> Unit = {}) : HTMLAnchorElement = tag("a", fn)
 fun Node.ol(fn: HTMLOListElement.() -> Unit = {}) : HTMLOListElement = tag("ol", fn)
 fun Node.li(fn: HTMLLIElement.() -> Unit = {}) : HTMLLIElement = tag("li", fn)
-fun Node.label(fn: HTMLLabelElement.() -> Unit = {}) : HTMLLabelElement = tag("label", fn)
-fun Node.textarea(fn: HTMLTextAreaElement.() -> Unit = {}) : HTMLTextAreaElement = tag("textarea", fn)
-fun Node.form(fn: HTMLFormElement.() -> Unit = {}) = tag("form", fn)
 fun Node.video(fn: HTMLVideoElement.() -> Unit = {})  = tag("video", fn)
 val Node.div by elem<HTMLDivElement>()
 val Node.source by elem<HTMLSourceElement>()
 val Node.audio by elem<HTMLAudioElement>()
 val Node.span by elem<HTMLSpanElement>()
+val Node.a by elem<HTMLAnchorElement>()
 val Node.button by elem<HTMLButtonElement>()
 val Node.h1 by elem<HTMLHeadingElement>()
 val Node.h2 by elem<HTMLHeadingElement>()
@@ -259,3 +337,8 @@ val Node.dl by elem<HTMLDListElement>()
 val Node.dt by elem<HTMLElement>()
 val Node.dd by elem<HTMLElement>()
 val Node.input by elem<HTMLInputElement>()
+val Node.form by elem<HTMLFormElement>()
+val Node.label by elem<HTMLLabelElement>()
+val Node.textarea by elem<HTMLTextAreaElement>()
+val Node.select by elem<HTMLSelectElement>()
+val Node.option by elem<HTMLOptionElement>()

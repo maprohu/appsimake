@@ -8,10 +8,15 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
+import kotlin.reflect.KProperty1
 
+@Suppress("NOTHING_TO_INLINE")
 inline fun dyn() = js("{}")
+@Suppress("NOTHING_TO_INLINE")
 inline fun <T> obj() = dyn().unsafeCast<T>()
+@Suppress("NOTHING_TO_INLINE")
 inline fun dyn(fn: dynamic.() -> Unit) = (dyn() as Any?).apply(fn)
+@Suppress("NOTHING_TO_INLINE")
 inline fun <T> obj(fn: T.() -> Unit) = obj<T>().apply(fn)
 
 class NamedDelegate<T>(
@@ -38,6 +43,9 @@ abstract class DynRx<T>(
     abstract val rxv: RxVal<T>
     fun getValue(): T = gs.get(o[name])
     override fun getValue(thisRef: Any, property: KProperty<*>): T = getValue()
+    val original by lazy { Var(rxv.now) }
+    val isDirty by lazy { Rx { rxv() != original() } }
+    fun clearDirty() { original.now = rxv.now }
 }
 
 class Dyn<T>(
@@ -59,7 +67,7 @@ class Dyn<T>(
 }
 
 class Binder<T>(
-    private val wrap: Wrap,
+    private val wrap: Wrap<*>,
     private val o: dynamic,
     private val getSet: GetSet<T> = GetSet(),
     private val init : (String) -> Unit
@@ -89,7 +97,7 @@ class AutoDyn<T>(
 }
 
 class AutoBinder<T>(
-    private val wrap: Wrap,
+    private val wrap: Wrap<*>,
     private val o: dynamic,
     private val getSet: GetSet<T> = GetSet(),
     private val fn : () -> T
@@ -115,10 +123,17 @@ inline fun <reified T: Enum<T>> enumGetSet() = object : GetSet<T> {
     override fun get(v: dynamic) = enumValueOf<T>(v.unsafeCast<String>())
 }
 
-abstract class Wrap(o: dynamic) {
+@Suppress("unused")
+class Prop<in T, out R>(
+    val name: String
+)
+val <T, R> KProperty1<T, R>.cast
+    get() = Prop<T, R>(name)
+
+abstract class Wrap<W: Wrap<W>>(o: dynamic) {
 
     // KProperty.getDelegate is not yet supported in javascript...
-    private val props = mutableMapOf<String, DynRx<*>>()
+    internal val props = mutableMapOf<String, DynRx<*>>()
     internal fun <T> add(p: DynRx<T>) { props[p.name] = p }
 
     val wrapped = o ?: obj()
@@ -133,15 +148,19 @@ abstract class Wrap(o: dynamic) {
     protected inline fun <reified T: Enum<T>> enum(v: T) = dyn(v, enumGetSet())
 
 
-    fun <T> KProperty0<T>.rxv() =
-            props.getValue(name).rxv() as T
+    fun <T> Prop<W, T>.prop() = props.getValue(name) as DynRx<T>
+    fun <T> KProperty1<W, T>.prop() = cast.prop()
+    fun <T> KProperty1<W, T>.rxv() = prop().rxv()
+
+    fun <T> auto(gs: GetSet<T> = GetSet(), fn: Wrap<W>.() -> T) = AutoBinder(this, wrapped, gs) { fn(this) }
 
     val type : String by dyn(this::class.simpleName!!)
 
 }
 
+fun <W: Wrap<W>, T> W.prop(p: Prop<W, T>) = props.getValue(p.name) as DynRx<T>
 
-fun <W: Wrap, T> W.auto(gs: GetSet<T> = GetSet(), fn: W.() -> T) = AutoBinder(this, wrapped, gs) { fn(this) }
+
 
 @Suppress("UNUSED_PARAMETER")
 inline fun <T : Any> jsNew(
@@ -156,6 +175,7 @@ fun <T> wrapper(vararg classes: KClass<*>) : (dynamic) -> T {
             .map { it.simpleName!! to it.js }
             .toMap()
 
+    @Suppress("UNCHECKED_CAST")
     return { d ->
         typeMap
             .getValue(d.type as String)

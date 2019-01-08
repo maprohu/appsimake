@@ -1,26 +1,23 @@
 package tasks
 
 import bootstrap.*
-import commonfb.LoggedInCtx
-import commonfb.LoggingInCtx
-import commonfb.stringClickListUI
+import commonfb.*
 import commonlib.private
 import commonui.RootPanel
 import commonui.screenLayout
+import commonui.showClosable
 import domx.*
 import firebase.User
-import firebase.firestore.DocItem
 import firebase.firestore.query
+import fontawesome.faFw
 import fontawesome.faPlus
 import fontawesome.faSearch
 import fontawesome.fas
-import killable.KillableSeq
 import killable.Killables
 import rx.Var
 import styles.scrollVertical
 import taskslib.Task
 import taskslib.tasks
-import kotlin.browser.document
 
 fun main(args: Array<String>) {
     TasksMain().start()
@@ -75,20 +72,43 @@ class LoggedIn(
                             cls {
                                 btn
                                 btnPrimary
-                                fas
-                                faPlus
+                                p2
+                            }
+                            span {
+                                cls {
+                                    fas
+                                    faFw
+                                    faPlus
+                                }
+                            }
+                            val ks = killables.seq()
+                            clickEvent {
+                                ks += showClosable(
+                                    { close -> editTask(root.sub(), close = close) },
+                                    ::showHome
+                                )
                             }
                         }
                         button {
                             cls {
                                 btn
                                 btnPrimary
-                                fas
-                                faSearch
+                                p2
                             }
+                            span {
+                                cls {
+                                    fas
+                                    faFw
+                                    faSearch
+                                }
+                            }
+                            val ks = killables.seq()
                             clickEvent {
                                 homeActive.now = false
-                                listTasks { showHome() }
+                                ks += showClosable(
+                                    { close -> listTasks(root.sub(), close) },
+                                    ::showHome
+                                )
                             }
                         }
                     }
@@ -108,18 +128,15 @@ class LoggedIn(
                         }
                         val root = RootPanel(this)
 
-                        val killableSeq = KillableSeq()
-                        homeActive.forEach {
-                            if (it) {
-                                killableSeq.set(
-                                    recent(root) { dit ->
-                                        viewTask(dit) {
-                                            showHome()
-                                        }
-                                    }
+                        val recentSeq = killables.seq()
+                        homeActive.forEach { ha ->
+                            if (ha) {
+                                recentSeq += recent(
+                                    ::showHome,
+                                    root
                                 )
                             } else {
-                                killableSeq.set {}
+                                recentSeq.clear()
                             }
                         }
                     }
@@ -138,31 +155,33 @@ class LoggedIn(
 }
 
 fun LoggedIn.recent(
-    root: RootPanel,
-    onClick: (DocItem<Task>) -> Unit
+    redisplay: () -> Unit,
+    panel: RootPanel
 ): () -> Unit {
     return userTasks
         .query(db) {
             Task::completed eq false
             Task::ts.desc()
         }
-        .stringClickListUI(
-            root,
-            extract = { Task(it.data()) },
-            hourglassDecor = { cls.cardBody },
-            emptyDivDecor = { cls.cardBody },
-            listDivDecor = {},
-            itemText = { it.title },
-            ulDecor = { cls.listGroupFlush },
-            onClick = onClick
+        .showClosableList(
+            redisplay = redisplay,
+            page = { dit -> { close -> viewTask(root.sub(), dit, close )}},
+            config = { onClick ->
+                ListUIConfig(
+                    panel,
+                    extract = { Task(it.data()) },
+                    hourglassDecor = { cls.cardBody },
+                    emptyDivDecor = { cls.cardBody },
+                    listDivDecor = {},
+                    ulDecor = { cls.listGroupFlush },
+                    itemFactory = stringListClick(
+                        { it.title },
+                        onClick
+                    )
+                )
+            }
         )
-
-
 }
 
 
 
-fun LoggedIn.taskGraph() {
-
-
-}

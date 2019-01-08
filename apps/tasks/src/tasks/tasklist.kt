@@ -1,35 +1,28 @@
 package tasks
 
 import bootstrap.*
-import common.ListenableMutableList
 import commonfb.stringClickListUI
 import commonui.RootPanel
 import commonui.screenLayout
 import domx.*
-import firebase.firestore.DocItem
-import firebase.firestore.docItems
 import firebase.firestore.query
 import fontawesome.faChevronLeft
 import fontawesome.faPlus
 import fontawesome.fas
-import fontawesome.spinner
 import killable.Killables
 import rx.Var
-import styles.scrollVertical
 import taskslib.Task
-import kotlin.browser.document
 
-fun LoggedIn.listTasks(after: () -> Unit) {
+fun LoggedIn.listTasks(panel: RootPanel, after: () -> Unit) : () -> Unit {
 
     val isBusy = Var(false)
 
     val killables = Killables()
 
-
-    root.newRoot {
+    panel.newRoot {
 
         fun displayList() {
-            root.setRoot(this)
+            panel.setRoot(this)
         }
 
         screenLayout {
@@ -83,7 +76,7 @@ fun LoggedIn.listTasks(after: () -> Unit) {
                             btnPrimary
                         }
                         clickEvent {
-                            editTask {
+                            editTask(panel.sub()) {
                                 displayList()
                             }
                         }
@@ -109,7 +102,7 @@ fun LoggedIn.listTasks(after: () -> Unit) {
                             }
                         },
                         onClick = {
-                            viewTask(it) {
+                            viewTask(panel.sub(), it) {
                                 displayList()
                             }
                         }
@@ -118,4 +111,6 @@ fun LoggedIn.listTasks(after: () -> Unit) {
             }
         }
     }
+
+    return { killables.kill() }
 }

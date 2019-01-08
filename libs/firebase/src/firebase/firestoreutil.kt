@@ -78,7 +78,7 @@ data class OnSnapshot(
     ) : this(onNext, {})
 }
 
-fun <T> Query.listen(
+fun <T> QueryWrap<T>.listen(
     killables: Killables? = null,
     onFirst: () -> Unit = {},
     onError: (FirebaseError) -> Unit = { console.dir(it) }
@@ -87,7 +87,7 @@ fun <T> Query.listen(
 
     val list = ListenableMutableList<Var<T>>()
 
-    onSnapshot(
+    query.onSnapshot(
             { qs ->
                 if (first) {
                     first = false
@@ -140,6 +140,7 @@ fun <T> Query.listen(
     list: ListenableMutableList<T>,
     create: (QueryDocumentSnapshot) -> T,
     update: (T, QueryDocumentSnapshot) -> Unit,
+    delete: (T) -> Unit,
     onFirst: () -> Unit = {},
     onError: (FirebaseError) -> Unit = { console.dir(it) }
 ): () -> Unit {
@@ -157,7 +158,7 @@ fun <T> Query.listen(
                         list.add(dc.newIndex, create(dc.doc))
                     }
                     DocumentChangeType.removed -> {
-                        list.removeAt(dc.oldIndex)
+                        delete(list.removeAt(dc.oldIndex))
                     }
                     DocumentChangeType.modified -> {
                         update(list[dc.oldIndex], dc.doc)
@@ -191,19 +192,21 @@ fun <T> Query.listen(
 
 class DocItem<T>(
     val id: String,
-    val data: Var<T>
+    val data: Var<T>,
+    val deleted: Killables = Killables()
 )
 
-fun <T> Query.docItems(
+fun <T> QueryWrap<T>.docItems(
     list: ListenableMutableList<DocItem<T>>,
     extract: (QueryDocumentSnapshot) -> T = { it.data() },
     onFirst: () -> Unit = {},
     onError: (FirebaseError) -> Unit = { console.dir(it) }
 ): () -> Unit {
-    return listen(
+    return query.listen(
         list = list,
         create = { DocItem(it.id, Var(extract(it))) },
         update = { di, qs -> di.data.now = extract(qs) },
+        delete = { it.deleted.kill() },
         onFirst = onFirst,
         onError = onError
     )
@@ -235,16 +238,10 @@ fun launch(fn: suspend () -> Unit) {
 }
 
 
-class Prop<in T, out R>(
-    val name: String
-)
-val <T, R> KProperty1<T, R>.cast
-    get() = Prop<T, R>(name)
 
 class QueryBuilder<T>(
     var query : Query
 ) {
-
     infix fun <P> KProperty1<T, P>.eq(v: P) = cast eq v
     fun <P> KProperty1<T, P>.asc() = cast.asc()
     fun <P> KProperty1<T, P>.desc() = cast.desc()
@@ -259,6 +256,12 @@ class QueryBuilder<T>(
         query = query.orderBy(name, "desc")
     }
 }
-fun <T> CollectionWrap<T>.query(db: Firestore, fn:  QueryBuilder<T>.() -> Unit): Query {
-    return QueryBuilder<T>(db.collection(path)).apply(fn).query
+fun <T> CollectionWrap<T>.query(db: Firestore, fn:  QueryBuilder<T>.() -> Unit): QueryWrap<T> {
+    return QueryBuilder<T>(db.collection(path)).apply(fn).query.wrap()
 }
+
+fun <T> Query.wrap() = QueryWrap<T>(this)
+
+class QueryWrap<in T>(
+    val query: Query
+)

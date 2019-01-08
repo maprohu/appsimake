@@ -1,19 +1,15 @@
 package taskslib
 
 import common.Wrap
-import common.auto
 import common.named
 import commonlib.*
 import firebaseshr.firestore.Timestamp
 
-val tasks by named { TasksLib(it) }
+val tasks by named { Lib(it) }
 
-class TasksLib(name: String) : Lib(name) {
-}
-
-val <P: Private> DocWrap<P, *>.tasks by coll<Task>()
-val <P: Private> DocWrap<P, *>.tags by coll<Tag>()
-val <P: Task> DocWrap<P, *>.notes by coll<Note>()
+val DocWrap<Private, *>.tasks by coll<Task>()
+val DocWrap<Private, *>.tags by coll<Tag>()
+val DocWrap<Task, *>.notes by coll<Note>()
 
 enum class TaskStatus(val completed: Boolean) {
     New(false),
@@ -46,19 +42,19 @@ fun <T> Array<T>.subs(min: Int, max: Int): List<List<T>> {
 val MaxTagIndexSize = 4
 
 
-class Task(o: dynamic = null) : Wrap(o) {
+class Task(o: dynamic = null) : Wrap<Task>(o) {
     var title : String by dyn()
     var text : String by dyn()
     var status: TaskStatus by enum(TaskStatus.New)
     var tags: Array<String> by dyn(arrayOf())
     var ts: Timestamp by dyn()
 
-    val completed by auto { ::status.rxv().completed }
-    val tagsx by auto { ::tags.rxv().subs(2, MaxTagIndexSize).toTypedArray() }
+    val completed by auto { Task::status.rxv().completed }
+    val tagsx by auto { Task::tags.rxv().subs(2, MaxTagIndexSize).toTypedArray() }
 }
 
-class Tag(o: dynamic = null) : Wrap(o)
-class Note(o: dynamic = null) : Wrap(o) {
+class Tag(o: dynamic = null) : Wrap<Tag>(o)
+class Note(o: dynamic = null) : Wrap<Note>(o) {
     val text : String by dyn()
     val ts: Timestamp by dyn()
 }
