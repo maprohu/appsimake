@@ -216,7 +216,10 @@ object gymclock : JsApp(
 )
 
 object firebaseshr : JsModule(
-    "libs/firebaseshr"
+    "libs/firebaseshr",
+    listOf(
+        commonshr
+    )
 )
 
 object firebasektjs : JsModule(
@@ -252,7 +255,6 @@ object commonfb : JsModule(
 object commonlib : JsModule(
     "libs/commonlib",
     listOf(
-        commonshr,
         firebaseshr
     )
 )

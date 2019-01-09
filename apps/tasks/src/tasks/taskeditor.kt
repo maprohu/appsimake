@@ -1,6 +1,10 @@
 package tasks
 
 import bootstrap.*
+import common.None
+import common.Optional
+import common.Some
+import common.dyn
 import commonui.RootPanel
 import commonui.faButton
 import commonui.faButtonSpan
@@ -8,13 +12,15 @@ import commonui.screenLayout
 import domx.*
 import firebase.firestore.DocItem
 import firebase.firestore.DocumentReference
-import firebase.firestore.FieldValue
+import firebase.firestore.connect
+import firebase.firestore.listen
+import firebaseshr.pt
 import fontawesome.*
 import killable.Killables
 import rx.Rx
 import rx.Var
-import rx.rxClass
 import rx.rxClasses
+import rx.set
 import styles.scrollVertical
 import taskslib.Task
 import kotlin.js.Promise
@@ -22,46 +28,62 @@ import kotlin.js.Promise
 
 fun LoggedIn.editTask(
     panel: RootPanel,
-    item: DocItem<Task>? = null,
+    item: DocItem<dynamic>? = null,
     close: () -> Unit
 ) : () -> Unit {
-    val savedData = Var(item?.let { it.data.now })
-    val title = Var(savedData.now?.title ?: "")
-    val text = Var(savedData.now?.text ?: "")
-    val isSaving = Var(false)
-    val isSaved = Rx { title() == savedData()?.title ?: "" && text() == savedData()?.text ?: "" }
-    val canSave = Rx { !isSaved() && !isSaving() && title().isNotBlank() }
-    val showDelete = Rx { savedData() != null }
-    val showDropDown = Rx { showDelete() }
-    val canDelete = Rx { savedData() != null && !isSaving() }
-
     val killables = Killables()
 
-    fun editingData() = Task().apply {
-        this.title = title.now
-        this.text = text.now
-        this.ts = FieldValue.serverTimestamp()
-    }
+    val persistedData = Var<Optional<dynamic>>(None)
+    val docExists = Rx { !persistedData().isEmpty() }
 
-    data class State(
-        val x : String = ""
-    )
-    var state = State()
+    val task = Task()
+
 
     lateinit var savePromise : () -> Promise<*>
     lateinit var deletePromise : () -> Promise<*>
 
     fun setupSavedState(ref: DocumentReference) {
         savePromise = {
-            val toSave = editingData()
-            ref
-                .set(toSave.wrapped)
-                .then { savedData.now = toSave }
+            ref.set(task.pt.merge())
         }
         deletePromise = {
             ref.delete()
         }
     }
+
+    fun saveNew(): Promise<*> {
+        return userTasksRef.add(
+            task.pt.write()
+        ).then { docRef ->
+            killables += docRef.listen(
+                persistedData
+            )
+            setupSavedState(docRef)
+        }
+    }
+
+    if (item != null) {
+        task.pt.rollbackToPersisted()
+        killables += item.data.forEach {
+            persistedData.now = Some(it)
+        }
+        killables += item.deleted.add {
+            persistedData.now = None
+        }
+        setupSavedState(userTasksRef.doc(item.id))
+    } else {
+        savePromise = { saveNew() }
+    }
+
+    @Suppress("RemoveExplicitTypeArguments")
+    connect(Rx<dynamic> { persistedData().getOrElse { dyn() } }, task)
+
+    val isSaving = Var(false)
+    val canSave = Rx { task.pt.shouldWrite() && !isSaving() && task.title.current().any { it.isNotBlank() } }
+    val showDelete = Rx { docExists() }
+    val showDropDown = Rx { showDelete() }
+    val canDelete = Rx { docExists() && !isSaving() }
+
 
     fun save() {
         if (canSave.now) {
@@ -69,37 +91,6 @@ fun LoggedIn.editTask(
             savePromise()
                 .then { isSaving.now = false }
         }
-    }
-
-    fun saveNew(): Promise<*> {
-        val toSave = editingData()
-
-        return userTasksRef.add(
-            toSave.wrapped
-        ).then { docRef ->
-            savedData.now = toSave
-
-            killables += docRef
-                .onSnapshot { d ->
-                    if (d.exists) {
-                        d.data<Any>().also { i ->
-                            savedData.now = Task(i)
-                        }
-                    } else {
-                        savedData.now = null
-                    }
-                }
-
-            setupSavedState(docRef)
-        }
-    }
-
-
-    if (item==null) {
-        savePromise = { saveNew() }
-    } else {
-        killables += item.data.forEach { savedData.now = it }
-        setupSavedState(userTasksRef.doc(item.id))
     }
 
     fun back() {
@@ -120,18 +111,18 @@ fun LoggedIn.editTask(
             top {
                 left.btnButton {
                     rxClasses {
-                        if (isSaved()) {
-                            listOf(Cls.btnSecondary)
-                        } else {
+                        if (task.pt.changed()) {
                             listOf(Cls.btnDanger)
+                        } else {
+                            listOf(Cls.btnSecondary)
                         }
                     }
                     faButtonSpan {
                         rxClasses {
-                            if (isSaved()) {
-                                listOf(Cls.faChevronLeft)
-                            } else {
+                            if (task.pt.changed()) {
                                 listOf(Cls.faUndo)
+                            } else {
+                                listOf(Cls.faChevronLeft)
                             }
                         }
                     }
@@ -235,8 +226,8 @@ fun LoggedIn.editTask(
                                     formControl
                                 }
                                 type = "text"
-                                value = title.now
-                                rxInput(title)
+                                value = task.title.current.now.getOrDefault("")
+                                listenInput { task.title.current.set(it) }
                             }
                         }
 
@@ -250,8 +241,8 @@ fun LoggedIn.editTask(
                                     formControl
                                 }
                                 rows = 5
-                                value = text.now
-                                rxInput(text)
+                                value = task.text.current.now.getOrDefault("")
+                                listenInput { task.text.current.set(it) }
                             }
                         }
                         div {

@@ -1,13 +1,10 @@
 package taskslib
 
-import common.Some
-import common.Wrap
 import common.named
 import commonlib.*
-import commonshr.enum
-import commonshr.o
-import commonshr.scalar
+import firebaseshr.*
 import firebaseshr.firestore.Timestamp
+import rx.Rx
 
 val tasks by named { Lib(it) }
 
@@ -22,7 +19,7 @@ enum class TaskStatus(val completed: Boolean) {
     Canceled(true)
 }
 
-fun <T> Array<T>.subs(min: Int, max: Int): List<List<T>> {
+fun <T> List<T>.subs(min: Int, max: Int): List<List<T>> {
     val result = mutableListOf<List<T>>()
 
     fun process(head: List<T>, rest: List<T>) {
@@ -46,19 +43,36 @@ fun <T> Array<T>.subs(min: Int, max: Int): List<List<T>> {
 val MaxTagIndexSize = 4
 
 
-class Task {
+open class Task : Base<Task>() {
+
     val title by o.scalar<String>().prop()
     val text by o.scalar<String>().prop()
     val status by o.scalar<TaskStatus>().withDefault(TaskStatus.New).enum().prop()
-    var tags: Array<String> by dyn(arrayOf())
-    var ts: Timestamp by dyn()
+    val tags by o.array<String>().toSet().prop()
+    val ts by o.scalar<Timestamp>().withDefault { ops.serverTimestamp() }.prop()
 
-    val completed by auto { Task::status.rxv().completed }
-    val tagsx by auto { Task::tags.rxv().subs(2, MaxTagIndexSize).toTypedArray() }
+    val completed by o.scalar<Boolean>().calculated {
+        status.current.now.map { s -> s.completed }.let(::lazyOf)
+    }.prop()
+
+    val tagsx by run {
+        o.scalar<Array<String>>().toList().arrayOf().toSet()
+            .calculated {
+                val t = tags.current()
+                lazy {
+                    t.map {  ts ->
+                        ts.sorted().subs(2, MaxTagIndexSize).toSet()
+                    }
+                }
+            }
+            .prop()
+    }
+
+    companion object : Task()
 }
 
-class Tag(o: dynamic = null) : Wrap<Tag>(o)
-class Note(o: dynamic = null) : Wrap<Note>(o) {
-    val text : String by dyn()
-    val ts: Timestamp by dyn()
+class Tag : Base<Tag>()
+class Note : Base<Note>() {
+    val text by o.scalar<String>().prop()
+    val ts by o.scalar<Timestamp>().withDefault { ops.serverTimestamp() }.prop()
 }

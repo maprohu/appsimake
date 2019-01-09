@@ -73,28 +73,6 @@ fun Node.removeFromParent() {
 
 
 
-open class Emitter<T> {
-
-    protected var listeners = listOf<(T) -> Unit>()
-
-    operator fun plusAssign(listener: (T) -> Unit) {
-        add(listener)
-    }
-
-    open fun add(listener: (T) -> Unit) : () -> Unit {
-        listeners += listener
-
-        return {
-            listeners -= listener
-        }
-    }
-
-    open fun fire(t: T) {
-        listeners.forEach { it(t) }
-    }
-
-}
-
 
 
 fun HTMLAnchorElement.attachEnabler(enabled: Rx<Boolean>) : Killable {

@@ -188,7 +188,9 @@ external class FieldValue {
     companion object {
         fun serverTimestamp() : Timestamp
 
+        // https://firebase.google.com/docs/reference/js/firebase.firestore.FieldValue#.arrayUnion
         fun <T> arrayUnion(vararg t: T) : Array<T>
+        // https://firebase.google.com/docs/reference/js/firebase.firestore.FieldValue#.arrayRemove
         fun <T> arrayRemove(vararg t: T) : Array<T>
         fun <T> delete() : T
     }

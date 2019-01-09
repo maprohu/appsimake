@@ -79,59 +79,59 @@ fun LoggedIn.viewTask(
                         dt { innerText = "Tags" }
                         dd {
 
-                            val ks = KillableSeq().also { killables += it }
-                            killables += task.data.forEach {  t ->
-                                div {
-                                    cls {
-                                        dFlex
-                                    }
-                                    t.tags.forEach { tag ->
-                                        div {
-                                            cls {
-                                                border
-                                                rounded
-                                            }
-                                            innerText = tag
-                                            button {
-                                                cls {
-                                                    m1
-                                                    this.close
-                                                }
-                                            }
-                                        }
-                                    }
-                                }.also { tagsDiv -> ks.set { tagsDiv.removeFromParent() } }
+//                            val ks = KillableSeq().also { killables += it }
+//                            killables += task.data.forEach {  t ->
+//                                div {
+//                                    cls {
+//                                        dFlex
+//                                    }
+//                                    t.tags.forEach { tag ->
+//                                        div {
+//                                            cls {
+//                                                border
+//                                                rounded
+//                                            }
+//                                            innerText = tag
+//                                            button {
+//                                                cls {
+//                                                    m1
+//                                                    this.close
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+//                                }.also { tagsDiv -> ks.set { tagsDiv.removeFromParent() } }
                             }
                         }
                         dt { innerText = "Notes" }
                         dd {
-                            div {
-                                cls {
-                                    border
-                                    p1
-                                }
-                                val notesRoot = RootPanel(this)
-                                killables += notesWrap
-                                    .query(db) {
-                                        Note::ts.desc()
-                                    }
-                                    .listUI(
-                                        ListUIConfig(
-                                            root = notesRoot,
-                                            extract = { Note(it.data()) },
-                                            itemFactory = {
-                                                li {
-                                                    cls {
-                                                        listGroupItem
-                                                    }
-                                                    rxText { it.data().text }
-                                                }
-
-                                            }
-                                        )
-                                    )
-
-                            }
+//                            div {
+//                                cls {
+//                                    border
+//                                    p1
+//                                }
+//                                val notesRoot = RootPanel(this)
+//                                killables += notesWrap
+//                                    .query(db) {
+//                                        Note::ts.desc()
+//                                    }
+//                                    .listUI(
+//                                        ListUIConfig(
+//                                            root = notesRoot,
+//                                            extract = { Note(it.data()) },
+//                                            itemFactory = {
+//                                                li {
+//                                                    cls {
+//                                                        listGroupItem
+//                                                    }
+//                                                    rxText { it.data().text }
+//                                                }
+//
+//                                            }
+//                                        )
+//                                    )
+//
+//                            }
 
 
                         }

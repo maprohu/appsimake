@@ -1,5 +1,9 @@
 package rx
 
+import common.None
+import common.Optional
+import common.Some
+import commonshr.SetDiff
 import killable.Killable
 import killable.Killables
 import org.w3c.dom.Element
@@ -115,7 +119,7 @@ interface RxIface<out T> {
         }
     }
 
-    fun onChange(fn: (T /* old */, T /* new */) -> Unit) : Killable {
+    fun onChange(fn: (old: T /* old */, new: T /* new */) -> Unit) : Killable {
         return foldLater(now) { old, new ->
             fn(old, new)
             new
@@ -187,8 +191,23 @@ abstract class RxVal<T>(
 
 }
 
+
+
 fun <T : Killable> RxVal<T>.killOld() : Killable {
     return off { it.kill() }
+}
+
+fun <T> Var<Optional<Set<T>>>.add(v: T) {
+    transform { c -> c.map { it + v }.orElse { Some(setOf(v)) } }
+}
+fun <T> Var<Optional<Set<T>>>.remove(v: T) {
+    transform { c -> c.map { it - v } }
+}
+fun <T> RxIface<Optional<Set<T>>>.diffs(fn: (SetDiff<T>) -> Unit): Killable {
+    fn(SetDiff.of(None, now))
+    return onChange { old, new ->
+        fn(SetDiff.of(old, new))
+    }
 }
 
 interface RxIfaceKillable<T> : RxIface<T>, Killable
@@ -240,6 +259,13 @@ open class Var<T>(
     override var now : T
         get() = super.now
         set(value) { setValue(value) }
+
+    fun transform(fn: (T) -> T) = { now = fn(now) }
+}
+
+
+fun <T> Var<Optional<T>>.set(v: T) {
+    now = Some(v)
 }
 
 fun Element.rxClass(

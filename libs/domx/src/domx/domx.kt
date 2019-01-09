@@ -93,9 +93,21 @@ fun HTMLTextAreaElement.rxInput(rx: Var<String>) {
     }
 }
 
+
 fun HTMLInputElement.rxInput(rx: Var<String>) {
     inputEvent {
         rx.now = value
+    }
+}
+
+fun HTMLTextAreaElement.listenInput(fn: (String) -> Unit) {
+    inputEvent {
+        fn(value)
+    }
+}
+fun HTMLInputElement.listenInput(fn: (String) -> Unit) {
+    inputEvent {
+        fn(value)
     }
 }
 

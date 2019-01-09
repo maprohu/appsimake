@@ -3,6 +3,10 @@ package firebase.firestore
 import common.*
 import commonlib.CollectionWrap
 import firebase.FirebaseError
+import firebaseshr.HasProps
+import firebaseshr.ScalarProp
+import firebaseshr.pt
+import killable.Killable
 import killable.Killables
 import kotlinx.coroutines.*
 import org.w3c.dom.Element
@@ -196,6 +200,13 @@ class DocItem<T>(
     val deleted: Killables = Killables()
 )
 
+
+fun <T> connect(persisted: RxVal<dynamic>, o: HasProps<T>): Killable {
+    return persisted.forEach { d ->
+        o.pt.updatePersisted(d)
+    }
+}
+
 fun <T> QueryWrap<T>.docItems(
     list: ListenableMutableList<DocItem<T>>,
     extract: (QueryDocumentSnapshot) -> T = { it.data() },
@@ -242,17 +253,13 @@ fun launch(fn: suspend () -> Unit) {
 class QueryBuilder<T>(
     var query : Query
 ) {
-    infix fun <P> KProperty1<T, P>.eq(v: P) = cast eq v
-    fun <P> KProperty1<T, P>.asc() = cast.asc()
-    fun <P> KProperty1<T, P>.desc() = cast.desc()
-
-    infix fun <P> Prop<T, P>.eq(v: P) {
+    infix fun <P> ScalarProp<T, P>.eq(v: P) {
         query = query.where(name, "==", v)
     }
-    fun <P> Prop<T, P>.asc() {
+    fun <P> ScalarProp<T, P>.asc() {
         query = query.orderBy(name)
     }
-    fun <P> Prop<T, P>.desc() {
+    fun <P> ScalarProp<T, P>.desc() {
         query = query.orderBy(name, "desc")
     }
 }
@@ -265,3 +272,18 @@ fun <T> Query.wrap() = QueryWrap<T>(this)
 class QueryWrap<in T>(
     val query: Query
 )
+
+fun DocumentReference.listen(
+    rxv: Var<Optional<dynamic>>
+) : Killable {
+    return Killable.once(
+        onSnapshot { d ->
+            if (d.exists) {
+                rxv.now = Some(d.data())
+            } else {
+                rxv.now = None
+            }
+        }
+    )
+
+}
