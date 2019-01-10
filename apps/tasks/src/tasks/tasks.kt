@@ -1,6 +1,7 @@
 package tasks
 
 import bootstrap.*
+import common.orEmpty
 import commonfb.*
 import commonlib.private
 import commonui.RootPanel
@@ -39,15 +40,14 @@ class TasksMain : LoggingInCtx(tasks, "Tasks") {
 class LoggedIn(
     val base: TasksMain,
     val user: User
-) {
+) : HasDB by base.fbCtx {
     val loggedInCtx = LoggedInCtx(base.fbCtx, user)
     val fbCtx = loggedInCtx.fbCtx
-    val db = fbCtx.db
     val root = base.appCtx.root
 
     val userTasks = tasks.app.private.doc(user.uid).tasks
 
-    val userTasksRef = loggedInCtx.fbCtx.db.collection(userTasks.path)
+    val userTasksRef = userTasks.ref
 
     val killables = Killables()
 
@@ -84,7 +84,7 @@ class LoggedIn(
                             val ks = killables.seq()
                             clickEvent {
                                 ks += showClosable(
-                                    { close -> editTask(root.sub(), close = close) },
+                                    { close -> editTask(root.sub(), Task(), close = close) },
                                     ::showHome
                                 )
                             }
@@ -154,14 +154,15 @@ class LoggedIn(
 
 }
 
+
 fun LoggedIn.recent(
     redisplay: () -> Unit,
     panel: RootPanel
 ): () -> Unit {
     return userTasks
         .query(db) {
-            Task::completed eq false
-            Task::ts.desc()
+            Task.completed eq false
+            Task.ts.desc()
         }
         .showClosableList(
             redisplay = redisplay,
@@ -169,13 +170,13 @@ fun LoggedIn.recent(
             config = { onClick ->
                 ListUIConfig(
                     panel,
-                    extract = { Task(it.data()) },
+                    create = { Task() },
                     hourglassDecor = { cls.cardBody },
                     emptyDivDecor = { cls.cardBody },
                     listDivDecor = {},
                     ulDecor = { cls.listGroupFlush },
                     itemFactory = stringListClick(
-                        { it.title },
+                        { it.title.initial().orEmpty() },
                         onClick
                     )
                 )

@@ -21,3 +21,5 @@ data class SetDiff<T>(
 
     }
 }
+
+fun <T> T.toLazy() = lazyOf(this)

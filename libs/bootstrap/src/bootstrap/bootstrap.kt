@@ -205,6 +205,10 @@ fun HTMLElement.rxText(fn: () -> String): Killable {
     return rx
 }
 
+fun HTMLElement.rxTextOrEmpty(fn: () -> Optional<String>): Killable {
+    return rxText { fn().orEmpty() }
+}
+
 fun setupFullScreen() {
     document.body!!.apply {
         fullSize()

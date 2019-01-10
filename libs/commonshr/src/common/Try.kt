@@ -142,3 +142,6 @@ object None : Optional<Nothing>() {
  * using the static [Optional.toOptional] method.
  */
 fun <T : Any> T?.toOptional(): Optional<T> = if (this == null) None else Some(this)
+
+fun Optional<String>.orEmpty() = getOrDefault("")
+

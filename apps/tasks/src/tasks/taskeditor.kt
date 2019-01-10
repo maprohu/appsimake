@@ -1,95 +1,67 @@
 package tasks
 
 import bootstrap.*
-import common.None
-import common.Optional
-import common.Some
-import common.dyn
+import common.*
 import commonui.RootPanel
 import commonui.faButton
 import commonui.faButtonSpan
 import commonui.screenLayout
 import domx.*
-import firebase.firestore.DocItem
-import firebase.firestore.DocumentReference
-import firebase.firestore.connect
-import firebase.firestore.listen
-import firebaseshr.pt
+import firebase.firestore.*
+import firebaseshr.IdState
 import fontawesome.*
 import killable.Killables
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
 import rx.Rx
 import rx.Var
 import rx.rxClasses
 import rx.set
 import styles.scrollVertical
 import taskslib.Task
-import kotlin.js.Promise
+import taskslib.TaskStatus
 
 
 fun LoggedIn.editTask(
     panel: RootPanel,
-    item: DocItem<dynamic>? = null,
+    task: Task,
     close: () -> Unit
 ) : () -> Unit {
+    task.props.rollback()
+
     val killables = Killables()
 
-    val persistedData = Var<Optional<dynamic>>(None)
-    val docExists = Rx { !persistedData().isEmpty() }
-
-    val task = Task()
-
-
-    lateinit var savePromise : () -> Promise<*>
-    lateinit var deletePromise : () -> Promise<*>
-
-    fun setupSavedState(ref: DocumentReference) {
-        savePromise = {
-            ref.set(task.pt.merge())
-        }
-        deletePromise = {
-            ref.delete()
-        }
-    }
-
-    fun saveNew(): Promise<*> {
-        return userTasksRef.add(
-            task.pt.write()
-        ).then { docRef ->
-            killables += docRef.listen(
-                persistedData
-            )
-            setupSavedState(docRef)
-        }
-    }
-
-    if (item != null) {
-        task.pt.rollbackToPersisted()
-        killables += item.data.forEach {
-            persistedData.now = Some(it)
-        }
-        killables += item.deleted.add {
-            persistedData.now = None
-        }
-        setupSavedState(userTasksRef.doc(item.id))
-    } else {
-        savePromise = { saveNew() }
-    }
-
-    @Suppress("RemoveExplicitTypeArguments")
-    connect(Rx<dynamic> { persistedData().getOrElse { dyn() } }, task)
-
     val isSaving = Var(false)
-    val canSave = Rx { task.pt.shouldWrite() && !isSaving() && task.title.current().any { it.isNotBlank() } }
-    val showDelete = Rx { docExists() }
+    val canSave = Rx { task.props.dirty() && !isSaving() && task.title.current().any { it.isNotBlank() } }
+    val showDelete = Rx { task.props.isPersisted() }
     val showDropDown = Rx { showDelete() }
-    val canDelete = Rx { docExists() && !isSaving() }
-
+    val canDelete = Rx { task.props.isPersisted() && !isSaving() }
 
     fun save() {
         if (canSave.now) {
             isSaving.now = true
-            savePromise()
-                .then { isSaving.now = false }
+
+            task.props.id.now.map { s ->
+                GlobalScope.launch {
+                    userTasksRef.doc(s.id).set(
+                        task.props.merge(),
+                        setOptionsMerge()
+                    ).await()
+                    isSaving.now = false
+                }
+            }.getOrElse {
+                GlobalScope.launch {
+                    val ref = userTasksRef.add(
+                        task.props.write()
+                    ).await()
+                    task.props.persisted(ref.id)
+                    killables += ref.listen(task)
+                    killables += task.props.onDeleted.add(close)
+
+                    isSaving.now = false
+                }
+            }
         }
     }
 
@@ -99,11 +71,10 @@ fun LoggedIn.editTask(
 
     fun delete() {
         isSaving.now = true
-        deletePromise()
-            .then {
-                isSaving.now = false
-                back()
-            }
+        GlobalScope.launch {
+            userTasks.doc(task.props.idOrFail).ref.delete().await()
+            isSaving.now = false
+        }
     }
 
     panel.newRoot {
@@ -111,7 +82,7 @@ fun LoggedIn.editTask(
             top {
                 left.btnButton {
                     rxClasses {
-                        if (task.pt.changed()) {
+                        if (task.props.dirty()) {
                             listOf(Cls.btnDanger)
                         } else {
                             listOf(Cls.btnSecondary)
@@ -119,7 +90,7 @@ fun LoggedIn.editTask(
                     }
                     faButtonSpan {
                         rxClasses {
-                            if (task.pt.changed()) {
+                            if (task.props.dirty()) {
                                 listOf(Cls.faUndo)
                             } else {
                                 listOf(Cls.faChevronLeft)
@@ -255,7 +226,21 @@ fun LoggedIn.editTask(
                                     customSelect
                                 }
                                 option {
-                                    innerText = "Csuf"
+                                    value = ""
+                                    innerText = "<please select>"
+                                }
+                                TaskStatus.values().forEach { s ->
+                                    option {
+                                        value = s.name
+                                        innerText = s.name
+                                    }
+                                }
+                                value = task.status.current.now.map { it.name }.orEmpty()
+
+                                changeEvent {
+                                    task.status.current.now =
+                                        if (value.isNullOrBlank()) None
+                                        else Some(TaskStatus.valueOf(value))
                                 }
 
                             }

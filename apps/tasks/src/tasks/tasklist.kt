@@ -1,7 +1,10 @@
 package tasks
 
 import bootstrap.*
-import commonfb.stringClickListUI
+import common.orEmpty
+import commonfb.ListUIConfig
+import commonfb.showClosableList
+import commonfb.stringListClick
 import commonui.RootPanel
 import commonui.screenLayout
 import domx.*
@@ -76,7 +79,7 @@ fun LoggedIn.listTasks(panel: RootPanel, after: () -> Unit) : () -> Unit {
                             btnPrimary
                         }
                         clickEvent {
-                            editTask(panel.sub()) {
+                            editTask(panel.sub(), Task()) {
                                 displayList()
                             }
                         }
@@ -89,25 +92,33 @@ fun LoggedIn.listTasks(panel: RootPanel, after: () -> Unit) : () -> Unit {
 
                 killables += userTasks
                     .query(db) {
-                        Task::title.asc()
+                        Task.title.asc()
                     }
-                    .stringClickListUI(
-                        listRoot,
-                        extract = { Task(it.data()) },
-                        itemText = { it.title },
-                        ulDecor = {
-                            cls {
-                                listGroupFlush
-                                borderBottom
+                    .showClosableList(
+                        redisplay = { displayList() },
+                        page = { item ->
+                            { close  ->
+                                viewTask(panel.sub(), item, close)
                             }
                         },
-                        onClick = {
-                            viewTask(panel.sub(), it) {
-                                displayList()
-                            }
+                        config = {  show ->
+                            ListUIConfig(
+                                root = listRoot,
+                                create = { Task() },
+                                ulDecor = {
+                                    cls {
+                                        listGroupFlush
+                                        borderBottom
+                                    }
+                                },
+                                itemFactory = stringListClick(
+                                    itemText = { it.title.initial().orEmpty() },
+                                    onClick = show
+                                )
+                            )
+
                         }
                     )
-
             }
         }
     }

@@ -1,7 +1,9 @@
 package taskslib
 
 import common.named
+import common.toOptional
 import commonlib.*
+import commonshr.toLazy
 import firebaseshr.*
 import firebaseshr.firestore.Timestamp
 import rx.Rx
@@ -49,8 +51,8 @@ open class Task : Base<Task>() {
     val text by o.scalar<String>().prop()
     val status by o.scalar<TaskStatus>().withDefault(TaskStatus.New).enum().prop()
     val tags by o.array<String>().toSet().prop()
-    val ts by o.scalar<Timestamp>().withDefault { ops.serverTimestamp() }.prop()
 
+    val ts by o.scalar<Timestamp>().calculated { ops.serverTimestamp().toOptional().toLazy() }.prop()
     val completed by o.scalar<Boolean>().calculated {
         status.current.now.map { s -> s.completed }.let(::lazyOf)
     }.prop()

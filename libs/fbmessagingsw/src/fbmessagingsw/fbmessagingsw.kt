@@ -10,6 +10,7 @@ import kotlin.js.Promise
 
 val sw = js("self").unsafeCast<ServiceWorkerGlobalScope>()
 
+
 val app by lazy {
     firebase.initializeApp(
         obj {

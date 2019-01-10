@@ -24,18 +24,13 @@ fun initBinder(ops: PropOps) {
 }
 
 interface PropTasks<in O> {
-    fun updatePersisted(o: dynamic)
-    fun rollbackToPersisted()
+    fun extractInitial(o: dynamic)
+    fun resetInitial()
+    fun rollback()
     fun writeTo(o: dynamic)
     fun mergeTo(o: dynamic)
-    val shouldWrite: RxVal<Boolean>
-    val changed: RxVal<Boolean>
+    val dirty: RxVal<Boolean>
     fun clearDirty()
-
-    fun startEditingPersisted(o: dynamic) {
-        updatePersisted(o)
-        rollbackToPersisted()
-    }
 }
 
 interface Prop<in O>: PropTasks<O> {
@@ -47,26 +42,35 @@ fun <T> Collection<(T) -> Unit>.fireWith(v: T) {
     forEach { it(v) }
 }
 
+interface PropRegsitry<in O> {
+    fun register(prop: Prop<@UnsafeVariance O>)
+}
+
 open class ScalarProp<in O, T>(
     override val name: String,
     private val ops: Ops<O, T>
 ) : Prop<O> {
 
-//    data class Events<O, T>(
-//        val beforeWrite : Collection<(ScalarProp<O, T>) -> Unit> = emptyList()
-//    )
+    var ignoreDirty = ops.ignoreDirty
+
+    init {
+        @Suppress("LeakingThis")
+        ops.registry.register(this)
+    }
+
     data class Ops<in O, T>(
-        val propFactory: PropFactory<O>,
+        val registry: PropRegsitry<O>,
+        val ignoreDirty: Boolean = false,
         val read: (dynamic) -> T = { it.unsafeCast<T>() },
         val write: (T) -> dynamic = { it.asDynamic() },
         val merge: ((old: T, new: T) -> dynamic)? = null,
         val calculate : ((ScalarProp<@UnsafeVariance O, T>) -> Lazy<Optional<T>>)? = null,
         val defaultValue: () -> Optional<T> = { None }
-//        val events: Events<@UnsafeVariance O, T> = Events()
     ) {
         fun prop(fn: (String, Ops<O, T>) -> ScalarProp<@UnsafeVariance O, T> = ::ScalarProp) = named { fn(it, this) }
         fun withDefault(v: () -> T) = copy(defaultValue = { Some(v()) } )
         fun withDefault(v: T) = copy(defaultValue = { Some(v) } )
+        fun withIgnoreDirty(v: Boolean = true) = copy(ignoreDirty = v)
         fun calculated(fn: (ScalarProp<@UnsafeVariance O, T>) -> Lazy<Optional<T>>) = copy(
             calculate = fn
         )
@@ -74,45 +78,39 @@ open class ScalarProp<in O, T>(
             r: (T) -> U,
             w: (U) -> T
         ) = Ops(
-            propFactory = propFactory,
+            registry = registry,
+            ignoreDirty = ignoreDirty,
             read = { r(read(it)) },
             write = { write(w(it)) },
             defaultValue = { defaultValue().map(r) }
         )
 
-//        fun onBeforeWrite(fn: (ScalarProp<O, T>) -> Unit) = copy(
-//            events = events.copy(
-//                beforeWrite = events.beforeWrite + fn
-//            )
-//        )
-
         companion object {
-            inline fun <O, T> array(pf: PropFactory<O>) = ScalarProp.Ops<O, Array<T>>(pf).copy(
+            inline fun <O, T> array(regsitry: PropRegsitry<O>) = ScalarProp.Ops<O, Array<T>>(regsitry).copy(
                 defaultValue = { Some(arrayOf()) }
             )
         }
     }
 
     val initial = Var(ops.defaultValue())
-    val persisted = Var<Optional<T>>(None)
     val current = Var(initial.now)
 
 
     val calculated
         get() = ops.calculate != null
 
-    override val shouldWrite: RxVal<Boolean> = if (calculated) Var(false) else Rx {
-        persisted() != current()
-    }
-    override val changed: RxVal<Boolean> = if (calculated) Var(false) else Rx {
-        initial() != current()
+    override val dirty: RxVal<Boolean> = if (calculated) Rx { false } else Rx {
+        if (ignoreDirty) false
+        else initial() != current()
     }
 
-    override fun updatePersisted(o: dynamic) {
-        persisted.now = opt<dynamic>(o, name).map(ops.read)
+    override fun extractInitial(o: dynamic) {
+        initial.now = opt<dynamic>(o, name).map(ops.read)
     }
 
-    fun Collection<(ScalarProp<O, T>) -> Unit>.fire() = fireWith(this@ScalarProp)
+    override fun resetInitial() {
+        initial.now = ops.defaultValue()
+    }
 
     val beforeWrite: () -> Unit =
         ops.calculate?.let { c ->
@@ -122,18 +120,16 @@ open class ScalarProp<in O, T>(
         } ?: {}
 
     override fun writeTo(o: dynamic) {
-//        ops.events.beforeWrite.fire()
         beforeWrite()
         current.now.forEach { o[name] = ops.write(it) }
     }
 
     override fun mergeTo(o: dynamic) {
-//        ops.events.beforeWrite.fire()
         beforeWrite()
-        if (shouldWrite.now) {
+        if (initial.now != current.now) {
             @Suppress("RemoveExplicitTypeArguments")
             o[name] = current.now.map<dynamic> { c ->
-                persisted.now.map<dynamic> { p ->
+                initial.now.map<dynamic> { p ->
                     ops.merge.let { m ->
                         if (m != null) {
                             m(p, c)
@@ -149,12 +145,11 @@ open class ScalarProp<in O, T>(
     }
 
     override fun clearDirty() {
-        persisted.now = current.now
         initial.now = current.now
     }
 
-    override fun rollbackToPersisted() {
-        current.now = persisted.now
+    override fun rollback() {
+        current.now = initial.now
     }
 
 }
@@ -167,11 +162,7 @@ class EnumProp<in O, T: Enum<T>>(name: String, ops: ScalarProp.Ops<O, T>) : Scal
     }
 }
 
-//sealed class SetEvent<T>
-//class SetAdded<T>(v: T) : SetEvent<T>()
-//class SetRemoved<T>(v: T) : SetEvent<T>()
-
-fun <O, T> ScalarProp.Ops<O, T>.arrayOf() = ScalarProp.Ops.array<O, dynamic>(propFactory).map(
+fun <O, T> ScalarProp.Ops<O, T>.arrayOf() = ScalarProp.Ops.array<O, dynamic>(registry).map(
     r = { it.map(read).toTypedArray() },
     w = { it.map(write).toTypedArray() }
 )
@@ -189,11 +180,6 @@ fun <O, T: Comparable<T>> ScalarProp.Ops<O, Array<T>>.sorted() = map(
     w = { it.sortedArray() }
 )
 
-
-//class ArraySetProp<in O, T>(name: String, ops: ScalarProp.Ops<O, Set<T>>) : ScalarProp<O, Set<T>>(name, ops) {
-//    constructor(name: String): this(name, arrayPropOps<O, T>().arraySetPropOps())
-//}
-
 inline fun <O, reified T: Enum<T>> ScalarProp.Ops<O, T>.enum() = EnumProp.Ops(
     scalar = copy(
         write = { it.name },
@@ -201,67 +187,97 @@ inline fun <O, reified T: Enum<T>> ScalarProp.Ops<O, T>.enum() = EnumProp.Ops(
     )
 )
 
-interface HasProps<in O> {
-    val props: List<Prop<O>>
-}
+data class IdState<I>(
+    val id: I,
+    val exists: Boolean = true
+)
 
-val <O> HasProps<O>.pt
-    get() = PropListTasks(props)
+class Props<in O, I> : PropTasks<O> {
 
-class PropListTasks<in O>(val props: List<Prop<O>>): PropTasks<O> {
-    override fun updatePersisted(o: dynamic) {
-        props.forEach { it.updatePersisted(o) }
+    val id = Var<Optional<IdState<I>>>(None)
+    internal var list : List<Prop<@UnsafeVariance O>> = listOf()
+
+    val isPersisted by lazy { Rx { id() != None } }
+    val isDeleted by lazy { Rx { id().map { s -> !s.exists }.getOrDefault(false) } }
+
+    val onDeleted by lazy {
+        val l = Listeners()
+        isDeleted.forEach { if (it) l.fire() }
+        l
     }
 
-    override fun rollbackToPersisted() {
-        props.forEach { it.rollbackToPersisted() }
+    val idOrFail
+        get() = id.now.get().id
+
+    fun persisted(idv: I) {
+        id.now = Some(IdState(idv))
+    }
+
+    fun deleted() {
+        id.transform { i -> i.map { s -> s.copy(exists = false) } }
+    }
+
+
+    override fun extractInitial(o: dynamic) {
+        list.forEach { it.extractInitial(o) }
+    }
+
+    override fun resetInitial() {
+        list.forEach { it.resetInitial() }
+    }
+
+    override fun rollback() {
+        list.forEach { it.rollback() }
     }
 
     override fun writeTo(o: dynamic) {
-        props.forEach { it.writeTo(o) }
+        list.forEach { it.writeTo(o) }
     }
 
     override fun mergeTo(o: dynamic) {
-        props.forEach { it.mergeTo(o) }
-    }
-
-    override val shouldWrite: RxVal<Boolean> by lazy {
-        Rx {
-            props.any { it.shouldWrite() }
+        if (id.now.isEmpty()) {
+            writeTo(o)
+        } else {
+            list.forEach { it.mergeTo(o) }
         }
     }
-    override val changed: RxVal<Boolean> by lazy {
+
+    override val dirty: RxVal<Boolean> by lazy {
         Rx {
-            props.any { it.changed() }
+            list.any {
+                it.dirty()
+            }
         }
     }
 
     override fun clearDirty() {
-        props.forEach { it.clearDirty() }
-    }
-
-    override fun startEditingPersisted(o: dynamic) {
-        props.forEach { it.startEditingPersisted(o) }
+        list.forEach { it.clearDirty() }
     }
 
     fun write() = obj<Any>().also(::writeTo).asDynamic()
 
     fun merge() = obj<Any>().also(::mergeTo).asDynamic()
 
-
+}
+interface HasProps<in O, I> {
+    val props: Props<O, I>
 }
 
-open class Base<T>(val o: PropFactory<T> = PropFactory()) : HasProps<T> by o
+open class Base<T>(val o: PropFactory<T, String> = PropFactory()) : HasProps<T, String> by o
 
-class PropFactory<in O>: HasProps<O> {
-    override var props = emptyList<Prop<@kotlin.UnsafeVariance O>>()
-    inline fun <T> scalar() = ScalarProp.Ops<O, T>(this)
-    inline fun <T> array() = ScalarProp.Ops.array<O, T>(this)
+class PropFactory<in O, I>: HasProps<O, I> {
+
+    override val props = Props<O, I>()
+
+    private val registry = object : PropRegsitry<O> {
+        override fun register(prop: Prop<@UnsafeVariance O>) {
+            props.list += prop
+        }
+    }
+
+    fun <T> scalar() = ScalarProp.Ops<O, T>(registry)
+    fun <T> array() = ScalarProp.Ops.array<O, T>(registry)
 }
-val PF = PropFactory<Any?>()
-fun <O> O.pf() = PropFactory<O>()
-val <O> O.o
-    get() = PF.unsafeCast<PropFactory<O>>()
 
 
 

@@ -1,22 +1,35 @@
 package commonfb
 
 import buildenv.serviceWorkerFileName
+import commonlib.CollectionWrap
+import commonlib.DocWrap
 import commonlib.Function
 import commonlib.Lib
 import commonui.AppCtx
 import firebase.AppOptions
 import firebase.app.firestore
-import firebase.firestore.withDefaultSettings
+import firebase.firestore.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
 import kotlin.browser.window
 import kotlin.js.Promise
 
+
+interface HasDB {
+    val db: Firestore
+
+    val DocWrap<*, *>.ref
+        get() = docRef(db)
+
+    val CollectionWrap<*>.ref
+        get() = collectionRef(db)
+}
+
 class FbCtx(
     val appCtx: AppCtx,
     val lib: Lib
-) {
+) : HasDB {
     val name = lib.name
 
     constructor(lib: Lib, title: String) : this(AppCtx(title), lib)
@@ -41,7 +54,7 @@ class FbCtx(
         )
     }
 
-    val db by lazy { app.firestore().withDefaultSettings() }
+    override val db by lazy { app.firestore().withDefaultSettings() }
     val auth by lazy { app.auth() }
     val messaging by lazy {
         GlobalScope.async {

@@ -1,6 +1,7 @@
 package tasks
 
 import bootstrap.*
+import common.orEmpty
 import common.removeFromParent
 import commonfb.ListUIConfig
 import commonfb.listUI
@@ -8,7 +9,6 @@ import commonui.RootPanel
 import commonui.screenLayout
 import domx.cls
 import domx.*
-import firebase.firestore.DocItem
 import firebase.firestore.query
 import fontawesome.faPen
 import fontawesome.fas
@@ -21,12 +21,12 @@ import taskslib.notes
 
 fun LoggedIn.viewTask(
     panel: RootPanel,
-    task: DocItem<Task>,
+    task: Task,
     close: () -> Unit
 ) : () -> Unit {
     val killables = Killables()
 
-    val taskWrap = userTasks.doc(task.id)
+    val taskWrap = userTasks.doc(task.props.idOrFail)
     val notesWrap = taskWrap.notes
 
     panel.newRoot {
@@ -71,14 +71,13 @@ fun LoggedIn.viewTask(
                             m1
                         }
                         dt { innerText = "Title" }
-                        dd { killables += rxText { task.data().title } }
+                        dd { killables += rxTextOrEmpty { task.title.initial() } }
                         dt { innerText = "Text" }
-                        dd { killables += rxText { task.data().text } }
+                        dd { killables += rxTextOrEmpty { task.text.initial() } }
                         dt { innerText = "Status" }
-                        dd { killables += rxText { task.data().status.name } }
-                        dt { innerText = "Tags" }
-                        dd {
-
+                        dd { killables += rxTextOrEmpty { task.status.initial().map { it.name } } }
+//                        dt { innerText = "Tags" }
+//                        dd {
 //                            val ks = KillableSeq().also { killables += it }
 //                            killables += task.data.forEach {  t ->
 //                                div {
@@ -101,40 +100,8 @@ fun LoggedIn.viewTask(
 //                                        }
 //                                    }
 //                                }.also { tagsDiv -> ks.set { tagsDiv.removeFromParent() } }
-                            }
-                        }
-                        dt { innerText = "Notes" }
-                        dd {
-//                            div {
-//                                cls {
-//                                    border
-//                                    p1
-//                                }
-//                                val notesRoot = RootPanel(this)
-//                                killables += notesWrap
-//                                    .query(db) {
-//                                        Note::ts.desc()
-//                                    }
-//                                    .listUI(
-//                                        ListUIConfig(
-//                                            root = notesRoot,
-//                                            extract = { Note(it.data()) },
-//                                            itemFactory = {
-//                                                li {
-//                                                    cls {
-//                                                        listGroupItem
-//                                                    }
-//                                                    rxText { it.data().text }
-//                                                }
-//
-//                                            }
-//                                        )
-//                                    )
-//
 //                            }
-
-
-                        }
+//                        }
                     }
 
                 }

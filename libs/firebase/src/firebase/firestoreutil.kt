@@ -2,20 +2,19 @@ package firebase.firestore
 
 import common.*
 import commonlib.CollectionWrap
+import commonlib.DocWrap
 import firebase.FirebaseError
+import firebase.firestore
 import firebaseshr.HasProps
+import firebaseshr.IdState
 import firebaseshr.ScalarProp
-import firebaseshr.pt
 import killable.Killable
 import killable.Killables
 import kotlinx.coroutines.*
 import org.w3c.dom.Element
 import rx.RxVal
 import rx.Var
-import kotlin.js.Promise
 import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty0
-import kotlin.reflect.KProperty1
 
 fun setOptionsMerge() = obj<SetOptions> { merge = true }
 
@@ -139,15 +138,55 @@ fun Query.onSnapshotNext(
 
 
 
+data class ListenConfig<T>(
+    val list: ListenableMutableList<T>,
+    val create: (id: String, data: dynamic) -> T,
+    val update: T.(dynamic) -> Unit,
+    val delete: (T) -> Unit,
+    val onFirst: () -> Unit = {},
+    val onError: (FirebaseError) -> Unit = { console.dir(it) }
+) {
+    companion object {
+
+//        fun <T> docItems(
+//            list: ListenableMutableList<DocItem<T>>,
+//            create: (dynamic) -> T,
+//            update: T.(dynamic) -> Unit
+//        ): ListenConfig<DocItem<T>> {
+//            return ListenConfig(
+//                list = list,
+//                create = { id, data -> DocItem(id, create(data)) },
+//                update = { d -> update(this.data, d) },
+//                delete = { it -> it.deleted.kill() }
+//            )
+//        }
+        fun <T: HasProps<*, String>> hasProps(
+            list: ListenableMutableList<T>,
+            create: () -> T
+        ) = ListenConfig(
+            list,
+            create = { id, d ->
+                create().also { t ->
+                    t.props.persisted(id)
+                    t.props.extractInitial(d)
+                }
+            },
+            update = { d ->
+                this.props.extractInitial(d)
+            },
+            delete = { t ->
+                t.props.deleted()
+                t.props.resetInitial()
+            }
+
+        )
+    }
+}
+
 
 fun <T> Query.listen(
-    list: ListenableMutableList<T>,
-    create: (QueryDocumentSnapshot) -> T,
-    update: (T, QueryDocumentSnapshot) -> Unit,
-    delete: (T) -> Unit,
-    onFirst: () -> Unit = {},
-    onError: (FirebaseError) -> Unit = { console.dir(it) }
-): () -> Unit {
+    config: ListenConfig<T>
+): () -> Unit = with(config) {
     require(list.isEmpty())
 
     var onNext: (QuerySnapshot) -> Unit
@@ -159,13 +198,13 @@ fun <T> Query.listen(
             .forEach { dc ->
                 when (dc.typeEnum) {
                     DocumentChangeType.added -> {
-                        list.add(dc.newIndex, create(dc.doc))
+                        list.add(dc.newIndex, create(dc.doc.id, dc.doc.data()))
                     }
                     DocumentChangeType.removed -> {
                         delete(list.removeAt(dc.oldIndex))
                     }
                     DocumentChangeType.modified -> {
-                        update(list[dc.oldIndex], dc.doc)
+                        update(list[dc.oldIndex], dc.doc.data())
                         if (dc.newIndex != dc.oldIndex) {
                             list.move(dc.oldIndex, dc.newIndex)
                         }
@@ -194,34 +233,12 @@ fun <T> Query.listen(
     return { killables.kill() }
 }
 
-class DocItem<T>(
-    val id: String,
-    val data: Var<T>,
-    val deleted: Killables = Killables()
-)
+//class DocItem<T>(
+//    val id: String,
+//    val data: T,
+//    val deleted: Killables = Killables()
+//)
 
-
-fun <T> connect(persisted: RxVal<dynamic>, o: HasProps<T>): Killable {
-    return persisted.forEach { d ->
-        o.pt.updatePersisted(d)
-    }
-}
-
-fun <T> QueryWrap<T>.docItems(
-    list: ListenableMutableList<DocItem<T>>,
-    extract: (QueryDocumentSnapshot) -> T = { it.data() },
-    onFirst: () -> Unit = {},
-    onError: (FirebaseError) -> Unit = { console.dir(it) }
-): () -> Unit {
-    return query.listen(
-        list = list,
-        create = { DocItem(it.id, Var(extract(it))) },
-        update = { di, qs -> di.data.now = extract(qs) },
-        delete = { it.deleted.kill() },
-        onFirst = onFirst,
-        onError = onError
-    )
-}
 
 fun Query.orderBy(prop: KProperty<*>) = orderBy(prop.name)
 
@@ -273,17 +290,21 @@ class QueryWrap<in T>(
     val query: Query
 )
 
-fun DocumentReference.listen(
-    rxv: Var<Optional<dynamic>>
+fun <T: HasProps<*, String>> DocumentReference.listen(
+    target: T
 ) : Killable {
     return Killable.once(
         onSnapshot { d ->
             if (d.exists) {
-                rxv.now = Some(d.data())
+                val data = d.data<dynamic>()
+                target.props.extractInitial(data)
             } else {
-                rxv.now = None
+                target.props.deleted()
             }
         }
     )
 
 }
+
+fun DocWrap<*, *>.docRef(db: Firestore = firestore()) = db.doc(path)
+fun CollectionWrap<*>.collectionRef(db: Firestore = firestore()) = db.collection(path)

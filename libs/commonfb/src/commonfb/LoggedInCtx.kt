@@ -1,6 +1,5 @@
 package commonfb
 
-import common.Wrap
 import common.obj
 import commonlib.fcmtokens
 import commonlib.private

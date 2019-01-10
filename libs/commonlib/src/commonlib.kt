@@ -28,19 +28,25 @@ class Function<in I, out O>(
 open class DocWrap<in D, C>(
     val id: String,
     parent: CollectionWrap<D>?
-) {
-    val path : String = "${parent?.path ?: ""}/$id"
+): HasPath {
+    override val path : String = "${parent?.path ?: ""}/$id"
 }
 
 fun <D2> coll() = object : ReadOnlyProperty<DocWrap<*, *>, CollectionWrap<D2>> {
     override fun getValue(thisRef: DocWrap<*, *>, property: KProperty<*>) =
         CollectionWrap<D2>(property.name, thisRef)
 }
+
+
+interface HasPath {
+    val path: String
+}
+
 open class CollectionWrap<in D>(
     val id: String,
     parent: DocWrap<*, *>?
-) {
-    val path : String = "${parent?.path ?: ""}/$id"
+) : HasPath {
+    override val path : String = "${parent?.path ?: ""}/$id"
 
     fun <D2: D, C> docdc(id: String) = DocWrap<D2, C>(id, this)
     fun <C> docc(id: String) = docdc<D,C>(id)

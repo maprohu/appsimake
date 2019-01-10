@@ -6,6 +6,8 @@ import commonui.RootPanel
 import commonui.showClosable
 import domx.*
 import firebase.firestore.*
+import firebase.firestore.ListenConfig.Companion.hasProps
+import firebaseshr.HasProps
 import killable.Killables
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLUListElement
@@ -13,57 +15,35 @@ import org.w3c.dom.Node
 import styles.scrollVertical
 import kotlin.browser.document
 
-fun <T> QueryWrap<T>.stringClickListUI(
-    root: RootPanel,
-    extract: (QueryDocumentSnapshot) -> T = { it.data() },
-    hourglassDecor: HTMLDivElement.() -> Unit = {},
-    emptyDivDecor : HTMLDivElement.() -> Unit = { cls.flexGrow1 },
-    listDivDecor : HTMLDivElement.() -> Unit = { classes += scrollVertical; flexGrow1() },
-    ulDecor: HTMLUListElement.() -> Unit = {},
-    itemText: (T) -> String,
-    onClick: (DocItem<T>) -> Unit
-): () -> Unit {
-    return listUI(
-        ListUIConfig(
-            root,
-            extract,
-            hourglassDecor,
-            emptyDivDecor,
-            listDivDecor,
-            ulDecor,
-            stringListClick(itemText, onClick)
-        )
-    )
-}
-
 fun <T> stringListClick(
     itemText: (T) -> String,
-    onClick: (DocItem<T>) -> Unit
-) : (DocItem<T>) -> Node = { item ->
+    onClick: (T) -> Unit
+) : (T) -> Node = { item ->
     document.listAction {
-        rxText { itemText(item.data()) }
+        rxText { itemText(item) }
         clickEvent {
             onClick(item)
         }
     }
 }
 
-data class ListUIConfig<T>(
+
+data class ListUIConfig<T: HasProps<*, String>>(
     val root: RootPanel,
-    val extract: (QueryDocumentSnapshot) -> T = { it.data() },
+    val create: () -> T,
     val hourglassDecor: HTMLDivElement.() -> Unit = {},
     val emptyDivDecor : HTMLDivElement.() -> Unit = { cls.flexGrow1 },
     val listDivDecor : HTMLDivElement.() -> Unit = { classes += scrollVertical; cls.flexGrow1 },
     val ulDecor: HTMLUListElement.() -> Unit = {},
-    val itemFactory: (DocItem<T>) -> Node
+    val itemFactory: (T) -> Node
 )
 
-fun <T> QueryWrap<T>.listUI(
+fun <T: HasProps<*, String>> QueryWrap<T>.listUI(
     config: ListUIConfig<T>
 ): () -> Unit = with(config) {
     root.setHourglass().apply(hourglassDecor)
 
-    val list = ListenableMutableList<DocItem<T>>()
+    val list = ListenableMutableList<T>()
 
     val emptyDiv = document.column {
         cls {
@@ -83,45 +63,52 @@ fun <T> QueryWrap<T>.listUI(
         }
     }
 
-    docItems(
-        list,
-        extract = extract,
-        onFirst = {
-            list.isEmptyRx.forEach { empty ->
-                root.setRoot(
-                    if (empty) emptyDiv else listDiv
-                )
+    query.listen(
+        hasProps(
+            list,
+            create = create
+        ).copy(
+            onFirst = {
+                list.isEmptyRx.forEach { empty ->
+                    root.setRoot(
+                        if (empty) emptyDiv else listDiv
+                    )
+                }
             }
-        }
+        )
     )
 }
 
-fun <T> QueryWrap<T>.showClosableList(
+fun <T: HasProps<*, String>> QueryWrap<T>.showClosableList(
     redisplay: () -> Unit,
-    page: (DocItem<T>) -> (() -> Unit) -> (() -> Unit),
-    config: ((DocItem<T>) -> Unit) -> ListUIConfig<T>
+    page: (T) -> (() -> Unit) -> (() -> Unit),
+    config: (show: (T) -> Unit) -> ListUIConfig<T>
 ) : () -> Unit {
 
     val listKills = Killables()
     val viewSeq = listKills.seq()
 
-    val onClick: (DocItem<T>) -> Unit = { dit ->
+    val onClick: (T) -> Unit = { dit ->
 
         val viewKills = viewSeq.killables()
 
         fun close() {
-            viewKills.fire()
             redisplay()
+            viewKills.kill()
         }
 
         viewKills += showClosable(
             page(dit),
             ::close
         )
-        viewKills += dit.deleted.add(::close)
+        viewKills += dit.props.onDeleted.add {
+            console.dir(dit)
+            close()
+        }
     }
 
     listKills += listUI(config(onClick))
 
     return listKills::kill
 }
+

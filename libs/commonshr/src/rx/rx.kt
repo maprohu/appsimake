@@ -260,7 +260,7 @@ open class Var<T>(
         get() = super.now
         set(value) { setValue(value) }
 
-    fun transform(fn: (T) -> T) = { now = fn(now) }
+    fun transform(fn: (T) -> T) { now = fn(now) }
 }
 
 
@@ -307,7 +307,7 @@ fun Element.rxClasses(
 ) : Killable  = rxClasses(style.toRx())
 
 fun Element.rxClasses(
-        style: RxVal<Collection<String>>
+        style: RxIface<Collection<String>>
 ) : Killable {
     return style.onOff(
             { addClass(*it.toTypedArray()) },
