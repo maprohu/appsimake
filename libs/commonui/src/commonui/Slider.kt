@@ -4,6 +4,7 @@ import bootstrap.*
 import common.*
 import domx.*
 import fontawesome.chevronLeft
+import fontawesome.fa
 import killable.Killables
 import killable.add
 import org.w3c.dom.*
@@ -175,7 +176,7 @@ class Slider(
                         margin2()
                         type = "button"
                         classes += "btn btn-light border"
-                        chevronLeft()
+                        cls.fa.chevronLeft
                         span {
                             flexGrow1()
                             innerText = "Back"

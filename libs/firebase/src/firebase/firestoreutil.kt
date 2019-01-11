@@ -176,7 +176,7 @@ data class ListenConfig<T>(
             },
             delete = { t ->
                 t.props.deleted()
-                t.props.resetInitial()
+//                t.props.resetInitial()
             }
 
         )
@@ -280,7 +280,7 @@ class QueryBuilder<T>(
         query = query.orderBy(name, "desc")
     }
 }
-fun <T> CollectionWrap<T>.query(db: Firestore, fn:  QueryBuilder<T>.() -> Unit): QueryWrap<T> {
+fun <T> CollectionWrap<T>.query(db: Firestore, fn:  QueryBuilder<T>.() -> Unit = {}): QueryWrap<T> {
     return QueryBuilder<T>(db.collection(path)).apply(fn).query.wrap()
 }
 

@@ -5,7 +5,6 @@ import common.removeFromParent
 import domx.cls
 import domx.div
 import domx.invoke
-import fontawesome.spinner
 import killable.Killable
 import killable.KillableSeq
 import org.w3c.dom.HTMLDivElement

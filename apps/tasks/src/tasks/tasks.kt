@@ -5,19 +5,18 @@ import common.orEmpty
 import commonfb.*
 import commonlib.private
 import commonui.RootPanel
+import commonui.faButton
 import commonui.screenLayout
 import commonui.showClosable
 import domx.*
 import firebase.User
 import firebase.firestore.query
-import fontawesome.faFw
-import fontawesome.faPlus
-import fontawesome.faSearch
-import fontawesome.fas
+import fontawesome.*
 import killable.Killables
 import rx.Var
 import styles.scrollVertical
 import taskslib.Task
+import taskslib.usertags
 import taskslib.tasks
 
 fun main(args: Array<String>) {
@@ -45,11 +44,16 @@ class LoggedIn(
     val fbCtx = loggedInCtx.fbCtx
     val root = base.appCtx.root
 
-    val userTasks = tasks.app.private.doc(user.uid).tasks
+    val userPrivate = tasks.app.private.doc(user.uid)
+    val userTasks = userPrivate.tasks
+    val userTags = userPrivate.usertags
+
 
     val userTasksRef = userTasks.ref
 
     val killables = Killables()
+
+    val tagSource = TagSource(userTags, db).also { killables += it }
 
     fun main(): () -> Unit {
 
@@ -68,48 +72,40 @@ class LoggedIn(
                         cls {
                             btnGroup
                         }
-                        button {
-                            cls {
-                                btn
-                                btnPrimary
-                                p2
-                            }
-                            span {
-                                cls {
-                                    fas
-                                    faFw
-                                    faPlus
-                                }
-                            }
-                            val ks = killables.seq()
-                            clickEvent {
-                                ks += showClosable(
+                        faButton(Fa.plus) {
+                            cls.btnPrimary
+                            killables += clickEventSeq {
+                                showClosable(
                                     { close -> editTask(root.sub(), Task(), close = close) },
                                     ::showHome
                                 )
                             }
                         }
-                        button {
-                            cls {
-                                btn
-                                btnPrimary
-                                p2
-                            }
-                            span {
-                                cls {
-                                    fas
-                                    faFw
-                                    faSearch
-                                }
-                            }
-                            val ks = killables.seq()
-                            clickEvent {
+                        faButton(Fa.search) {
+                            cls.btnPrimary
+                            killables += clickEventSeq {
                                 homeActive.now = false
-                                ks += showClosable(
+                                showClosable(
                                     { close -> listTasks(root.sub(), close) },
                                     ::showHome
                                 )
                             }
+                        }
+                        dropdownGroup(Cls.btnPrimary) {
+                            menu {
+                                cls.dropdownMenuRight
+                                dropdownItemAnchor {
+                                    icon.cls.fa.tags
+                                    text.innerText = "Tags"
+                                    killables += anchor.clickEventSeq {
+                                        showClosable(
+                                            { c -> listTags(root.sub(), c) },
+                                            ::showHome
+                                        )
+                                    }
+                                }
+                            }
+
                         }
                     }
                 }

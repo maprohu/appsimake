@@ -23,6 +23,15 @@ fun initBinder(ops: PropOps) {
     propOps = ops
 }
 
+data class ValidationError(
+    val message: String
+) {
+    companion object {
+        val emptyValidator : (Optional<Any?>) -> Set<ValidationError> = { emptySet() }
+        val mandatory = ValidationError("Field is mandatory.")
+    }
+}
+
 interface PropTasks<in O> {
     fun extractInitial(o: dynamic)
     fun resetInitial()
@@ -35,6 +44,8 @@ interface PropTasks<in O> {
 
 interface Prop<in O>: PropTasks<O> {
     val name: String
+    val validationErrors: RxVal<Set<ValidationError>>
+    val isValid: RxVal<Boolean>
 
 }
 
@@ -65,7 +76,8 @@ open class ScalarProp<in O, T>(
         val write: (T) -> dynamic = { it.asDynamic() },
         val merge: ((old: T, new: T) -> dynamic)? = null,
         val calculate : ((ScalarProp<@UnsafeVariance O, T>) -> Lazy<Optional<T>>)? = null,
-        val defaultValue: () -> Optional<T> = { None }
+        val defaultValue: () -> Optional<T> = { None },
+        val validate: (Optional<T>) -> Set<ValidationError> = ValidationError.emptyValidator
     ) {
         fun prop(fn: (String, Ops<O, T>) -> ScalarProp<@UnsafeVariance O, T> = ::ScalarProp) = named { fn(it, this) }
         fun withDefault(v: () -> T) = copy(defaultValue = { Some(v()) } )
@@ -73,6 +85,16 @@ open class ScalarProp<in O, T>(
         fun withIgnoreDirty(v: Boolean = true) = copy(ignoreDirty = v)
         fun calculated(fn: (ScalarProp<@UnsafeVariance O, T>) -> Lazy<Optional<T>>) = copy(
             calculate = fn
+        )
+        fun mandatory() =  validated(ValidationError.mandatory) { it.isEmpty() }
+        fun ifPresent(err: ValidationError, invalid: (T) -> Boolean) = validated(err) { vo ->
+            vo.map(invalid).getOrDefault(false)
+        }
+        fun validated(err: ValidationError, invalid: (Optional<T>) -> Boolean) = validated { v ->
+            if (invalid(v)) setOf(err) else emptySet()
+        }
+        fun validated(fn: (Optional<T>) -> Set<ValidationError>) = copy(
+            validate = { v -> validate(v) + fn(v) }
         )
         fun <U> map(
             r: (T) -> U,
@@ -102,6 +124,14 @@ open class ScalarProp<in O, T>(
     override val dirty: RxVal<Boolean> = if (calculated) Rx { false } else Rx {
         if (ignoreDirty) false
         else initial() != current()
+    }
+
+    override val validationErrors by lazy {
+        Rx { ops.validate(current()) }
+    }
+
+    override val isValid by lazy {
+        Rx { validationErrors().isEmpty() }
     }
 
     override fun extractInitial(o: dynamic) {
@@ -154,13 +184,13 @@ open class ScalarProp<in O, T>(
 
 }
 
-class EnumProp<in O, T: Enum<T>>(name: String, ops: ScalarProp.Ops<O, T>) : ScalarProp<O, T>(name, ops) {
-    data class Ops<in O, T: Enum<T>>(
-        val scalar: ScalarProp.Ops<O, T>
-    ) {
-        fun prop() = scalar.prop(::EnumProp)
-    }
-}
+//class EnumProp<in O, T: Enum<T>>(name: String, ops: ScalarProp.Ops<O, T>) : ScalarProp<O, T>(name, ops) {
+//    data class Ops<in O, T: Enum<T>>(
+//        val scalar: ScalarProp.Ops<O, T>
+//    ) {
+//        fun prop() = scalar.prop(::EnumProp)
+//    }
+//}
 
 fun <O, T> ScalarProp.Ops<O, T>.arrayOf() = ScalarProp.Ops.array<O, dynamic>(registry).map(
     r = { it.map(read).toTypedArray() },
@@ -180,12 +210,10 @@ fun <O, T: Comparable<T>> ScalarProp.Ops<O, Array<T>>.sorted() = map(
     w = { it.sortedArray() }
 )
 
-inline fun <O, reified T: Enum<T>> ScalarProp.Ops<O, T>.enum() = EnumProp.Ops(
-    scalar = copy(
-        write = { it.name },
-        read = { enumValueOf(it.unsafeCast<String>()) }
-    )
-)
+//inline fun <O, reified T: Enum<T>> ScalarProp.Ops<O, T>.enum() = EnumProp.Ops(
+//    scalar = copy(
+//    )
+//)
 
 data class IdState<I>(
     val id: I,
@@ -199,6 +227,9 @@ class Props<in O, I> : PropTasks<O> {
 
     val isPersisted by lazy { Rx { id() != None } }
     val isDeleted by lazy { Rx { id().map { s -> !s.exists }.getOrDefault(false) } }
+    val isValid: RxVal<Boolean> by lazy {
+        Rx { list.all { it.isValid() } }
+    }
 
     val onDeleted by lazy {
         val l = Listeners()
@@ -277,6 +308,10 @@ class PropFactory<in O, I>: HasProps<O, I> {
 
     fun <T> scalar() = ScalarProp.Ops<O, T>(registry)
     fun <T> array() = ScalarProp.Ops.array<O, T>(registry)
+    inline fun <reified E: Enum<E>> enum() = scalar<String>().map(
+        w = { it.name },
+        r = { enumValueOf<E>(it.unsafeCast<String>()) }
+    )
 }
 
 

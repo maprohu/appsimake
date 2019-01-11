@@ -1,33 +1,60 @@
 package fontawesome
 
 import domx.*
-import org.w3c.dom.Element
-import org.w3c.dom.Node
-import styles.lineHeightInherit
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 
-fun Element.fas(name: String) {
-    classes += "fas fa-$name"
-}
-
-fun Node.fa(name: String) = span {
-    classes += "fas fa-$name $lineHeightInherit"
-}
-
-fun Node.chevronRight() = fa("chevron-right")
-fun Node.chevronLeft() = fa("chevron-left")
-fun Node.chevronDown() = fa("chevron-down")
-fun Node.spinner() = fa("spinner fa-spin")
+//fun Element.fas(name: String) {
+//    classes += "fas fa-$name"
+//}
+//
+//fun Node.fa(name: String) = span {
+//    classes += "fas fa-$name $lineHeightInherit"
+//}
+//
+//fun Node.chevronRight() = fa("chevron-right")
+//fun Node.chevronLeft() = fa("chevron-left")
+//fun Node.chevronDown() = fa("chevron-down")
+//fun Node.spinner() = fa("spinner fa-spin")
 
 val Cls.fas by css()
-val Cls.faFw by css()
-val Cls.faBan by css()
-val Cls.faUndo by css()
-val Cls.faSearch by css()
-val Cls.faPen by css()
-val Cls.faPlus by css()
-val Cls.faPlusSquare by css()
-val Cls.faChevronLeft by css()
-val Cls.faChevronRight by css()
-val Cls.faChevronDown by css()
-val Cls.faTrashAlt by css()
-val Cls.faSave by css()
+
+open class Fa(val cls: Cls) {
+    init {
+        cls.fas
+    }
+    companion object: Fa(Cls)
+}
+
+val Cls.fa
+    get() = Fa(this)
+
+operator fun Fa.invoke(fn: Fa.() -> Unit) = apply(fn)
+
+class FaCssClass(val name: String) : ReadOnlyProperty<Fa, String> {
+    override fun getValue(thisRef: Fa, property: KProperty<*>) : String {
+        thisRef.cls.element { classes += name }
+        return name
+    }
+}
+class FaCssClassProvider {
+    operator fun provideDelegate(
+        thisRef: Nothing?,
+        prop: KProperty<*>
+    ) = FaCssClass("fa-${prop.name.toCss()}")
+}
+fun facss() = FaCssClassProvider()
+
+val Fa.fw by facss()
+val Fa.ban by facss()
+val Fa.undo by facss()
+val Fa.search by facss()
+val Fa.pen by facss()
+val Fa.plus by facss()
+val Fa.plusSquare by facss()
+val Fa.chevronLeft by facss()
+val Fa.chevronRight by facss()
+val Fa.chevronDown by facss()
+val Fa.trashAlt by facss()
+val Fa.save by facss()
+val Fa.tags by facss()

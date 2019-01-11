@@ -9,8 +9,6 @@ import common.*
 import domx.*
 import org.w3c.dom.events.MouseEvent
 import styles.overflowHidden
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 
 
 //fun Node.topbar(
@@ -50,24 +48,34 @@ fun Element.dropdownToggle() {
     classes += "dropdown-toggle"
 }
 
-class Dropdown(node: Node) {
+class DropdownGroup(
+    node: HTMLElement,
+    btnStyle: String? = null
+) {
     val element = node.div {
-        dropdown()
+        cls {
+            btnGroup
+            dropdown
+        }
     }
 
-    val button  = element.btnButton {
-        btnSecondary()
-        attributes["data-toggle"] = "dropdown"
+    val drop  = element.button {
+        cls {
+            btn
+            dropdownToggle
+        }
+        classes += btnStyle
+        attr["data-toggle"] = "dropdown"
     }
-
-    fun button(fn: HTMLButtonElement.() -> Unit) = button.apply(fn)
 
     val menu = element.div {
-        dropdownMenu()
+        cls {
+            dropdownMenu
+        }
     }
 }
 
-fun Node.dropdown(fn: Dropdown.() -> Unit) = Dropdown(this).apply(fn)
+fun HTMLElement.dropdownGroup(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply(fn)
 
 fun Node.dropdownDiv(
     block : HTMLDivElement.() -> Unit = {}
@@ -82,15 +90,29 @@ fun Node.dropdownDiv(
     }
 }
 
-fun Node.dropdownItemAnchor(
-    block : HTMLAnchorElement.() -> Unit = {}
-): HTMLAnchorElement {
-    return a {
-        dropdownItem()
+class DropdownItemAnchor(node: Node) {
+    val anchor = node.a {
+        cls {
+            dropdownItem
+        }
         href = "#"
-        block()
     }
+
+    private val iconSpan = anchor.span
+
+    val icon by lazy {
+        iconSpan {
+            cls {
+                mr2
+            }
+        }
+    }
+
+    val text = anchor.span
+
 }
+
+fun Node.dropdownItemAnchor(block : DropdownItemAnchor.() -> Unit = {}) = DropdownItemAnchor(this).apply(block)
 
 
 fun Node.listAction(
@@ -425,6 +447,7 @@ fun Element.positionRelative() {
 
 val Cls.textDanger by css()
 val Cls.bgDanger by css()
+val Cls.bgSecondary by css()
 val Cls.border by css()
 val Cls.borderBottom by css()
 val Cls.rounded by css()
@@ -459,6 +482,7 @@ val Cls.btnSecondary by css()
 val Cls.btnPrimary by css()
 val Cls.btnDanger by css()
 val Cls.btn by css()
+val Cls.btnOutlineSecondary by css()
 val Cls.dFlex by css()
 val Cls.flexRow by css()
 val Cls.flexColumn by css()
@@ -476,7 +500,11 @@ val Cls.navbarBrand by css()
 val Cls.formInline by css()
 val Cls.formControl by css()
 val Cls.formGroup by css()
+val Cls.isInvalid by css()
 val Cls.inputGroup by css()
+val Cls.inputGroupAppend by css()
+val Cls.inputGroupText by css()
+val Cls.inputGroupPrepend by css()
 val Cls.dropdown by css()
 val Cls.dropdownToggle by css()
 val Cls.dropdownMenu by css()

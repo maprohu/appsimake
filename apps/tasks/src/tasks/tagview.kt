@@ -3,7 +3,10 @@ package tasks
 import bootstrap.*
 import common.orEmpty
 import common.removeFromParent
-import commonfb.*
+import commonfb.ListUIConfig
+import commonfb.ViewScreenConfig
+import commonfb.build
+import commonfb.listUI
 import commonui.RootPanel
 import commonui.faButton
 import commonui.screenLayout
@@ -17,33 +20,39 @@ import killable.KillableSeq
 import killable.Killables
 import styles.scrollVertical
 import taskslib.Note
+import taskslib.Tag
 import taskslib.Task
 import taskslib.notes
 
-fun LoggedIn.viewTask(
+fun LoggedIn.viewTag(
     panel: RootPanel,
-    task: Task,
+    item: Tag,
     close: () -> Unit
 ) : Killable {
     return ViewScreenConfig(
-        "Task",
-        ::editTask
-    ) { item ->
+        "Tag",
+        ::editTag
+    ) {
         val killables = Killables()
-        scrollPanel {
 
-            dt { innerText = "Title" }
-            dd { killables += rxTextOrEmpty { item.title.initial() } }
-            dt { innerText = "Text" }
-            dd { killables += rxTextOrEmpty { item.text.initial() } }
-            dt { innerText = "Status" }
-            dd { killables += rxTextOrEmpty { item.status.initial().map { it.name } } }
-
+        classes += scrollVertical
+        cls {
+            flexColumn
         }
+        div {
+            cls {
+                p1
+            }
+            dl {
+                cls {
+                    m1
+                }
+                dt { innerText = "Name" }
+                dd { killables += rxTextOrEmpty { item.name.initial() } }
+            }
+        }
+
         killables
-    }.build(
-        panel,
-        task,
-        close
-    )
+    }.build(panel, item, close)
+
 }

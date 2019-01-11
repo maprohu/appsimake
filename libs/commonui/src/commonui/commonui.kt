@@ -3,6 +3,7 @@ package commonui
 import bootstrap.*
 import domx.*
 import fontawesome.*
+import killable.Killable
 import killable.Killables
 import org.w3c.dom.*
 
@@ -17,18 +18,20 @@ fun Node.nextButton(label: HTMLDivElement.() -> Unit, fn: () -> Unit): HTMLAncho
             flexGrow1()
             label()
         }
-        chevronRight()
+        cls.fa.chevronRight
     }
 }
 
 fun Element.hourglass(): HTMLDivElement {
     return centerDiv {
-        spinner()
+        cls {
+            spinnerBorder
+        }
     }
 }
 
 fun showClosable(
-    page: (() -> Unit) -> (() -> Unit),
+    page: (() -> Unit) -> Killable,
     back: () -> Unit
 ) : Killables {
     val killables = Killables()
@@ -49,8 +52,7 @@ fun HTMLButtonElement.faButtonSpan(
     }
     return span {
         cls {
-            fas
-            faFw
+            fa.fw
         }
         faIconClass?.let { classes += it }
         fn()
@@ -69,4 +71,5 @@ fun Node.faButton(
         fn()
     }
 }
+
 

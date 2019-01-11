@@ -291,6 +291,25 @@ fun GlobalEventHandlers.rxHover(rx: Var<Boolean>) {
     onmouseleave = { rx.now = false; null }
 }
 
+fun Element.rxClass(
+    style: String,
+    fn: RxVal<Boolean>
+) : Killable {
+    return fn.forEach {
+        if (it) addClass(style)
+        else removeClass(style)
+    }
+}
+
+fun Element.rxClass(
+    style: String,
+    fn: () -> Boolean
+) : Killable {
+    val rxv = Rx { fn() }
+    rxClass(style, rxv)
+    return rxv
+}
+
 fun Element.rxClassOpt(
         style: RxVal<String?>
 ) : Killable {

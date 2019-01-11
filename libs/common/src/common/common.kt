@@ -115,43 +115,46 @@ fun <T> linkedIterable(first: T?, next: (T) -> T?) : Iterable<T> {
 
 interface ListenableList<out T> : List<T> {
 
-    fun addListener(listener: Listener<T>) : () -> Unit
+    fun addListener(listener: Listener<T>) : Killable
 
-    interface Listener<in T> {
-        fun added(index: Int, element: T)
-        fun removed(index: Int)
-        fun moved(from: Int, to: Int)
+    data class Listener<in T>(
+        val added: (Int, T) -> Unit = { _, _ -> },
+        val removed: (Int, T) -> Unit = { _, _ -> },
+        val moved: (Int, Int) -> Unit = { _, _ ->}
+    )
 
-        companion object {
-            fun <T> of(
-                    added: (Int, T) -> Unit,
-                    removed: (Int) -> Unit,
-                    moved: (Int, Int) -> Unit
-            ) : Listener<T> {
-                return object : Listener<T> {
-                    override fun added(index: Int, element: T) {
-                        added(index, element)
-                    }
-                    override fun removed(index: Int) {
-                        removed(index)
-                    }
-                    override fun moved(from: Int, to: Int) {
-                        moved(from, to)
-                    }
-                }
-            }
-        }
-    }
-
-    fun addListener(
-            added: (Int, T) -> Unit,
-            removed: (Int) -> Unit,
-            moved: (Int, Int) -> Unit
-    ): () -> Unit {
-        return addListener(
-                Listener.of(added, removed, moved)
-        )
-    }
+//    interface Listener<in T> {
+//        fun added(index: Int, element: T)
+//        fun removed(index: Int)
+//        fun moved(from: Int, to: Int)
+//
+//        companion object {
+//            fun <T> of(
+//            ) : Listener<T> {
+//                return object : Listener<T> {
+//                    override fun added(index: Int, element: T) {
+//                        added(index, element)
+//                    }
+//                    override fun removed(index: Int) {
+//                        removed(index)
+//                    }
+//                    override fun moved(from: Int, to: Int) {
+//                        moved(from, to)
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    fun addListener(
+//            added: (Int, T) -> Unit,
+//            removed: (Int) -> Unit,
+//            moved: (Int, Int) -> Unit
+//    ): () -> Unit {
+//        return addListener(
+//                Listener.of(added, removed, moved)
+//        )
+//    }
 
 
 
@@ -166,10 +169,10 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
 
     val isEmptyRx = Rx { sizeVar() == 0 }
 
-    override fun addListener(listener: ListenableList.Listener<T>): () -> Unit {
+    override fun addListener(listener: ListenableList.Listener<T>): Killable {
         listeners += listener
 
-        return { listeners -= listener }
+        return Killable.once { listeners -= listener }
     }
 
     private val delegate = mutableListOf<T>()
@@ -188,14 +191,14 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
     override fun removeAt(index: Int): T {
         val v = delegate.removeAt(index)
         sizeVar.now = size
-        listeners.forEach { it.removed(index) }
+        listeners.forEach { it.removed(index, v) }
         return v
     }
 
     override fun set(index: Int, element: T): T {
         val v = delegate.set(index, element)
         listeners.forEach {
-            it.removed(index)
+            it.removed(index, v)
             it.added(index, element)
         }
         return v

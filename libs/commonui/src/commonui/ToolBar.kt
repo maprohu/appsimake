@@ -3,7 +3,8 @@ package commonui
 import bootstrap.*
 import common.insertAt
 import domx.*
-import fontawesome.faChevronLeft
+import fontawesome.chevronLeft
+import fontawesome.fa
 import fontawesome.fas
 import org.w3c.dom.*
 import styles.cls
@@ -38,8 +39,7 @@ class ToolBar(node: Node) {
     fun backButton(fn: () -> Unit): HTMLButtonElement {
         return leftButton {
             cls {
-                fas
-                faChevronLeft
+                fa.chevronLeft
                 clickEvent {
                     fn()
                 }

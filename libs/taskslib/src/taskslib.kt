@@ -11,7 +11,7 @@ import rx.Rx
 val tasks by named { Lib(it) }
 
 val DocWrap<Private, *>.tasks by coll<Task>()
-val DocWrap<Private, *>.tags by coll<Tag>()
+val DocWrap<Private, *>.usertags by coll<Tag>()
 val DocWrap<Task, *>.notes by coll<Note>()
 
 enum class TaskStatus(val completed: Boolean) {
@@ -47,9 +47,19 @@ val MaxTagIndexSize = 4
 
 open class Task : Base<Task>() {
 
-    val title by o.scalar<String>().prop()
+    val title by o
+        .scalar<String>()
+        .mandatory()
+        .ifPresent(ValidationError.mandatory) {it.isBlank()}
+        .prop()
+
     val text by o.scalar<String>().prop()
-    val status by o.scalar<TaskStatus>().withDefault(TaskStatus.New).enum().prop()
+    val status by o
+        .enum<TaskStatus>()
+        .withDefault(TaskStatus.New)
+        .mandatory()
+        .prop()
+
     val tags by o.array<String>().toSet().prop()
 
     val ts by o.scalar<Timestamp>().calculated { ops.serverTimestamp().toOptional().toLazy() }.prop()
@@ -73,7 +83,11 @@ open class Task : Base<Task>() {
     companion object : Task()
 }
 
-class Tag : Base<Tag>()
+open class Tag : Base<Tag>() {
+    val name by o.scalar<String>().prop()
+    companion object : Tag()
+}
+
 class Note : Base<Note>() {
     val text by o.scalar<String>().prop()
     val ts by o.scalar<Timestamp>().withDefault { ops.serverTimestamp() }.prop()

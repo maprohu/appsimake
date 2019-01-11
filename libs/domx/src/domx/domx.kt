@@ -5,6 +5,7 @@ import common.insertAt
 import common.removeAt
 import common.removeFromParent
 import killable.Killable
+import killable.KillableSeq
 import org.w3c.dom.*
 import org.w3c.dom.css.ElementCSSInlineStyle
 import org.w3c.dom.events.Event
@@ -42,15 +43,19 @@ val Element.classes
     get() = Classes(this)
 
 class Classes(private val element: Element) {
-    operator fun plusAssign(cls: String) {
-        cls.trim().split(Regex("\\s")).forEach {
-            element.addClass(it)
+    operator fun plusAssign(cls: String?) {
+        cls?.let {
+            c -> c.trim().split(Regex("\\s")).forEach {
+                element.addClass(it)
+            }
         }
     }
 
-    operator fun minusAssign(cls: String) {
-        cls.trim().split(Regex("\\s")).forEach {
-            element.removeClass(it)
+    operator fun minusAssign(cls: String?) {
+        cls?.let {
+            c -> c.trim().split(Regex("\\s")).forEach {
+                element.removeClass(it)
+            }
         }
     }
 }
@@ -71,6 +76,16 @@ fun GlobalEventHandlers.clickEvent(fn: (MouseEvent) -> Unit) {
         it.preventDefault()
         fn(it as MouseEvent)
     }
+}
+
+fun GlobalEventHandlers.clickEventSeq(fn: (MouseEvent) -> Killable): KillableSeq {
+    val seq = KillableSeq()
+    onclick = {
+        it.preventDefault()
+        seq += fn(it as MouseEvent)
+        Unit
+    }
+    return seq
 }
 
 fun GlobalEventHandlers.inputEvent(fn: (InputEvent) -> Unit) {

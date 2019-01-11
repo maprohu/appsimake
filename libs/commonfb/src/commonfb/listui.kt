@@ -8,6 +8,7 @@ import domx.*
 import firebase.firestore.*
 import firebase.firestore.ListenConfig.Companion.hasProps
 import firebaseshr.HasProps
+import killable.Killable
 import killable.Killables
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLUListElement
@@ -81,7 +82,7 @@ fun <T: HasProps<*, String>> QueryWrap<T>.listUI(
 
 fun <T: HasProps<*, String>> QueryWrap<T>.showClosableList(
     redisplay: () -> Unit,
-    page: (T) -> (() -> Unit) -> (() -> Unit),
+    page: (T) -> (() -> Unit) -> Killable,
     config: (show: (T) -> Unit) -> ListUIConfig<T>
 ) : () -> Unit {
 
@@ -102,7 +103,6 @@ fun <T: HasProps<*, String>> QueryWrap<T>.showClosableList(
             ::close
         )
         viewKills += dit.props.onDeleted.add {
-            console.dir(dit)
             close()
         }
     }
