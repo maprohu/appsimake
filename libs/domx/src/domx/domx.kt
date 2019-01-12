@@ -145,9 +145,11 @@ fun <T> Node.listenableList(
 ): Killable {
     return list.addListener(
         ListenableList.Listener(
-            { index, element -> insertAt(index, create(element)) },
-            { index, _ -> removeAt(index) },
-            { from, to -> insertAt (to, removeAt(from)) }
+            added = { index, element ->
+                insertAt(index, create(element))
+            },
+            removed = { index, _ -> removeAt(index) },
+            moved = { from, to -> insertAt (to, removeAt(from)) }
         )
     )
 }
@@ -304,6 +306,13 @@ internal val Node.nodeExt
         this.asDynamic()[domxNodesAttributeName].unsafeCast<NodeExt?>() ?:
         NodeExt(this)
             .also { this.asDynamic()[domxNodesAttributeName] = it }
+
+
+fun Node.rxDisplayed(fn: () -> Boolean): Killable {
+    val rxv = Rx { fn() }
+    rxDisplayed(rxv)
+    return rxv
+}
 
 fun Node.rxDisplayed(rxv: RxVal<Boolean>): Killable {
     val parent = parentNode!!

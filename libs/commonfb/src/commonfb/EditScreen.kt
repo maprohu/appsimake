@@ -180,11 +180,11 @@ fun Element.scrollForm(fn: HTMLFormElement.() -> Unit) {
 
     div {
         cls {
-            m2
             dFlex
             flexColumn
         }
         form {
+            cls.p1
             fn()
         }
     }

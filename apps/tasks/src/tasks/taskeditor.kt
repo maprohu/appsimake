@@ -10,8 +10,11 @@ import fontawesome.*
 import killable.Killable
 import killable.Killables
 import killable.add
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import rx.RxIface
 import rx.Var
+import rx.add
 import rx.diffs
 import taskslib.Tag
 import taskslib.Task
@@ -28,13 +31,23 @@ fun LoggedIn.editTask(
     ) { item ->
         val killables = Killables()
         scrollForm {
+            cls {
+                dFlex
+                flexColumn
+            }
             div {
-                cls.formGroup
+                cls {
+                    formGroup
+                    dFlex
+                    flexColumn
+                }
                 label {
+                    cls.m1
                     innerText = "Title"
                 }
                 input {
                     cls {
+                        m1
                         formControl
                     }
                     type = "text"
@@ -45,10 +58,12 @@ fun LoggedIn.editTask(
             div {
                 cls.formGroup
                 label {
+                    cls.m1
                     innerText = "Text"
                 }
                 textarea {
                     cls {
+                        m1
                         formControl
                     }
                     rows = 5
@@ -58,21 +73,30 @@ fun LoggedIn.editTask(
             div {
                 cls.formGroup
                 label {
+                    cls.m1
                     innerText = "Status"
                 }
                 select {
                     cls {
+                        m1
                         customSelect
                     }
                     killables += enumProp(item.status)
                 }
             }
             div {
-                cls.formGroup
+                cls {
+                    formGroup
+                }
                 label {
+                    cls.m1
                     innerText = "Tags"
                 }
                 div {
+                    cls {
+                        dFlex
+                        flexRow
+                    }
                     class Wrap(val tag: RxIface<Tag>) {
                         val ks = Killables().also { ks ->
                             killables.add(ks).also { r ->
@@ -84,6 +108,8 @@ fun LoggedIn.editTask(
                                 cls {
                                     border
                                     rounded
+                                    m1
+                                    p1
                                 }
                                 span {
                                     killables += rxTextOrEmpty {
@@ -94,6 +120,11 @@ fun LoggedIn.editTask(
                         }
                     }
                     val tagsList = ListenableMutableList<Wrap>()
+
+                    killables += listenableList(
+                        tagsList
+                    ) { it.node }
+
                     killables += item.tags.current.diffs {  diff ->
                         if (diff.removed.isNotEmpty()) {
                             val it = tagsList.iterator()
@@ -111,12 +142,12 @@ fun LoggedIn.editTask(
                         }
                     }
 
-                    killables += listenableList(
-                        tagsList
-                    ) { it.node }
                 }
                 div {
-                    cls.inputGroup
+                    cls {
+                        m1
+                        inputGroup
+                    }
                     val isBusy = Var(false)
                     val tag = input {
                         cls.formControl
@@ -141,10 +172,20 @@ fun LoggedIn.editTask(
                                             plus
                                         }
                                     }
+                                    rxDisplayed { !isBusy() }
                                 }
                             }
                             clickEvent {
-                                item.tags.current.transform { c -> c + tag.value }
+                                if (!isBusy.now) {
+                                    isBusy.now = true
+                                    val v = tag.value
+                                    tag.value = ""
+                                    GlobalScope.launch {
+                                        val tv = tagSource.byName(v)
+                                        item.tags.current.add(tv.now.props.idOrFail)
+                                        isBusy.now = false
+                                    }
+                                }
                             }
                         }
                         button {

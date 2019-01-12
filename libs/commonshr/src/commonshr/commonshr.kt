@@ -11,11 +11,11 @@ data class SetDiff<T>(
             old: Optional<Set<T>>,
             new: Optional<Set<T>>
         ) = SetDiff(
-            old.map { o ->
-                new.map { o - it }.getOrElse { o }
+            removed = old.map { o ->
+                new.map { n -> o - n }.getOrElse { o }
             }.getOrElse { emptySet() },
-            new.map { o ->
-                old.map { o - it }.getOrElse { o }
+            added = new.map { n ->
+                old.map { o -> n - o }.getOrElse { n }
             }.getOrElse { emptySet() }
         )
 

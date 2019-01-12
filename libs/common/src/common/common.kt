@@ -172,7 +172,9 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
     override fun addListener(listener: ListenableList.Listener<T>): Killable {
         listeners += listener
 
-        return Killable.once { listeners -= listener }
+        return Killable.once {
+            listeners -= listener
+        }
     }
 
     private val delegate = mutableListOf<T>()
@@ -181,6 +183,12 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
 
     override val size: Int
         get() = delegate.size
+
+
+//    override fun add(element: T): Boolean {
+//        add(delegate.size, element)
+//        return true
+//    }
 
     override fun add(index: Int, element: T) {
         delegate.add(index, element)
