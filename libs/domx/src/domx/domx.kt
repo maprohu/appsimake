@@ -142,21 +142,13 @@ fun ElementCSSInlineStyle.rxVisible(fn: () -> Boolean): Rx<Boolean> {
 fun <T> Node.listenableList(
     list: ListenableList<T>,
     create: (T) -> Node
-): () -> Unit {
+): Killable {
     return list.addListener(
-        object : ListenableList.Listener<T> {
-            override fun added(index: Int, element: T) {
-                insertAt(index, create(element))
-            }
-
-            override fun removed(index: Int) {
-                removeAt(index)
-            }
-
-            override fun moved(from: Int, to: Int) {
-                insertAt(to, removeAt(from))
-            }
-        }
+        ListenableList.Listener(
+            { index, element -> insertAt(index, create(element)) },
+            { index, _ -> removeAt(index) },
+            { from, to -> insertAt (to, removeAt(from)) }
+        )
     )
 }
 

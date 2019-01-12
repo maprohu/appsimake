@@ -1,18 +1,21 @@
 package tasks
 
 import bootstrap.*
+import common.ListenableMutableList
 import common.plus
 import commonfb.*
 import commonui.RootPanel
-import commonui.faButton
 import domx.*
 import fontawesome.*
 import killable.Killable
 import killable.Killables
+import killable.add
+import rx.RxIface
+import rx.Var
 import rx.diffs
-import styles.cursorPointer
-import styles.lineHeightInherit
+import taskslib.Tag
 import taskslib.Task
+import kotlin.browser.document
 
 
 fun LoggedIn.editTask(
@@ -70,24 +73,74 @@ fun LoggedIn.editTask(
                     innerText = "Tags"
                 }
                 div {
+                    class Wrap(val tag: RxIface<Tag>) {
+                        val ks = Killables().also { ks ->
+                            killables.add(ks).also { r ->
+                                ks += r
+                            }
+                        }
+                        val node = document.div {
+                            div {
+                                cls {
+                                    border
+                                    rounded
+                                }
+                                span {
+                                    killables += rxTextOrEmpty {
+                                        tag().name.initial()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    val tagsList = ListenableMutableList<Wrap>()
+                    killables += item.tags.current.diffs {  diff ->
+                        if (diff.removed.isNotEmpty()) {
+                            val it = tagsList.iterator()
+                            while (it.hasNext()) {
+                                val v = it.next()
+                                if (v.tag.now.props.idOrFail in diff.removed) {
+                                    v.ks.kill()
+                                    it.remove()
+                                }
+                            }
+                        }
 
-                    item.tags.current.diffs {  }
+                        for (id in diff.added) {
+                            tagsList += Wrap(tagSource.tag(id))
+                        }
+                    }
+
+                    killables += listenableList(
+                        tagsList
+                    ) { it.node }
                 }
                 div {
                     cls.inputGroup
+                    val isBusy = Var(false)
                     val tag = input {
                         cls.formControl
                         type = "text"
                     }
-
                     div {
                         cls.inputGroupAppend
                         button {
                             cls {
                                 btn
                                 btnOutlineSecondary
-                                fa {
-                                    plus
+                                span {
+                                    cls {
+                                        spinnerBorder
+                                        spinnerBorderSm
+                                    }
+                                    rxDisplayed(isBusy)
+                                }
+                                span {
+                                    cls {
+                                        fa {
+                                            plus
+                                        }
+                                    }
                                 }
                             }
                             clickEvent {

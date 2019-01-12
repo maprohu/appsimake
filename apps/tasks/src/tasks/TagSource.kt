@@ -27,7 +27,14 @@ class TagSource(
 
     private val map = mutableMapOf<String, Var<Tag>>()
 
-    private fun tagv(id: String) = map.getOrPut(id) { Var(Tag().also { it.name.initial.set(id) }) }
+    private fun tagv(id: String) = map.getOrPut(id) {
+        Var(
+            Tag().also {
+                it.props.persisted(id)
+                it.name.initial.set(id)
+            }
+        )
+    }
 
     init {
         val list = ListenableMutableList<Tag>()
