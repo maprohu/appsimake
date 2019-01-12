@@ -34,7 +34,7 @@ data class ListUIConfig<T: HasProps<*, String>>(
     val create: () -> T,
     val hourglassDecor: HTMLDivElement.() -> Unit = {},
     val emptyDivDecor : HTMLDivElement.() -> Unit = { cls.flexGrow1 },
-    val listDivDecor : HTMLDivElement.() -> Unit = { classes += scrollVertical; cls.flexGrow1 },
+    val listDivDecor : HTMLDivElement.() -> Unit = { cls.scrollVertical; cls.flexGrow1 },
     val ulDecor: HTMLUListElement.() -> Unit = {},
     val itemFactory: (T) -> Node
 )

@@ -1,8 +1,7 @@
 package commonfb
 
-import bootstrap.btnPrimary
-import bootstrap.flexColumn
-import bootstrap.p1
+import bootstrap.*
+import common.Optional
 import commonlib.DocWrap
 import commonui.RootPanel
 import commonui.faButton
@@ -15,6 +14,7 @@ import killable.Killable
 import killable.Killables
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLDivElement
+import org.w3c.dom.Node
 import styles.scrollVertical
 
 data class ViewScreenConfig<T: HasProps<*, String>>(
@@ -63,8 +63,8 @@ fun <T: HasProps<*, String>> ViewScreenConfig<T>.build(
 
 
 fun Element.scrollPanel(fn: HTMLDivElement.() -> Unit) {
-    classes += scrollVertical
     cls {
+        scrollVertical
         flexColumn
     }
     div {
@@ -73,4 +73,21 @@ fun Element.scrollPanel(fn: HTMLDivElement.() -> Unit) {
         }
         fn()
     }
+}
+
+fun Node.viewFieldLabel(title: String) {
+    span {
+        cls {
+            m1
+            fontWeightBold
+        }
+        innerText = title
+    }
+}
+
+fun Node.viewTextField(label: String, fn: () -> Optional<String>): Killable {
+    viewFieldLabel(label)
+    return span {
+        cls.m1
+    }.rxTextOrEmpty(fn)
 }

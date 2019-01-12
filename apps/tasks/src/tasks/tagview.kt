@@ -35,9 +35,9 @@ fun LoggedIn.viewTag(
     ) {
         val killables = Killables()
 
-        classes += scrollVertical
         cls {
             flexColumn
+            scrollVertical
         }
         div {
             cls {

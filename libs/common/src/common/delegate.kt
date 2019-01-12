@@ -3,11 +3,11 @@ package common
 import kotlin.reflect.KProperty
 
 private object UNINITIALIZED
-class LazyDelegate<out T>(private val fn: (Any?, KProperty<*>) -> T) {
+class LazyDelegate<in O, out T>(private val fn: (O, KProperty<*>) -> T) {
 
     private var value : Any? = UNINITIALIZED
 
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
+    operator fun getValue(thisRef: O, property: KProperty<*>): T {
         if (value === UNINITIALIZED) {
             value = fn(thisRef, property)
         }
@@ -16,4 +16,5 @@ class LazyDelegate<out T>(private val fn: (Any?, KProperty<*>) -> T) {
 
 }
 
-fun <T> lazyNamed(fn: (String) -> T) = LazyDelegate { _, p -> fn(p.name) }
+fun <T> lazyNamed(fn: (String) -> T) = LazyDelegate<Any?, T> { _, p -> fn(p.name) }
+//fun <O, T> lazyThisNamed(fn: (String) -> T) = LazyDelegate { _, p -> fn(p.name) }

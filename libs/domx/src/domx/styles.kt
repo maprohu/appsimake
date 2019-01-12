@@ -1,120 +1,75 @@
 package styles
 
-import common.lazyNamed
+import domx.Cls
+import domx.classes
 import domx.styleTag
+import domx.toCss
+import org.w3c.dom.css.CSSStyleSheet
 import kotlin.browser.document
-import kotlin.dom.appendText
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 
-val styleElement by lazy {
+private val styleElement by lazy {
     document.head!!.styleTag()
 }
 
-fun add(name: String, rules: String) : String {
-    styleElement.appendText(".$name {$rules}\n")
-    return name
+private val styleSheet by lazy {
+    styleElement.sheet.unsafeCast<CSSStyleSheet>()
 }
 
-private val defaultAnimRules = """
-    animation-duration: 0.5s;
-    animation-fill-mode: forwards;
-    animation-timing-function: ease;
-""".trimIndent()
-
-fun anim(
-        name: String,
-        keyframes: String,
-        rules: String = defaultAnimRules
-) : String {
-    styleElement.appendText("@keyframes $name {$keyframes}\n")
-    return add(name, "animation-name: $name; $rules")
-}
-
-val lineHeightInherit by lazy {
-    add(
-            "line-height-inherit",
-            "line-height: inherit;"
+fun addStyle(name: String, rules: String) {
+    styleSheet.insertRule(
+        ".$name {$rules}",
+        styleSheet.cssRules.length
     )
 }
 
-val cursorPointer by lazy {
-    add(
-            "cursor-pointer",
-            "cursor: pointer;"
-    )
+private fun def(s: String) = object : ReadOnlyProperty<Cls, String> {
+    var name : String? = null
+    override fun getValue(thisRef: Cls, property: KProperty<*>): String {
+        val n:String = if (name == null) {
+            val n = property.name.toCss()
+            name = n
+            addStyle(n, s)
+            n
+        } else {
+            name!!
+        }
+        thisRef.element {
+            this.classes += n
+        }
+        return n
+    }
+
 }
 
-val overflowHidden by lazy {
-    add(
-        "overflow-hidden",
-        "overflow: hidden;"
-    )
-}
+val Cls.lineHeightInherit by def(
+    "line-height: inherit;"
+)
 
-val scrollVertical by cls("overflow-y: auto;" )
+val Cls.cursorPointer by def(
+    "cursor: pointer;"
+)
 
-val flexBasis0 by cls("flex-basis: 0;" )
+val Cls.overflowHidden by def(
+    "overflow: hidden;"
+)
 
-val pointerEventsNone by lazy {
-    add(
-            "pointer-events-none",
-            "pointer-events: none;"
-    )
-}
+val Cls.scrollVertical by def("overflow-y: auto;" )
 
-val transformRight by lazy {
-    add(
-            "transform-right",
-            "transform: translate(100%);"
-    )
-}
+val Cls.flexBasis0 by def("flex-basis: 0;" )
 
-val transformLeft by lazy {
-    add(
-            "transform-left",
-            "transform: translate(-100%);"
-    )
-}
+val Cls.pointerEventsNone by def(
+    "pointer-events: none;"
+)
 
-val transformCenter by lazy {
-    add(
-            "transform-center",
-            "transform: none;"
-    )
-}
+val Cls.fontSize100 by def(
+    "font-size: 100%;"
+)
 
-val animLeft by lazy {
-    anim(
-            "anim-left",
-            """
-                to {
-                    transform: translate(-100%);
-                }
-            """.trimIndent()
-    )
-}
+val Cls.widthAuto by def(
+    "width: auto;"
+)
 
-val animRight by lazy {
-    anim(
-            "anim-right",
-            """
-                to {
-                    transform: translate(100%);
-                }
-            """.trimIndent()
-    )
-}
-
-val animCenter by lazy {
-    anim(
-            "animCenter",
-            """
-                to {
-                    transform: none;
-                }
-            """.trimIndent()
-    )
-}
-
-fun cls(txt: String) = lazyNamed { add(it, txt) }
 
 

@@ -1,15 +1,13 @@
 package tasks
 
 import bootstrap.*
-import commonfb.EditScreenConfig
-import commonfb.build
-import commonfb.scrollForm
-import commonfb.textProp
+import commonfb.*
 import commonui.RootPanel
 import domx.*
 import killable.Killable
 import killable.Killables
 import taskslib.Tag
+import kotlin.browser.document
 
 
 fun LoggedIn.editTag(
@@ -19,26 +17,25 @@ fun LoggedIn.editTag(
 ) : Killable {
     return EditScreenConfig<Tag>(
         "Tag"
-    ) { item ->
-        val killables = Killables()
-
-        scrollForm {
-            div {
-                cls.formGroup
-                label {
-                    innerText = "Name"
-                }
-                input {
-                    cls {
-                        formControl
+    ) { item, killables ->
+        FormConfig {
+            scrollForm {
+                div {
+                    cls.formGroup
+                    label {
+                        innerText = "Name"
                     }
-                    type = "text"
-                    textProp(item.name)
+                    input {
+                        cls {
+                            formControl
+                        }
+                        type = "text"
+                        killables += textProp(item.name)
+                    }
                 }
             }
         }
 
-        killables
     }.build(
         panel,
         tag,

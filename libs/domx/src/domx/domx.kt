@@ -1,11 +1,7 @@
 package domx
 
-import common.ListenableList
-import common.insertAt
-import common.removeAt
-import common.removeFromParent
-import killable.Killable
-import killable.KillableSeq
+import common.*
+import killable.*
 import org.w3c.dom.*
 import org.w3c.dom.css.ElementCSSInlineStyle
 import org.w3c.dom.events.Event
@@ -154,6 +150,36 @@ fun <T> Node.listenableList(
     )
 }
 
+fun <T> Node.listenKillableList(
+    list: ListenableList<T>,
+    create: (T, Killables) -> Node
+): Killable {
+    val killables = Killables()
+    val kills = mutableListOf<Killable>()
+    killables += list.addListener(
+        ListenableList.Listener(
+            added = { index, element ->
+                val ks = Killables()
+                val r = killables.add(ks)
+                ks += r
+                val node = create(element, ks)
+                insertAt(index, node)
+                kills.add(index, ks)
+            },
+            removed = { index, _ ->
+                removeAt(index)
+                val ks = kills.removeAt(index)
+                ks.kill()
+            },
+            moved = { from, to ->
+                insertAt (to, removeAt(from))
+                kills.add(to, kills.removeAt(from))
+            }
+        )
+    )
+    return killables
+}
+
 val String.textNode
     get() = document.createTextNode(this)
 
@@ -203,9 +229,9 @@ fun Node.checkbox(fn: HTMLInputElement.() -> Unit) = input {
     fn()
 }
 
-fun Element.pointerEventsNone() {
-    classes += styles.pointerEventsNone
-}
+//fun Element.pointerEventsNone() {
+//    classes += styles.pointerEventsNone
+//}
 
 fun HTMLSourceElement.base64(mime: String, data:String) {
     src = "data:$mime;base64,$data"

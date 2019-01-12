@@ -69,43 +69,46 @@ class LoggedIn(
                         innerText = loggedInCtx.appCtx.title
                     }
                     right {
-                        cls {
-                            btnGroup
-                        }
-                        faButton(Fa.plus) {
-                            cls.btnPrimary
-                            killables += clickEventSeq {
-                                showClosable(
-                                    { close -> editTask(root.sub(), Task(), close = close) },
-                                    ::showHome
-                                )
+                        div {
+                            cls {
+                                m1
+                                btnGroup
                             }
-                        }
-                        faButton(Fa.search) {
-                            cls.btnPrimary
-                            killables += clickEventSeq {
-                                homeActive.now = false
-                                showClosable(
-                                    { close -> listTasks(root.sub(), close) },
-                                    ::showHome
-                                )
-                            }
-                        }
-                        dropdownGroup(Cls.btnPrimary) {
-                            menu {
-                                cls.dropdownMenuRight
-                                dropdownItemAnchor {
-                                    icon.cls.fa.tags
-                                    text.innerText = "Tags"
-                                    killables += anchor.clickEventSeq {
-                                        showClosable(
-                                            { c -> listTags(root.sub(), c) },
-                                            ::showHome
-                                        )
-                                    }
+                            faButton(Fa.plus) {
+                                cls.btnPrimary
+                                killables += clickEventSeq {
+                                    showClosable(
+                                        { close -> editTask(root.sub(), Task(), close = close) },
+                                        ::showHome
+                                    )
                                 }
                             }
+                            faButton(Fa.search) {
+                                cls.btnPrimary
+                                killables += clickEventSeq {
+                                    homeActive.now = false
+                                    showClosable(
+                                        { close -> listTasks(root.sub(), close) },
+                                        ::showHome
+                                    )
+                                }
+                            }
+                            dropdownGroup(Cls.btnPrimary) {
+                                menu {
+                                    cls.dropdownMenuRight
+                                    dropdownItemAnchor {
+                                        icon.cls.fa.tags
+                                        text.innerText = "Tags"
+                                        killables += anchor.clickEventSeq {
+                                            showClosable(
+                                                { c -> listTags(root.sub(), c) },
+                                                ::showHome
+                                            )
+                                        }
+                                    }
+                                }
 
+                            }
                         }
                     }
                 }
@@ -113,8 +116,8 @@ class LoggedIn(
                     cls {
                         flexColumn
                         p2
+                        scrollVertical
                     }
-                    classes += scrollVertical
 
                     div {
                         cls.card

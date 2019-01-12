@@ -239,7 +239,7 @@ fun setupFullScreen() {
 
         parentElement!!.apply {
             fullSize()
-            classes += overflowHidden
+            cls.overflowHidden
         }
     }
 }
@@ -354,28 +354,16 @@ fun Element.flexShrink0() {
 fun Element.bgLight() {
     classes += "bg-light"
 }
-val bgTransparent = "bg-transparent"
-fun Element.bgTransparent() {
-    classes += bgTransparent
-}
-val bgWarning = "bg-warning"
-fun Element.bgWarning() {
-    classes += bgWarning
-}
-val bgSucess = "bg-success"
-fun Element.bgSuccess() {
-    classes += bgSucess
-}
 fun Element.bgDark() {
     classes += "bg-dark"
 }
 fun Element.bgWhite() {
     classes += "bg-white"
 }
-fun Element.flexFixedSize() {
-    flexShrink0()
-    flexGrow0()
-}
+//fun Element.flexFixedSize() {
+//    flexShrink0()
+//    flexGrow0()
+//}
 fun Element.alignItemsCenter() {
     classes += "align-items-center"
 }
@@ -447,6 +435,7 @@ fun Element.positionRelative() {
 
 val Cls.textDanger by css()
 val Cls.bgDanger by css()
+val Cls.bgLight by css()
 val Cls.bgSecondary by css()
 val Cls.border by css()
 val Cls.borderBottom by css()
@@ -463,6 +452,7 @@ val Cls.spinnerGrow by css()
 val Cls.m0 by css()
 val Cls.m1 by css()
 val Cls.m2 by css()
+val Cls.mt1 by css()
 val Cls.mr0 by css()
 val Cls.mr1 by css()
 val Cls.mr2 by css()
@@ -474,6 +464,8 @@ val Cls.p2 by css()
 val Cls.p3 by css()
 val Cls.p4 by css()
 val Cls.p5 by css()
+val Cls.px1 by css()
+val Cls.px2 by css()
 val Cls.ml1 by css()
 val Cls.btnGroup by css()
 val Cls.btnGroupVertical by css()
@@ -511,11 +503,23 @@ val Cls.dropdownMenu by css()
 val Cls.dropdownMenuRight by css()
 val Cls.dropdownItem by css()
 val Cls.customSelect by css()
+val Cls.fontWeightBold by css()
+val Cls.badge by css()
+val Cls.badgeSecondary by css()
+val Cls.navTabs by css()
+val Cls.navItem by css()
+val Cls.navLink by css()
+val Cls.active by css()
+
 
 
 fun Cls.flexCenter() {
     dFlex
     justifyContentCenter
     alignItemsCenter
+}
+fun Cls.flexFixedSize() {
+    flexGrow0
+    flexShrink0
 }
 

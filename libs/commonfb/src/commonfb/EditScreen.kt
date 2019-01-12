@@ -5,10 +5,7 @@ import common.None
 import common.Some
 import common.orEmpty
 import commonlib.CollectionWrap
-import commonui.RootPanel
-import commonui.faButton
-import commonui.faButtonSpan
-import commonui.screenLayout
+import commonui.*
 import domx.*
 import firebase.firestore.*
 import firebaseshr.HasProps
@@ -16,6 +13,7 @@ import firebaseshr.Prop
 import firebaseshr.ScalarProp
 import fontawesome.*
 import killable.Killable
+import killable.Killable.Companion.empty
 import killable.Killables
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
@@ -24,9 +22,51 @@ import org.w3c.dom.*
 import rx.*
 import styles.scrollVertical
 
+data class TabConfig(
+    val icon: String,
+    val node: (Killables) -> Node
+)
+
+fun tabsConfig(
+    ks: Killables,
+    ts: Collection<TabConfig>
+): FormConfig {
+    val active = Var(0)
+
+    val nodes = ts.map { tc ->
+        lazy { tc.node(ks) }
+    }
+
+    return FormConfig(
+        tabs = {
+            ts.forEachIndexed { idx, tc ->
+                faTab(
+                    tc.icon,
+                    Rx { active() == idx }
+                ) {
+                    clickEvent {
+                        active.now = idx
+                    }
+                }
+            }
+        },
+        form = {
+            val root = RootPanel(this)
+
+            active.forEach { idx ->
+                root.setRoot(nodes[idx].value)
+            }
+        }
+    )
+}
+
+data class FormConfig(
+    val tabs: HTMLDivElement.() -> Unit = {},
+    val form: HTMLDivElement.() -> Unit
+)
 data class EditScreenConfig<T: HasProps<*, String>>(
     val title: String,
-    val form: HTMLDivElement.(T) -> Killables
+    val form: (T, Killables) -> FormConfig
 )
 
 fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
@@ -85,84 +125,94 @@ fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
         }
     }
 
+
+    val fc = form(item, killables)
+
     panel.newRoot {
         screenLayout {
             top {
-                left.btnButton {
-                    rxClasses {
-                        if (item.props.dirty()) {
-                            listOf(Cls.btnDanger)
-                        } else {
-                            listOf(Cls.btnSecondary)
-                        }
-                    }
-                    faButtonSpan {
+                left {
+                    btnButton {
+                        cls.m1
                         rxClasses {
                             if (item.props.dirty()) {
-                                listOf(Fa.undo)
+                                listOf(Cls.btnDanger)
                             } else {
-                                listOf(Fa.chevronLeft)
+                                listOf(Cls.btnSecondary)
                             }
                         }
+                        faButtonSpan {
+                            rxClasses {
+                                if (item.props.dirty()) {
+                                    listOf(Fa.undo)
+                                } else {
+                                    listOf(Fa.chevronLeft)
+                                }
+                            }
+                        }
+                        clickEvent {
+                            back()
+                        }
                     }
-                    clickEvent {
-                        back()
+                    middleTitle {
+                        innerText = this@build.title
                     }
-                }
-                middleTitle {
-                    innerText = this@build.title
-                }
-                right {
-                    cls {
-                        dFlex
-                        flexRow
-                        alignItemsCenter
+                    element {
+                        div {
+                            cls {
+                                m1
+                                spinnerBorder
+                                spinnerBorderSm
+                            }
+                            rxDisplayed(isSaving)
+                        }
+                        fc.tabs(this)
                     }
-                    div {
+                    right {
                         cls {
-                            m1
-                            spinnerBorder
-                            spinnerBorderSm
+                            dFlex
+                            flexRow
+                            alignItemsCenter
                         }
-                        rxDisplayed(isSaving)
-                    }
-                    div {
-                        cls {
-                            btnGroup
-                        }
-                        faButton(Fa.save) {
-                            cls.btnPrimary
-                            rxEnabled(canSave)
-                            clickEvent { save() }
-                        }
-                        dropdownGroup(Cls.btnPrimary) {
-                            element.rxDisplayed(showDropDown)
-                            menu {
-                                cls.dropdownMenuRight
-                                dropdownItemAnchor {
-                                    anchor {
-                                        cls {
-                                            textDanger
+                        div {
+                            cls {
+                                m1
+                                btnGroup
+                            }
+                            faButton(Fa.save) {
+                                cls.btnPrimary
+                                rxEnabled(canSave)
+                                clickEvent { save() }
+                            }
+                            dropdownGroup(Cls.btnPrimary) {
+                                element.rxDisplayed(showDropDown)
+                                menu {
+                                    cls.dropdownMenuRight
+                                    dropdownItemAnchor {
+                                        anchor {
+                                            cls {
+                                                textDanger
+                                            }
+                                            rxDisplayed(showDelete)
+                                            rxAnchorClick(canDelete) {
+                                                delete()
+                                            }
                                         }
-                                        rxDisplayed(showDelete)
-                                        rxAnchorClick(canDelete) {
-                                            delete()
+                                        icon.cls.fa.trashAlt
+                                        text {
+                                            innerText = "Delete"
                                         }
-                                    }
-                                    icon.cls.fa.trashAlt
-                                    text {
-                                        innerText = "Delete"
                                     }
                                 }
                             }
                         }
+
+
                     }
-
-
                 }
             }
             main {
-                killables += form(this, item)
+                fc.form(this)
             }
         }
 
@@ -175,8 +225,8 @@ fun Element.scrollForm(fn: HTMLFormElement.() -> Unit) {
     cls {
         dFlex
         flexColumn
+        scrollVertical
     }
-    classes += scrollVertical
 
     div {
         cls {
@@ -234,5 +284,26 @@ fun Element.validProp(prop: Prop<*>): Killable {
 
     rxClass(Cls.isInvalid) { !prop.isValid() }
     return killables
+}
+
+fun Element.formGroup(lbl: String, fn: HTMLDivElement.((labelFor: Element) -> Unit) -> Unit) {
+    div {
+        cls {
+            formGroup
+            dFlex
+            flexColumn
+            flexFixedSize()
+        }
+        val l = label {
+            cls {
+                flexFixedSize()
+                m1
+            }
+            innerText = lbl
+        }
+        fn {
+            l.htmlFor = it.ref
+        }
+    }
 }
 

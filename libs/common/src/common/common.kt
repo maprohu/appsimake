@@ -1,11 +1,11 @@
 package common
 
+import commonshr.SetDiff
 import killable.Killable
 import killable.Killables
 import org.w3c.dom.*
-import kotlin.browser.document
-import org.w3c.dom.events.Event
 import rx.Rx
+import rx.RxIface
 import rx.RxVal
 import rx.Var
 import kotlin.browser.window
@@ -172,6 +172,8 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
     override fun addListener(listener: ListenableList.Listener<T>): Killable {
         listeners += listener
 
+        forEachIndexed(listener.added)
+
         return Killable.once {
             listeners -= listener
         }
@@ -225,4 +227,25 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
 
 }
 
+
+data class SortedListenableListConfig<T, C: Comparable<C>>(
+    val killables: Killables,
+    val emitter: Emitter<SetDiff<T>>,
+    val key: (T, Killables) -> RxIface<C>
+
+
+) {
+    class Holder<T, C: Comparable<C>>(
+        val item: T,
+        val krx: RxIface<C>,
+        val killable: Killable
+    ) {
+        var current = krx.now
+    }
+    fun build() {
+        val list = ListenableMutableList<Holder<T, C>>()
+    }
+}
+
+fun <T> ListenableList<T>.sortTo()
 

@@ -6,6 +6,7 @@ import bootstrap.flexGrow1
 import bootstrap.padding2
 import common.resizeEvent
 import domx.classes
+import domx.cls
 import domx.div
 import domx.invoke
 import killable.Killables
@@ -78,14 +79,16 @@ fun HTMLElement.aspectRatio(
         )
 
         div {
-            classes += flexBasis0
+            cls.flexBasis0
             spacingGrow.forEach {
                 style.flexGrow = it.toString()
             }
         }
         column {
-            classes += flexBasis0
-            flexGrow1()
+            cls {
+                flexBasis0
+                flexGrow1
+            }
 
             column {
                 flexGrow1()
@@ -102,7 +105,7 @@ fun HTMLElement.aspectRatio(
 
         }
         div {
-            classes += flexBasis0
+            cls.flexBasis0
             spacingGrow.forEach {
                 style.flexGrow = it.toString()
             }

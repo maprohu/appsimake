@@ -4,24 +4,32 @@ import bootstrap.*
 import common.insertAt
 import domx.*
 import fontawesome.chevronLeft
-import fontawesome.fa
+import fontawesome.*
 import fontawesome.fas
+import killable.Killable
+import killable.Killables
 import org.w3c.dom.*
-import styles.cls
+import rx.RxIface
+import rx.rxClass
 import kotlin.browser.document
 
 class ToolBar(node: Node) {
 
     val element = node.row {
-        flexFixedSize()
-        bgLight()
-        padding1()
+        cls {
+            navTabs
+            flexFixedSize()
+            bgLight
+//            p1
+        }
     }
 
     val left by lazy {
         document.div {
-            flex()
-            flexFixedSize()
+            cls {
+                dFlex
+                flexFixedSize()
+            }
         }.also { element.insertAt(0, it ) }
     }
 
@@ -121,4 +129,32 @@ class ScreenLayout(val element: Element) {
 
 }
 fun Element.screenLayout(fn: ScreenLayout.() -> Unit = {}) = ScreenLayout(this).apply(fn)
+
+fun Node.faTab(faIcon: String, act: RxIface<Boolean>, fn: HTMLAnchorElement.() -> Unit): Killable {
+    val killables = Killables()
+    div {
+        cls {
+            mt1
+            navItem
+            dFlex
+        }
+        a {
+            cls {
+                navLink
+                px2
+                killables += rxClass(active, act)
+            }
+            span {
+                cls {
+                    fa.fw
+                }
+                classes += faIcon
+            }
+            href = "#"
+            fn()
+        }
+    }
+    return killables
+
+}
 

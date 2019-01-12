@@ -293,7 +293,7 @@ fun GlobalEventHandlers.rxHover(rx: Var<Boolean>) {
 
 fun Element.rxClass(
     style: String,
-    fn: RxVal<Boolean>
+    fn: RxIface<Boolean>
 ) : Killable {
     return fn.forEach {
         if (it) addClass(style)

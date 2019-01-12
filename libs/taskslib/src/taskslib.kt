@@ -68,12 +68,16 @@ open class Task : Base<Task>() {
     }.prop()
 
     val tagsx by run {
-        o.scalar<Array<String>>().toList().arrayOf().toSet()
+        o.array<String>().toSet()
             .calculated {
                 val t = tags.current()
                 lazy {
                     t.map {  ts ->
-                        ts.sorted().subs(2, MaxTagIndexSize).toSet()
+                        ts
+                            .sorted()
+                            .subs(2, MaxTagIndexSize)
+                            .map { ids -> ids.joinToString(";") }
+                            .toSet()
                     }
                 }
             }

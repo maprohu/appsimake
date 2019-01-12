@@ -1,28 +1,38 @@
 package killable
 
-import common.Listeners
+import killable.Killable.Companion.empty
+import killable.Killable.Companion.once
 
-class Killables : Listeners(), Killable {
-    private var killed = false
+class Killables : Killable {
 
-    override fun kill() {
-        fire()
+    protected var list = listOf<Killable>()
+
+    operator fun plusAssign(listener: () -> Unit) {
+        add(listener)
     }
 
-    override fun fire() {
-        if (!killed) {
-            killed = true
-            super.fire()
-            listeners = listOf()
+    fun add(fn: () -> Unit) = add(once(fn))
+    fun add(listener: Killable) : Killable {
+        return if (!killed) {
+            list += listener
+
+            once {
+                list -= listener
+            }
+        } else {
+            listener.kill()
+
+            empty
         }
     }
 
-    override fun add(listener: () -> Unit): () -> Unit {
-        if (killed) {
-            listener()
-            return {}
-        } else {
-            return super.add(listener)
+    private var killed = false
+
+    override fun kill() {
+        if (!killed) {
+            killed = true
+            list.forEach { it.kill() }
+            list = listOf()
         }
     }
 
