@@ -47,6 +47,6 @@ fun Listeners.add(killable: Killable): () -> Unit {
 class KillableValue<T>(
     val value: T,
     val killable: Killable
-) {
+): Killable by killable {
     constructor(value: T, fn: () -> Unit) : this(value, Killable.once(fn))
 }

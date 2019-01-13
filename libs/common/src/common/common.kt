@@ -2,6 +2,7 @@ package common
 
 import commonshr.SetDiff
 import killable.Killable
+import killable.KillableValue
 import killable.Killables
 import org.w3c.dom.*
 import rx.Rx
@@ -229,23 +230,330 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
 
 
 data class SortedListenableListConfig<T, C: Comparable<C>>(
+    val list: ListenableList<T>,
     val killables: Killables,
-    val emitter: Emitter<SetDiff<T>>,
     val key: (T, Killables) -> RxIface<C>
-
-
 ) {
-    class Holder<T, C: Comparable<C>>(
-        val item: T,
-        val krx: RxIface<C>,
-        val killable: Killable
+    class Move(
+        val forward: Boolean,
+        val range: IntRange
     ) {
-        var current = krx.now
+        val shift = if (forward) -1 else 1
+
+        companion object {
+            fun of(from: Int, to: Int): Move {
+                return if (from < to) {
+                    Move(
+                        true,
+                        from until to
+                    )
+                } else {
+                    Move(
+                        false,
+                        to+1 .. from
+                    )
+                }
+            }
+        }
     }
-    fun build() {
-        val list = ListenableMutableList<Holder<T, C>>()
+
+    fun build(): ListenableList<T> {
+
+        val result = ListenableMutableList<T>()
+
+        class Holder(
+            val holders: MutableList<Holder>,
+            val sorted: MutableList<Holder>,
+            item: T,
+            holdersIndex: Int
+        ) {
+            fun find(k: C) = sorted.binarySearchBy(k) { it.currentKey }.let { i ->
+                if (i < 0) -i-1 else i
+            }
+
+            val ks = killables.killables()
+            val krx = key(item, ks)
+            var currentKey = krx.now
+            var sortedIndex = find(currentKey)
+
+            init {
+                holders.add(holdersIndex, this)
+                sorted.add(sortedIndex, this)
+                sorted.listIterator(sortedIndex+1).forEach { s ->
+                    s.sortedIndex ++
+                }
+                result.add(sortedIndex, item)
+
+                ks += krx.forEachLater { k ->
+                    val from = sortedIndex
+                    sorted.removeAt(sortedIndex)
+                    val to = find(k)
+                    currentKey = k
+                    sorted.add(to, this)
+                    if (to != from) {
+                        val move = Move.of(from, to)
+                        move.range.map(sorted::get).forEach { it.sortedIndex += move.shift }
+                        result.move(from, to)
+                    }
+                }
+            }
+
+            fun move(from: Int, to: Int) {
+                holders.add(to, holders.removeAt(from))
+            }
+
+            fun remove(from: Int) {
+                holders.removeAt(from)
+                sorted.removeAt(sortedIndex)
+                sorted.listIterator(sortedIndex).forEach { h ->
+                    h.sortedIndex --
+                }
+                ks.kill()
+                result.removeAt(sortedIndex)
+            }
+        }
+
+        val holders = mutableListOf<Holder>()
+        val sorted = mutableListOf<Holder>()
+
+        killables += list.addListener(
+            ListenableList.Listener(
+                added = { idx, item ->
+                    Holder(
+                        holders,
+                        sorted,
+                        item,
+                        idx
+                    )
+                },
+                removed = { idx, _ ->
+                    holders[idx].remove(idx)
+
+                },
+                moved = { from, to ->
+                    holders[from].move(from, to)
+                }
+
+            )
+        )
+
+        return result
     }
 }
 
-fun <T> ListenableList<T>.sortTo()
 
+data class MappedListenableListConfig<T, U>(
+    val list: ListenableList<T>,
+    val killables: Killables,
+    val lifecycle: Lifecycle<T, U>
+) {
+    data class Lifecycle<T, U>(
+        val create: (T) -> U,
+        val kill: (U) -> Unit
+    ) {
+        companion object {
+            fun <T, U: Killable> killable(
+                killables: Killables,
+                create: (T, Killables) -> U
+            ) = Lifecycle<T, U>(
+                create = { t ->
+                    val ks = killables.killables()
+                    create(t, ks)
+                },
+                kill = Killable::kill
+            )
+            fun <T, U> killableValue(
+                killables: Killables,
+                create: (T, Killables) -> U
+            ) = killable<T, KillableValue<U>>(
+                killables
+            ) { t, ks ->
+                KillableValue(create(t, ks), ks)
+            }
+        }
+    }
+    fun build(): ListenableList<U> {
+        val result = ListenableMutableList<U>()
+
+        killables += list.addListener(
+            ListenableList.Listener(
+                added = { index, element ->
+                    val node = lifecycle.create(element)
+                    result.add(index, node)
+                },
+                removed = { index, _ ->
+                    val node = result.removeAt(index)
+                    lifecycle.kill(node)
+                },
+                moved = result::move
+            )
+        )
+
+        return result
+    }
+}
+
+interface HasValue<out T> {
+    val value: T
+}
+
+data class FilteredListenableListConfig<T, K, I>(
+    val list: ListenableList<T>,
+    val killables: Killables,
+    val filterKey: (T, Killables) -> RxIface<K>,
+    val input: RxIface<I>,
+    val filter: (K, I) -> Boolean
+) {
+
+    fun build(): ListenableList<T> {
+        val result = ListenableMutableList<T>()
+
+        class Holder(
+            val holders: MutableList<Holder>,
+            val item: T,
+            var holdersIndex: Int
+        ) {
+            var resultIndex: Optional<Int> = None
+            var resultsBefore = 0
+
+            fun resultsIndexAfter() = resultIndex.getOrDefault(resultsBefore)
+
+            val ks = killables.killables()
+            val key = filterKey(item, ks)
+
+
+            fun recalcResultsBefore() {
+                resultsBefore =
+                        if (holdersIndex == 0) 0
+                        else holders[holdersIndex - 1].resultsIndexAfter()
+            }
+
+
+            init {
+                holders.add(holdersIndex, this)
+                holders.listIterator(holdersIndex + 1).forEach { i ->
+                    i.holdersIndex += 1
+                }
+                recalcResultsBefore()
+
+                ks += key.forEach { k ->
+                    updateKey(k)
+                }
+            }
+
+            fun move(to: Int) {
+                val from = holdersIndex
+                holders.add(to, holders.removeAt(from))
+                holdersIndex = to
+                val fwd = from < to
+                val range = if (fwd) from until to else to+1 .. from
+                fun forRange(fn: (Holder) -> Unit) = range.forEach { i ->
+                    fn(holders[i])
+                }
+
+                if (fwd) forRange { h ->
+                    h.holdersIndex -= 1
+                } else forRange { h ->
+                    h.holdersIndex += 1
+                }
+
+                resultIndex.forEach { ri ->
+                    if (fwd) {
+                        forRange { h ->
+                            h.shift(true)
+                        }
+
+                        recalcResultsBefore()
+                    } else {
+                        recalcResultsBefore()
+
+                        forRange { h ->
+                            h.shift(false)
+                        }
+                    }
+
+                    result.move(ri, resultIndex.get())
+                }
+            }
+
+            fun shift(down: Boolean) {
+                if (down) {
+                    resultsBefore -= 1
+                    resultIndex = resultIndex.map { it - 1 }
+                } else {
+                    resultsBefore -= 1
+                    resultIndex = resultIndex.map { it - 1 }
+                }
+            }
+
+            fun updateVisibility(nv: Boolean) {
+                resultIndex.map { ri ->
+                    if (!nv) {
+                        // hide
+                        result.removeAt(ri)
+                        resultIndex = None
+                        holders.listIterator(holdersIndex + 1).forEach { h ->
+                            h.shift(true)
+                        }
+                    }
+                }.getOrElse {
+                    if (nv) {
+                        // show
+                        result.add(resultsBefore, item)
+                        resultIndex = Some(resultsBefore)
+                        holders.listIterator(holdersIndex + 1).forEach { h ->
+                            h.shift(false)
+                        }
+                    }
+                }
+            }
+
+            fun updateInput(i: I) {
+                updateVisibility(filter(key.now, i))
+            }
+
+            fun updateKey(k: K) {
+                updateVisibility(filter(k, input.now))
+            }
+
+            fun remove() {
+                updateVisibility(false)
+                holders.removeAt(holdersIndex)
+                holders.listIterator(holdersIndex).forEach { h ->
+                    h.holdersIndex -= 1
+                }
+            }
+
+        }
+
+        val holders = mutableListOf<Holder>()
+
+        killables += input.forEachLater { i ->
+            holders.forEach { holder ->
+                holder.updateInput(i)
+            }
+        }
+
+        killables += list.addListener(
+            ListenableList.Listener(
+                added = { idx, t ->
+                    Holder(
+                        holders = holders,
+                        item = t,
+                        holdersIndex = idx
+                    )
+                },
+                removed = { idx, _ ->
+                    holders[idx].remove()
+                },
+                moved = { from, to ->
+                    holders[from].move(to)
+                }
+            )
+        )
+
+
+        return result
+    }
+
+}

@@ -50,7 +50,7 @@ fun LoggedIn.viewTask(
                     diff.added.forEach { list.add(it) }
                 }
 
-                listenKillableList(list) { id, ks ->
+                listenableList(list, killables) { id, ks ->
                     span {
                         cls {
                             m1

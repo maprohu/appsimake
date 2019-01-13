@@ -150,18 +150,16 @@ fun <T> Node.listenableList(
     )
 }
 
-fun <T> Node.listenKillableList(
+fun <T> Node.listenableList(
     list: ListenableList<T>,
+    killables: Killables,
     create: (T, Killables) -> Node
-): Killable {
-    val killables = Killables()
+) {
     val kills = mutableListOf<Killable>()
     killables += list.addListener(
         ListenableList.Listener(
             added = { index, element ->
-                val ks = Killables()
-                val r = killables.add(ks)
-                ks += r
+                val ks = killables.killables()
                 val node = create(element, ks)
                 insertAt(index, node)
                 kills.add(index, ks)
@@ -177,7 +175,6 @@ fun <T> Node.listenKillableList(
             }
         )
     )
-    return killables
 }
 
 val String.textNode

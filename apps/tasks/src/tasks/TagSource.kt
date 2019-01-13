@@ -3,6 +3,7 @@ package tasks
 import common.ListenableList
 import common.ListenableMutableList
 import commonlib.CollectionWrap
+import commonshr.SetDiff
 import firebase.firestore.*
 import killable.Killable
 import killable.Killables
@@ -63,8 +64,12 @@ class TagSource(
         rxv
     }
 
+    private val list = ListenableMutableList<Tag>()
+
+    val listenableList: ListenableList<Tag>
+        get() = list
+
     init {
-        val list = ListenableMutableList<Tag>()
 
         list.addListener(
             ListenableList.Listener(
@@ -92,6 +97,15 @@ class TagSource(
             val tref = tagsRef.add(t.props.write()).await()
             tagv(tref.id)
         }
+    }
+
+    fun listen(fn: (SetDiff<Tag>) -> Unit): Killable {
+        return list.addListener(
+            ListenableList.Listener(
+                added = { t, _ -> SetDiff(added = setOf(t)) },
+                removed = { t, _ -> SetDiff(removed = setOf(t)) }
+            )
+        )
     }
 
 }

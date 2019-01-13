@@ -1,13 +1,17 @@
 package killable
 
 
-class KillableSeq(initial: Killable = Killable.empty) : Killable {
+class KillableSeq private constructor(
+    private var current: Killable = Killable.empty,
+    internal val onKill: Killables
+) : Killable by onKill {
 
-    private var current : Killable = initial
+    constructor(initial: Killable = Killable.empty): this(initial, Killables())
+
     private var killed = false
 
-    override fun kill() {
-        if (!killed) {
+    init {
+        onKill += {
             killed = true
             current()
             current = Killable.empty

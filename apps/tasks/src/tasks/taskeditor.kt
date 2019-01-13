@@ -138,66 +138,6 @@ fun LoggedIn.editTask(
                                     }
 
                                 }
-                                div {
-                                    cls {
-                                        m1
-                                        inputGroup
-                                        widthAuto
-                                    }
-                                    val isBusy = Var(false)
-                                    val tag = input {
-                                        cls {
-                                            formControl
-                                            widthAuto
-                                        }
-                                        type = "text"
-                                    }
-                                    div {
-                                        cls.inputGroupAppend
-                                        button {
-                                            cls {
-                                                btn
-                                                btnOutlineSecondary
-                                                span {
-                                                    cls {
-                                                        spinnerBorder
-                                                        spinnerBorderSm
-                                                    }
-                                                    rxDisplayed(isBusy)
-                                                }
-                                                span {
-                                                    cls {
-                                                        fa {
-                                                            plus
-                                                        }
-                                                    }
-                                                    rxDisplayed { !isBusy() }
-                                                }
-                                            }
-                                            clickEvent {
-                                                if (!isBusy.now) {
-                                                    isBusy.now = true
-                                                    val v = tag.value
-                                                    tag.value = ""
-                                                    GlobalScope.launch {
-                                                        val tv = tagSource.byName(v)
-                                                        item.tags.current.add(tv.now.props.idOrFail)
-                                                        isBusy.now = false
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        button {
-                                            cls {
-                                                btn
-                                                btnOutlineSecondary
-                                                fa {
-                                                    search
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
 
                             }
 
@@ -206,7 +146,7 @@ fun LoggedIn.editTask(
                     }
                 },
                 TabConfig(Fa.tags) {
-                    document.div
+                    tagsEditor(item)
                 },
                 TabConfig(Fa.comments) {
                     document.div

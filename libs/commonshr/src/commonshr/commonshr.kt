@@ -3,8 +3,8 @@ package commonshr
 import common.Optional
 
 data class SetDiff<T>(
-    val removed: Set<T>,
-    val added: Set<T>
+    val removed: Set<T> = setOf(),
+    val added: Set<T> = setOf()
 ) {
     companion object {
         fun <T> of(

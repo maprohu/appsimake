@@ -31,8 +31,9 @@ class Killables : Killable {
     override fun kill() {
         if (!killed) {
             killed = true
-            list.forEach { it.kill() }
+            val l = list
             list = listOf()
+            l.forEach { it.kill() }
         }
     }
 
@@ -41,7 +42,7 @@ class Killables : Killable {
     }
 
 
-    fun killables() = Killables().also { add(it) }
-    fun seq() = KillableSeq().also { add(it) }
+    fun killables() = Killables().also { it += add(it) }
+    fun seq() = KillableSeq().also { it.onKill += add(it) }
 
 }
