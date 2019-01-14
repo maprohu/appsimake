@@ -1,7 +1,6 @@
 package tasks
 
-import common.ListenableList
-import common.ListenableMutableList
+import common.*
 import commonlib.CollectionWrap
 import commonshr.SetDiff
 import firebase.firestore.*
@@ -10,10 +9,7 @@ import killable.Killables
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
-import rx.Rx
-import rx.RxVal
-import rx.Var
-import rx.set
+import rx.*
 import taskslib.Tag
 
 
@@ -102,10 +98,69 @@ class TagSource(
     fun listen(fn: (SetDiff<Tag>) -> Unit): Killable {
         return list.addListener(
             ListenableList.Listener(
-                added = { t, _ -> SetDiff(added = setOf(t)) },
-                removed = { t, _ -> SetDiff(removed = setOf(t)) }
+                added = { _, item -> fn(SetDiff(added = setOf(item))) },
+                removed = { _, item -> fn(SetDiff(removed = setOf(item))) }
             )
         )
     }
+
+    class Counted<T>(
+        private val create: (Killables) -> T
+    ) {
+        private var current: Optional<Holder> = None
+
+        private inner class Holder(
+            val value: T,
+            val killable: Killable
+        ) {
+            var count = 0
+
+            fun release() {
+                count--
+
+                if (count <= 0) {
+                    current = None
+                    killable.kill()
+                }
+            }
+        }
+
+        fun get(ks: Killables): T {
+            return current.getOrElse {
+                val k = Killables()
+                Holder(
+                    create(k),
+                    k
+                ).also {
+                    current = Some(it)
+                }
+            }.let { holder ->
+                holder.count++
+
+                ks += Killable.once {
+                    holder.release()
+                }
+
+                holder.value
+            }
+        }
+    }
+
+    val tagSet = Counted { ks ->
+        val rxv = Var(setOf<Tag>())
+        listen { diff ->
+            rxv.transform {  s ->
+                s - diff.removed + diff.added
+            }
+        }.also { ks += it }
+        rxv as RxIface<Set<Tag>>
+    }
+
+    val tagNameSet = Counted { ks ->
+        tagSet.get(ks).let { ts ->
+            Rx { ts().map { it.name.initial().orEmpty() }.toSet() }.also { ks += it }
+        }
+    }
+
 
 }

@@ -112,7 +112,7 @@ class StateMachine<I, S: State<I, S>>(
     fun shutdown() {
         destroy()
         destroy = { alreadyShutdown() }
-        state = AlreadyShutdown() as S
+        state = AlreadyShutdown().unsafeCast<S>()
     }
 
 }

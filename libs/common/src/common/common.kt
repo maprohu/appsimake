@@ -1,8 +1,6 @@
 package common
 
-import commonshr.SetDiff
 import killable.Killable
-import killable.KillableValue
 import killable.Killables
 import org.w3c.dom.*
 import rx.Rx
@@ -345,47 +343,57 @@ data class SortedListenableListConfig<T, C: Comparable<C>>(
 data class MappedListenableListConfig<T, U>(
     val list: ListenableList<T>,
     val killables: Killables,
-    val lifecycle: Lifecycle<T, U>
+    val mapper: (T, Killables) -> U
 ) {
-    data class Lifecycle<T, U>(
-        val create: (T) -> U,
-        val kill: (U) -> Unit
-    ) {
-        companion object {
-            fun <T, U: Killable> killable(
-                killables: Killables,
-                create: (T, Killables) -> U
-            ) = Lifecycle<T, U>(
-                create = { t ->
-                    val ks = killables.killables()
-                    create(t, ks)
-                },
-                kill = Killable::kill
-            )
-            fun <T, U> killableValue(
-                killables: Killables,
-                create: (T, Killables) -> U
-            ) = killable<T, KillableValue<U>>(
-                killables
-            ) { t, ks ->
-                KillableValue(create(t, ks), ks)
-            }
-        }
-    }
+//    data class Lifecycle<T, U>(
+//        val create: (T, Killables) -> U,
+//        val kill: (U) -> Unit
+//    ) {
+//        companion object {
+//            fun <T, U: Killable> killable(
+//                killables: Killables,
+//                create: (T, Killables) -> U
+//            ) = Lifecycle<T, U>(
+//                create = { t ->
+//                    val ks = killables.killables()
+//                    create(t, ks)
+//                },
+//                kill = Killable::kill
+//            )
+//            fun <T, U> killableValue(
+//                killables: Killables,
+//                create: (T, Killables) -> U
+//            ) = killable<T, KillableValue<U>>(
+//                killables
+//            ) { t, ks ->
+//                KillableValue(create(t, ks), ks)
+//            }
+//        }
+//    }
     fun build(): ListenableList<U> {
         val result = ListenableMutableList<U>()
+        class Holder(
+            val killable: Killable
+        )
+        val holders = mutableListOf<Holder>()
 
         killables += list.addListener(
             ListenableList.Listener(
                 added = { index, element ->
-                    val node = lifecycle.create(element)
+                    val ks = killables.killables()
+                    val node = mapper(element, ks)
                     result.add(index, node)
+                    holders.add(index, Holder(ks))
                 },
                 removed = { index, _ ->
-                    val node = result.removeAt(index)
-                    lifecycle.kill(node)
+                    result.removeAt(index)
+                    val holder = holders.removeAt(index)
+                    holder.killable.kill()
                 },
-                moved = result::move
+                moved = { from, to ->
+                    result.move(from, to)
+                    holders.add(to, holders.removeAt(from))
+                }
             )
         )
 
@@ -393,9 +401,6 @@ data class MappedListenableListConfig<T, U>(
     }
 }
 
-interface HasValue<out T> {
-    val value: T
-}
 
 data class FilteredListenableListConfig<T, K, I>(
     val list: ListenableList<T>,
@@ -416,7 +421,7 @@ data class FilteredListenableListConfig<T, K, I>(
             var resultIndex: Optional<Int> = None
             var resultsBefore = 0
 
-            fun resultsIndexAfter() = resultIndex.getOrDefault(resultsBefore)
+            fun resultsIndexAfter() = resultIndex.map { it + 1 }.getOrDefault(resultsBefore)
 
             val ks = killables.killables()
             val key = filterKey(item, ks)
@@ -481,14 +486,14 @@ data class FilteredListenableListConfig<T, K, I>(
                     resultsBefore -= 1
                     resultIndex = resultIndex.map { it - 1 }
                 } else {
-                    resultsBefore -= 1
-                    resultIndex = resultIndex.map { it - 1 }
+                    resultsBefore += 1
+                    resultIndex = resultIndex.map { it + 1 }
                 }
             }
 
-            fun updateVisibility(nv: Boolean) {
+            fun updateVisibility(newVisible: Boolean) {
                 resultIndex.map { ri ->
-                    if (!nv) {
+                    if (!newVisible) {
                         // hide
                         result.removeAt(ri)
                         resultIndex = None
@@ -497,7 +502,7 @@ data class FilteredListenableListConfig<T, K, I>(
                         }
                     }
                 }.getOrElse {
-                    if (nv) {
+                    if (newVisible) {
                         // show
                         result.add(resultsBefore, item)
                         resultIndex = Some(resultsBefore)
@@ -556,4 +561,7 @@ data class FilteredListenableListConfig<T, K, I>(
         return result
     }
 
+
 }
+
+

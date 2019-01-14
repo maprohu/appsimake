@@ -145,8 +145,8 @@ fun LoggedIn.editTask(
                         }
                     }
                 },
-                TabConfig(Fa.tags) {
-                    tagsEditor(item)
+                TabConfig(Fa.tags) { ks ->
+                    tagsEditor(item, ks)
                 },
                 TabConfig(Fa.comments) {
                     document.div

@@ -142,7 +142,9 @@ fun Node.listGroup(
     content: HTMLUListElement.() -> Unit
 ): HTMLElement {
     return ul {
-        classes += "list-group"
+        cls {
+            listGroup
+        }
         content()
     }
 }
@@ -151,7 +153,7 @@ fun Node.listGroupItem(
     content: HTMLLIElement.() -> Unit
 ): HTMLElement {
     return li {
-        classes += "list-group-item"
+        cls.listGroupItem
         content()
     }
 }
@@ -435,10 +437,12 @@ fun Element.positionRelative() {
 
 val Cls.textDanger by css()
 val Cls.bgDanger by css()
+val Cls.bgWarning by css()
 val Cls.bgLight by css()
 val Cls.bgSecondary by css()
 val Cls.border by css()
 val Cls.borderBottom by css()
+val Cls.borderWarning by css()
 val Cls.rounded by css()
 val Cls.close by css()
 val Cls.card by css()
@@ -464,6 +468,7 @@ val Cls.p2 by css()
 val Cls.p3 by css()
 val Cls.p4 by css()
 val Cls.p5 by css()
+val Cls.py1 by css()
 val Cls.px1 by css()
 val Cls.px2 by css()
 val Cls.ml1 by css()
