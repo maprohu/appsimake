@@ -36,7 +36,7 @@ fun <T: HasProps<*, String>> ViewScreenConfig<T>.build(
         fun displayViewer() {
             panel.setRoot(this)
         }
-        screenLayout {
+        screenLayout(killables) {
             top {
                 backButton(close)
                 middleTitle {
@@ -44,7 +44,10 @@ fun <T: HasProps<*, String>> ViewScreenConfig<T>.build(
                 }
                 right {
                     faButton(Fa.pen) {
-                        cls.btnPrimary
+                        cls {
+                            m1
+                            btnPrimary
+                        }
                         clickEventSeq {
                             edit(panel.sub(), item, ::displayViewer)
                         }

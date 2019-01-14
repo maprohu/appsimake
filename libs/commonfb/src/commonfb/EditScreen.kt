@@ -129,8 +129,11 @@ fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
     val fc = form(item, killables)
 
     panel.newRoot {
-        screenLayout {
+        screenLayout(killables) {
+
             top {
+                spinner.visibility.now = isSaving
+
                 left {
                     btnButton {
                         cls.m1
@@ -157,15 +160,7 @@ fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
                     middleTitle {
                         innerText = this@build.title
                     }
-                    element {
-                        div {
-                            cls {
-                                m1
-                                spinnerBorder
-                                spinnerBorderSm
-                            }
-                            rxDisplayed(isSaving)
-                        }
+                    tabs {
                         fc.tabs(this)
                     }
                     right {
@@ -286,7 +281,7 @@ fun Element.validProp(prop: Prop<*>): Killable {
     return killables
 }
 
-fun Element.formGroup(lbl: String, fn: HTMLDivElement.((labelFor: Element) -> Unit) -> Unit) {
+fun Element.formGroup(lbl: String, fn: HTMLDivElement.(labelFor: Element.() -> Unit) -> Unit) {
     div {
         cls {
             formGroup
@@ -302,7 +297,7 @@ fun Element.formGroup(lbl: String, fn: HTMLDivElement.((labelFor: Element) -> Un
             innerText = lbl
         }
         fn {
-            l.htmlFor = it.ref
+            l.htmlFor = this.ref
         }
     }
 }

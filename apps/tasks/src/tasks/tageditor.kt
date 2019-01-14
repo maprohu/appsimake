@@ -6,6 +6,7 @@ import commonui.RootPanel
 import domx.*
 import killable.Killable
 import killable.Killables
+import styles.widthAuto
 import taskslib.Tag
 import kotlin.browser.document
 
@@ -20,14 +21,13 @@ fun LoggedIn.editTag(
     ) { item, killables ->
         FormConfig {
             scrollForm {
-                div {
-                    cls.formGroup
-                    label {
-                        innerText = "Name"
-                    }
+                formGroup("Tag Name") { lbl ->
                     input {
+                        lbl()
                         cls {
                             formControl
+                            m1
+                            widthAuto
                         }
                         type = "text"
                         killables += textProp(item.name)

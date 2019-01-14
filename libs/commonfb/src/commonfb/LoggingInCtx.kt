@@ -11,6 +11,7 @@ import domx.div
 import domx.invoke
 import firebase.User
 import firebaseui.Login
+import killable.Killables
 
 abstract class LoggingInCtx(
     val fbCtx: FbCtx
@@ -22,14 +23,14 @@ abstract class LoggingInCtx(
 
     private val login by lazy { Login(fbCtx.app) }
 
-    fun loggedOut() {
+    fun loggedOut(killables: Killables) {
         login.loginUi(
-            loginDiv()
+            loginDiv(killables)
         )
     }
 
-    open fun loginDiv() =
-        appCtx.root.newRoot().screenLayout {
+    open fun loginDiv(killables: Killables) =
+        appCtx.root.newRoot().screenLayout(killables) {
             top {
                 left {
                     a {

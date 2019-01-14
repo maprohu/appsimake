@@ -5,7 +5,6 @@ import common.Listeners
 interface Killable {
     fun kill()
 
-
     companion object {
         fun once(fn: () -> Unit) = OnceKillable(fn)
         fun of(fn: () -> Unit) = object : Killable {

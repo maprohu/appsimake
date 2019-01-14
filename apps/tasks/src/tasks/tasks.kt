@@ -63,7 +63,7 @@ class LoggedIn(
                 homeActive.now = true
                 root.setRoot(this)
             }
-            screenLayout {
+            screenLayout(killables) {
                 top {
                     middleTitle {
                         innerText = loggedInCtx.appCtx.title

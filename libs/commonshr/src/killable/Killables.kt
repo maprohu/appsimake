@@ -13,6 +13,10 @@ class Killables : Killable {
 
     fun add(fn: () -> Unit) = add(once(fn))
     fun add(listener: Killable) : Killable {
+        if (listener == empty) {
+            return empty
+        }
+
         return if (!killed) {
             list += listener
 

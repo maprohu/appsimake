@@ -35,8 +35,9 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
             panel.setRoot(this)
         }
 
-        screenLayout {
+        screenLayout(killables) {
             top {
+                spinner.visibility.now = isBusy
                 backButton(close)
                 middle {
 
@@ -53,19 +54,13 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
 
                         innerText = this@build.title
                     }
-                    div {
-                        cls {
-                            flexGrow0
-                            flexShrink0
-                            spinnerBorder
-                            spinnerBorderSm
-                        }
-                        rxDisplay(isBusy)
-                    }
                 }
                 right {
                     faButton(Fa.plus) {
-                        cls.btnPrimary
+                        cls {
+                            m1
+                            btnPrimary
+                        }
                         killables += clickEventSeq {
                             edit(panel.sub(), create(), ::displayList)
                         }
