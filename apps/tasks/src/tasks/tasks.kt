@@ -13,6 +13,9 @@ import firebase.User
 import firebase.firestore.query
 import fontawesome.*
 import killable.Killables
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
 import rx.Var
 import styles.scrollVertical
 import taskslib.Task
@@ -20,7 +23,13 @@ import taskslib.usertags
 import taskslib.tasks
 
 fun main(args: Array<String>) {
-    TasksMain().start()
+    TasksMain().let { tm ->
+        GlobalScope.launch {
+            tm.fbCtx.db.enablePersistence().await()
+
+            tm.start()
+        }
+    }
 }
 
 

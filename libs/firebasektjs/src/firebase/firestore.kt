@@ -26,6 +26,12 @@ external class Firestore {
     fun <T> runTransaction(fn: (Transaction) -> Any) : Promise<T>
 
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#enablePersistence
+    fun enablePersistence(): Promise<Unit>
+
+
+
+
 }
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.Transaction

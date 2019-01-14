@@ -7,14 +7,16 @@ import bootstrap.padding2
 import commonui.AppCtx
 import commonui.screenLayout
 import commonui.topbar
+import killable.Killables
 import kotlin.browser.document
 
 fun main(args: Array<String>) {
     val appCtx = AppCtx("Apps I Make")
     appCtx.registerServiceWorker()
+    val killables = Killables()
 
     appCtx.root.newRoot {
-        screenLayout {
+        screenLayout(killables) {
             top {
                 middleTitle {
                     innerText = appCtx.title
