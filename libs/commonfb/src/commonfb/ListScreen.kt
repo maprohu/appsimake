@@ -145,6 +145,7 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
                         flexGrow1
                         dFlex
                         flexColumn
+                        bgLight
                     }
 
                     val listRoot = RootPanel(this)
@@ -163,7 +164,6 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
                                 listDivDecor = {
                                     cls {
                                         scrollVertical
-                                        bgLight
                                     }
                                 },
                                 ulDecor = {
