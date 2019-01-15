@@ -13,7 +13,9 @@ object kotlinxCoroutines : KotlinJsLib(
     kotlinxCoroutinesCoreJs,
     "kotlinx-coroutines-core"
 )
-
+object webAnimationsJs : JsDownload(
+    "https://raw.githubusercontent.com/web-animations/web-animations-js/2.3.1/web-animations.min.js"
+)
 object jquery : JsDownload(
     "https://code.jquery.com/jquery-3.3.1.js"
 )
@@ -210,6 +212,7 @@ object gymclock : JsApp(
     "apps/gymclock",
     "Gym Clock",
     deps = listOf(
+        webAnimationsJs,
         commonui
     ),
     serviceWorker = gymclocksw

@@ -8,9 +8,8 @@ external interface ElementAnimate {
     fun animate(keyframes: dynamic, duration: Int)
     fun animate(keyframes: dynamic, options: AnimateOptions)
 
-
-
 }
+
 
 external interface AnimateOptions {
     var id: String

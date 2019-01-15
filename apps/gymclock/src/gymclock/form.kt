@@ -4,10 +4,8 @@ import bootstrap.*
 import common.Listeners
 import commonui.screenLayout
 import domx.*
-import rx.Rx
-import rx.RxVal
-import rx.Var
-import rx.rxClassOpt
+import killable.Killables
+import rx.*
 import styles.cursorPointer
 import styles.pointerEventsNone
 import styles.scrollVertical
@@ -16,10 +14,13 @@ import kotlin.browser.document
 object Form {
 
     val root by lazy {
+        val ks = Killables()
 
         document.div {
-            flexGrow1()
-            screenLayout {
+            cls {
+                flexGrow1
+            }
+            screenLayout(ks) {
                 top {
                     middleTitle {
                         innerText = "Gym Clock"
@@ -27,27 +28,33 @@ object Form {
                 }
 
                 main {
-                    classes += scrollVertical
-                    flexColumn()
-                    padding2()
+                    cls {
+                        scrollVertical
+                        dFlex
+                        flexColumn
+                        p2
+                    }
 
                     val valids = mutableListOf<RxVal<Boolean>>()
                     val submit = Listeners()
 
                     form {
 
-
                         fun number(
                             labelString: String,
                             source: Var<Int>
                         ) {
                             div {
-                                formGroup()
+                                cls {
+                                    formGroup
+                                }
                                 val l = label {
                                     innerText = labelString
                                 }
                                 input {
-                                    formControl()
+                                    cls {
+                                        formControl
+                                    }
                                     type = "number"
                                     l.htmlFor = this.ref
                                     min = "0"
@@ -73,7 +80,7 @@ object Form {
                                     }
                                     valids += valid
                                     submit += { source.now = rxn.now!! }
-                                    rxClassOpt(Rx { if (!valid()) "is-invalid" else null })
+                                    ks += rxClass(Cls.isInvalid) { !valid() }
                                 }
 
                             }
@@ -94,17 +101,23 @@ object Form {
                         )
 
                         a {
-                            classes += cursorPointer
+                            cls {
+                                cursorPointer
+                            }
                             val i = input {
-                                margin1()
-                                classes += pointerEventsNone
+                                cls {
+                                    m1
+                                    pointerEventsNone
+                                }
                                 type = "checkbox"
                                 Model.sounds.forEach {
                                     checked = it
                                 }
                             }
                             label {
-                                classes += pointerEventsNone
+                                cls {
+                                    pointerEventsNone
+                                }
                                 innerText = "Sounds"
                                 htmlFor = i.ref
                             }
@@ -114,8 +127,10 @@ object Form {
                         }
                     }
                     btnButton {
-                        flexFixedSize()
-                        btnPrimary()
+                        cls {
+                            flexFixedSize()
+                            btnPrimary
+                        }
                         innerText = "Start"
                         val canSubmit = Rx {
                             valids.all { it() }

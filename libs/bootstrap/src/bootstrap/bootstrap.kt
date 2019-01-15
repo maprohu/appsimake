@@ -437,9 +437,13 @@ fun Element.positionRelative() {
 
 
 
+val Cls.w100 by css()
+val Cls.h100 by css()
 val Cls.textDanger by css()
 val Cls.bgDanger by css()
+val Cls.bgTransparent by css()
 val Cls.bgWarning by css()
+val Cls.bgSuccess by css()
 val Cls.bgLight by css()
 val Cls.bgSecondary by css()
 val Cls.border by css()
@@ -523,6 +527,8 @@ val Cls.navTabs by css()
 val Cls.navItem by css()
 val Cls.navLink by css()
 val Cls.active by css()
+val Cls.positionRelative by css()
+val Cls.positionAbsolute by css()
 
 
 

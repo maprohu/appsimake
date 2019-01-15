@@ -46,11 +46,11 @@ class ToolBar private constructor(val element: HTMLDivElement, killables: Killab
         return leftButton {
             cls {
                 m1
-                fa.chevronLeft
-                clickEvent {
-                    fn()
-                }
             }
+            clickEvent {
+                fn()
+            }
+            faButtonSpan(Fa.chevronLeft)
         }
     }
 

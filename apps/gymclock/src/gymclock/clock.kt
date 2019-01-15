@@ -6,8 +6,11 @@ import bootstrap.*
 import common.dyn
 import common.obj
 import common.res
+import commonui.faButton
+import commonui.faButtonSpan
 import commonui.screenLayout
 import domx.*
+import fontawesome.*
 import killable.Killable
 import killable.KillableSeq
 import killable.Killables
@@ -19,7 +22,6 @@ import styles.pointerEventsNone
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.js.Date
-import kotlin.math.ceil
 import kotlin.math.floor
 
 object Clock {
@@ -49,49 +51,45 @@ object Clock {
 
 
     fun show() {
-        val killables = Killables()
+        val ks = Killables()
 
-        killables += Main.appCtx.keepAwake()
+        ks += Main.appCtx.keepAwake()
 
         Main.appCtx.root.newRoot {
-            screenLayout {
+            screenLayout(ks) {
 
                 top {
-                    leftButton {
-                        innerText = "Cancel"
-                        clickEvent {
-                            killables.kill()
-                            Form.show()
-                        }
+                    backButton {
+                        ks.kill()
+                        Form.show()
                     }
                     middleTitle {
                         innerText = Main.appCtx.title
                     }
                     right {
                         btnButton {
-                            margin1()
-                            flexRow()
-                            flexAlignItemsCenter()
-                            btnSecondary()
-                            checkbox {
-                                marginRight2()
-                                pointerEventsNone()
-                                killables += Model.sounds.forEach {
-                                    checked = it
+                            cls {
+                                m1
+                                btnPrimary
+                            }
+                            faButtonSpan {
+                                ks += rxClass {
+                                    if (Model.sounds()) {
+                                        Fa.volumeUp
+                                    } else {
+                                        Fa.volumeMute
+                                    }
                                 }
                             }
-                            span {
-                                innerText = "Sounds"
-                            }
                             clickEvent {
-                                Model.sounds.now = !Model.sounds.now
+                                Model.sounds.transform { s -> !s }
                             }
                         }
                     }
                 }
 
                 main {
-                    killables += timer(this)
+                    ks += timer(this)
                 }
             }
         }
@@ -122,14 +120,18 @@ object Clock {
         val killables = Killables()
 
         timerDiv.apply {
-            positionRelative()
+            cls {
+                positionRelative
+            }
         }
 
         val counter = Var(-1)
 
-        val colorDivClass = Var(bgTransparent)
+        val colorDivClass = Var(Cls.bgTransparent)
         val colorDiv = timerDiv.div {
-            positionAbsolute()
+            cls {
+                positionAbsolute
+            }
             rxClass(colorDivClass)
             style.apply {
                 left = "0"
@@ -140,9 +142,14 @@ object Clock {
         }
 
         timerDiv.div {
-            fullSize()
-            positionAbsolute()
-            flexCenter()
+            cls {
+                w100
+                h100
+                positionAbsolute
+                dFlex
+                justifyContentCenter
+                alignItemsCenter
+            }
             span {
                 style.fontSize = "52vmin"
                 counter.forEach {
@@ -165,7 +172,7 @@ object Clock {
         val init = listOf(
             Phase(
                 Model.delay.now,
-                bgWarning,
+                Cls.bgWarning,
                 restAudio
             )
         ).nonZeroes().toPhaseList()
@@ -173,12 +180,12 @@ object Clock {
         val repeatPhases = listOf(
             Phase(
                 Model.work.now,
-                bgSucess,
+                Cls.bgSuccess,
                 workAudio
             ),
             Phase(
                 Model.rest.now,
-                bgWarning,
+                Cls.bgWarning,
                 restAudio
             )
         ).nonZeroes()
