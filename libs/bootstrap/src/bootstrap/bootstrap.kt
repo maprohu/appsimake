@@ -54,7 +54,6 @@ class DropdownGroup(
 ) {
     val element = node.div {
         cls {
-            btnGroup
             dropdown
         }
     }
@@ -75,20 +74,26 @@ class DropdownGroup(
     }
 }
 
-fun HTMLElement.dropdownGroup(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply(fn)
-
-fun Node.dropdownDiv(
-    block : HTMLDivElement.() -> Unit = {}
-): HTMLDivElement {
-    return div {
-        classes += "dropdown"
-        dropdownToggleButton()
-        div {
-            dropdownMenu()
-            block()
-        }
-    }
+fun HTMLElement.dropdownGroup(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply {
+    element.cls.btnGroup
+    fn()
 }
+fun HTMLElement.dropdownDiv(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply {
+    fn()
+}
+
+//fun Node.dropdownDiv(
+//    block : HTMLDivElement.() -> Unit = {}
+//): HTMLDivElement {
+//    return div {
+//        classes += "dropdown"
+//        dropdownToggleButton()
+//        div {
+//            dropdownMenu()
+//            block()
+//        }
+//    }
+//}
 
 class DropdownItemAnchor(node: Node) {
     val anchor = node.a {
@@ -483,6 +488,7 @@ val Cls.btnOutlineSecondary by css()
 val Cls.dFlex by css()
 val Cls.flexRow by css()
 val Cls.flexColumn by css()
+val Cls.flexWrap by css()
 val Cls.flexGrow1 by css()
 val Cls.flexGrow0 by css()
 val Cls.flexShrink0 by css()
@@ -510,6 +516,7 @@ val Cls.dropdownItem by css()
 val Cls.customSelect by css()
 val Cls.fontWeightBold by css()
 val Cls.badge by css()
+val Cls.badgePrimary by css()
 val Cls.badgeSecondary by css()
 val Cls.navTabs by css()
 val Cls.navItem by css()

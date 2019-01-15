@@ -15,6 +15,7 @@ import fontawesome.*
 import killable.Killable
 import killable.Killable.Companion.empty
 import killable.Killables
+import killable.addedTo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
@@ -86,29 +87,34 @@ fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
     val showDropDown = Rx { showDelete() }
     val canDelete = Rx { item.props.isPersisted() && !isSaving() }
 
+    val idListenerSeq = killables.seq()
+    val idOpt = Rx { item.props.id().map { it.id } }.addedTo(killables)
+    val docRef = Rx { idOpt().map { id -> wrap.doc(id).docRef(db) } }
+    docRef.forEach { dro ->
+        idListenerSeq += dro.map { dr ->
+            dr.onSnapshot { d ->
+                isSaving.now = false
+            }
+        }.getOrDefault {}
+    }
+
     fun save() {
         if (canSave.now) {
             isSaving.now = true
 
-            item.props.id.now.map { s ->
-                GlobalScope.launch {
-                    wrap.doc(s.id).docRef(db).set(
-                        item.props.merge(),
-                        setOptionsMerge()
-                    ).await()
-                    isSaving.now = false
-                }
+            docRef.now.map<Unit> { dr ->
+                dr.set(
+                    item.props.merge(),
+                    setOptionsMerge()
+                )
             }.getOrElse {
-                GlobalScope.launch {
-                    val ref = wrap.collectionRef(db).add(
-                        item.props.write()
-                    ).await()
-                    item.props.persisted(ref.id)
-                    killables += ref.listen(item)
-                    killables += item.props.onDeleted.add(close)
-
-                    isSaving.now = false
-                }
+                val ref = wrap.collectionRef(db).doc()
+                item.props.persisted(ref.id)
+                ref.set(
+                    item.props.write()
+                )
+                killables += ref.listen(item)
+                killables += item.props.onDeleted.add(close)
             }
         }
     }

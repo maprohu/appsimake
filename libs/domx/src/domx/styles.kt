@@ -57,6 +57,14 @@ val Cls.overflowHidden by def(
 
 val Cls.scrollVertical by def("overflow-y: auto;" )
 
+val Cls.dGrid by def("display: grid;" )
+val Cls.alignContentCenter by def("align-content: center;" )
+//val Cls.justifyContentCenter by def("justify-content: center;" )
+val Cls.gridAutoFlowRow by def("grid-auto-flow: row;" )
+
+val Cls.justifySelfEnd by def("justify-self: end;")
+val Cls.justifySelfStart by def("justify-self: start;")
+
 val Cls.flexBasis0 by def("flex-basis: 0;" )
 
 val Cls.pointerEventsNone by def(

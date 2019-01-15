@@ -29,6 +29,9 @@ external class Firestore {
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#enablePersistence
     fun enablePersistence(): Promise<Unit>
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#disableNetwork
+    fun disableNetwork(): Promise<Unit>
+
 
 
 

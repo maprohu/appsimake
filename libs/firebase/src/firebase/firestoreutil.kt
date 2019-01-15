@@ -290,17 +290,21 @@ class QueryWrap<in T>(
     val query: Query
 )
 
+fun <T: HasProps<*, String>> T.onSnapshot(d: DocumentSnapshot) {
+    if (d.exists) {
+        val data = d.data<dynamic>()
+        props.extractInitial(data)
+    } else {
+        props.deleted()
+    }
+}
+
 fun <T: HasProps<*, String>> DocumentReference.listen(
     target: T
 ) : Killable {
     return Killable.once(
         onSnapshot { d ->
-            if (d.exists) {
-                val data = d.data<dynamic>()
-                target.props.extractInitial(data)
-            } else {
-                target.props.deleted()
-            }
+            target.onSnapshot(d)
         }
     )
 

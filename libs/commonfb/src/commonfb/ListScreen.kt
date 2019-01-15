@@ -3,15 +3,23 @@ package commonfb
 import bootstrap.*
 import commonui.RootPanel
 import commonui.faButton
+import commonui.faTab
 import commonui.screenLayout
 import domx.*
 import firebase.firestore.QueryWrap
 import firebaseshr.HasProps
 import fontawesome.Fa
+import fontawesome.filter
 import fontawesome.plus
 import killable.Killable
 import killable.Killables
+import org.w3c.dom.HTMLDivElement
 import rx.Var
+import styles.scrollVertical
+
+data class FilterConfig(
+    val panel: HTMLDivElement.() -> Unit
+)
 
 data class ListScreenConfig<T: HasProps<*, String>>(
     val title: String,
@@ -19,7 +27,8 @@ data class ListScreenConfig<T: HasProps<*, String>>(
     val view: (RootPanel, T, () -> Unit) -> Killable,
     val edit: (RootPanel, T, () -> Unit) -> Killable,
     val query: QueryWrap<T>,
-    val itemText: (T) -> String
+    val itemText: (T) -> String,
+    val filter: FilterConfig? = null
 )
 
 fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
@@ -36,6 +45,8 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
         }
 
         screenLayout(killables) {
+            val filterOpen = Var(false)
+
             top {
                 spinner.visibility.now = isBusy
                 backButton(close)
@@ -55,6 +66,21 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
                         innerText = this@build.title
                     }
                 }
+
+                if (filter != null) {
+                    tabs {
+                        faTab(
+                            Fa.filter,
+                            filterOpen
+                        ) {
+                            clickEvent {
+                                filterOpen.transform { act -> !act }
+                            }
+                        }
+                    }
+                }
+
+
                 right {
                     faButton(Fa.plus) {
                         cls {
@@ -68,9 +94,38 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
                 }
             }
             main {
-                val listRoot = RootPanel(this)
+                cls {
+                    flexColumn
+                }
+                if (filter != null) {
+                    div {
+                        cls {
+                            flexFixedSize()
+                            scrollVertical
+                            borderBottom
+                        }
 
-                killables += query.showClosableList(
+                        rxDisplayed(filterOpen)
+
+                        div {
+                            cls {
+                                p2
+                            }
+
+                            filter.panel(this)
+                        }
+                    }
+                }
+
+                div {
+                    cls {
+                        flexGrow1
+                        dFlex
+                        flexColumn
+                    }
+
+                    val listRoot = RootPanel(this)
+                    killables += query.showClosableList(
                         redisplay = { displayList() },
                         page = { item ->
                             { close  ->
@@ -95,6 +150,7 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
 
                         }
                     )
+                }
             }
         }
     }

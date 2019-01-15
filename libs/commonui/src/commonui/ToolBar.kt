@@ -25,7 +25,6 @@ class ToolBar private constructor(val element: HTMLDivElement, killables: Killab
         killables
     )
 
-
     val left =
         document.div {
             cls {
@@ -55,9 +54,6 @@ class ToolBar private constructor(val element: HTMLDivElement, killables: Killab
         }
     }
 
-
-
-
     val middle =
         element.div {
             flex()
@@ -76,6 +72,12 @@ class ToolBar private constructor(val element: HTMLDivElement, killables: Killab
     }
 
     val spinner = element.div {
+        cls {
+            dFlex
+            flexRow
+            alignItemsCenter
+        }
+
         div {
             cls {
                 m1

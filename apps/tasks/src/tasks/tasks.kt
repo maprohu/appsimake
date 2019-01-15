@@ -124,27 +124,31 @@ class LoggedIn(
                 main {
                     cls {
                         flexColumn
-                        p2
                         scrollVertical
                     }
 
                     div {
-                        cls.card
-                        div {
-                            cls.cardHeader
-                            innerText = "Recent"
+                        cls {
+                            p2
                         }
-                        val root = RootPanel(this)
+                        div {
+                            cls.card
+                            div {
+                                cls.cardHeader
+                                innerText = "Recent"
+                            }
+                            val root = RootPanel(this)
 
-                        val recentSeq = killables.seq()
-                        homeActive.forEach { ha ->
-                            if (ha) {
-                                recentSeq += recent(
-                                    ::showHome,
-                                    root
-                                )
-                            } else {
-                                recentSeq.clear()
+                            val recentSeq = killables.seq()
+                            homeActive.forEach { ha ->
+                                if (ha) {
+                                    recentSeq += recent(
+                                        ::showHome,
+                                        root
+                                    )
+                                } else {
+                                    recentSeq.clear()
+                                }
                             }
                         }
                     }
