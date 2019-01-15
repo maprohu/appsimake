@@ -12,13 +12,14 @@ import kotlin.browser.document
 
 
 fun LoggedIn.editTag(
+    killables: Killables,
     panel: RootPanel,
     tag: Tag,
     close: () -> Unit
-) : Killable {
+) {
     return EditScreenConfig<Tag>(
         "Tag"
-    ) { item, killables ->
+    ) { item, eks ->
         FormConfig {
             scrollForm {
                 formGroup("Tag Name") { lbl ->
@@ -30,13 +31,14 @@ fun LoggedIn.editTag(
                             widthAuto
                         }
                         type = "text"
-                        killables += textProp(item.name)
+                        eks += textProp(item.name)
                     }
                 }
             }
         }
 
     }.build(
+        killables,
         panel,
         tag,
         close,

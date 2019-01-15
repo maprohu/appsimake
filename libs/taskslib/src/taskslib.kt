@@ -18,7 +18,14 @@ enum class TaskStatus(val completed: Boolean) {
     New(false),
     Started(false),
     Completed(true),
-    Canceled(true)
+    Canceled(true);
+
+
+    companion object {
+        val byCompleted = values().groupBy { it.completed }
+
+
+    }
 }
 
 fun <T> List<T>.subs(min: Int, max: Int): List<List<T>> {
@@ -64,10 +71,10 @@ open class Task : Base<Task>() {
 
     val ts by o.scalar<Timestamp>().calculated { ops.serverTimestamp().toOptional().toLazy() }.prop()
     val completed by o.scalar<Boolean>().calculated {
-        status.current.now.map { s -> s.completed }.let(::lazyOf)
+        status.current().map { s -> s.completed }.let(::lazyOf)
     }.prop()
 
-    val tagsx by run {
+    val tagsx by
         o.array<String>().toSet()
             .calculated {
                 val t = tags.current()
@@ -76,16 +83,18 @@ open class Task : Base<Task>() {
                         ts
                             .sorted()
                             .subs(2, MaxTagIndexSize)
-                            .map { ids -> ids.joinToString(";") }
+                            .map { ids -> ids.multiTags }
                             .toSet()
                     }
                 }
             }
             .prop()
-    }
 
     companion object : Task()
 }
+
+val List<String>.multiTags
+    get() = joinToString(";")
 
 open class Tag : Base<Tag>() {
     val name by o.scalar<String>().prop()

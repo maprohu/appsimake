@@ -31,15 +31,15 @@ fun Element.hourglass(): HTMLDivElement {
 }
 
 fun showClosable(
-    page: (() -> Unit) -> Killable,
+    killables: Killables,
+    page: (Killables, close: () -> Unit) -> Unit,
     back: () -> Unit
-) : Killables {
-    val killables = Killables()
-    killables += page {
+) {
+    val ks = killables.killables()
+    page(ks) {
         back()
-        killables.kill()
+        ks.kill()
     }
-    return killables
 }
 
 

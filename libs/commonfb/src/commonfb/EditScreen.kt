@@ -71,13 +71,13 @@ data class EditScreenConfig<T: HasProps<*, String>>(
 )
 
 fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
+    killables: Killables,
     panel: RootPanel,
     item: T,
     close: () -> Unit,
     wrap: CollectionWrap<T>,
     db: Firestore
-): Killable {
-    val killables = Killables()
+) {
 
     item.props.rollback()
 
@@ -92,7 +92,7 @@ fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
     val docRef = Rx { idOpt().map { id -> wrap.doc(id).docRef(db) } }
     docRef.forEach { dro ->
         idListenerSeq += dro.map { dr ->
-            dr.onSnapshot { d ->
+            dr.onSnapshot {
                 isSaving.now = false
             }
         }.getOrDefault {}
@@ -218,8 +218,6 @@ fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
         }
 
     }
-
-    return killables
 }
 
 fun Element.scrollForm(fn: HTMLFormElement.() -> Unit) {

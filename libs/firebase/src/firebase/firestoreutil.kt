@@ -82,7 +82,7 @@ data class OnSnapshot(
 }
 
 fun <T> QueryWrap<T>.listen(
-    killables: Killables? = null,
+    killables: Killables,
     onFirst: () -> Unit = {},
     onError: (FirebaseError) -> Unit = { console.dir(it) }
 ): ListenableList<RxVal<T>> {
@@ -118,7 +118,7 @@ fun <T> QueryWrap<T>.listen(
 
             },
             onError
-    ).also { killables?.add(it) }
+    ).also { killables += it }
 
     return list
 }
@@ -142,7 +142,7 @@ data class ListenConfig<T>(
     val list: ListenableMutableList<T>,
     val create: (id: String, data: dynamic) -> T,
     val update: T.(dynamic) -> Unit,
-    val delete: (T) -> Unit,
+    val remove: (T) -> Unit,
     val onFirst: () -> Unit = {},
     val onError: (FirebaseError) -> Unit = { console.dir(it) }
 ) {
@@ -167,15 +167,19 @@ data class ListenConfig<T>(
             list,
             create = { id, d ->
                 create().also { t ->
-                    t.props.persisted(id)
-                    t.props.extractInitial(d)
+                    t.props.apply {
+                        persisted(id)
+                        extractInitial(d)
+                        live.now = true
+                    }
                 }
             },
             update = { d ->
                 this.props.extractInitial(d)
             },
-            delete = { t ->
-                t.props.deleted()
+            remove = { t ->
+                t.props.live.now = false
+//                t.props.deleted()
 //                t.props.resetInitial()
             }
 
@@ -185,8 +189,9 @@ data class ListenConfig<T>(
 
 
 fun <T> Query.listen(
+    killables: Killables,
     config: ListenConfig<T>
-): () -> Unit = with(config) {
+) = with(config) {
     require(list.isEmpty())
 
     var onNext: (QuerySnapshot) -> Unit
@@ -201,7 +206,9 @@ fun <T> Query.listen(
                         list.add(dc.newIndex, create(dc.doc.id, dc.doc.data()))
                     }
                     DocumentChangeType.removed -> {
-                        delete(list.removeAt(dc.oldIndex))
+//                        console.dir(dc)
+                        remove(list.removeAt(dc.oldIndex))
+                        list.removeAt(dc.oldIndex)
                     }
                     DocumentChangeType.modified -> {
                         update(list[dc.oldIndex], dc.doc.data())
@@ -221,8 +228,6 @@ fun <T> Query.listen(
     }
 
 
-    val killables = Killables()
-
     killables += onSnapshot(
         { qs ->
             onNext(qs)
@@ -230,7 +235,6 @@ fun <T> Query.listen(
         onError
     )
 
-    return { killables.kill() }
 }
 
 //class DocItem<T>(
@@ -270,8 +274,12 @@ fun launch(fn: suspend () -> Unit) {
 class QueryBuilder<T>(
     var query : Query
 ) {
+    infix fun <P> ScalarProp<T, Set<P>>.arrayContains(v: P) {
+        // TODO fix this. introduce collection property
+        query = query.where(name, "array-contains", write(setOf(v)).unsafeCast<Array<dynamic>>().first())
+    }
     infix fun <P> ScalarProp<T, P>.eq(v: P) {
-        query = query.where(name, "==", v)
+        query = query.where(name, "==", write(v))
     }
     fun <P> ScalarProp<T, P>.asc() {
         query = query.orderBy(name)
@@ -281,9 +289,10 @@ class QueryBuilder<T>(
     }
 }
 fun <T> CollectionWrap<T>.query(db: Firestore, fn:  QueryBuilder<T>.() -> Unit = {}): QueryWrap<T> {
-    return QueryBuilder<T>(db.collection(path)).apply(fn).query.wrap()
+    return QueryBuilder<T>(db.collection(path)).apply(fn).wrap()
 }
 
+fun <T> QueryBuilder<T>.wrap() = query.wrap<T>()
 fun <T> Query.wrap() = QueryWrap<T>(this)
 
 class QueryWrap<in T>(
@@ -302,12 +311,17 @@ fun <T: HasProps<*, String>> T.onSnapshot(d: DocumentSnapshot) {
 fun <T: HasProps<*, String>> DocumentReference.listen(
     target: T
 ) : Killable {
-    return Killable.once(
-        onSnapshot { d ->
-            target.onSnapshot(d)
-        }
-    )
+    require(!target.props.live.now)
+    target.props.live.now = true
 
+    val killSnapshot = onSnapshot { d ->
+        target.onSnapshot(d)
+    }
+
+    return Killable.once {
+        killSnapshot()
+        target.props.live.now = false
+    }
 }
 
 fun DocWrap<*, *>.docRef(db: Firestore = firestore()) = db.doc(path)

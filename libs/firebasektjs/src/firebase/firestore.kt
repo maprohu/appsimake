@@ -106,7 +106,7 @@ open external class Query {
     fun where(
         fieldPath: String,
         opStr: String,
-        value: Any?
+        value: dynamic
     ) : Query
 
     fun get(options: GetOptions = definedExternally) : Promise<QuerySnapshot>

@@ -69,6 +69,8 @@ open class ScalarProp<in O, T>(
         ops.registry.register(this)
     }
 
+    fun write(v: T) = ops.write(v)
+
     data class Ops<in O, T>(
         val registry: PropRegsitry<O>,
         val ignoreDirty: Boolean = false,
@@ -243,6 +245,8 @@ class Props<in O, I> : PropTasks<O> {
     fun persisted(idv: I) {
         id.now = Some(IdState(idv))
     }
+
+    val live = Var(false)
 
     fun deleted() {
         id.transform { i -> i.map { s -> s.copy(exists = false) } }

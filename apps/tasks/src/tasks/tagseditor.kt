@@ -2,7 +2,9 @@ package tasks
 
 import bootstrap.*
 import common.*
-import commonfb.scrollForm
+import commonui.RootPanel
+import commonui.faButton
+import commonui.screenLayout
 import domx.*
 import fontawesome.*
 import killable.Killables
@@ -21,6 +23,73 @@ fun LoggedIn.tagsEditor(
     item: Task,
     killables: Killables
 ): HTMLDivElement {
+    val tagsRx = Var(item.tags.current.now.orEmpty())
+    tagsRx.forEachLater {
+        item.tags.current.now = Some(it)
+    }
+
+    return tagsSelector(
+        killables = killables,
+        tags = tagsRx,
+        create = true
+    )
+}
+
+fun LoggedIn.selectTags(
+    killables: Killables,
+    panel: RootPanel,
+    tags: Var<Set<String>>,
+    close: (Boolean) -> Unit
+) {
+    panel.newRoot {
+        screenLayout(killables) {
+            top {
+                left {
+                    cls {
+                        m1
+                        btnGroup
+                    }
+                    faButton(Fa.check) {
+                        cls {
+                            btnSuccess
+                        }
+                        clickEvent {
+                            close(true)
+                        }
+                    }
+                    faButton(Fa.times) {
+                        cls {
+                            btnDanger
+                        }
+                        clickEvent {
+                            close(false)
+                        }
+                    }
+                }
+
+                middleTitle {
+                    innerText = "Select Tags"
+                }
+            }
+
+            main {
+                tagsSelector(
+                    killables,
+                    tags,
+                    false
+                ).also { appendChild(it) }
+            }
+
+        }
+    }
+
+}
+
+fun LoggedIn.tagsSelector(
+    killables: Killables,
+    tags: Var<Set<String>>,
+    create: Boolean
+): HTMLDivElement {
     return document.div {
         cls {
             flexGrow1
@@ -29,10 +98,11 @@ fun LoggedIn.tagsEditor(
         }
 
         val clearFilter = Listeners()
-        val filterInput = Var("")
-        val isFiltered = Rx { filterInput().isNotBlank() }
+//        val filterTextInward = Var("")
+        val filterTextOutward = Var("")
+        val isFiltered = Rx { filterTextOutward().isNotBlank() }
         val tagNameSet = tagSource.tagNameSet.get(killables)
-        val isNewTag = Rx { isFiltered() && filterInput() !in tagNameSet() }
+        val isNewTag = Rx { isFiltered() && filterTextOutward() !in tagNameSet() }
         val isBusy = Var(false)
         val addTagEnabled = Rx { !isBusy() && isNewTag() }
 
@@ -47,22 +117,23 @@ fun LoggedIn.tagsEditor(
                     inputGroup
                     widthAuto
                 }
-                val tag = input {
+                input {
                     cls {
                         formControl
                         widthAuto
-                        placeholder = "filter or create tag..."
+                        placeholder = if (create) "filter or create tag..." else "filter tags..."
                     }
                     type = "text"
                     rxClass(Cls.borderWarning, isFiltered)
                     fun extract() {
-                        filterInput.now = value
+                        filterTextOutward.now = value
                     }
 
                     clearFilter += {
                         value = ""
                         extract()
                     }
+
                     inputEvent { extract() }
                 }
                 div {
@@ -80,39 +151,42 @@ fun LoggedIn.tagsEditor(
                             clearFilter.fire()
                         }
                     }
-                    button {
-                        cls {
-                            btn
-                            btnOutlineSecondary
-                        }
-                        span {
+                    if (create) {
+                        button {
                             cls {
-                                spinnerBorder
-                                spinnerBorderSm
+                                btn
+                                btnOutlineSecondary
                             }
-                            rxDisplayed(isBusy)
-                        }
-                        span {
-                            cls {
-                                fa {
-                                    plus
+                            span {
+                                cls {
+                                    spinnerBorder
+                                    spinnerBorderSm
+                                }
+                                rxDisplayed(isBusy)
+                            }
+                            span {
+                                cls {
+                                    fa {
+                                        plus
+                                    }
+                                }
+                                rxDisplayed { !isBusy() }
+                            }
+                            rxEnabled(addTagEnabled)
+                            clickEvent {
+                                if (addTagEnabled.now) {
+                                    isBusy.now = true
+                                    val v = filterTextOutward.now
+                                    clearFilter.fire()
+                                    GlobalScope.launch {
+                                        val tv = tagSource.byName(v)
+                                        tags.transform { ts -> ts + tv.now.props.idOrFail }
+                                        isBusy.now = false
+                                    }
                                 }
                             }
-                            rxDisplayed { !isBusy() }
                         }
-                        rxEnabled(addTagEnabled)
-                        clickEvent {
-                            if (addTagEnabled.now) {
-                                isBusy.now = true
-                                val v = tag.value
-                                tag.value = ""
-                                GlobalScope.launch {
-                                    val tv = tagSource.byName(v)
-                                    item.tags.current.add(tv.now.props.idOrFail)
-                                    isBusy.now = false
-                                }
-                            }
-                        }
+
                     }
                 }
             }
@@ -140,19 +214,30 @@ fun LoggedIn.tagsEditor(
                 mapper = { tag, ks ->
                     val tagId = tag.props.idOrFail
                     val nrx = Rx { tag.name.initial().orEmpty() }.also { ks += it }
-                    val selected = Rx { tagId in item.tags.current().orEmpty() }.also { ks += it }
+                    val selected = Rx { tagId in tags() }.also { ks += it }
+
+                    fun click() {
+                        if (selected.now) tags.transform { s -> s - tagId }
+                        else tags.transform { s -> s + tagId }
+                    }
 
                     TagNode(
                         tag,
                         nrx,
                         selected,
-                        document.listGroupItem {
+                        document.a {
                             cls {
+                                listGroupItem
+                                listGroupItemAction
                                 dFlex
                                 flexRow
                                 py1
                                 px2
                                 alignItemsCenter
+                            }
+                            href = "#"
+                            clickEvent {
+                                click()
                             }
                             div {
                                 cls {
@@ -193,8 +278,7 @@ fun LoggedIn.tagsEditor(
                                     }
                                 }
                                 clickEvent {
-                                    if (selected.now) item.tags.current.remove(tagId)
-                                    else item.tags.current.add(tagId)
+//                                    click()
                                 }
                             }
                         }
@@ -211,15 +295,16 @@ fun LoggedIn.tagsEditor(
                     list = sorted,
                     killables = killables,
                     filterKey = { item, _ -> item.nrx },
-                    input = filterInput,
+                    input = filterTextOutward,
                     filter = { name, filter ->
                         filterTag(name = name, filter = filter)
                     }
                 ).build()
             }
 
-            listGroup {
+            div {
                 cls {
+                    listGroup
                     listGroupFlush
                     borderBottom
                 }

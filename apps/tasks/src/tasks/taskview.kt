@@ -2,45 +2,37 @@ package tasks
 
 import bootstrap.*
 import common.ListenableMutableList
-import common.orEmpty
-import common.removeFromParent
 import commonfb.*
 import commonui.RootPanel
-import commonui.faButton
-import commonui.screenLayout
 import domx.cls
 import domx.*
-import firebase.firestore.query
-import fontawesome.Fa
-import fontawesome.pen
-import killable.Killable
-import killable.KillableSeq
 import killable.Killables
+import org.w3c.dom.Element
+import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLSpanElement
+import org.w3c.dom.Node
 import rx.diffs
 import styles.fontSize100
-import styles.scrollVertical
-import taskslib.Note
 import taskslib.Task
-import taskslib.notes
 
 fun LoggedIn.viewTask(
+    killables: Killables,
     panel: RootPanel,
     task: Task,
     close: () -> Unit
-) : Killable {
-    return ViewScreenConfig(
+) {
+    ViewScreenConfig(
         "Task",
         ::editTask
-    ) { item ->
-        val killables = Killables()
+    ) { vks, item ->
         scrollPanel {
             cls {
                 dFlex
                 flexColumn
             }
-            killables += viewTextField("Title") { item.title.initial() }
-            killables += viewTextField("Text") { item.text.initial() }
-            killables += viewTextField("Status") { item.status.initial().map { it.name } }
+            vks += viewTextField("Title") { item.title.initial() }
+            vks += viewTextField("Text") { item.text.initial() }
+            vks += viewTextField("Status") { item.status.initial().map { it.name } }
 
             viewFieldLabel("Tags")
             div {
@@ -50,27 +42,37 @@ fun LoggedIn.viewTask(
                     diff.added.forEach { list.add(it) }
                 }
 
-                listenableList(list, killables) { id, ks ->
+                listenableList(list, vks) { id, ks ->
                     span {
-                        cls {
-                            m1
-                            badge
-                            badgeSecondary
-                            fontSize100
-                        }
-                        ks += rxText {
-                            tagSource.tag(id)().name.initial().getOrElse { id }
-                        }
+                        tagBadge(ks, id, tagSource)
                     }
                 }
 
             }
 
         }
-        killables
     }.build(
+        killables,
         panel,
         task,
         close
     )
 }
+
+fun HTMLElement.tagBadge(
+    ks: Killables,
+    tagId: String,
+    tagSource: TagSource
+) {
+    cls {
+        m1
+        badge
+        badgePill
+        badgeSecondary
+        fontSize100
+    }
+    ks += rxText {
+        tagSource.tag(tagId)().name.initial().getOrElse { tagId }
+    }
+}
+

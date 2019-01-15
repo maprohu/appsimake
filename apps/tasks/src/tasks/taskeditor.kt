@@ -21,15 +21,16 @@ import kotlin.browser.document
 
 
 fun LoggedIn.editTask(
+    killables: Killables,
     panel: RootPanel,
     task: Task,
     close: () -> Unit
-) : Killable {
-    return EditScreenConfig<Task>(
+) {
+    EditScreenConfig<Task>(
         "Task"
-    ) { item, killables ->
+    ) { item, eks ->
         tabsConfig(
-            killables,
+            eks,
             listOf(
                 TabConfig(Fa.list) {
                     document.div {
@@ -49,7 +50,7 @@ fun LoggedIn.editTask(
                                         widthAuto
                                     }
                                     type = "text"
-                                    killables += textProp(item.title)
+                                    eks += textProp(item.title)
                                 }
                             }
 
@@ -63,7 +64,7 @@ fun LoggedIn.editTask(
                                         widthAuto
                                     }
                                     rows = 5
-                                    killables += textProp(item.text)
+                                    eks += textProp(item.text)
                                 }
 
                             }
@@ -75,7 +76,7 @@ fun LoggedIn.editTask(
                                         customSelect
                                         widthAuto
                                     }
-                                    killables += enumProp(item.status)
+                                    eks += enumProp(item.status)
                                 }
                             }
                         }
@@ -90,6 +91,7 @@ fun LoggedIn.editTask(
             )
         )
     }.build(
+        killables,
         panel,
         task,
         close,

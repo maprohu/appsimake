@@ -405,9 +405,6 @@ fun Element.formCheck() {
 fun Element.formCheckInput() {
     classes += "form-check-input"
 }
-fun Element.btnGroup() {
-    classes += "btn-group"
-}
 fun Element.dropdownMenu() {
     classes += "dropdown-menu"
 }
@@ -481,10 +478,12 @@ val Cls.btnGroup by css()
 val Cls.btnGroupVertical by css()
 val Cls.btnToolbar by css()
 val Cls.btnSecondary by css()
+val Cls.btnSuccess by css()
 val Cls.btnPrimary by css()
 val Cls.btnDanger by css()
 val Cls.btn by css()
 val Cls.btnOutlineSecondary by css()
+val Cls.dBlock by css()
 val Cls.dFlex by css()
 val Cls.flexRow by css()
 val Cls.flexColumn by css()
@@ -498,6 +497,7 @@ val Cls.alignItemsCenter by css()
 val Cls.alignItemsStretch by css()
 val Cls.listGroup by css()
 val Cls.listGroupItem by css()
+val Cls.listGroupItemAction by css()
 val Cls.listGroupFlush by css()
 val Cls.navbarBrand by css()
 val Cls.formInline by css()
@@ -516,6 +516,7 @@ val Cls.dropdownItem by css()
 val Cls.customSelect by css()
 val Cls.fontWeightBold by css()
 val Cls.badge by css()
+val Cls.badgePill by css()
 val Cls.badgePrimary by css()
 val Cls.badgeSecondary by css()
 val Cls.navTabs by css()

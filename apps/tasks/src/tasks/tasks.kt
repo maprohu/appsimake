@@ -85,19 +85,21 @@ class LoggedIn(
                             }
                             faButton(Fa.plus) {
                                 cls.btnPrimary
-                                killables += clickEventSeq {
+                                killables += clickEventSeq { ks, _ ->
                                     showClosable(
-                                        { close -> editTask(root.sub(), Task(), close = close) },
+                                        ks,
+                                        { pks, close -> editTask(pks, root.sub(), Task(), close = close) },
                                         ::showHome
                                     )
                                 }
                             }
                             faButton(Fa.search) {
                                 cls.btnPrimary
-                                killables += clickEventSeq {
+                                killables += clickEventSeq { ks, _ ->
                                     homeActive.now = false
                                     showClosable(
-                                        { close -> listTasks(root.sub(), close) },
+                                        ks,
+                                        { pks, close -> listTasks(pks, root.sub(), close) },
                                         ::showHome
                                     )
                                 }
@@ -108,9 +110,10 @@ class LoggedIn(
                                     dropdownItemAnchor {
                                         icon.cls.fa.tags
                                         text.innerText = "Tags"
-                                        killables += anchor.clickEventSeq {
+                                        killables += anchor.clickEventSeq { ks, _ ->
                                             showClosable(
-                                                { c -> listTags(root.sub(), c) },
+                                                ks,
+                                                { pks, c -> listTags(pks, root.sub(), c) },
                                                 ::showHome
                                             )
                                         }
@@ -142,9 +145,10 @@ class LoggedIn(
                             val recentSeq = killables.seq()
                             homeActive.forEach { ha ->
                                 if (ha) {
-                                    recentSeq += recent(
+                                    recent(
                                         ::showHome,
-                                        root
+                                        root,
+                                        recentSeq.killables()
                                     )
                                 } else {
                                     recentSeq.clear()
@@ -169,31 +173,37 @@ class LoggedIn(
 
 fun LoggedIn.recent(
     redisplay: () -> Unit,
-    panel: RootPanel
-): () -> Unit {
-    return userTasks
-        .query(db) {
-            Task.completed eq false
-            Task.ts.desc()
-        }
-        .showClosableList(
-            redisplay = redisplay,
-            page = { dit -> { close -> viewTask(root.sub(), dit, close )}},
-            config = { onClick ->
-                ListUIConfig(
-                    panel,
-                    create = { Task() },
-                    hourglassDecor = { cls.cardBody },
-                    emptyDivDecor = { cls.cardBody },
-                    listDivDecor = {},
-                    ulDecor = { cls.listGroupFlush },
-                    itemFactory = stringListClick(
-                        { it.title.initial().orEmpty() },
-                        onClick
-                    )
+    panel: RootPanel,
+    killables: Killables
+) {
+    showClosableList<Task>(
+        killables = killables,
+        redisplay = redisplay,
+        page = { ks, dit, close ->
+            dit.keepAlive(ks, userTasks, db)
+            viewTask(ks, root.sub(), dit, close )
+        },
+        config = { onClick ->
+            ListUIConfig(
+                root = panel,
+                query = Var(
+                     userTasks.query(db) {
+                        Task.completed eq false
+                        Task.ts.desc()
+                    }
+                ),
+                create = { Task() },
+                hourglassDecor = { cls.cardBody },
+                emptyDivDecor = { cls.cardBody },
+                listDivDecor = {},
+                ulDecor = { cls.listGroupFlush },
+                itemFactory = stringListClick(
+                    { it.title.initial().orEmpty() },
+                    onClick
                 )
-            }
-        )
+            )
+        }
+    )
 }
 
 

@@ -74,12 +74,11 @@ fun GlobalEventHandlers.clickEvent(fn: (MouseEvent) -> Unit) {
     }
 }
 
-fun GlobalEventHandlers.clickEventSeq(fn: (MouseEvent) -> Killable): KillableSeq {
+fun GlobalEventHandlers.clickEventSeq(fn: (Killables, MouseEvent) -> Unit): KillableSeq {
     val seq = KillableSeq()
     onclick = {
         it.preventDefault()
-        seq += fn(it as MouseEvent)
-        Unit
+        fn(seq.killables(), it as MouseEvent)
     }
     return seq
 }

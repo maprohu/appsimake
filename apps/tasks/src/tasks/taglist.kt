@@ -13,18 +13,27 @@ import rx.Var
 import taskslib.Tag
 import taskslib.Task
 
-fun LoggedIn.listTags(panel: RootPanel, after: () -> Unit) : Killable {
-    return ListScreenConfig(
+fun LoggedIn.listTags(
+    killables: Killables,
+    panel: RootPanel,
+    after: () -> Unit
+) {
+    ListScreenConfig(
         "Tags",
         { Tag() },
-        ::viewTag,
+        userTags,
         ::editTag,
-        userTags.query(db) {
-            Tag.name.asc()
-        },
-        { it.name.initial().orEmpty() }
+        ::editTag,
+        { it.name.initial().orEmpty() },
+        filter = FilterConfig.of(
+            userTags.query(db) {
+                Tag.name.asc()
+            }
+        )
     ).build(
+        killables,
         panel,
+        db,
         after
     )
 }

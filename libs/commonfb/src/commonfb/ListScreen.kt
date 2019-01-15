@@ -1,12 +1,16 @@
 package commonfb
 
 import bootstrap.*
+import commonlib.CollectionWrap
 import commonui.RootPanel
 import commonui.faButton
 import commonui.faTab
 import commonui.screenLayout
 import domx.*
+import firebase.firestore.Firestore
+import firebase.firestore.QueryBuilder
 import firebase.firestore.QueryWrap
+import firebase.firestore.wrap
 import firebaseshr.HasProps
 import fontawesome.Fa
 import fontawesome.filter
@@ -14,35 +18,53 @@ import fontawesome.plus
 import killable.Killable
 import killable.Killables
 import org.w3c.dom.HTMLDivElement
+import rx.RxIface
 import rx.Var
 import styles.scrollVertical
 
-data class FilterConfig(
+class FilterConfig<T>(
+    val query: RxIface<QueryWrap<T>>,
+    val filter: Boolean = true,
     val panel: HTMLDivElement.() -> Unit
-)
+) {
+    companion object {
+
+        @Suppress("RedundantLambdaArrow")
+        fun <T> of(queryWrap: QueryWrap<T>) = { _:Killables, _:() -> Unit ->
+            FilterConfig(
+                query = Var(queryWrap),
+                filter = false,
+                panel = {}
+            )
+        }
+
+    }
+}
 
 data class ListScreenConfig<T: HasProps<*, String>>(
     val title: String,
     val create: () -> T,
-    val view: (RootPanel, T, () -> Unit) -> Killable,
-    val edit: (RootPanel, T, () -> Unit) -> Killable,
-    val query: QueryWrap<T>,
+    val collection: CollectionWrap<T>,
+    val view: (Killables, RootPanel, T, () -> Unit) -> Unit,
+    val edit: (Killables, RootPanel, T, () -> Unit) -> Unit,
     val itemText: (T) -> String,
-    val filter: FilterConfig? = null
+    val filter: (Killables, redisplay: () -> Unit) -> FilterConfig<T>
 )
 
 fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
+    killables: Killables,
     panel: RootPanel,
+    db: Firestore,
     close: () -> Unit
-) : Killable {
+) {
 
     val isBusy = Var(false)
-    val killables = Killables()
 
     panel.newRoot {
         fun displayList() {
             panel.setRoot(this)
         }
+        val filterConfig = filter(killables, ::displayList)
 
         screenLayout(killables) {
             val filterOpen = Var(false)
@@ -67,7 +89,8 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
                     }
                 }
 
-                if (filter != null) {
+
+                if (filterConfig.filter) {
                     tabs {
                         faTab(
                             Fa.filter,
@@ -87,8 +110,8 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
                             m1
                             btnPrimary
                         }
-                        killables += clickEventSeq {
-                            edit(panel.sub(), create(), ::displayList)
+                        killables += clickEventSeq { ks, _ ->
+                            edit(ks, panel.sub(), create(), ::displayList)
                         }
                     }
                 }
@@ -97,7 +120,7 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
                 cls {
                     flexColumn
                 }
-                if (filter != null) {
+                if (filterConfig.filter) {
                     div {
                         cls {
                             flexFixedSize()
@@ -112,7 +135,7 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
                                 p2
                             }
 
-                            filter.panel(this)
+                            filterConfig.panel(this)
                         }
                     }
                 }
@@ -125,21 +148,28 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
                     }
 
                     val listRoot = RootPanel(this)
-                    killables += query.showClosableList(
+                    showClosableList<T>(
+                        killables,
                         redisplay = { displayList() },
-                        page = { item ->
-                            { close  ->
-                                view(panel.sub(), item, close)
-                            }
+                        page = { ks, item, close ->
+                            item.keepAlive(ks, collection, db)
+                            view(ks, panel.sub(), item, close)
                         },
-                        config = {  show ->
+                        config = { show ->
                             ListUIConfig(
                                 root = listRoot,
+                                query = filterConfig.query,
                                 create = create,
+                                listDivDecor = {
+                                    cls {
+                                        scrollVertical
+                                        bgLight
+                                    }
+                                },
                                 ulDecor = {
                                     cls {
-                                        listGroupFlush
-                                        borderBottom
+                                        m2
+                                        dBlock
                                     }
                                 },
                                 itemFactory = stringListClick(
@@ -155,5 +185,4 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
         }
     }
 
-    return killables
 }

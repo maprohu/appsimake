@@ -74,10 +74,10 @@ class TagSource(
             )
         )
 
-        killables += ListenConfig.hasProps(
+        ListenConfig.hasProps(
             list
         ) { Tag() }.let { c ->
-            wrap.query(db).query.listen(c)
+            wrap.query(db).query.listen(killables, c)
         }
     }
 

@@ -145,5 +145,6 @@ fun <T : Any> T?.toOptional(): Optional<T> = if (this == null) None else Some(th
 
 fun Optional<String>.orEmpty() = getOrDefault("")
 operator fun <T> Optional<Set<T>>.plus(item: T) = map { it + item }.orElse { Some(setOf(item)) }
+fun <T> Optional<Set<T>>.orEmpty() = getOrDefault(emptySet())
 fun <T> Optional<Collection<T>>.orEmpty() = getOrDefault(emptyList())
 

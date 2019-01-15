@@ -19,18 +19,17 @@ import styles.scrollVertical
 
 data class ViewScreenConfig<T: HasProps<*, String>>(
     val title: String,
-    val edit: (RootPanel, T, () -> Unit) -> Killable,
-    val view: HTMLDivElement.(T) -> Killable
+    val edit: (Killables, RootPanel, T, () -> Unit) -> Unit,
+    val view: HTMLDivElement.(Killables, T) -> Unit
 
 )
 
 fun <T: HasProps<*, String>> ViewScreenConfig<T>.build(
+    killables: Killables,
     panel: RootPanel,
     item: T,
     close: () -> Unit
-): Killable {
-
-    val killables = Killables()
+) {
 
     panel.newRoot {
         fun displayViewer() {
@@ -48,20 +47,19 @@ fun <T: HasProps<*, String>> ViewScreenConfig<T>.build(
                             m1
                             btnPrimary
                         }
-                        clickEventSeq {
-                            edit(panel.sub(), item, ::displayViewer)
+                        clickEventSeq { ks, _ ->
+                            edit(ks, panel.sub(), item, ::displayViewer)
                         }
                     }
                 }
             }
             main {
-                killables += view(this, item)
+                view(this, killables, item)
             }
 
         }
     }
 
-    return killables
 }
 
 

@@ -2,6 +2,7 @@ package commonfb
 
 import bootstrap.*
 import common.ListenableMutableList
+import commonlib.CollectionWrap
 import commonui.RootPanel
 import commonui.showClosable
 import domx.*
@@ -13,6 +14,7 @@ import killable.Killables
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLUListElement
 import org.w3c.dom.Node
+import rx.RxIface
 import styles.scrollVertical
 import kotlin.browser.document
 
@@ -31,6 +33,7 @@ fun <T> stringListClick(
 
 data class ListUIConfig<T: HasProps<*, String>>(
     val root: RootPanel,
+    val query: RxIface<QueryWrap<T>>,
     val create: () -> T,
     val hourglassDecor: HTMLDivElement.() -> Unit = {},
     val emptyDivDecor : HTMLDivElement.() -> Unit = { cls.flexGrow1 },
@@ -39,55 +42,71 @@ data class ListUIConfig<T: HasProps<*, String>>(
     val itemFactory: (T) -> Node
 )
 
-fun <T: HasProps<*, String>> QueryWrap<T>.listUI(
+fun <T: HasProps<*, String>> listUI(
+    killables: Killables,
     config: ListUIConfig<T>
-): () -> Unit = with(config) {
-    root.setHourglass().apply(hourglassDecor)
+) {
+    with(config) {
 
-    val list = ListenableMutableList<T>()
 
-    val emptyDiv = document.column {
-        cls {
-            flexCenter()
+        val emptyDiv = document.column {
+            cls {
+                flexCenter()
+            }
+            emptyDivDecor()
+            span {
+                innerText = "The list is empty"
+            }
         }
-        emptyDivDecor()
-        span {
-            innerText = "The list is empty"
-        }
-    }
 
-    val listDiv = document.column {
-        listDivDecor()
-        listGroup {
-            ulDecor()
-            listenableList(list, itemFactory)
-        }
-    }
 
-    query.listen(
-        hasProps(
-            list,
-            create = create
-        ).copy(
-            onFirst = {
-                list.isEmptyRx.forEach { empty ->
-                    root.setRoot(
-                        if (empty) emptyDiv else listDiv
-                    )
+        killables += query.fold(Killable.empty) { old, q ->
+            old.kill()
+
+            val queryRoot = root.sub()
+            queryRoot.setHourglass().apply(hourglassDecor)
+
+            val ks = killables.killables()
+
+            val list = ListenableMutableList<T>()
+
+            val listDiv = document.column {
+                listDivDecor()
+                listGroup {
+                    ulDecor()
+                    listenableList(list, itemFactory)
                 }
             }
-        )
-    )
+
+            q.query.listen(
+                ks,
+                hasProps(
+                    list,
+                    create = create
+                ).copy(
+                    onFirst = {
+                        ks += list.isEmptyRx.forEach { empty ->
+                            queryRoot.setRoot(
+                                if (empty) emptyDiv else listDiv
+                            )
+                        }
+                    }
+                )
+            )
+
+            ks
+        }
+
+    }
 }
 
-fun <T: HasProps<*, String>> QueryWrap<T>.showClosableList(
+fun <T: HasProps<*, String>> showClosableList(
+    killables: Killables,
     redisplay: () -> Unit,
-    page: (T) -> (() -> Unit) -> Killable,
+    page: (Killables, T, close: () -> Unit) -> Unit,
     config: (show: (T) -> Unit) -> ListUIConfig<T>
-) : () -> Unit {
-
-    val listKills = Killables()
-    val viewSeq = listKills.seq()
+) {
+    val viewSeq = killables.seq()
 
     val onClick: (T) -> Unit = { dit ->
 
@@ -98,8 +117,9 @@ fun <T: HasProps<*, String>> QueryWrap<T>.showClosableList(
             viewKills.kill()
         }
 
-        viewKills += showClosable(
-            page(dit),
+        showClosable(
+            viewKills,
+            { ks, close -> page(ks, dit, close) },
             ::close
         )
         viewKills += dit.props.onDeleted.add {
@@ -107,8 +127,25 @@ fun <T: HasProps<*, String>> QueryWrap<T>.showClosableList(
         }
     }
 
-    listKills += listUI(config(onClick))
+    listUI(killables, config(onClick))
+}
 
-    return listKills::kill
+fun <T: HasProps<*, String>> T.keepAlive(
+    killables: Killables,
+    coll: CollectionWrap<T>,
+    db: Firestore
+) {
+    val killListen = Killables()
+    val killForeach = props.live.forEach { alive ->
+        if (!alive) {
+            killListen += coll.doc(id = props.idOrFail).docRef(db).listen(this)
+        }
+    }
+
+    // Kill order may be important
+    killables += {
+        killForeach.kill()
+        killListen.kill()
+    }
 }
 
