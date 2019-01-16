@@ -206,9 +206,7 @@ fun <T> Query.listen(
                         list.add(dc.newIndex, create(dc.doc.id, dc.doc.data()))
                     }
                     DocumentChangeType.removed -> {
-//                        console.dir(dc)
                         remove(list.removeAt(dc.oldIndex))
-                        list.removeAt(dc.oldIndex)
                     }
                     DocumentChangeType.modified -> {
                         update(list[dc.oldIndex], dc.doc.data())

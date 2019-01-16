@@ -45,21 +45,10 @@ fun LoggedIn.selectTags(
         screenLayout(killables) {
             top {
                 left {
-                    cls {
-                        m1
-                        btnGroup
-                    }
-                    faButton(Fa.check) {
-                        cls {
-                            btnSuccess
-                        }
-                        clickEvent {
-                            close(true)
-                        }
-                    }
                     faButton(Fa.times) {
                         cls {
-                            btnDanger
+                            m1
+                            btnSecondary
                         }
                         clickEvent {
                             close(false)
@@ -69,6 +58,19 @@ fun LoggedIn.selectTags(
 
                 middleTitle {
                     innerText = "Select Tags"
+                }
+
+                right {
+                    faButton(Fa.check) {
+                        cls {
+                            m1
+                            btnSuccess
+                        }
+                        clickEvent {
+                            close(true)
+                        }
+                    }
+
                 }
             }
 

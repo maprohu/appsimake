@@ -298,7 +298,7 @@ class NodeExt(
 
     fun updateChildren(): ChildRole? {
         val lastKnownVisibleChildExt = lastKnownChild.previousChain().find { it.isDisplayed }
-        val firstUnknownChild = lastKnownVisibleChildExt?.owner ?: owner.firstChild
+        val firstUnknownChild = lastKnownVisibleChildExt?.owner?.nextSibling ?: owner.firstChild
 
         firstUnknownChild.nextSeq().forEach {
             lastKnownChild = it.nodeExt.makeChild(this, lastKnownChild)
@@ -339,7 +339,7 @@ fun Node.rxDisplayed(fn: () -> Boolean): Killable {
 fun Node.rxDisplayed(rxv: RxVal<Boolean>): Killable {
     val parent = parentNode!!
     val parentNodeExt = parent.nodeExt
-    parentNodeExt.updateChildren()!!
+    parentNodeExt.updateChildren()
     val childRole = nodeExt.asChild()
     require(childRole.parent.owner == parent)
     return rxv.forEach {  v ->

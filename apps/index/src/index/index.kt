@@ -7,6 +7,7 @@ import bootstrap.padding2
 import commonui.AppCtx
 import commonui.screenLayout
 import commonui.topbar
+import domx.invoke
 import killable.Killables
 import kotlin.browser.document
 
@@ -23,7 +24,7 @@ fun main(args: Array<String>) {
                 }
             }
 
-            main {
+            this.main {
                 flexColumn()
                 padding2()
                 listGroup {

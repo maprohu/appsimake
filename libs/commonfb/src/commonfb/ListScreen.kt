@@ -1,6 +1,7 @@
 package commonfb
 
 import bootstrap.*
+import commonfb.ListUIConfig.Companion.standardEmptyDiv
 import commonlib.CollectionWrap
 import commonui.RootPanel
 import commonui.faButton

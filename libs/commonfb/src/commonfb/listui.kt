@@ -35,12 +35,27 @@ data class ListUIConfig<T: HasProps<*, String>>(
     val root: RootPanel,
     val query: RxIface<QueryWrap<T>>,
     val create: () -> T,
-    val hourglassDecor: HTMLDivElement.() -> Unit = {},
-    val emptyDivDecor : HTMLDivElement.() -> Unit = { cls.flexGrow1 },
+    val hourglassDecor: HTMLDivElement.() -> Unit = { cls.m2 },
+    val emptyDivDecor : HTMLDivElement.() -> Unit = standardEmptyDiv,
     val listDivDecor : HTMLDivElement.() -> Unit = { cls.scrollVertical; cls.flexGrow1 },
     val ulDecor: HTMLUListElement.() -> Unit = {},
     val itemFactory: (T) -> Node
-)
+) {
+    companion object {
+
+        val standardEmptyDiv: HTMLDivElement.() -> Unit = {
+            cls {
+                flexCenter()
+                flexGrow1
+                p1
+            }
+            span {
+                innerText = "The list is empty"
+            }
+        }
+
+    }
+}
 
 fun <T: HasProps<*, String>> listUI(
     killables: Killables,
@@ -48,13 +63,7 @@ fun <T: HasProps<*, String>> listUI(
 ) {
     with(config) {
         val emptyDiv = document.column {
-            cls {
-                flexCenter()
-            }
             emptyDivDecor()
-            span {
-                innerText = "The list is empty"
-            }
         }
 
         killables += query.fold(Killable.empty) { old, q ->

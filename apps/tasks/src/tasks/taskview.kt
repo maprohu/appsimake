@@ -13,12 +13,8 @@ import domx.*
 import firebase.firestore.query
 import fontawesome.Fa
 import fontawesome.comment
-import fontawesome.comments
 import killable.Killables
-import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.HTMLSpanElement
-import org.w3c.dom.Node
 import rx.Var
 import rx.diffs
 import styles.fontSize100
@@ -84,14 +80,20 @@ fun LoggedIn.viewTask(
                 killables += viewTextField("Status") { item.status.initial().map { it.name } }
 
                 viewFieldLabel("Tags")
+                val notesList = ListenableMutableList<String>()
                 div {
-                    val list = ListenableMutableList<String>()
-                    item.tags.initial.diffs { diff ->
-                        diff.removed.forEach { list.remove(it) }
-                        diff.added.forEach { list.add(it) }
+                    rxDisplayed { notesList.isEmptyRx() }
+                    cls.m1
+                    innerText = "<none>"
+                }
+                div {
+                    rxDisplayed { !notesList.isEmptyRx() }
+                    killables += item.tags.initial.diffs { diff ->
+                        diff.removed.forEach { notesList.remove(it) }
+                        diff.added.forEach { notesList.add(it) }
                     }
 
-                    listenableList(list, killables) { id, ks ->
+                    listenableList(notesList, killables) { id, ks ->
                         span {
                             tagBadge(ks, id, tagSource)
                         }
@@ -123,6 +125,10 @@ fun LoggedIn.viewTask(
                                 }
                             ),
                             { Note() },
+                            emptyDivDecor = {
+                                cls.m1
+                                innerText = "<none>"
+                            },
                             itemFactory = stringListClick(
                                 { it.text.initial().orEmpty() },
                                 show

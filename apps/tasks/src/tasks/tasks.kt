@@ -3,6 +3,7 @@ package tasks
 import bootstrap.*
 import common.orEmpty
 import commonfb.*
+import commonfb.ListUIConfig.Companion.standardEmptyDiv
 import commonlib.private
 import commonui.RootPanel
 import commonui.faButton
@@ -194,7 +195,10 @@ fun LoggedIn.recent(
                 ),
                 create = { Task() },
                 hourglassDecor = { cls.cardBody },
-                emptyDivDecor = { cls.cardBody },
+                emptyDivDecor = {
+                    standardEmptyDiv()
+                    cls.cardBody
+                },
                 listDivDecor = {},
                 ulDecor = { cls.listGroupFlush },
                 itemFactory = stringListClick(
