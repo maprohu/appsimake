@@ -119,6 +119,7 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
             }
             main {
                 cls {
+                    dFlex
                     flexColumn
                 }
                 if (filterConfig.filter) {
