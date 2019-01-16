@@ -211,9 +211,11 @@ fun Node.topbar(killables: Killables, fn: ToolBar.() -> Unit = {}) = toolbar(kil
 
 class ScreenLayout(val element: Element, killables: Killables) {
     init {
-        element.apply {
-            flex()
-            flexColumn()
+        element {
+            cls {
+                dFlex
+                flexColumn
+            }
         }
     }
 
@@ -225,12 +227,13 @@ class ScreenLayout(val element: Element, killables: Killables) {
 
     val main by lazy {
         element.div {
-            flex()
-            flexGrow1()
+            cls {
+//                dFlex
+                flexGrow1
+            }
         }
     }
 
-    fun main(fn: HTMLDivElement.() -> Unit) = main.apply(fn)
 
 //    val bottom by lazy {
 //        main

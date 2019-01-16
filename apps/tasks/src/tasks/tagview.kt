@@ -19,7 +19,7 @@ fun LoggedIn.viewTag(
     ViewScreenConfig(
         "Tag",
         ::editTag
-    ) { vks, item ->
+    ) { state, item ->
 
         cls {
             flexColumn
@@ -34,7 +34,7 @@ fun LoggedIn.viewTag(
                     m1
                 }
                 dt { innerText = "Name" }
-                dd { vks += rxTextOrEmpty { item.name.initial() } }
+                dd { state.killables += rxTextOrEmpty { item.name.initial() } }
             }
         }
 

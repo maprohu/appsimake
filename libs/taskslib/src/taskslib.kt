@@ -101,7 +101,10 @@ open class Tag : Base<Tag>() {
     companion object : Tag()
 }
 
-class Note : Base<Note>() {
+open class Note : Base<Note>() {
     val text by o.scalar<String>().prop()
-    val ts by o.scalar<Timestamp>().withDefault { ops.serverTimestamp() }.prop()
+    val ts by o.scalar<Timestamp>().calculated { ops.serverTimestamp().toOptional().toLazy() }.prop()
+
+    companion object : Note()
+
 }

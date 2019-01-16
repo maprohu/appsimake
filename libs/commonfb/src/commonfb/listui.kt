@@ -47,8 +47,6 @@ fun <T: HasProps<*, String>> listUI(
     config: ListUIConfig<T>
 ) {
     with(config) {
-
-
         val emptyDiv = document.column {
             cls {
                 flexCenter()
@@ -58,7 +56,6 @@ fun <T: HasProps<*, String>> listUI(
                 innerText = "The list is empty"
             }
         }
-
 
         killables += query.fold(Killable.empty) { old, q ->
             old.kill()
