@@ -219,6 +219,10 @@ open class Listeners {
 
     protected var listeners = listOf<() -> Unit>()
 
+    operator fun invoke(listener: () -> Unit) {
+        add(listener)
+    }
+
     operator fun plusAssign(listener: () -> Unit) {
         add(listener)
     }

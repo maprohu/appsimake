@@ -42,7 +42,6 @@ fun LoggedIn.editTag(
         panel,
         tag,
         close,
-        userTags,
         db
     )
 

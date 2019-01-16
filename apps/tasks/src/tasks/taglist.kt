@@ -6,6 +6,7 @@ import commonfb.*
 import commonui.*
 import domx.*
 import firebase.firestore.query
+import firebaseshr.withCollection
 import fontawesome.*
 import killable.Killable
 import killable.Killables
@@ -20,8 +21,8 @@ fun LoggedIn.listTags(
 ) {
     ListScreenConfig(
         "Tags",
-        { Tag() },
         userTags,
+        { Tag() },
         ::editTag,
         ::editTag,
         { it.name.initial().orEmpty() },

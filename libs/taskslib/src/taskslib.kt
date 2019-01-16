@@ -10,9 +10,9 @@ import rx.Rx
 
 val tasks by named { Lib(it) }
 
-val DocWrap<Private, *>.tasks by coll<Task>()
-val DocWrap<Private, *>.usertags by coll<Tag>()
-val DocWrap<Task, *>.notes by coll<Note>()
+val DocWrap<Private>.tasks by coll<Task>()
+val DocWrap<Private>.usertags by coll<Tag>()
+val DocWrap<Task>.notes by coll<Note>()
 
 enum class TaskStatus(val completed: Boolean) {
     New(false),
@@ -89,6 +89,16 @@ open class Task : Base<Task>() {
                 }
             }
             .prop()
+
+    init {
+        with(props) {
+            onDeleted {
+                ops.deleteCollection(
+                    docWrapOrFail.notes
+                )
+            }
+        }
+    }
 
     companion object : Task()
 }

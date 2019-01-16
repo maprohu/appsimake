@@ -8,6 +8,7 @@ import commonui.ToolBar
 import commonui.faButton
 import commonui.screenLayout
 import domx.*
+import firebaseshr.HasFBProps
 import firebaseshr.HasProps
 import fontawesome.Fa
 import fontawesome.pen
@@ -20,7 +21,7 @@ import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Node
 import styles.scrollVertical
 
-data class ViewScreenConfig<T: HasProps<*, String>>(
+data class ViewScreenConfig<T: HasFBProps<*>>(
     val title: String,
     val edit: (Killables, RootPanel, T, () -> Unit) -> Unit,
     val top: ToolBar.(ToolbarConfig) -> Unit = standardToolbar,
@@ -81,7 +82,7 @@ data class ViewScreenState(
     val close: () -> Unit
 )
 
-fun <T: HasProps<*, String>> ViewScreenConfig<T>.build(
+fun <T: HasFBProps<*>> ViewScreenConfig<T>.build(
     killables: Killables,
     panel: RootPanel,
     item: T,

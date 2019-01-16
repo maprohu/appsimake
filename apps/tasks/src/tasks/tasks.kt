@@ -12,6 +12,7 @@ import commonui.showClosable
 import domx.*
 import firebase.User
 import firebase.firestore.query
+import firebaseshr.withCollection
 import fontawesome.*
 import killable.Killables
 import kotlinx.coroutines.GlobalScope
@@ -19,6 +20,7 @@ import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import rx.Var
 import styles.scrollVertical
+import taskslib.Tag
 import taskslib.Task
 import taskslib.usertags
 import taskslib.tasks
@@ -89,7 +91,7 @@ class LoggedIn(
                                 killables += clickEventSeq { ks, _ ->
                                     showClosable(
                                         ks,
-                                        { pks, close -> editTask(pks, root.sub(), Task(), close = close) },
+                                        { pks, close -> editTask(pks, root.sub(), Task().withCollection(userTasks), close = close) },
                                         ::showHome
                                     )
                                 }
@@ -181,7 +183,7 @@ fun LoggedIn.recent(
         killables = killables,
         redisplay = redisplay,
         page = { ks, dit, close ->
-            dit.keepAlive(ks, userTasks, db)
+            dit.keepAlive(ks, db)
             viewTask(ks, root.sub(), dit, close )
         },
         config = { onClick ->
@@ -193,6 +195,7 @@ fun LoggedIn.recent(
                         Task.ts.desc()
                     }
                 ),
+                collectionWrap = userTasks,
                 create = { Task() },
                 hourglassDecor = { cls.cardBody },
                 emptyDivDecor = {

@@ -31,7 +31,7 @@ sealed class Try<out T> {
     fun <U> flatMap(f: (T) -> Try<U>): Try<U> {
         return when (this) {
             is Success -> f(this.value)
-            is Failure -> this as Failure<U>
+            is Failure -> this.unsafeCast<Failure<U>>()
         }
     }
 

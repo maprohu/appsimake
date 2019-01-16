@@ -9,6 +9,7 @@ import commonui.AppCtx
 import firebase.AppOptions
 import firebase.app.firestore
 import firebase.firestore.*
+import firebase.initBinder
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
@@ -19,7 +20,7 @@ import kotlin.js.Promise
 interface HasDB {
     val db: Firestore
 
-    val DocWrap<*, *>.ref
+    val DocWrap<*>.ref
         get() = docRef(db)
 
     val CollectionWrap<*>.ref
@@ -54,7 +55,11 @@ class FbCtx(
         )
     }
 
-    override val db by lazy { app.firestore().withDefaultSettings() }
+    override val db by lazy {
+        app.firestore().withDefaultSettings().also { db ->
+            initBinder(db)
+        }
+    }
     val auth by lazy { app.auth() }
     val messaging by lazy {
         GlobalScope.async {

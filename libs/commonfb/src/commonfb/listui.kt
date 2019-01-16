@@ -8,6 +8,7 @@ import commonui.showClosable
 import domx.*
 import firebase.firestore.*
 import firebase.firestore.ListenConfig.Companion.hasProps
+import firebaseshr.HasFBProps
 import firebaseshr.HasProps
 import killable.Killable
 import killable.Killables
@@ -31,9 +32,10 @@ fun <T> stringListClick(
 }
 
 
-data class ListUIConfig<T: HasProps<*, String>>(
+data class ListUIConfig<T: HasFBProps<*>>(
     val root: RootPanel,
     val query: RxIface<QueryWrap<T>>,
+    val collectionWrap: CollectionWrap<T>,
     val create: () -> T,
     val hourglassDecor: HTMLDivElement.() -> Unit = { cls.m2 },
     val emptyDivDecor : HTMLDivElement.() -> Unit = standardEmptyDiv,
@@ -57,7 +59,7 @@ data class ListUIConfig<T: HasProps<*, String>>(
     }
 }
 
-fun <T: HasProps<*, String>> listUI(
+fun <T: HasFBProps<*>> listUI(
     killables: Killables,
     config: ListUIConfig<T>
 ) {
@@ -88,6 +90,7 @@ fun <T: HasProps<*, String>> listUI(
                 ks,
                 hasProps(
                     list,
+                    collectionWrap,
                     create = create
                 ).copy(
                     onFirst = {
@@ -106,7 +109,7 @@ fun <T: HasProps<*, String>> listUI(
     }
 }
 
-fun <T: HasProps<*, String>> showClosableList(
+fun <T: HasFBProps<*>> showClosableList(
     killables: Killables,
     redisplay: () -> Unit,
     page: (Killables, T, close: () -> Unit) -> Unit,
@@ -136,15 +139,14 @@ fun <T: HasProps<*, String>> showClosableList(
     listUI(killables, config(onClick))
 }
 
-fun <T: HasProps<*, String>> T.keepAlive(
+fun <T: HasFBProps<*>> T.keepAlive(
     killables: Killables,
-    coll: CollectionWrap<T>,
     db: Firestore
 ) {
     val killListen = Killables()
     val killForeach = props.live.forEach { alive ->
         if (!alive) {
-            killListen += coll.doc(id = props.idOrFail).docRef(db).listen(this)
+            killListen += props.docWrapOrFail.docRef(db).listen(this)
         }
     }
 

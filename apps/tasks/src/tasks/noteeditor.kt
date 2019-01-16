@@ -13,7 +13,6 @@ import taskslib.Note
 fun LoggedIn.editNote(
     killables: Killables,
     panel: RootPanel,
-    coll: CollectionWrap<Note>,
     note: Note,
     close: () -> Unit
 ) {
@@ -40,7 +39,6 @@ fun LoggedIn.editNote(
         panel,
         note,
         close,
-        coll,
         db
     )
 

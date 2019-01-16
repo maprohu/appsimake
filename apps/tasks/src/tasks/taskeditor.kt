@@ -92,7 +92,6 @@ fun LoggedIn.editTask(
         panel,
         task,
         close,
-        userTasks,
         db
     )
 

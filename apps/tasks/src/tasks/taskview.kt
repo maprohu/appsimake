@@ -11,6 +11,7 @@ import commonui.faButton
 import domx.cls
 import domx.*
 import firebase.firestore.query
+import firebaseshr.withCollection
 import fontawesome.Fa
 import fontawesome.comment
 import killable.Killables
@@ -28,7 +29,7 @@ fun LoggedIn.viewTask(
     task: Task,
     close: () -> Unit
 ) {
-    val notesWrap = userTasks.doc(task.props.idOrFail).notes
+    val notesWrap = task.props.docWrapOrFail.notes
 
     ViewScreenConfig(
         "Task",
@@ -48,8 +49,7 @@ fun LoggedIn.viewTask(
                                 editNote(
                                     state.killables,
                                     state.panel.sub(),
-                                    notesWrap,
-                                    Note(),
+                                    Note().withCollection(notesWrap),
                                     state.redisplay
                                 )
 
@@ -111,7 +111,6 @@ fun LoggedIn.viewTask(
                             editNote(
                                 ks,
                                 st.panel.sub(),
-                                notesWrap,
                                 item,
                                 close
                             )
@@ -124,6 +123,7 @@ fun LoggedIn.viewTask(
                                     Note.ts.desc()
                                 }
                             ),
+                            notesWrap,
                             { Note() },
                             emptyDivDecor = {
                                 cls.m1

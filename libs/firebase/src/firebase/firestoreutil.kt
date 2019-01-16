@@ -5,6 +5,7 @@ import commonlib.CollectionWrap
 import commonlib.DocWrap
 import firebase.FirebaseError
 import firebase.firestore
+import firebaseshr.HasFBProps
 import firebaseshr.HasProps
 import firebaseshr.IdState
 import firebaseshr.ScalarProp
@@ -160,15 +161,17 @@ data class ListenConfig<T>(
 //                delete = { it -> it.deleted.kill() }
 //            )
 //        }
-        fun <T: HasProps<*, String>> hasProps(
+        fun <T: HasFBProps<*>> hasProps(
             list: ListenableMutableList<T>,
+            collectionWrap: CollectionWrap<T>,
             create: () -> T
         ) = ListenConfig(
             list,
             create = { id, d ->
                 create().also { t ->
                     t.props.apply {
-                        persisted(id)
+                        collection = collectionWrap
+                        persistedFB(id)
                         extractInitial(d)
                         live.now = true
                     }
@@ -297,7 +300,7 @@ class QueryWrap<in T>(
     val query: Query
 )
 
-fun <T: HasProps<*, String>> T.onSnapshot(d: DocumentSnapshot) {
+fun <T: HasFBProps<*>> T.onSnapshot(d: DocumentSnapshot) {
     if (d.exists) {
         val data = d.data<dynamic>()
         props.extractInitial(data)
@@ -306,7 +309,7 @@ fun <T: HasProps<*, String>> T.onSnapshot(d: DocumentSnapshot) {
     }
 }
 
-fun <T: HasProps<*, String>> DocumentReference.listen(
+fun <T: HasFBProps<*>> DocumentReference.listen(
     target: T
 ) : Killable {
     require(!target.props.live.now)
@@ -322,5 +325,5 @@ fun <T: HasProps<*, String>> DocumentReference.listen(
     }
 }
 
-fun DocWrap<*, *>.docRef(db: Firestore = firestore()) = db.doc(path)
+fun DocWrap<*>.docRef(db: Firestore = firestore()) = db.doc(path)
 fun CollectionWrap<*>.collectionRef(db: Firestore = firestore()) = db.collection(path)

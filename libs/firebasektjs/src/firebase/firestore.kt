@@ -32,8 +32,21 @@ external class Firestore {
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#disableNetwork
     fun disableNetwork(): Promise<Unit>
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore?authuser=0#batch
+    fun batch(): WriteBatch
 
 
+
+}
+
+// https://firebase.google.com/docs/reference/js/firebase.firestore.WriteBatch?authuser=0
+external interface WriteBatch {
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.WriteBatch?authuser=0#delete
+    fun delete(ref: DocumentReference): WriteBatch
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.WriteBatch?authuser=0#commit
+    fun commit(): Promise<Unit>
 
 }
 
@@ -92,6 +105,7 @@ external interface DocumentReference {
 
 }
 
+// https://firebase.google.com/docs/reference/js/firebase.firestore.Query?authuser=0
 open external class Query {
     fun orderBy(
             fieldPath: String,
@@ -109,6 +123,10 @@ open external class Query {
         value: dynamic
     ) : Query
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Query#limit
+    fun limit(count: Int): Query
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Query?authuser=0#get
     fun get(options: GetOptions = definedExternally) : Promise<QuerySnapshot>
 
 }

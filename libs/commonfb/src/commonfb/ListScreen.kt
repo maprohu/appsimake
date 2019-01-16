@@ -12,6 +12,7 @@ import firebase.firestore.Firestore
 import firebase.firestore.QueryBuilder
 import firebase.firestore.QueryWrap
 import firebase.firestore.wrap
+import firebaseshr.HasFBProps
 import firebaseshr.HasProps
 import fontawesome.Fa
 import fontawesome.filter
@@ -42,17 +43,17 @@ class FilterConfig<T>(
     }
 }
 
-data class ListScreenConfig<T: HasProps<*, String>>(
+data class ListScreenConfig<T: HasFBProps<*>>(
     val title: String,
+    val collectionWrap: CollectionWrap<T>,
     val create: () -> T,
-    val collection: CollectionWrap<T>,
     val view: (Killables, RootPanel, T, () -> Unit) -> Unit,
     val edit: (Killables, RootPanel, T, () -> Unit) -> Unit,
     val itemText: (T) -> String,
     val filter: (Killables, redisplay: () -> Unit) -> FilterConfig<T>
 )
 
-fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
+fun <T: HasFBProps<*>> ListScreenConfig<T>.build(
     killables: Killables,
     panel: RootPanel,
     db: Firestore,
@@ -155,13 +156,14 @@ fun <T: HasProps<*, String>> ListScreenConfig<T>.build(
                         killables,
                         redisplay = { displayList() },
                         page = { ks, item, close ->
-                            item.keepAlive(ks, collection, db)
+                            item.keepAlive(ks, db)
                             view(ks, panel.sub(), item, close)
                         },
                         config = { show ->
                             ListUIConfig(
                                 root = listRoot,
                                 query = filterConfig.query,
+                                collectionWrap = collectionWrap,
                                 create = create,
                                 listDivDecor = {
                                     cls {

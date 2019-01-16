@@ -8,9 +8,7 @@ import commonlib.CollectionWrap
 import commonui.*
 import domx.*
 import firebase.firestore.*
-import firebaseshr.HasProps
-import firebaseshr.Prop
-import firebaseshr.ScalarProp
+import firebaseshr.*
 import fontawesome.*
 import killable.Killable
 import killable.Killable.Companion.empty
@@ -65,17 +63,16 @@ data class FormConfig(
     val tabs: HTMLDivElement.() -> Unit = {},
     val form: HTMLDivElement.() -> Unit
 )
-data class EditScreenConfig<T: HasProps<*, String>>(
+data class EditScreenConfig<T: HasFBProps<*>>(
     val title: String,
     val form: (T, Killables) -> FormConfig
 )
 
-fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
+fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
     killables: Killables,
     panel: RootPanel,
     item: T,
     close: () -> Unit,
-    wrap: CollectionWrap<T>,
     db: Firestore
 ) {
 
@@ -88,28 +85,36 @@ fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
     val canDelete = Rx { item.props.isPersisted() && !isSaving() }
 
     val idListenerSeq = killables.seq()
-    val idOpt = Rx { item.props.id().map { it.id } }.addedTo(killables)
-    val docRef = Rx { idOpt().map { id -> wrap.doc(id).docRef(db) } }
-    docRef.forEach { dro ->
-        idListenerSeq += dro.map { dr ->
-            dr.onSnapshot {
+
+    val docRefOpt = Rx {
+        item.props.id().let {
+            if (it is IdState.Persisted) it.id.docRef(db)
+            else null
+        }
+    }.addedTo(killables)
+
+    docRefOpt.forEach {  dr ->
+        if (dr != null) {
+            idListenerSeq += dr.onSnapshot {
                 isSaving.now = false
             }
-        }.getOrDefault {}
+        } else {
+            idListenerSeq.clear()
+        }
     }
 
     fun save() {
         if (canSave.now) {
             isSaving.now = true
 
-            docRef.now.map<Unit> { dr ->
+            docRefOpt.now?.let { dr ->
                 dr.set(
                     item.props.merge(),
                     setOptionsMerge()
                 )
-            }.getOrElse {
-                val ref = wrap.collectionRef(db).doc()
-                item.props.persisted(ref.id)
+            } ?: run {
+                val ref = item.props.collection.collectionRef(db).doc()
+                item.props.persistedFB(ref.id)
                 ref.set(
                     item.props.write()
                 )
@@ -126,7 +131,8 @@ fun <T: HasProps<*, String>> EditScreenConfig<T>.build(
     fun delete() {
         isSaving.now = true
         GlobalScope.launch {
-            wrap.doc(item.props.idOrFail).docRef(db).delete().await()
+            // TODO check if this works offline. guess not...
+            item.props.docWrapOrFail.docRef(db).delete().await()
             isSaving.now = false
         }
     }

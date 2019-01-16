@@ -1,7 +1,10 @@
 package firebaseshr
 
 import common.*
+import commonlib.CollectionWrap
+import commonlib.DocWrap
 import firebaseshr.firestore.Timestamp
+import kotlinx.coroutines.Deferred
 import rx.Rx
 import rx.RxVal
 import rx.Var
@@ -10,10 +13,18 @@ fun hasOwnProperty(d: dynamic, prop: String) = d.hasOwnProperty(prop).unsafeCast
 fun <T> opt(d: dynamic, name: String) = if (hasOwnProperty(d, name)) Some(d[name].unsafeCast<T>()) else None
 
 
+
 data class PropOps(
-    val delete: () -> dynamic = { throw IllegalStateException() },
-    val serverTimestamp: () -> Timestamp = { throw IllegalStateException() }
-)
+    val delete: () -> dynamic = { notInitialized() },
+    val serverTimestamp: () -> Timestamp = { notInitialized() },
+    val deleteCollection: (CollectionWrap<*>) -> Deferred<Unit> = { notInitialized() }
+) {
+    companion object {
+        fun notInitialized(): Nothing {
+            throw IllegalStateException("Firebase ops not initialized!")
+        }
+    }
+}
 
 internal var propOps = PropOps()
 val ops
@@ -217,18 +228,70 @@ fun <O, T: Comparable<T>> ScalarProp.Ops<O, Array<T>>.sorted() = map(
 //    )
 //)
 
-data class IdState<I>(
-    val id: I,
-    val exists: Boolean = true
-)
+sealed class IdState<out N, out P> {
+    class New<C>(val id: C) : IdState<C, Nothing>()
+    data class Persisted<P>(
+        val id: P,
+        val deleted: Boolean = false
+    ) : IdState<Nothing, P>()
+}
+//data class IdState<I>(
+//    val id: I,
+//    val exists: Boolean = true
+//)
 
-class Props<in O, I> : PropTasks<O> {
+open class FBProps<in O>(initial: CollectionWrap<O>) : Props<O, CollectionWrap<O>, DocWrap<O>>(initial) {
 
-    val id = Var<Optional<IdState<I>>>(None)
+    var collection: CollectionWrap<@UnsafeVariance O>
+        set(v) {
+            id.transform { st ->
+                when (st) {
+                    is IdState.New -> IdState.New(v)
+                    is IdState.Persisted -> st.copy(
+                        id = v.doc(st.id.id)
+                    )
+                }
+            }
+        }
+        get() = id.now.let { st ->
+            when (st) {
+                is IdState.New -> st.id
+                is IdState.Persisted -> st.id.parent!!
+            }
+        }
+
+
+    fun persistedFB(id: String) {
+        this.id.transform { i ->
+            IdState.Persisted((i as IdState.New).id.doc(id))
+        }
+    }
+
+    val docWrapOrFail: DocWrap<O>
+        get() = (id.now as IdState.Persisted).id
+
+    val idOrFail
+        get() = docWrapOrFail.id
+
+}
+
+
+open class Props<in O, out N, out P>(initial: N) : PropTasks<O> {
+
+    val id = Var<IdState<@kotlin.UnsafeVariance N, @kotlin.UnsafeVariance P>>(IdState.New(initial))
     internal var list : List<Prop<@UnsafeVariance O>> = listOf()
 
-    val isPersisted by lazy { Rx { id() != None } }
-    val isDeleted by lazy { Rx { id().map { s -> !s.exists }.getOrDefault(false) } }
+    val isPersisted by lazy { Rx { id() is IdState.Persisted } }
+    val isDeleted by lazy {
+        Rx {
+            id().let { i ->
+                when (i) {
+                    is IdState.Persisted -> i.deleted
+                    else -> false
+                }
+            }
+        }
+    }
     val isValid: RxVal<Boolean> by lazy {
         Rx { list.all { it.isValid() } }
     }
@@ -239,19 +302,18 @@ class Props<in O, I> : PropTasks<O> {
         l
     }
 
-    val idOrFail
-        get() = id.now.get().id
 
-    fun persisted(idv: I) {
-        id.now = Some(IdState(idv))
+    fun persisted(idv: @UnsafeVariance P) {
+        id.now = IdState.Persisted(idv)
     }
 
     val live = Var(false)
 
     fun deleted() {
-        id.transform { i -> i.map { s -> s.copy(exists = false) } }
+        id.transform { i ->
+            (i as IdState.Persisted).copy(deleted = true)
+        }
     }
-
 
     override fun extractInitial(o: dynamic) {
         list.forEach { it.extractInitial(o) }
@@ -270,7 +332,7 @@ class Props<in O, I> : PropTasks<O> {
     }
 
     override fun mergeTo(o: dynamic) {
-        if (id.now.isEmpty()) {
+        if (!isPersisted.now) {
             writeTo(o)
         } else {
             list.forEach { it.mergeTo(o) }
@@ -294,15 +356,31 @@ class Props<in O, I> : PropTasks<O> {
     fun merge() = obj<Any>().also(::mergeTo).asDynamic()
 
 }
-interface HasProps<in O, I> {
-    val props: Props<O, I>
+interface HasProps<in O, out N, out P> {
+    val props: Props<O, N, P>
 }
 
-open class Base<T>(val o: PropFactory<T, String> = PropFactory()) : HasProps<T, String> by o
+interface HasFBProps<in O>: HasProps<O, CollectionWrap<O>, DocWrap<O>> {
 
-class PropFactory<in O, I>: HasProps<O, I> {
+    override val props: FBProps<O>
 
-    override val props = Props<O, I>()
+}
+
+open class Base<T>(val o: FBPropFactory<T> = FBPropFactory(CollectionWrap(""))) : HasFBProps<T> by o {
+}
+
+fun <T: Base<T>> T.withCollection(c: CollectionWrap<T>): T {
+    props.collection = c
+    return this
+}
+
+class FBPropFactory<O>(initial: CollectionWrap<O>) : BasePropFactory<O, CollectionWrap<O>, DocWrap<O>, FBProps<O>>(FBProps(initial)), HasFBProps<O>
+
+open class PropFactory<in O, out N, out P>(initial: N): BasePropFactory<O, N, P, Props<@kotlin.UnsafeVariance O, @kotlin.UnsafeVariance N, @kotlin.UnsafeVariance P>>(Props(initial))
+
+open class BasePropFactory<in O, out N, out P, PR: Props<O, N, P>>(
+    override val props: PR
+): HasProps<O, N, P> {
 
     private val registry = object : PropRegsitry<O> {
         override fun register(prop: Prop<@UnsafeVariance O>) {

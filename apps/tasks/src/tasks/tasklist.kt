@@ -104,8 +104,8 @@ fun LoggedIn.listTasks(killables: Killables, panel: RootPanel, after: () -> Unit
 
     ListScreenConfig(
         "Task List",
-        { Task() },
         userTasks,
+        { Task() },
         ::viewTask,
         ::editTask,
         { it.title.initial().orEmpty() },

@@ -221,7 +221,8 @@ object gymclock : JsApp(
 object firebaseshr : JsModule(
     "libs/firebaseshr",
     listOf(
-        commonshr
+        commonshr,
+        kotlinxCoroutines
     )
 )
 

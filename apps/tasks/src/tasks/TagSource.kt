@@ -4,6 +4,7 @@ import common.*
 import commonlib.CollectionWrap
 import commonshr.SetDiff
 import firebase.firestore.*
+import firebaseshr.withCollection
 import killable.Killable
 import killable.Killables
 import kotlinx.coroutines.GlobalScope
@@ -14,7 +15,7 @@ import taskslib.Tag
 
 
 class TagSource(
-    wrap: CollectionWrap<Tag>,
+    private val wrap: CollectionWrap<Tag>,
     db: Firestore
 ): Killable {
     private val tagsRef = wrap.collectionRef(db)
@@ -31,11 +32,12 @@ class TagSource(
 
     private fun tagv(id: String) = map.getOrPut(id) {
         val rxv = Var(
-            Tag().also {
-                it.props.persisted(id)
+            Tag().withCollection(wrap).also {
+                it.props.persistedFB(id)
                 it.name.initial.set(id)
             }
         )
+
         Rx { rxv().name.initial() }.onOff(
             on = {
                 it.forEach { id ->
@@ -75,7 +77,8 @@ class TagSource(
         )
 
         ListenConfig.hasProps(
-            list
+            list,
+            wrap
         ) { Tag() }.let { c ->
             wrap.query(db).query.listen(killables, c)
         }
