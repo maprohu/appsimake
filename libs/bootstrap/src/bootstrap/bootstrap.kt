@@ -74,6 +74,17 @@ class DropdownGroup(
     }
 }
 
+val Node.dropdownSplit: HTMLButtonElement
+    get() = button {
+        cls {
+            btn
+            dropdownToggle
+            dropdownToggleSplit
+        }
+        attr["data-toggle"] = "dropdown"
+        attr["data-reference"] = "parent"
+    }
+
 fun HTMLElement.dropdownGroup(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply {
     element.cls.btnGroup
     fn()
@@ -523,6 +534,7 @@ val Cls.inputGroupText by css()
 val Cls.inputGroupPrepend by css()
 val Cls.dropdown by css()
 val Cls.dropdownToggle by css()
+val Cls.dropdownToggleSplit by css()
 val Cls.dropdownMenu by css()
 val Cls.dropdownMenuRight by css()
 val Cls.dropdownItem by css()

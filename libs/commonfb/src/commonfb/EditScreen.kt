@@ -78,8 +78,10 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
 
     item.props.rollback()
 
+    killables += item.props.onDeleted.add(close)
+
     val isSaving = Var(false)
-    val canSave = Rx { item.props.dirty() && !isSaving() && item.props.isValid() }
+    val canSave = Rx { item.props.dirty() && item.props.isValid() }
     val showDelete = Rx { item.props.isPersisted() }
     val showDropDown = Rx { showDelete() }
     val canDelete = Rx { item.props.isPersisted() && !isSaving() }
@@ -119,7 +121,6 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
                     item.props.write()
                 )
                 killables += ref.listen(item)
-                killables += item.props.onDeleted.add(close)
             }
         }
     }
@@ -147,28 +148,75 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
                 spinner.visibility.now = isSaving
 
                 left {
-                    btnButton {
-                        cls.m1
-                        rxClasses {
-                            if (item.props.dirty()) {
-                                listOf(Cls.btnDanger)
-                            } else {
-                                listOf(Cls.btnSecondary)
+                    div {
+                        cls {
+                            btnGroup
+                            m1
+                        }
+                        faButton(Fa.chevronLeft) {
+                            cls.btnSecondary
+                            rxDisplayed {
+                                !item.props.dirty()
+                            }.addedTo(killables)
+                            clickEvent {
+                                back()
                             }
                         }
-                        faButtonSpan {
-                            rxClasses {
-                                if (item.props.dirty()) {
-                                    listOf(Fa.undo)
-                                } else {
-                                    listOf(Fa.chevronLeft)
+                        faButton(Fa.chevronLeft) {
+                            cls.btnSuccess
+                            span.cls {
+                                fa.save
+                                ml1
+                            }
+                            rxDisplayed(canSave)
+                            clickEvent {
+                                item.props.save()
+                                back()
+                            }
+                        }
+                        faButton(Fa.backspace) {
+                            cls.btnDanger
+                            rxDisplayed {
+                                item.props.dirty() && !canSave()
+                            }.addedTo(killables)
+                            clickEvent {
+                                back()
+                            }
+                        }
+                        dropdownSplit {
+                            cls.btnSuccess
+                            rxDisplayed(canSave)
+                        }
+                        div {
+                            rxDisplayed(canSave)
+                            cls.dropdownMenu
+                            dropdownItemAnchor {
+                                anchor {
+                                    cls {
+                                        textDanger
+                                    }
+                                }
+                                icon.cls.fa.backspace
+                                text {
+                                    innerText = "Discard"
+                                }
+                                clickEvent {
+                                    back()
                                 }
                             }
                         }
-                        clickEvent {
-                            back()
-                        }
+
                     }
+
+//                        faButtonSpan {
+//                            rxClasses {
+//                                if (item.props.dirty()) {
+//                                    listOf(Fa.undo)
+//                                } else {
+//                                    listOf(Fa.chevronLeft)
+//                                }
+//                            }
+//                        }
                     middleTitle {
                         innerText = this@build.title
                     }
@@ -213,8 +261,6 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
                                 }
                             }
                         }
-
-
                     }
                 }
             }
