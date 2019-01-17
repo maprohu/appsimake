@@ -2,8 +2,13 @@ package gymclock
 
 import bootstrap.*
 import common.Listeners
+import commonui.faButtonSpan
 import commonui.screenLayout
 import domx.*
+import fontawesome.Fa
+import fontawesome.fa
+import fontawesome.running
+import fontawesome.x3
 import killable.Killables
 import rx.*
 import styles.cursorPointer
@@ -131,7 +136,9 @@ object Form {
                             flexFixedSize()
                             btnPrimary
                         }
-                        innerText = "Start"
+                        faButtonSpan(Fa.running) {
+                            cls.fa.x3
+                        }
                         val canSubmit = Rx {
                             valids.all { it() }
                         }

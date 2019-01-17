@@ -71,6 +71,8 @@ val Fa.volumeUp by facss()
 val Fa.volumeMute by facss()
 val Fa.eyeSlash by facss()
 val Fa.eye by facss()
+val Fa.running by facss()
+
 val Fa.x2 by facss("2x")
 val Fa.x3 by facss("3x")
 val Fa.x4 by facss("4x")

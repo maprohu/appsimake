@@ -161,10 +161,7 @@ object Clock {
             }
             span {
                 killables += window.resizeEvent {
-                    console.dir(this)
                     val fs = "${with(timerDiv) { min(offsetWidth, offsetHeight) * 0.6 }.toInt() }px"
-                    console.dir(fs)
-
                     style.fontSize = fs
                 }
                 counter.forEach {
