@@ -122,6 +122,7 @@ interface ListenableList<out T> : List<T> {
         val moved: (Int, Int) -> Unit = { _, _ ->}
     )
 
+    val isEmptyRx: RxIface<Boolean>
 //    interface Listener<in T> {
 //        fun added(index: Int, element: T)
 //        fun removed(index: Int)
@@ -166,7 +167,7 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
     val sizeRx : RxVal<Int>
         get() = sizeVar
 
-    val isEmptyRx = Rx { sizeVar() == 0 }
+    override val isEmptyRx = Rx { sizeVar() == 0 }
 
     override fun addListener(listener: ListenableList.Listener<T>): Killable {
         listeners += listener

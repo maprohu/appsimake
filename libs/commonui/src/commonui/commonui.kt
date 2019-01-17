@@ -43,7 +43,7 @@ fun showClosable(
 }
 
 
-fun HTMLButtonElement.faButtonSpan(
+fun Element.faButtonSpan(
     faIconClass: String? = null,
     fn: HTMLSpanElement.() -> Unit = {}
 ): HTMLSpanElement {

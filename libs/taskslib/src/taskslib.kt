@@ -12,6 +12,7 @@ val tasks by named { Lib(it) }
 
 val DocWrap<Private>.tasks by coll<Task>()
 val DocWrap<Private>.usertags by coll<Tag>()
+val DocWrap<Private>.hiddenTasks by coll<HiddenTask>()
 val DocWrap<Task>.notes by coll<Note>()
 
 enum class TaskStatus(val completed: Boolean) {
@@ -118,3 +119,5 @@ open class Note : Base<Note>() {
     companion object : Note()
 
 }
+
+open class HiddenTask : Base<HiddenTask>()

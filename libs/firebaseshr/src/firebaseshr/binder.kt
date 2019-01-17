@@ -17,7 +17,10 @@ fun <T> opt(d: dynamic, name: String) = if (hasOwnProperty(d, name)) Some(d[name
 data class PropOps(
     val delete: () -> dynamic = { notInitialized() },
     val serverTimestamp: () -> Timestamp = { notInitialized() },
-    val deleteCollection: (CollectionWrap<*>) -> Deferred<Unit> = { notInitialized() }
+    val deleteCollection: (CollectionWrap<*>) -> Deferred<Unit> = { notInitialized() },
+    val createId: (CollectionWrap<*>) -> String = { notInitialized() },
+    val write: (DocWrap<*>, dynamic) -> Deferred<Unit> = { _, _ -> notInitialized() },
+    val merge: (DocWrap<*>, dynamic) -> Deferred<Unit> = { _, _ -> notInitialized() }
 ) {
     companion object {
         fun notInitialized(): Nothing {
@@ -155,11 +158,17 @@ open class ScalarProp<in O, T>(
         initial.now = ops.defaultValue()
     }
 
+    var calculationActive = ops.calculate != null
+
     val beforeWrite: () -> Unit =
         ops.calculate?.let { c ->
             val calc = Rx { c(this) };
 
-            { current.now = calc.now.value }
+            {
+                if (calculationActive) {
+                    current.now = calc.now.value
+                }
+            }
         } ?: {}
 
     override fun writeTo(o: dynamic) {
@@ -195,6 +204,23 @@ open class ScalarProp<in O, T>(
         current.now = initial.now
     }
 
+}
+
+
+fun <T> dontCalculate(
+    vararg ps: ScalarProp<*, *>,
+    fn: () -> T
+): T {
+    val st = ps.map {
+        val saved = it.calculationActive
+        it.calculationActive = false
+        it to saved
+    }
+    try {
+        return fn()
+    } finally {
+        st.forEach { it.first.calculationActive = it.second }
+    }
 }
 
 //class EnumProp<in O, T: Enum<T>>(name: String, ops: ScalarProp.Ops<O, T>) : ScalarProp<O, T>(name, ops) {
@@ -273,7 +299,24 @@ open class FBProps<in O>(initial: CollectionWrap<O>) : Props<O, CollectionWrap<O
     val idOrFail
         get() = docWrapOrFail.id
 
+    fun save(): Deferred<Unit> {
+        return id.now.let { ids ->
+            when (ids) {
+                is IdState.New -> {
+                    val did = ops.createId(ids.id)
+                    val dw = ids.id.doc(did)
+                    val r = ops.write(dw, write())
+                    id.transform { IdState.Persisted(dw) }
+                    r
+                }
+                is IdState.Persisted -> ops.merge(ids.id, merge())
+            }
+        }
+    }
+
 }
+
+
 
 
 open class Props<in O, out N, out P>(initial: N) : PropTasks<O> {

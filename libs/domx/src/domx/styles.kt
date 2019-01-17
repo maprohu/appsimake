@@ -70,6 +70,9 @@ val Cls.flexBasis0 by def("flex-basis: 0;" )
 val Cls.pointerEventsNone by def(
     "pointer-events: none;"
 )
+val Cls.pointerEventsAll by def(
+    "pointer-events: all;"
+)
 
 val Cls.fontSize100 by def(
     "font-size: 100%;"
@@ -78,6 +81,20 @@ val Cls.fontSize100 by def(
 val Cls.widthAuto by def(
     "width: auto;"
 )
+
+val Cls.zIndex1 by def(
+    "z-index: 1;"
+)
+
+val Cls.leftRightTopBottom0 by def(
+    """
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    """.trimIndent()
+)
+
 
 
 

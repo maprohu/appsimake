@@ -1,29 +1,28 @@
 package tasks
 
 import bootstrap.*
-import common.orEmpty
+import common.*
 import commonfb.*
 import commonfb.ListUIConfig.Companion.standardEmptyDiv
 import commonlib.private
-import commonui.RootPanel
-import commonui.faButton
-import commonui.screenLayout
-import commonui.showClosable
+import commonui.*
 import domx.*
 import firebase.User
-import firebase.firestore.query
+import firebase.firestore.*
+import firebaseshr.dontCalculate
 import firebaseshr.withCollection
 import fontawesome.*
 import killable.Killables
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
+import rx.Rx
+import rx.RxIface
 import rx.Var
-import styles.scrollVertical
-import taskslib.Tag
-import taskslib.Task
-import taskslib.usertags
-import taskslib.tasks
+import rx.set
+import styles.*
+import taskslib.*
+import kotlin.browser.document
 
 fun main(args: Array<String>) {
     TasksMain().let { tm ->
@@ -59,6 +58,7 @@ class LoggedIn(
     val userPrivate = tasks.app.private.doc(user.uid)
     val userTasks = userPrivate.tasks
     val userTags = userPrivate.usertags
+    val userHiddenTasks = userPrivate.hiddenTasks
 
 
     val userTasksRef = userTasks.ref
@@ -75,12 +75,48 @@ class LoggedIn(
                 homeActive.now = true
                 root.setRoot(this)
             }
+            val hiddenTaskIds = Var(emptySet<String>())
+            val hiddenCount = Rx { hiddenTaskIds().size }
+
+            killables += userHiddenTasks.query(db).query.idDiffs { d ->
+                hiddenTaskIds.transform { h -> h - d.removed + d.added }
+            }
+
             screenLayout(killables) {
                 top {
                     middleTitle {
                         innerText = loggedInCtx.appCtx.title
                     }
                     right {
+                        cls {
+                            dFlex
+                            flexRow
+                            alignItemsCenter
+                        }
+                        div {
+                            faButton(Fa.eye) {
+                                cls {
+                                    btnInfo
+                                    m1
+                                }
+                                span {
+                                    cls {
+                                        ml1
+                                        badgePill
+                                        badgeWarning
+                                    }
+                                    rxText { "${hiddenCount()}" }
+                                }
+                                rxDisplayed { hiddenTaskIds().isNotEmpty() }
+                                clickEvent {
+                                    deleteCollection(
+                                        userHiddenTasks.collectionRef(db),
+                                        db
+                                    )
+                                    hiddenTaskIds.now = emptySet()
+                                }
+                            }
+                        }
                         div {
                             cls {
                                 m1
@@ -128,37 +164,23 @@ class LoggedIn(
                     }
                 }
                 main {
-                    cls {
-                        flexColumn
-                        scrollVertical
-                    }
+                    cls.dFlex
+                    val root = RootPanel(this)
 
-                    div {
-                        cls {
-                            p2
-                        }
-                        div {
-                            cls.card
-                            div {
-                                cls.cardHeader
-                                innerText = "Recent"
-                            }
-                            val root = RootPanel(this)
-
-                            val recentSeq = killables.seq()
-                            homeActive.forEach { ha ->
-                                if (ha) {
-                                    recent(
-                                        ::showHome,
-                                        root,
-                                        recentSeq.killables()
-                                    )
-                                } else {
-                                    recentSeq.clear()
-                                }
-                            }
+                    val recentSeq = killables.seq()
+                    homeActive.forEach { ha ->
+                        if (ha) {
+                            recent(
+                                recentSeq.killables(),
+                                root,
+                                hiddenTaskIds,
+                                ::showHome
+                            )
+                        } else {
+                            recentSeq.clear()
                         }
                     }
+
                 }
             }
         }
@@ -175,9 +197,10 @@ class LoggedIn(
 
 
 fun LoggedIn.recent(
-    redisplay: () -> Unit,
+    killables: Killables,
     panel: RootPanel,
-    killables: Killables
+    filter: RxIface<Set<String>>,
+    redisplay: () -> Unit
 ) {
     showClosableList<Task>(
         killables = killables,
@@ -197,17 +220,86 @@ fun LoggedIn.recent(
                 ),
                 collectionWrap = userTasks,
                 create = { Task() },
-                hourglassDecor = { cls.cardBody },
-                emptyDivDecor = {
-                    standardEmptyDiv()
-                    cls.cardBody
+                ulDecor = {
+                    cls {
+                        m1
+                        flexFixedSize()
+                    }
                 },
-                listDivDecor = {},
-                ulDecor = { cls.listGroupFlush },
-                itemFactory = stringListClick(
-                    { it.title.initial().orEmpty() },
-                    onClick
-                )
+                filter = { list ->
+                    FilteredListenableListConfig(
+                        list,
+                        killables,
+                        { task, _ -> Rx { task.props.idOrFail } },
+                        input = filter,
+                        filter = { id, ids -> id !in ids }
+                    ).build()
+                },
+                itemFactory = { task ->
+                    document.div {
+                        cls {
+                            listGroupItem
+                            positionRelative
+                            p0
+                        }
+
+                        a {
+                            cls {
+                                positionAbsolute
+                                leftRightTopBottom0
+                                listGroupItemAction
+                            }
+                            href = "#"
+                            clickEvent {
+                                onClick(task)
+                            }
+                        }
+
+                        div {
+                            cls {
+                                p1
+                                flexGrow1
+                                dFlex
+                                flexRow
+                                alignItemsCenter
+                                positionRelative
+                                pointerEventsNone
+                                zIndex1
+                            }
+                            span {
+                                cls {
+                                    m1
+                                    flexGrow1
+                                }
+                                rxTextOrEmpty { task.title.initial() }
+                            }
+                            button {
+                                cls {
+                                    btn
+                                    btnSecondary
+                                    p1
+                                    flexFixedSize()
+                                    pointerEventsAll
+                                }
+                                span {
+                                    cls.fa {
+                                        fw
+                                        eyeSlash
+                                    }
+                                }
+                                clickEvent {
+                                    HiddenTask()
+                                        .withCollection(userHiddenTasks)
+                                        .props.apply {
+                                            persistedFB(task.props.idOrFail)
+                                        }
+                                        .save()
+                                }
+                            }
+                        }
+                    }
+
+                }
             )
         }
     )

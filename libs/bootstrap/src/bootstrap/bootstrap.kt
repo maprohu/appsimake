@@ -125,6 +125,10 @@ fun Node.listAction(
 ): HTMLAnchorElement {
     return a {
         href = "#"
+        cls {
+            listGroupItem
+            listGroupItemAction
+        }
         classes += "list-group-item list-group-item-action"
         content()
     }
@@ -446,6 +450,7 @@ val Cls.bgWhite by css()
 val Cls.bgSuccess by css()
 val Cls.bgLight by css()
 val Cls.bgSecondary by css()
+val Cls.bgWarning by css()
 val Cls.border by css()
 val Cls.borderTop by css()
 val Cls.borderBottom by css()
@@ -470,6 +475,7 @@ val Cls.mr2 by css()
 val Cls.mr3 by css()
 val Cls.mr4 by css()
 val Cls.mr5 by css()
+val Cls.p0 by css()
 val Cls.p1 by css()
 val Cls.p2 by css()
 val Cls.p3 by css()
@@ -483,9 +489,11 @@ val Cls.btnGroup by css()
 val Cls.btnGroupVertical by css()
 val Cls.btnToolbar by css()
 val Cls.btnSecondary by css()
+val Cls.btnInfo by css()
 val Cls.btnSuccess by css()
 val Cls.btnPrimary by css()
 val Cls.btnDanger by css()
+val Cls.btnWarning by css()
 val Cls.btn by css()
 val Cls.btnOutlineSecondary by css()
 val Cls.dBlock by css()
@@ -524,6 +532,7 @@ val Cls.badge by css()
 val Cls.badgePill by css()
 val Cls.badgePrimary by css()
 val Cls.badgeSecondary by css()
+val Cls.badgeWarning by css()
 val Cls.navTabs by css()
 val Cls.navItem by css()
 val Cls.navLink by css()

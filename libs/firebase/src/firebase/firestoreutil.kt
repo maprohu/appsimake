@@ -3,12 +3,10 @@ package firebase.firestore
 import common.*
 import commonlib.CollectionWrap
 import commonlib.DocWrap
+import commonshr.SetDiff
 import firebase.FirebaseError
 import firebase.firestore
-import firebaseshr.HasFBProps
-import firebaseshr.HasProps
-import firebaseshr.IdState
-import firebaseshr.ScalarProp
+import firebaseshr.*
 import killable.Killable
 import killable.Killables
 import kotlinx.coroutines.*
@@ -136,6 +134,15 @@ fun Query.onSnapshotNext(
     onNext: (QuerySnapshot) -> Unit
 ) : () -> Unit = onSnapshot(onNext, { console.dir(it) })
 
+fun Query.idDiffs(fn: ((SetDiff<String>) -> Unit)) : () -> Unit = onSnapshotNext { qs ->
+    qs.docChanges().fold(SetDiff<String>()) { d, ch ->
+        when (ch.typeEnum) {
+            DocumentChangeType.added -> d.copy(added = d.added + ch.doc.id)
+            DocumentChangeType.removed -> d.copy(removed = d.removed + ch.doc.id)
+            else -> d
+        }
+    }.also(fn)
+}
 
 
 
@@ -327,3 +334,57 @@ fun <T: HasFBProps<*>> DocumentReference.listen(
 
 fun DocWrap<*>.docRef(db: Firestore = firestore()) = db.doc(path)
 fun CollectionWrap<*>.collectionRef(db: Firestore = firestore()) = db.collection(path)
+
+const val MaxBatchSize = 500
+
+fun deleteCollection(
+    ref: CollectionReference,
+    db: Firestore
+): Deferred<Unit> {
+    return GlobalScope.async {
+        suspend fun step(): Boolean {
+            val qs = ref
+                .limit(MaxBatchSize)
+                .get()
+                .await()
+
+            val batch = db.batch()
+            for (doc in qs.docs) {
+                batch.delete(doc.ref)
+            }
+            val c = batch.commit()
+            launch {
+                c.await()
+            }
+
+            return qs.size == MaxBatchSize
+        }
+
+        while (step()) {}
+    }
+
+}
+
+fun initBinder(
+    db: Firestore
+) {
+    initBinder(
+        PropOps(
+            delete = { FieldValue.delete() },
+            serverTimestamp = { FieldValue.serverTimestamp() },
+            deleteCollection = { cw ->
+                deleteCollection(cw.collectionRef(db), db)
+            },
+            createId = {
+                it.collectionRef(db).doc().id
+            },
+            write = { w, d ->
+                w.docRef(db).set(d).asDeferred()
+            },
+            merge = { w, d ->
+                w.docRef(db).set(d, setOptionsMerge()).asDeferred()
+            }
+        )
+
+    )
+}

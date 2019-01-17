@@ -1,6 +1,7 @@
 package commonfb
 
 import bootstrap.*
+import common.ListenableList
 import common.ListenableMutableList
 import commonlib.CollectionWrap
 import commonui.RootPanel
@@ -37,6 +38,7 @@ data class ListUIConfig<T: HasFBProps<*>>(
     val query: RxIface<QueryWrap<T>>,
     val collectionWrap: CollectionWrap<T>,
     val create: () -> T,
+    val filter: (ListenableList<T>) -> ListenableList<T> = { it },
     val hourglassDecor: HTMLDivElement.() -> Unit = { cls.m2 },
     val emptyDivDecor : HTMLDivElement.() -> Unit = standardEmptyDiv,
     val listDivDecor : HTMLDivElement.() -> Unit = { cls.scrollVertical; cls.flexGrow1 },
@@ -78,11 +80,13 @@ fun <T: HasFBProps<*>> listUI(
 
             val list = ListenableMutableList<T>()
 
+            val filtered = filter(list)
+
             val listDiv = document.column {
                 listDivDecor()
                 listGroup {
                     ulDecor()
-                    listenableList(list, itemFactory)
+                    listenableList(filtered, itemFactory)
                 }
             }
 
@@ -94,7 +98,7 @@ fun <T: HasFBProps<*>> listUI(
                     create = create
                 ).copy(
                     onFirst = {
-                        ks += list.isEmptyRx.forEach { empty ->
+                        ks += filtered.isEmptyRx.forEach { empty ->
                             queryRoot.setRoot(
                                 if (empty) emptyDiv else listDiv
                             )

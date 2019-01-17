@@ -9,7 +9,6 @@ import commonui.AppCtx
 import firebase.AppOptions
 import firebase.app.firestore
 import firebase.firestore.*
-import firebase.initBinder
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
