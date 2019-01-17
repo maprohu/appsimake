@@ -3,9 +3,7 @@ package gymclock
 import animate.AnimateOptions
 import animate.ElementAnimate
 import bootstrap.*
-import common.dyn
-import common.obj
-import common.res
+import common.*
 import commonui.faButton
 import commonui.faButtonSpan
 import commonui.screenLayout
@@ -23,6 +21,7 @@ import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.js.Date
 import kotlin.math.floor
+import kotlin.math.min
 
 object Clock {
 
@@ -59,9 +58,17 @@ object Clock {
             screenLayout(ks) {
 
                 top {
-                    backButton {
-                        ks.kill()
-                        Form.show()
+                    leftButton {
+                        cls {
+                            m1
+                        }
+                        clickEvent {
+                            ks.kill()
+                            Form.show()
+                        }
+                        faButtonSpan(Fa.chevronLeft) {
+                            cls.fa.x3
+                        }
                     }
                     middleTitle {
                         innerText = Main.appCtx.title
@@ -73,6 +80,8 @@ object Clock {
                                 btnPrimary
                             }
                             faButtonSpan {
+                                cls.fa.x3
+
                                 ks += rxClass {
                                     if (Model.sounds()) {
                                         Fa.volumeUp
@@ -151,7 +160,13 @@ object Clock {
                 alignItemsCenter
             }
             span {
-                style.fontSize = "52vmin"
+                killables += window.resizeEvent {
+                    console.dir(this)
+                    val fs = "${with(timerDiv) { min(offsetWidth, offsetHeight) * 0.6 }.toInt() }px"
+                    console.dir(fs)
+
+                    style.fontSize = fs
+                }
                 counter.forEach {
                     innerText = it.toString()
                 }

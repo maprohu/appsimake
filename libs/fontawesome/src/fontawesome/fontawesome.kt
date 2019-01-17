@@ -37,13 +37,13 @@ class FaCssClass(val name: String) : ReadOnlyProperty<Fa, String> {
         return name
     }
 }
-class FaCssClassProvider {
+class FaCssClassProvider(private val cls: String? = null) {
     operator fun provideDelegate(
         thisRef: Nothing?,
         prop: KProperty<*>
-    ) = FaCssClass("fa-${prop.name.toCss()}")
+    ) = FaCssClass("fa-${cls ?: prop.name.toCss()}")
 }
-fun facss() = FaCssClassProvider()
+fun facss(cls: String? = null) = FaCssClassProvider(cls)
 
 val Fa.fw by facss()
 val Fa.ban by facss()
@@ -71,3 +71,6 @@ val Fa.volumeUp by facss()
 val Fa.volumeMute by facss()
 val Fa.eyeSlash by facss()
 val Fa.eye by facss()
+val Fa.x2 by facss("2x")
+val Fa.x3 by facss("3x")
+val Fa.x4 by facss("4x")
