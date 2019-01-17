@@ -277,7 +277,7 @@ fun LoggedIn.recent(
                                 cls {
                                     btn
                                     btnSecondary
-                                    p1
+                                    p2
                                     flexFixedSize()
                                     pointerEventsAll
                                 }
