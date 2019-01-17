@@ -108,6 +108,7 @@ open class JsApp(
         """
             {
                 "name": "$title",
+                "display": "standalone",
                 "gcm_sender_id": "103953800507"
             }
         """.trimIndent()
