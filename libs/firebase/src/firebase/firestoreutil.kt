@@ -383,6 +383,12 @@ fun initBinder(
             },
             merge = { w, d ->
                 w.docRef(db).set(d, setOptionsMerge()).asDeferred()
+            },
+            arrayUnion = { vs ->
+                FieldValue.arrayUnion(*vs)
+            },
+            arrayRemove = { vs ->
+                FieldValue.arrayRemove(*vs)
             }
         )
 

@@ -3,6 +3,7 @@ package firebaseshr
 import common.*
 import commonlib.CollectionWrap
 import commonlib.DocWrap
+import commonshr.SetDiff
 import firebaseshr.firestore.Timestamp
 import kotlinx.coroutines.Deferred
 import rx.Rx
@@ -13,28 +14,29 @@ fun hasOwnProperty(d: dynamic, prop: String) = d.hasOwnProperty(prop).unsafeCast
 fun <T> opt(d: dynamic, name: String) = if (hasOwnProperty(d, name)) Some(d[name].unsafeCast<T>()) else None
 
 
-
 data class PropOps(
-    val delete: () -> dynamic = { notInitialized() },
-    val serverTimestamp: () -> Timestamp = { notInitialized() },
-    val deleteCollection: (CollectionWrap<*>) -> Deferred<Unit> = { notInitialized() },
-    val createId: (CollectionWrap<*>) -> String = { notInitialized() },
-    val write: (DocWrap<*>, dynamic) -> Deferred<Unit> = { _, _ -> notInitialized() },
-    val merge: (DocWrap<*>, dynamic) -> Deferred<Unit> = { _, _ -> notInitialized() }
+    val delete: () -> dynamic,
+    val serverTimestamp: () -> Timestamp,
+    val deleteCollection: (CollectionWrap<*>) -> Deferred<Unit>,
+    val createId: (CollectionWrap<*>) -> String,
+    val write: (DocWrap<*>, dynamic) -> Deferred<Unit>,
+    val merge: (DocWrap<*>, dynamic) -> Deferred<Unit>,
+    val arrayUnion: (items: Array<dynamic>) -> dynamic,
+    val arrayRemove: (items: Array<dynamic>) -> dynamic
 ) {
     companion object {
         fun notInitialized(): Nothing {
-            throw IllegalStateException("Firebase ops not initialized!")
+            throw IllegalStateException("Firebase binderOps not initialized!")
         }
     }
 }
 
-internal var propOps = PropOps()
-val ops
-    get() = propOps
+internal var binderOpsInternal: PropOps? = null
+val binderOps
+    get() = binderOpsInternal ?: PropOps.notInitialized()
 
 fun initBinder(ops: PropOps) {
-    propOps = ops
+    binderOpsInternal = ops
 }
 
 data class ValidationError(
@@ -192,7 +194,7 @@ open class ScalarProp<in O, T>(
                 }.getOrElse {
                     ops.write(c)
                 }
-            }.getOrElse(propOps.delete)
+            }.getOrElse(binderOps.delete)
         }
     }
 
@@ -223,22 +225,32 @@ fun <T> dontCalculate(
     }
 }
 
-//class EnumProp<in O, T: Enum<T>>(name: String, ops: ScalarProp.Ops<O, T>) : ScalarProp<O, T>(name, ops) {
-//    data class Ops<in O, T: Enum<T>>(
-//        val scalar: ScalarProp.Ops<O, T>
-//    ) {
-//        fun prop() = scalar.prop(::EnumProp)
-//    }
-//}
-
 fun <O, T> ScalarProp.Ops<O, T>.arrayOf() = ScalarProp.Ops.array<O, dynamic>(registry).map(
     r = { it.map(read).toTypedArray() },
     w = { it.map(write).toTypedArray() }
 )
+
 fun <O, T> ScalarProp.Ops<O, Array<T>>.toSet() = map(
     r = { it.toSet() },
     w = { it.toTypedArray() }
-)
+).let { mapped ->
+    mapped.copy(
+        merge = { old, new ->
+            with(SetDiff.of(old, new)) {
+                when {
+                    added.isEmpty() -> binderOps.arrayRemove(
+                        write(removed.toTypedArray()).unsafeCast<Array<dynamic>>()
+                    )
+                    removed.isEmpty() -> binderOps.arrayUnion(
+                        write(added.toTypedArray()).unsafeCast<Array<dynamic>>()
+                    )
+                    else -> mapped.write(new)
+                }
+            }
+        }
+    )
+}
+
 fun <O, T> ScalarProp.Ops<O, Array<T>>.toList() = map(
     r = { it.toList() },
     w = { it.toTypedArray() }
@@ -303,13 +315,13 @@ open class FBProps<in O>(initial: CollectionWrap<O>) : Props<O, CollectionWrap<O
         return id.now.let { ids ->
             when (ids) {
                 is IdState.New -> {
-                    val did = ops.createId(ids.id)
+                    val did = binderOps.createId(ids.id)
                     val dw = ids.id.doc(did)
-                    val r = ops.write(dw, write())
+                    val r = binderOps.write(dw, write())
                     id.transform { IdState.Persisted(dw) }
                     r
                 }
-                is IdState.Persisted -> ops.merge(ids.id, merge())
+                is IdState.Persisted -> binderOps.merge(ids.id, merge())
             }
         }
     }
@@ -438,6 +450,7 @@ open class BasePropFactory<in O, out N, out P, PR: Props<O, N, P>>(
         r = { enumValueOf<E>(it.unsafeCast<String>()) }
     )
 }
+
 
 
 

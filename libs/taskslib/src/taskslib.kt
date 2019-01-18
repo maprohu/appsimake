@@ -6,7 +6,6 @@ import commonlib.*
 import commonshr.toLazy
 import firebaseshr.*
 import firebaseshr.firestore.Timestamp
-import rx.Rx
 
 val tasks by named { Lib(it) }
 
@@ -70,7 +69,7 @@ open class Task : Base<Task>() {
 
     val tags by o.array<String>().toSet().prop()
 
-    val ts by o.scalar<Timestamp>().calculated { ops.serverTimestamp().toOptional().toLazy() }.prop()
+    val ts by o.scalar<Timestamp>().calculated { binderOps.serverTimestamp().toOptional().toLazy() }.prop()
     val completed by o.scalar<Boolean>().calculated {
         status.current().map { s -> s.completed }.let(::lazyOf)
     }.prop()
@@ -94,7 +93,7 @@ open class Task : Base<Task>() {
     init {
         with(props) {
             onDeleted {
-                ops.deleteCollection(
+                binderOps.deleteCollection(
                     docWrapOrFail.notes
                 )
             }
@@ -114,7 +113,7 @@ open class Tag : Base<Tag>() {
 
 open class Note : Base<Note>() {
     val text by o.scalar<String>().prop()
-    val ts by o.scalar<Timestamp>().calculated { ops.serverTimestamp().toOptional().toLazy() }.prop()
+    val ts by o.scalar<Timestamp>().calculated { binderOps.serverTimestamp().toOptional().toLazy() }.prop()
 
     companion object : Note()
 

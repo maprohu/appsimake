@@ -27,7 +27,11 @@ import kotlin.browser.document
 fun main(args: Array<String>) {
     TasksMain().let { tm ->
         GlobalScope.launch {
-            tm.fbCtx.db.enablePersistence().await()
+            try {
+                tm.fbCtx.db.enablePersistence().await()
+            } catch (e: dynamic) {
+                console.error(e.unsafeCast<Any>())
+            }
 
             tm.start()
         }

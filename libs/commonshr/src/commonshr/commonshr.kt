@@ -18,8 +18,16 @@ data class SetDiff<T>(
                 old.map { o -> n - o }.getOrElse { n }
             }.getOrElse { emptySet() }
         )
-
+        fun <T> of(
+            old: Set<T>,
+            new: Set<T>
+        ) = SetDiff(
+            removed = old - new,
+            added = new - old
+        )
     }
+
+
 }
 
 fun <T> T.toLazy() = lazyOf(this)

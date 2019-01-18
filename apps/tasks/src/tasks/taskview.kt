@@ -12,15 +12,18 @@ import domx.cls
 import domx.*
 import firebase.firestore.query
 import firebaseshr.withCollection
-import fontawesome.Fa
-import fontawesome.comment
+import fontawesome.*
 import killable.Killables
+import killable.addedTo
 import org.w3c.dom.HTMLElement
+import rx.Rx
 import rx.Var
 import rx.diffs
+import rx.set
 import styles.fontSize100
 import taskslib.Note
 import taskslib.Task
+import taskslib.TaskStatus
 import taskslib.notes
 
 fun LoggedIn.viewTask(
@@ -57,6 +60,29 @@ fun LoggedIn.viewTask(
 
                         }
                         editButton(killables, edit)
+                        val canComplete = Rx { !task.completed.initial().getOrDefault(false) }.addedTo(killables)
+                        dropdownSplit {
+                            cls.btnPrimary
+                            rxDisplayed(canComplete)
+                        }
+                        div {
+                            rxDisplayed(canComplete)
+                            cls {
+                                dropdownMenu
+                                dropdownMenuRight
+                            }
+                            dropdownItemAnchor {
+                                icon.cls.fa.clipboardCheck
+                                text.innerText = "Mark as Completed"
+                                clickEvent {
+                                    task.props.rollback()
+                                    task.status.current.set(TaskStatus.Completed)
+                                    task.props.save()
+                                    close()
+                                }
+                            }
+                        }
+
                     }
                 }
             }
