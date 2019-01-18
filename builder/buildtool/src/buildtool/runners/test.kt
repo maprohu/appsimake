@@ -33,9 +33,15 @@ import kfun.Try
 
 fun main(args: Array<String>) {
 
-    runTask {
-        gymclock.testHtml
-    }
+    println(
+        AppManifest().toJson()
+
+    )
+
+
+//    runTask {
+//        gymclock.testHtml
+//    }
 
 //    println( Try { testapp.publicHtml } )
 //

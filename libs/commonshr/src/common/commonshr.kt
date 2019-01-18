@@ -196,24 +196,15 @@ fun <T> named(fn: (String) -> T) = NamedDelegate(fn)
 
 @Suppress("UNUSED_PARAMETER", "SpellCheckingInspection")
 inline fun <T : Any> jsNew(
+    constr: JsClass<T>
+) : T = js("new constr()") as T
+
+@Suppress("UNUSED_PARAMETER", "SpellCheckingInspection")
+inline fun <T : Any> jsNew(
     constr: JsClass<T>,
     param: dynamic
 ) : T = js("new constr(param)") as T
 
-// waiting for KClass.sealedSubclasses to be implemented in KotlinJS
-fun <T> wrapper(vararg classes: KClass<*>) : (dynamic) -> T {
-    val typeMap =
-        classes
-            .map { it.simpleName!! to it.js }
-            .toMap()
-
-    @Suppress("UNCHECKED_CAST")
-    return { d ->
-        typeMap
-            .getValue(d.type as String)
-            .let { jsNew(it, d) as T }
-    }
-}
 
 open class Listeners {
 

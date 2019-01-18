@@ -14,6 +14,7 @@ function define(args, fn) {
 
 define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'appsimake-commonshr'], function (_, Kotlin, $module$kotlinx_coroutines_core, $module$firebase_functions, $module$appsimake_commonshr) {
   'use strict';
+  var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var lazy = Kotlin.kotlin.lazy_klfg04$;
   var coroutines = $module$kotlinx_coroutines_core.kotlinx.coroutines;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
@@ -21,8 +22,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
   var async = $module$kotlinx_coroutines_core.kotlinx.coroutines.async_pda6u4$;
   var asPromise = $module$kotlinx_coroutines_core.kotlinx.coroutines.asPromise_ge6odz$;
   var onCall = $module$firebase_functions.https.onCall;
-  var Unit = Kotlin.kotlin.Unit;
-  var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
   function admin$lambda() {
     return require('firebase-admin');
   }
@@ -101,13 +100,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
   function implementAny($receiver, exports, fn) {
     exports[$receiver.qualifiedName] = onCall(fn);
   }
-  function firestore$lambda$lambda$lambda($receiver) {
-    $receiver.timestampsInSnapshots = true;
-    return Unit;
-  }
   function firestore$lambda() {
     var $receiver = get_admin().firestore();
-    $receiver.settings(obj(firestore$lambda$lambda$lambda));
+    var $receiver_0 = {};
+    $receiver_0.timestampsInSnapshots = true;
+    $receiver.settings($receiver_0);
     return $receiver;
   }
   var firestore;
@@ -123,6 +120,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
   package$commonfns.implementAsync_5bcz1w$ = implementAsync;
   package$commonfns.implementSync_i37kts$ = implementSync;
   package$commonfns.implementAny_w6celz$ = implementAny;
+  $$importsForInline$$['appsimake-commonshr'] = $module$appsimake_commonshr;
   Object.defineProperty(package$commonfns, 'firestore', {
     get: get_firestore
   });

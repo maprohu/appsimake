@@ -6,10 +6,12 @@ import commonfb.LoggedInCtx
 import commonfb.LoggingInCtx
 import commonui.ToolBar
 import firebase.User
+import firebaseshr.initFrom
 import killable.Killables
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tictactoelib.MoveData
+import tictactoelib.Player
 import tictactoelib.tictactoe
 
 fun main(args: Array<String>) {
@@ -59,7 +61,7 @@ class TicTacToeLoggedOutControl: LoggingInCtx(tictactoe, "Tic Tac Toe") {
 
         val stopQuerying = control.playerRef.onSnapshot { ds ->
             stateMachine.update(
-                if (ds.exists) ds.data() else null
+                if (ds.exists) Player().initFrom(ds.data()) else null
             )
         }
 
@@ -71,8 +73,4 @@ class TicTacToeLoggedOutControl: LoggingInCtx(tictactoe, "Tic Tac Toe") {
     }
 }
 
-external interface Player {
-    var active: Boolean
-    var game: String?
-}
 

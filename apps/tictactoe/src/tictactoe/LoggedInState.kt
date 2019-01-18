@@ -6,10 +6,11 @@ import firebase.firestore.*
 import killable.Killables
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import rx.set
 import tictactoelib.Game
+import tictactoelib.Player
 import tictactoelib.Start
-import tictactoelib.firestoreMovesCollectionName
-import tictactoelib.firestoreMovesRef
+import tictactoelib.moves
 import kotlin.random.Random
 
 abstract class LoggedInState(val control: PlayerCtx) : State<Player?, LoggedInState>()
@@ -22,8 +23,8 @@ class PlayerStateUnknown(control: PlayerCtx) : LoggedInState(control) {
                 control.createPlayer()
                 null
             }
-            input.game != null -> StartPlayingState(control, input.game!!)
-            !input.active -> PlayerInactive(control)
+            input.game.iv != null -> StartPlayingState(control, input.game.iv!!)
+            !input.active.iv -> PlayerInactive(control)
             else -> PlayerActiveWaiting(control)
         }
     }
@@ -44,8 +45,8 @@ class PlayerInactive(control: PlayerCtx) : LoggedInState(control) {
                 control.createPlayer()
                 null
             }
-            input.game != null -> StartPlayingState(control, input.game!!)
-            input.active -> PlayerActiveWaiting(control)
+            input.game.iv != null -> StartPlayingState(control, input.game.iv!!)
+            input.active.iv -> PlayerActiveWaiting(control)
             else -> null
         }
     }
@@ -53,6 +54,7 @@ class PlayerInactive(control: PlayerCtx) : LoggedInState(control) {
 }
 
 class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
+    val db = control.db
 
     override fun enter(): () -> Unit {
         val killUI = waitingUI()
@@ -63,11 +65,12 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
         val processingJob = GlobalScope.launch {
 
             val ownGameRef = control.mainCtx.gamesRef.add(
-                obj<Game>{
-                    players = arrayOf(control.playerId)
-                    isOver = false
-                }
+                Game().apply {
+                    players.cv = arrayOf(control.playerId)
+                    isOver.cv = false
+                }.props.write()
             ).await()
+            val ownGameWrap = control.mainCtx.gamesWrap.doc(ownGameRef.id)
 
             for (otherPlayerChange in channel) {
 //                val firstPlayerIndex = Random.nextInt(2)
@@ -79,7 +82,7 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                     for (player in players) {
                         val ds = tx.get(player).await()
 
-                        if (!ds.exists || ds.data<Player>().let { !it.active || it.game != null } ) {
+                        if (!ds.exists || ds.data<Player>().let { !it.active.iv || it.game.iv != null } ) {
                             playersFree = false
                             break
                         }
@@ -89,35 +92,34 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                         players.forEach {
                             tx.set(
                                 it,
-                                obj<Player> {
-                                    active = false
-                                    game = ownGameRef.id
+                                Player().apply {
+                                    active.cv = false
+                                    game.cv = ownGameRef.id
                                 },
                                 obj {
                                     merge = true
                                 }
                             )
                         }
-                        val game = obj<Game> {
-                            this.players = players.map { it.id }.toTypedArray()
-                            originalPlayers = this.players.copyOf()
+                        val game = Game().apply {
+                            this.players.cv = players.map { it.id }.toTypedArray()
+                            originalPlayers.cv = this.players.iv.copyOf()
 //                            this.firstPlayer = firstPlayerIndex
                         }
                         tx.set(
                             ownGameRef,
-                            game,
+                            game.props.write(),
                             setOptionsMerge()
                         )
 
                         val seq = SequenceStartsFrom
-                        val moveRef = ownGameRef.collection(firestoreMovesCollectionName)
-                            .doc(seq.toString())
+                        val moveRef = ownGameWrap.moves.doc(seq.toString()).docRef(db)
                         tx.set(
                             moveRef,
                             Start().apply {
-                                sequence = seq
-                                player = Random.nextInt(2)
-                            }.wrapped
+                                sequence.cv = seq
+                                player.cv = Random.nextInt(2)
+                            }.props.write()
                         )
 
                         true
@@ -166,8 +168,8 @@ class PlayerActiveWaiting(control: PlayerCtx) : LoggedInState(control) {
                 control.createPlayer()
                 null
             }
-            input.game != null -> StartPlayingState(control, input.game!!)
-            !input.active -> PlayerInactive(control)
+            input.game.iv != null -> StartPlayingState(control, input.game.iv!!)
+            !input.active.iv -> PlayerInactive(control)
             else -> null
         }
     }
@@ -186,9 +188,9 @@ class StartPlayingState(
                 control.createPlayer()
                 PlayerActiveWaiting(control)
             }
-            input.game == null && !input.active -> PlayerInactive(control)
-            input.game == null -> PlayerActiveWaiting(control)
-            input.game != game -> StartPlayingState(control, input.game!!)
+            input.game.iv == null && !input.active.iv -> PlayerInactive(control)
+            input.game.iv == null -> PlayerActiveWaiting(control)
+            input.game.iv != game -> StartPlayingState(control, input.game.iv!!)
             else -> null
         }
     }

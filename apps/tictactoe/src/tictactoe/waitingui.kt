@@ -7,12 +7,14 @@ import commonfb.FcmControl
 import commonui.screenLayout
 import domx.*
 import firebase.firestore.setOptionsMerge
+import fontawesome.copy
 import fontawesome.fa
 import fontawesome.fas
 import killable.Killables
 import org.w3c.dom.HTMLElement
 import rx.Rx
 import styles.pointerEventsNone
+import tictactoelib.Player
 import kotlin.browser.document
 import kotlin.browser.window
 
@@ -25,7 +27,7 @@ fun HTMLElement.toggleNotificationButton(
     killables += fcmState
     flexAlignItemsCenter()
     input {
-        classes += pointerEventsNone
+        cls.pointerEventsNone
         margin1()
         type = "checkbox"
         fcmState.forEach {
@@ -49,14 +51,14 @@ fun HTMLElement.toggleNotificationButton(
 fun PlayerActiveWaiting.waitingUI() : () -> Unit {
     val killables = Killables()
     control.appCtx.root.newRoot {
-        screenLayout {
+        screenLayout(killables) {
             top {
                 ticTacToe()
                 leftButton {
                     innerText = "Cancel"
                     clickEvent {
                         control.playerRef.set(
-                            obj<Player> { active = false},
+                            Player().apply { active.cv = false }.props.merge(),
                             setOptionsMerge()
                         )
                     }
@@ -88,7 +90,9 @@ fun PlayerActiveWaiting.waitingUI() : () -> Unit {
                 }
 
                 row {
-                    flexFixedSize()
+                    cls {
+                        flexFixedSize()
+                    }
                     padding1()
                     input {
                         padding1()
@@ -100,14 +104,15 @@ fun PlayerActiveWaiting.waitingUI() : () -> Unit {
                     btnButton {
                         btnSecondary()
                         margin1()
-                        fas("copy")
+                        cls.fa.copy
                         clickEvent {
-                            val t = document.textarea()
-                            t.value = window.location.href
-                            document.body!!.appendChild(t)
-                            t.select()
-                            document.execCommand("copy")
-                            t.removeFromParent()
+                            document.textarea {
+                                value = window.location.href
+                                document.body!!.appendChild(this)
+                                select()
+                                document.execCommand("copy")
+                                removeFromParent()
+                            }
                         }
                     }
                 }

@@ -12,9 +12,9 @@ function define(args, fn) {
     );
 }
 
-define(['exports', 'kotlin', 'appsimake-commonlib', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_commonlib, $module$appsimake_commonshr) {
+define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_commonshr) {
   'use strict';
-  var Lib = $module$appsimake_commonlib.commonlib.Lib;
+  var Lib = $module$appsimake_commonshr.commonlib.Lib;
   var named = $module$appsimake_commonshr.common.named_cq6yhu$;
   var PropertyMetadata = Kotlin.PropertyMetadata;
   function testapp$lambda(it) {
@@ -49,10 +49,10 @@ define(['exports', 'kotlin', 'appsimake-commonlib', 'appsimake-commonshr'], func
       return tokensPath;
     }
   });
-  testapp = named(testapp$lambda).provideDelegate_d6mtq7$(this, testapp_metadata);
-  sendMessage = get_testapp().function_q3lmfv$().provideDelegate_d6mtq7$(this, sendMessage_metadata);
+  testapp = named(testapp$lambda).provideDelegate_n5byny$(this, testapp_metadata);
+  sendMessage = get_testapp().function_q3lmfv$().provideDelegate_n5byny$(this, sendMessage_metadata);
   tokensCollectionName = 'tokens';
-  tokensPath = get_testapp().firestoreBasePath + '/' + tokensCollectionName;
+  tokensPath = get_testapp().app.path + '/' + tokensCollectionName;
   Kotlin.defineModule('appsimake-testapplib', _);
   return _;
 });

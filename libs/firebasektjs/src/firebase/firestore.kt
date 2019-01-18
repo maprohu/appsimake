@@ -63,7 +63,7 @@ external interface Transaction {
     fun set(ref: DocumentReference, data: dynamic, options: SetOptions = definedExternally) : Transaction
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Transaction#update
-    fun update(ref: DocumentReference, vararg value: Any) : Transaction
+    fun update(ref: DocumentReference, vararg value: dynamic) : Transaction
 
 }
 

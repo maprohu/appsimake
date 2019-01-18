@@ -14,25 +14,23 @@ function define(args, fn) {
 
 define(['exports', 'kotlin', 'appsimake-testapplib', 'appsimake-functions', 'kotlinx-coroutines-core', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_testapplib, $module$appsimake_functions, $module$kotlinx_coroutines_core, $module$appsimake_commonshr) {
   'use strict';
+  var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var testapplib = $module$appsimake_testapplib.testapplib;
   var commonfns = $module$appsimake_functions.commonfns;
   var await_0 = $module$kotlinx_coroutines_core.kotlinx.coroutines.await_t11jrl$;
   var firebaseadmin = $module$appsimake_functions.firebaseadmin;
   var Unit = Kotlin.kotlin.Unit;
-  var obj = $module$appsimake_commonshr.common.obj_7qq44f$;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var implementAsync = $module$appsimake_functions.commonfns.implementAsync_5bcz1w$;
-  function init$lambda$lambda$lambda(closure$qds, closure$msg) {
-    return function ($receiver) {
-      $receiver.token = closure$qds.id;
-      $receiver.data = closure$msg;
-      return Unit;
-    };
-  }
   function init$lambda$lambda(closure$msg) {
     return function (qds) {
-      firebaseadmin.admin.messaging().send(obj(init$lambda$lambda$lambda(qds, closure$msg)));
+      var tmp$ = firebaseadmin.admin.messaging();
+      var $receiver = {};
+      var closure$msg_0 = closure$msg;
+      $receiver.token = qds.id;
+      $receiver.data = closure$msg_0;
+      tmp$.send($receiver);
       return Unit;
     };
   }
@@ -88,6 +86,7 @@ define(['exports', 'kotlin', 'appsimake-testapplib', 'appsimake-functions', 'kot
   function init(exports) {
     implementAsync(testapplib.sendMessage, exports, init$lambda);
   }
+  $$importsForInline$$['appsimake-commonshr'] = $module$appsimake_commonshr;
   var package$testappfns = _.testappfns || (_.testappfns = {});
   package$testappfns.init_za3rmp$ = init;
   Kotlin.defineModule('appsimake-testappfns', _);

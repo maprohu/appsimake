@@ -264,6 +264,7 @@ open class Var<T>(
 }
 
 
+fun <T> RxIface<Optional<T>>.get() = now.get()
 fun <T> Var<Optional<T>>.set(v: T) {
     now = Some(v)
 }

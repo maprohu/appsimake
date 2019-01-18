@@ -6,9 +6,7 @@ import commonlib.DocWrap
 import commonshr.SetDiff
 import firebaseshr.firestore.Timestamp
 import kotlinx.coroutines.Deferred
-import rx.Rx
-import rx.RxVal
-import rx.Var
+import rx.*
 
 fun hasOwnProperty(d: dynamic, prop: String) = d.hasOwnProperty(prop).unsafeCast<Boolean>()
 fun <T> opt(d: dynamic, name: String) = if (hasOwnProperty(d, name)) Some(d[name].unsafeCast<T>()) else None
@@ -133,7 +131,17 @@ open class ScalarProp<in O, T>(
     }
 
     val initial = Var(ops.defaultValue())
+
+    val iv
+        get() = initial.get()
+//        set(v) = initial.set(v)
+
+
     val current = Var(initial.now)
+
+    var cv
+        get() = current.get()
+        set(v) = current.set(v)
 
 
     val calculated
@@ -421,7 +429,40 @@ interface HasFBProps<in O>: HasProps<O, CollectionWrap<O>, DocWrap<O>> {
 
 }
 
-open class Base<T>(val o: FBPropFactory<T> = FBPropFactory(CollectionWrap(""))) : HasFBProps<T> by o {
+open class Base<T>(val o: FBPropFactory<T> = FBPropFactory(CollectionWrap(""))) : HasFBProps<T> by o
+open class BaseRoot<out T: BaseRoot<T>> : Base<@kotlin.UnsafeVariance T>()
+class BaseRootCheck: BaseRoot<BaseRootCheck>() {
+    val type by o.scalar<String>().prop()
+}
+
+fun <T: Base<*>> T.currentFrom(d: dynamic): T {
+    initFrom(d)
+    props.rollback()
+    return this
+}
+fun <T: Base<*>> T.initFrom(d: dynamic): T {
+    props.extractInitial(d)
+    return this
+}
+
+// waiting for KClass.sealedSubclasses to be implemented in KotlinJS
+fun <T: BaseRoot<T>> wrapper(
+    vararg classes: () -> T
+) : (dynamic) -> T {
+    val typeMap =
+        classes
+            .map { cl ->
+                cl()::class.simpleName!! to cl
+            }
+            .toMap()
+
+    return { d ->
+        BaseRootCheck().apply {
+            props.extractInitial(d)
+        }.let { ch ->
+            typeMap.getValue(ch.type.initial.now.get())()
+        }
+    }
 }
 
 fun <T: Base<T>> T.withCollection(c: CollectionWrap<T>): T {

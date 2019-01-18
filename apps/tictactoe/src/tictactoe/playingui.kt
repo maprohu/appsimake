@@ -3,36 +3,37 @@ package tictactoe
 import bootstrap.*
 import common.obj
 import commonui.RootPanel
+import commonui.faButton
 import commonui.screenLayout
-import domx.clickEvent
-import domx.div
-import fontawesome.chevronLeft
-import fontawesome.spinner
+import domx.*
+import fontawesome.*
+import killable.Killables
+import tictactoelib.Player
 
 class PlayingUI(
     playerCtx: PlayerCtx
 ) {
-    val layout = playerCtx.appCtx.root.newRoot().screenLayout {
+    val layout = playerCtx.appCtx.root.newRoot().screenLayout(Killables()) {
         top {
-            left.dropdown {
-                element {
-                    margin1()
+            left {
+                cls {
+                    m1
+                    dropdown
                 }
-
-                button {
-                    chevronLeft()
+                faButton(Fa.chevronLeft) {
+                    attr["data-toggle"] = "dropdown"
                 }
-
-                menu {
+                div {
+                    cls.dropdownMenu
                     dropdownItemAnchor {
                         innerText = "Back to Waiting Room"
                         clickEvent {
                             playerCtx.playerRef
                                 .set(
-                                    obj<Player> {
-                                        active = true
-                                        game = null
-                                    }
+                                    Player().apply {
+                                        active.cv = true
+                                        game.cv = null
+                                    }.props.write()
                                 )
                         }
                     }
@@ -41,10 +42,10 @@ class PlayingUI(
                         clickEvent {
                             playerCtx.playerRef
                                 .set(
-                                    obj<Player> {
-                                        active = false
-                                        game = null
-                                    }
+                                    Player().apply {
+                                        active.cv = false
+                                        game.cv = null
+                                    }.props.write()
                                 )
                         }
                     }
@@ -59,7 +60,12 @@ class PlayingUI(
     }.div {
         margin1()
         flexCenter()
-        spinner()
+        span {
+            cls {
+                spinnerBorder
+                spinnerBorderSm
+            }
+        }
     }
 
     val root = RootPanel(layout.main)

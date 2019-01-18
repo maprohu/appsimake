@@ -289,7 +289,7 @@ class QueryBuilder<T>(
     infix fun <P> ScalarProp<T, P>.eq(v: P) {
         query = query.where(name, "==", write(v))
     }
-    fun <P> ScalarProp<T, P>.asc() {
+    fun <P, T2: T> ScalarProp<T2, P>.asc() {
         query = query.orderBy(name)
     }
     fun <P> ScalarProp<T, P>.desc() {

@@ -4,6 +4,7 @@ import common.obj
 import fbmessagingsw.messageHandler
 import fbmessagingsw.messageTitle
 import fbmessagingsw.sw
+import firebaseshr.initFrom
 import org.w3c.notifications.NotificationOptions
 import tictactoelib.Leave
 import tictactoelib.Move
@@ -13,15 +14,15 @@ import kotlin.js.Promise
 
 fun main(args: Array<String>) {
 
-    messageTitle = {
-        val move = Move.of(
-            JSON.parse(it.data.json as String)
-        )
+    messageTitle = { msgIn ->
+        val d = JSON.parse<dynamic>(msgIn.data.json as String)
+        val move = Move.of(d)
 
         val msg = when (move) {
             is Start -> "game started"
             is Leave -> "opponent left"
             is Placement -> "opponent moved"
+            else -> throw Error("unexpected move: $move")
         }
 
         "TicTacToe: $msg"
@@ -40,7 +41,7 @@ fun main(args: Array<String>) {
                             this.click_action = sw.registration.scope
                         }
                     }
-                } as? Any
+                }.unsafeCast<Any?>()
             )
 
         )

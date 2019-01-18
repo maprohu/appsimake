@@ -1,50 +1,58 @@
 package tictactoelib
 
-import common.Wrap
 import common.named
-import common.wrapper
+import commonlib.AppDoc
+import commonlib.DocWrap
 import commonlib.Lib
+import commonlib.coll
+import firebaseshr.Base
+import firebaseshr.BaseRoot
+import firebaseshr.initFrom
+import firebaseshr.wrapper
 
 val tictactoe by named { Lib(it) }
+
+val <D: AppDoc> DocWrap<D>.games by coll<Game>()
+val <D: AppDoc> DocWrap<D>.players by coll<Player>()
+val DocWrap<Game>.moves by coll<Move<*>>()
 
 external interface MoveData {
     var text: String
     var fcmToken: String
 }
 
-val firestoreGamesPath = "${tictactoe.firestoreBasePath}/games"
-val firestorePlayersPath = "${tictactoe.firestoreBasePath}/players"
-val firestoreMovesCollectionName = "moves"
-fun firestoreGameRef(gameId: String) = "$firestoreGamesPath/$gameId"
-fun firestoreMovesRef(gameId: String) = "${firestoreGameRef(gameId)}/$firestoreMovesCollectionName"
-
-external interface Game {
-    var players: Array<String>
-    var originalPlayers: Array<String>
-    var isOver: Boolean
+open class Player: Base<Player>() {
+    val active by o.scalar<Boolean>().prop()
+    val game by o.scalar<String?>().prop()
+}
+class Game: Base<Game>() {
+    val players by o.array<String>().prop()
+    val originalPlayers by o.array<String>().prop()
+    val isOver by o.scalar<Boolean>().prop()
 //    var firstPlayer: Int
 //    var lastSequence: Int?
 }
 
 
-sealed class Move(o: dynamic) : Wrap(o) {
-    var sequence: Int by dyn()
-    var player: Int by dyn()
+sealed class Move<T: Move<T>>: BaseRoot<T>() {
+    val sequence by o.scalar<Int>().prop()
+    val player by o.scalar<Int>().prop()
 
-    companion object {
-        val of = wrapper<Move>(
-            Start::class,
-            Placement::class,
-            Leave::class
+    companion object : Move<Nothing>() {
+        val emptyOf = wrapper(
+            { Start() },
+            { Placement() },
+            { Leave() }
         )
+        fun of(d: dynamic) = emptyOf(d).initFrom(d)
     }
 }
 
-class Start(o: dynamic = null) : Move(o)
+class Start : Move<Start>()
 
-class Placement(o: dynamic = null) : Move(o) {
-    var x : Int by dyn()
-    var y : Int by dyn()
+class Placement : Move<Placement>() {
+    val x by o.scalar<Int>().prop()
+    val y by o.scalar<Int>().prop()
 }
 
-class Leave(o: dynamic = null) : Move(o)
+class Leave : Move<Leave>()

@@ -20,11 +20,8 @@ enum class TaskStatus(val completed: Boolean) {
     Completed(true),
     Canceled(true);
 
-
     companion object {
         val byCompleted = values().groupBy { it.completed }
-
-
     }
 }
 

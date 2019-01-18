@@ -11,4 +11,4 @@ external interface Msg {
 val sendMessage by testapp.function<Msg, Unit>()
 
 val tokensCollectionName = "tokens"
-val tokensPath = "${testapp.firestoreBasePath}/$tokensCollectionName"
+val tokensPath = "${testapp.app.path}/$tokensCollectionName"

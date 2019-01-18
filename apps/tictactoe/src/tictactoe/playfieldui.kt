@@ -6,6 +6,8 @@ import common.obj
 import commonui.*
 import domx.*
 import firebase.firestore.*
+import firebaseshr.initFrom
+import fontawesome.Fa
 import domx.a as _
 import fontawesome.chevronDown
 import killable.Killables
@@ -237,8 +239,8 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
                             move(
                                 expectingSequence,
                                 Placement().apply {
-                                    this.x = x
-                                    this.y = y
+                                    this.x.current.set(x)
+                                    this.y.current.set(y)
                                 }
                             )
                         }
@@ -385,28 +387,36 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
     }
 
     ui.layout.top.right {
-        dropdown {
-            element {
-                margin1()
+        cls {
+            dropdown
+            m1
+        }
+
+        faButton(Fa.chevronDown) {
+            dataToggleDropdown()
+        }
+
+        div {
+            cls {
+                dropdownMenu
+                dropdownMenuRight
             }
 
-            button {
-                chevronDown()
-            }
-
-            menu {
-                dropdownMenuRight()
-
-                dropdownItemAnchor {
+            dropdownItemAnchor {
+                text {
                     this + "Change mark to "
                     drawMark(theirMark)
 
+                }
+                anchor {
                     clickEvent {
                         ourMark.now = ourMark.now.other
                     }
                 }
+            }
 
-                dropdownItemAnchor {
+            dropdownItemAnchor {
+                anchor {
                     toggleNotificationButton(
                         killables,
                         loggedInCtx.fcmControl
@@ -427,8 +437,8 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
         turn() in gameOverStates
     }
 
-    fun Move.isOurs() = player == playerIndex
-    fun Move.party() = if (isOurs()) Party.This else Party.That
+    fun Move<*>.isOurs() = player.initial.now.any { it == playerIndex }
+    fun Move<*>.party() = if (isOurs()) Party.This else Party.That
 
     data class Dir(
         val dx: Int,
@@ -477,18 +487,18 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
         return hs.isNotEmpty()
     }
 
-    fun Move.process() {
-        if (sequence < expectingSequence) return
+    fun Move<*>.process() {
+        if (sequence.iv < expectingSequence) return
         if (isOver.now) return
-        if (sequence > expectingSequence) throw Error("expecting sequence $expectingSequence, got $sequence")
-        expectingSequence = sequence + 1
+        if (sequence.iv > expectingSequence) throw Error("expecting sequence $expectingSequence, got $sequence")
+        expectingSequence = sequence.iv + 1
 
         when (this) {
             is Start -> {
-                turn.now = if (this.player == playerIndex) Turn.There else Turn.Here
+                turn.now = if (this.player.iv == playerIndex) Turn.There else Turn.Here
             }
             is Placement -> {
-                val coords = Coords(x, y)
+                val coords = Coords(x.iv, y.iv)
                 val state = state(coords)
                 val party = party()
                 state.now = party.field
@@ -501,26 +511,31 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
             is Leave -> {
                 turn.now = Turn.Alone
             }
+            else -> throw Error()
         }
 
         if (isOver.now) {
             gameRef.set(
-                obj<Game> {
-                    this.isOver = true
-                },
+                Game().apply {
+                    this.isOver.cv = true
+                }.props.merge(),
                 setOptionsMerge()
             )
         }
 
     }
 
-    val stopListening = movesRef
-        .orderBy(Move::sequence)
+    val stopListening = movesWrap
+        .query(db) {
+            Move.sequence.asc()
+        }
+        .query
         .onSnapshotNext { qs ->
             qs.docChanges()
                 .filter { it.typeEnum == DocumentChangeType.added }
                 .forEach { dc ->
-                    Move.of(dc.doc.data()).process()
+                    val d = dc.doc.data<dynamic>()
+                    Move.of(d).process()
                 }
         }
 

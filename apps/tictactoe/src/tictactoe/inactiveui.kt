@@ -6,10 +6,12 @@ import commonui.screenLayout
 import domx.*
 import firebase.firestore.setOptionsMerge
 import fontawesome.fas
+import killable.Killables
+import tictactoelib.Player
 
 fun PlayerInactive.inactiveUI() {
     control.appCtx.root.newRoot {
-        screenLayout {
+        screenLayout(Killables()) {
 
             top {
                 ticTacToe()
@@ -28,7 +30,7 @@ fun PlayerInactive.inactiveUI() {
                     innerText = "Enter Waiting Room"
                     clickEvent {
                         control.playerRef.set(
-                            obj<Player> { active = true },
+                            Player().apply { active.cv = true }.props.merge(),
                             setOptionsMerge()
                         )
                     }

@@ -64,7 +64,7 @@ class DropdownGroup(
             dropdownToggle
         }
         classes += btnStyle
-        attr["data-toggle"] = "dropdown"
+        dataToggleDropdown()
     }
 
     val menu = element.div {
@@ -74,6 +74,10 @@ class DropdownGroup(
     }
 }
 
+fun HTMLButtonElement.dataToggleDropdown() {
+    attr["data-toggle"] = "dropdown"
+}
+
 val Node.dropdownSplit: HTMLButtonElement
     get() = button {
         cls {
@@ -81,7 +85,7 @@ val Node.dropdownSplit: HTMLButtonElement
             dropdownToggle
             dropdownToggleSplit
         }
-        attr["data-toggle"] = "dropdown"
+        dataToggleDropdown()
         attr["data-reference"] = "parent"
     }
 
@@ -129,7 +133,6 @@ class DropdownItemAnchor(node: Node) {
 }
 
 fun Node.dropdownItemAnchor(block : DropdownItemAnchor.() -> Unit = {}) = DropdownItemAnchor(this).apply(block)
-
 
 fun Node.listAction(
     content: HTMLAnchorElement.() -> Unit

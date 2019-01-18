@@ -5,9 +5,12 @@ import commonfb.FbCtx
 import commonfb.LoggedInCtx
 import firebase.User
 import firebase.firestore.*
+import firebaseshr.currentFrom
+import firebaseshr.initFrom
 import killable.Killables
 import kotlinx.coroutines.*
 import tictactoelib.Game
+import tictactoelib.Player
 
 class PlayerCtx(
     val mainCtx: MainCtx,
@@ -26,9 +29,9 @@ class PlayerCtx(
     val playerRef = mainCtx.playersRef.doc(playerId)
 
     fun newPlayer() =
-        obj<Player>().apply {
-            active = false
-            game = null
+        Player().apply {
+            active.cv = false
+            game.cv = null
         }
 
     fun cleanupGames() {
@@ -60,30 +63,31 @@ class PlayerCtx(
                 val game = tx.get(gameRef).await()
 
                 if (game.exists) {
+
                     val player = tx.get(playerRef).await()
 
                     val playerToWrite = if (player.exists) {
-                        player.data()
+                        Player().currentFrom(player.data())
                     } else {
                         newPlayer()
                     }
 
-                    if (playerToWrite.game != game.ref.id) {
-                        val gameData = game.data<Game>()
+                    if (playerToWrite.game.cv != game.ref.id) {
+                        val gameData = Game().currentFrom(game.data())
 
                         gameData.apply {
-                            players = players.filterNot { it == playerId }.toTypedArray()
+                            players.cv = players.cv.filterNot { it == playerId }.toTypedArray()
                         }
 
-                        val deleted = if (gameData.players.isEmpty()) {
+                        val deleted = if (gameData.players.cv.isEmpty()) {
                             tx.delete(game.ref)
                             true
                         } else {
-                            tx.update(game.ref, gameData)
+                            tx.update(game.ref, gameData.props.write())
                             false
                         }
 
-                        tx.set(playerRef, playerToWrite)
+                        tx.set(playerRef, playerToWrite.props.write())
 
                         deleted
                     } else {
@@ -123,8 +127,8 @@ class PlayerCtx(
             if (!it.exists) {
                 leaveGame(gameId)
             } else {
-                val game = it.data<Game>()
-                val playerIndex = game.players.indexOf(playerId)
+                val game = Game().initFrom(it.data())
+                val playerIndex = game.players.iv.indexOf(playerId)
 //                val weStart = playerIndex == game.firstPlayer
                 val playingCtx = PlayingCtx(
                     this,
@@ -143,10 +147,10 @@ class PlayerCtx(
 
         GlobalScope.launch {
             db.tx { tx ->
-                val player = tx.get(playerRef).await().data<Player>()
+                val player = Player().currentFrom(tx.get(playerRef).await().data())
 
-                if (player.game == gameId) {
-                    player.game = null
+                if (player.game.cv == gameId) {
+                    player.game.cv = null
                 }
 
                 tx.set(playerRef, player)

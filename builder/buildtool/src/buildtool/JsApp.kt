@@ -5,13 +5,128 @@ import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
 import java.io.PrintWriter
 
+
+fun Any?.toJson(): String {
+    return when (this) {
+        null -> "null"
+        is MapBase -> {
+            map.entries
+                .filter { e -> e.key != null }
+                .joinToString(",") { e ->
+                    "\n\"${e.key}\": ${e.value.toJson()}".prependIndent("  ")
+                }
+                .let { s -> "{$s\n}" }
+        }
+        is String -> {
+            this
+                .replace("\\", "\\\\")
+                .replace("\b", "\\b")
+                .replace("\u000C", "\\f")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+                .replace("\"", "\\\"")
+                .let { s -> "\"$s\"" }
+        }
+        is Iterable<Any?> -> {
+            joinToString<Any?>(",") { e ->
+                "\n${e.toJson()}".prependIndent("  ")
+            }.let { s ->
+                "[$s\n]"
+            }
+        }
+        else -> toString()
+    }
+
+}
+
+open class MapBase {
+    val map: MutableMap<String, Any?> = mutableMapOf()
+}
+
+class AppManifest : MapBase() {
+    var name: String by map
+    var icons: List<Icon> by map
+    var display: String by map
+    var gcm_sender_id: String by map
+    val start_url: String by map
+
+    init {
+        gcm_sender_id = "103953800507"
+        display = "standalone"
+    }
+
+    class Icon : MapBase() {
+        var src: String by map
+        var type: String by map
+        var sizes: String by map
+
+        init {
+            type = "image/png"
+            sizes = "192x192"
+        }
+    }
+}
+
+data class JsAppConfig(
+//    val path: String,
+    val module: JsModuleConfig,
+    val title: String,
+//    val css: List<Res>,
+//    val deps: List<JsDep> = listOf(),
+    val serviceWorker: JsModule = firebaseMessagingSw,
+    val icon192: String? = null,
+    val icon512: String? = null
+) {
+
+    constructor(
+        path: String,
+        title: String,
+        css: List<Res>,
+        deps: List<JsDep> = listOf(),
+        serviceWorker: JsModule = firebaseMessagingSw
+    ): this(
+        JsModuleConfig(
+            path
+        ).copy(
+            css = css,
+            deps = deps
+        ),
+        title,
+        serviceWorker
+    )
+
+    constructor(
+        path: String,
+        title: String,
+        deps: List<JsDep> = listOf(),
+        serviceWorker: JsModule = firebaseMessagingSw
+    ) : this(path, title, listOf(), deps, serviceWorker)
+
+}
+
 open class JsApp(
-    path: String,
-    title: String,
-    css: List<Res>,
-    deps: List<JsDep> = listOf(),
-    serviceWorker: JsModule = firebaseMessagingSw
-) : JsModule(path, css, deps) {
+    config: JsAppConfig
+) : JsModule(config.module) {
+
+    constructor(
+        path: String,
+        title: String,
+        css: List<Res>,
+        deps: List<JsDep> = listOf(),
+        serviceWorker: JsModule = firebaseMessagingSw
+    ): this(
+        JsAppConfig(
+            JsModuleConfig(
+                path
+            ).copy(
+                css = css,
+                deps = deps
+            ),
+            title,
+            serviceWorker
+        )
+    )
 
     constructor(
         path: String,
@@ -105,13 +220,25 @@ open class JsApp(
 //    }
 
     val manifestText by task {
-        """
-            {
-                "name": "$title",
-                "display": "standalone",
-                "gcm_sender_id": "103953800507"
+        AppManifest().apply {
+            name = config.title
+            val ics = mutableListOf<AppManifest.Icon>()
+            config.icon192?.let { i ->
+                ics += AppManifest.Icon().apply {
+                    src = i
+                    sizes = "192x192"
+                }
             }
-        """.trimIndent()
+            config.icon512?.let { i ->
+                ics += AppManifest.Icon().apply {
+                    src = i
+                    sizes = "512x512"
+                }
+            }
+            if (!ics.isEmpty()) {
+                icons = ics
+            }
+        }.toJson()
     }
 
     val publicManifest by task {
@@ -178,12 +305,12 @@ open class JsApp(
     val testSW by task {
         val file = TestingDir.resolve(simpleName).resolve(serviceWorkerFileName)
 
-        serviceWorker.writeTestingServiceWorkerJS(file, this)
+        config.serviceWorker.writeTestingServiceWorkerJS(file, this)
     }
 
     val publicSW by task {
         val file = PublicDir.resolve(simpleName).resolve(serviceWorkerFileName)
-        serviceWorker.writePublicServiceWorkerJS(file, this)
+        config.serviceWorker.writePublicServiceWorkerJS(file, this)
     }
 
     private fun HEAD.setupHtmlHead() {
