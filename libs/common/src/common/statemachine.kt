@@ -1,5 +1,7 @@
 package common
 
+import killable.Killable
+
 interface State1<in I, out O> {
     operator fun invoke(input: I) : Pair<State1<I, O>?, O>
 }
@@ -81,7 +83,7 @@ class LazySM0<T>(fn: () -> T) {
 
 abstract class State<in I, S: State<I, S>> {
 
-    open fun enter() : () -> Unit = {}
+    open fun enter() : Killable = Killable.empty
     abstract fun process(input: I) : S?
 
 }
@@ -89,13 +91,13 @@ abstract class State<in I, S: State<I, S>> {
 class StateMachine<I, S: State<I, S>>(
     private var state: S
 ) {
-    private var destroy : () -> Unit = state.enter()
+    private var destroy : Killable = state.enter()
 
     fun update(input: I) {
         val nextState = state.process(input)
 
         if (nextState != null) {
-            destroy()
+            destroy.kill()
             state = nextState
             destroy = state.enter()
         }
@@ -110,8 +112,8 @@ class StateMachine<I, S: State<I, S>>(
     }
 
     fun shutdown() {
-        destroy()
-        destroy = { alreadyShutdown() }
+        destroy.kill()
+        destroy = Killable.of { alreadyShutdown() }
         state = AlreadyShutdown().unsafeCast<S>()
     }
 

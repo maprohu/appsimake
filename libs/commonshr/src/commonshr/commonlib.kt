@@ -4,6 +4,7 @@ import common.named
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+fun lib() = named { Lib(it) }
 
 open class Lib(
     val name: String
@@ -48,10 +49,8 @@ open class CollectionWrap<in D>(
 ) : HasPath {
     override val path : String = "${parent?.path ?: ""}/$id"
 
-    fun <D2: D> docdc(id: String) = DocWrap<D2>(id, this)
-    fun docc(id: String) = docdc<D>(id)
-    fun <D2: D> docd(id: String) = docdc<D2>(id)
-    fun doc(id: String) = docdc<D>(id)
+    fun <D2: D> docd(id: String) = DocWrap<D2>(id, this)
+    fun doc(id: String) = docd<D>(id)
 }
 
 fun <D> doc() = object : ReadOnlyProperty<CollectionWrap<D>, DocWrap<D>> {

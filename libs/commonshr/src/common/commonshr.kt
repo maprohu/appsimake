@@ -248,7 +248,7 @@ open class Emitter<T> {
         }
     }
 
-    open fun fire(t: T) {
+    open fun emit(t: T) {
         listeners.forEach { it(t) }
     }
 

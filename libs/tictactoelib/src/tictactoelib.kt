@@ -1,16 +1,13 @@
 package tictactoelib
 
 import common.named
-import commonlib.AppDoc
-import commonlib.DocWrap
-import commonlib.Lib
-import commonlib.coll
+import commonlib.*
 import firebaseshr.Base
 import firebaseshr.BaseRoot
 import firebaseshr.initFrom
 import firebaseshr.wrapper
 
-val tictactoe by named { Lib(it) }
+val tictactoe by lib()
 
 val <D: AppDoc> DocWrap<D>.games by coll<Game>()
 val <D: AppDoc> DocWrap<D>.players by coll<Player>()

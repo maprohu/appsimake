@@ -12,6 +12,7 @@ import firebase.firestore.*
 import firebaseshr.dontCalculate
 import firebaseshr.withCollection
 import fontawesome.*
+import killable.Killable
 import killable.Killables
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
@@ -45,7 +46,7 @@ class TasksMain : LoggingInCtx(tasks, "Tasks") {
         appCtx.registerServiceWorker()
     }
 
-    override fun loggedIn(user: User): () -> Unit {
+    override fun loggedIn(user: User): Killable {
         return LoggedIn(this, user).main()
     }
 
@@ -71,7 +72,7 @@ class LoggedIn(
 
     val tagSource = TagSource(userTags, db).also { killables += it }
 
-    fun main(): () -> Unit {
+    fun main(): Killable {
 
         root.newRoot {
             val homeActive = Var(true)
@@ -191,7 +192,7 @@ class LoggedIn(
 
 
 
-        return {
+        return Killable.once {
             killables.kill()
             loggedInCtx.killables.kill()
         }

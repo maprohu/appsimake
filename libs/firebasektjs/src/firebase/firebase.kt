@@ -6,6 +6,7 @@ import firebase.auth.Auth
 import firebase.firestore.Firestore
 import firebase.functions.Functions
 import firebase.messaging.Messaging
+import firebase.storage.Storage
 
 external interface AppOptions {
     var apiKey: String
@@ -51,30 +52,10 @@ external fun functions(
     app: App = definedExternally
 ) : Functions
 
+external fun storage(
+    app: App = definedExternally
+): Storage
 
 external class FirebaseError
 
 
-external interface Thenable<out T> {
-
-//    fun <S> then(
-//            onResolve: (T) -> S,
-//            onReject: (Any) -> Any = definedExternally
-//    ) : Thenable<S>
-
-}
-
-//external interface Promise<out T> : Thenable<T> {
-//
-//    fun <S> then(
-//            onResolve: (T) -> Any?
-//    ) : Promise<S>
-//
-//    fun <S> then(
-//            onResolve: (T) -> Any?,
-//            onReject: (Any) -> Any?
-//    ) : Promise<S>
-//
-//    fun <S> catch(error: (Error) -> Any?) : Promise<S>
-//
-//}

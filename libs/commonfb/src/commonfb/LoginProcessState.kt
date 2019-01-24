@@ -2,6 +2,7 @@ package commonfb
 
 import common.State
 import firebase.User
+import killable.Killable
 import killable.Killables
 
 abstract class LoginProcessState(val control: LoggingInCtx): State<User?, LoginProcessState>() {
@@ -18,9 +19,9 @@ abstract class LoginProcessState(val control: LoggingInCtx): State<User?, LoginP
 
 open class LoggedUnknown(control: LoggingInCtx) : LoginProcessState(control) {
 
-    override fun enter(): () -> Unit {
+    override fun enter(): Killable {
         control.appCtx.hourglass()
-        return {}
+        return Killable.empty
     }
 
 
@@ -28,10 +29,10 @@ open class LoggedUnknown(control: LoggingInCtx) : LoginProcessState(control) {
 
 class LoggedOut(control: LoggingInCtx) : LoginProcessState(control) {
 
-    override fun enter(): () -> Unit {
+    override fun enter(): Killable {
         val killables = Killables()
         control.loggedOut(killables)
-        return { killables.kill() }
+        return killables
     }
 
 }

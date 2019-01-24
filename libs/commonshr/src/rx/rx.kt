@@ -263,6 +263,9 @@ open class Var<T>(
     fun transform(fn: (T) -> T) { now = fn(now) }
 }
 
+fun Var<Int>.increase() = transform { it + 1 }
+fun Var<Int>.decrease() = transform { it - 1 }
+
 
 fun <T> RxIface<Optional<T>>.get() = now.get()
 fun <T> Var<Optional<T>>.set(v: T) {

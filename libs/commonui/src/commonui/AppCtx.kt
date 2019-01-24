@@ -2,7 +2,7 @@ package commonui
 
 import bootstrap.setupFullScreen
 import buildenv.serviceWorkerFileName
-import common.named
+import common.*
 import domx.base64
 import domx.source
 import domx.video
@@ -132,5 +132,36 @@ class AppCtx(
                 keepAwakeVideo.pause()
             }
         }
+    }
+
+    val networkType by lazy {
+        val rxv = Var(NetworkType.unknown)
+        val connection = window.navigator.connection
+        console.dir(connection)
+        fun update() {
+            rxv.now = connection.type
+        }
+        val listener : (Event) -> Unit = {
+            update()
+        }
+        update()
+        connection.addEventListener("change", listener)
+        killables += { connection.removeEventListener("change", listener) }
+        rxv
+    }
+
+    val networkEffectiveType by lazy {
+        val connection = window.navigator.connection
+        val rxv = Var(connection.effectiveType)
+        fun update() {
+            rxv.now = connection.effectiveType
+        }
+        val listener : (Event) -> Unit = {
+            update()
+        }
+        update()
+        connection.addEventListener("change", listener)
+        killables += { connection.removeEventListener("change", listener) }
+        rxv
     }
 }

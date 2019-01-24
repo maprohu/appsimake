@@ -331,6 +331,24 @@ object tictactoe : JsApp(
     )
 )
 
+object musiclib : JsModule(
+    "libs/musiclib",
+    listOf(
+        commonlib
+    )
+)
+object music : JsApp(
+    JsAppConfig(
+        "apps/music",
+        "Music Player",
+        listOf(
+            musiclib,
+            commonfb,
+            indexeddb
+        )
+    )
+)
+
 object functions : JsModule(
     "libs/functions",
     listOf(

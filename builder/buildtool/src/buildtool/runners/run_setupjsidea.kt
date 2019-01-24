@@ -36,6 +36,7 @@ fun main(args: Array<String>) {
         testappfns,
         tictactoelib,
         tictactoefns,
+        musiclib,
         mainfns,
 
         index,
@@ -44,7 +45,8 @@ fun main(args: Array<String>) {
         gymclock,
         tasks,
         tictactoe,
-        chat
+        chat,
+        music
     )
 
     fun createLibrary(

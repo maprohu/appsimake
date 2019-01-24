@@ -11,6 +11,7 @@ import domx.div
 import domx.invoke
 import firebase.User
 import firebaseui.Login
+import killable.Killable
 import killable.Killables
 
 abstract class LoggingInCtx(
@@ -49,7 +50,7 @@ abstract class LoggingInCtx(
             flexCenter()
         }.div
 
-    abstract fun loggedIn(user: User) : () -> Unit
+    abstract fun loggedIn(user: User) : Killable
 
 
     fun start() {

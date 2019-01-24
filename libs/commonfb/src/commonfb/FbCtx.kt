@@ -48,7 +48,7 @@ class FbCtx(
                 authDomain = "appsimake.firebaseapp.com"
                 databaseURL = "https://appsimake.firebaseio.com"
                 projectId = "appsimake"
-                storageBucket = ""
+                storageBucket = "appsimake.appspot.com"
                 messagingSenderId = "850641545175"
             }
         )

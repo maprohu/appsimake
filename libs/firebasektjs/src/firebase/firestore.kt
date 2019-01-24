@@ -42,6 +42,9 @@ external class Firestore {
 // https://firebase.google.com/docs/reference/js/firebase.firestore.WriteBatch?authuser=0
 external interface WriteBatch {
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.WriteBatch?authuser=0#set
+    fun set(ref: DocumentReference, data: dynamic, options: SetOptions = definedExternally): WriteBatch
+
     // https://firebase.google.com/docs/reference/js/firebase.firestore.WriteBatch?authuser=0#delete
     fun delete(ref: DocumentReference): WriteBatch
 

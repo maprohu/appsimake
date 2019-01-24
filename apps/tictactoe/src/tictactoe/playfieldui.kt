@@ -2,11 +2,9 @@ package tictactoe
 
 import bootstrap.*
 import common.Emitter
-import common.obj
 import commonui.*
 import domx.*
 import firebase.firestore.*
-import firebaseshr.initFrom
 import fontawesome.Fa
 import domx.a as _
 import fontawesome.chevronDown
@@ -482,7 +480,7 @@ fun PlayingCtx.playfieldUI(): () -> Unit {
             }
         }
 
-        hs.forEach { highlights.fire(it) }
+        hs.forEach { highlights.emit(it) }
 
         return hs.isNotEmpty()
     }

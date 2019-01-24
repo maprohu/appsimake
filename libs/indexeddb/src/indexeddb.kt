@@ -1,15 +1,19 @@
 package indexeddb
 
 import kotlinx.coroutines.*
+import org.w3c.dom.WindowOrWorkerGlobalScope
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.EventTarget
 import org.w3c.workers.ServiceWorkerGlobalScope
 
-abstract external class ServiceWorkerGlobalScopeIDB : ServiceWorkerGlobalScope, HasIndexedDB
+//abstract external class ServiceWorkerGlobalScopeIDB : ServiceWorkerGlobalScope, HasIndexedDB
 
 external interface HasIndexedDB {
     val indexedDB: IDBFactory
 }
+
+val WindowOrWorkerGlobalScope.indexedDB : IDBFactory
+    get() = this.unsafeCast<HasIndexedDB>().indexedDB
 
 // https://developer.mozilla.org/en-US/docs/Web/API/IDBFactory
 external interface IDBFactory {
@@ -78,6 +82,12 @@ external class IDBVersionChangeEvent : Event {
 
     override val target: IDBOpenDBRequest
 
+    // https://developer.mozilla.org/en-US/docs/Web/API/IDBVersionChangeEvent/newVersion
+    val newVersion: Int
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/IDBVersionChangeEvent/oldVersion
+    val oldVersion: Int
+
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/IDBDatabase
@@ -91,6 +101,21 @@ external interface IDBDatabase {
     fun transaction(stores: Array<String>, mode: TransactionMode = definedExternally): IDBTransaction
 
 
+}
+
+suspend fun <K, V> IDBDatabase.get(store: String, key: K): V? {
+    return transaction(store).objectStore<K, V>(store).get(key).await()
+}
+suspend fun <K, V> IDBDatabase.put(store: String, key: K, value: V) {
+    return transaction(store, TransactionMode.readwrite).objectStore<K, V>(store).put(value, key).await()
+}
+
+suspend fun IDBDatabase.clear(store: String) {
+    return transaction(store, TransactionMode.readwrite).objectStore<Any, Any>(store).clear().await()
+}
+
+suspend fun <K> IDBDatabase.exists(store: String, key: K): Boolean {
+    return transaction(store).objectStore<K, Any>(store).getKey(key).await() != null
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/IDBTransaction
@@ -115,8 +140,14 @@ external interface IDBObjectStore<K, V> {
     // https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/put
     fun put(item: V, key: K = definedExternally): IDBRequest<Unit>
 
+    // https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/clear
+    fun clear(): IDBRequest<Unit>
+
     // https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/get
     fun get(key: K): IDBRequest<V?>
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getKey
+    fun getKey(key: K): IDBRequest<K?>
 
     // https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/delete
     fun delete(key: K): IDBRequest<Unit>

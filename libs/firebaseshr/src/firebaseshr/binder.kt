@@ -429,11 +429,24 @@ interface HasFBProps<in O>: HasProps<O, CollectionWrap<O>, DocWrap<O>> {
 
 }
 
-open class Base<T>(val o: FBPropFactory<T> = FBPropFactory(CollectionWrap(""))) : HasFBProps<T> by o
-open class BaseRoot<out T: BaseRoot<T>> : Base<@kotlin.UnsafeVariance T>()
-class BaseRootCheck: BaseRoot<BaseRootCheck>() {
-    val type by o.scalar<String>().prop()
+open class BaseVal<T, N, P, PS: Props<T, N, P>, PF: BasePropFactory<T, N, P, PS>>(val o: PF) : HasProps<T, N, P> by o
+
+@Suppress("DELEGATED_MEMBER_HIDES_SUPERTYPE_OVERRIDE")
+open class Base<T>(
+    o: FBPropFactory<T> = FBPropFactory(CollectionWrap(""))
+) : BaseVal<T, CollectionWrap<T>, DocWrap<T>, FBProps<T>, FBPropFactory<T>>(o), HasFBProps<T> by o
+
+open class BaseRootVal<out T: BaseRootVal<T>> : BaseVal<@kotlin.UnsafeVariance T, Unit, Unit, Props<@kotlin.UnsafeVariance T, Unit, Unit>, PropFactory<@kotlin.UnsafeVariance T, Unit, Unit>>(
+    PropFactory(Unit)
+) {
+    val type by o.scalar<String>().withDefault { this::class.js.name }.prop()
 }
+
+open class BaseRoot<out T: BaseRoot<T>> : Base<@kotlin.UnsafeVariance T>() {
+    val type by o.scalar<String>().withDefault { this::class.js.name }.prop()
+}
+
+class BaseRootCheck: BaseRootVal<BaseRootCheck>()
 
 fun <T: Base<*>> T.currentFrom(d: dynamic): T {
     initFrom(d)
@@ -485,6 +498,12 @@ open class BasePropFactory<in O, out N, out P, PR: Props<O, N, P>>(
     }
 
     fun <T> scalar() = ScalarProp.Ops<O, T>(registry)
+    fun <T: BaseRoot<T>> baseRoot(read: (dynamic) -> T) = ScalarProp.Ops<O, T>(
+        registry = registry,
+        read = read,
+        write =
+
+    )
     fun <T> array() = ScalarProp.Ops.array<O, T>(registry)
     inline fun <reified E: Enum<E>> enum() = scalar<String>().map(
         w = { it.name },

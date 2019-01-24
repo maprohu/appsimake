@@ -11,6 +11,7 @@ import rx.Rx
 import rx.RxVal
 import rx.Var
 import kotlin.browser.document
+import kotlin.browser.window
 import kotlin.dom.addClass
 import kotlin.dom.removeClass
 import kotlin.properties.ReadOnlyProperty
@@ -74,6 +75,40 @@ fun GlobalEventHandlers.clickEvent(fn: (MouseEvent) -> Unit) {
     }
 }
 
+fun GlobalEventHandlers.longClick(fn: () -> Unit) {
+    var timer: Int? = null
+    fun cancel() {
+        timer?.let { t ->
+            window.clearTimeout(t)
+            timer = null
+        }
+    }
+    onmouseleave = {
+        it.preventDefault()
+        it.stopPropagation()
+        cancel()
+        Unit
+    }
+    onmousedown = {
+        it.preventDefault()
+        it.stopPropagation()
+        cancel()
+        timer = window.setTimeout(
+            {
+                timer = null
+                fn()
+            },
+            1000
+        )
+        Unit
+    }
+    onmouseup = {
+        it.preventDefault()
+        it.stopPropagation()
+        cancel()
+    }
+}
+
 fun GlobalEventHandlers.clickEventSeq(fn: (Killables, MouseEvent) -> Unit): KillableSeq {
     val seq = KillableSeq()
     onclick = {
@@ -121,8 +156,11 @@ fun HTMLInputElement.listenInput(fn: (String) -> Unit) {
     }
 }
 
-fun HTMLButtonElement.rxEnabled(rx: RxVal<Boolean>) {
-    rx.forEach { disabled = !it }
+fun HTMLButtonElement.rxEnabled(rx: RxVal<Boolean>): Killable {
+    return rx.forEach { disabled = !it }
+}
+fun HTMLButtonElement.rxEnabled(fn: () -> Boolean): Killable {
+    return Rx { fn() }.also { rxEnabled(it) }
 }
 
 fun ElementCSSInlineStyle.rxVisible(rxv: RxVal<Boolean>): Killable {

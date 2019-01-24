@@ -8,7 +8,7 @@ import kotlin.browser.document
 import common.*
 import domx.*
 import org.w3c.dom.events.MouseEvent
-import styles.overflowHidden
+import styles.*
 
 
 //fun Node.topbar(
@@ -21,6 +21,54 @@ import styles.overflowHidden
 //        block()
 //    }
 //}
+
+class ClickItemButtons(node: Node) {
+    val element = node.div {
+        cls {
+            listGroupItem
+            positionRelative
+            p0
+        }
+    }
+
+    val anchor = element.a {
+        cls {
+            positionAbsolute
+            leftRightTopBottom0
+            listGroupItemAction
+        }
+        href = "#"
+    }
+
+    private val rel = element.div {
+        cls {
+            p1
+            flexGrow1
+            dFlex
+            flexRow
+            alignItemsCenter
+            positionRelative
+            pointerEventsNone
+            zIndex1
+        }
+    }
+
+    val text = rel.span {
+        cls {
+            m1
+            flexGrow1
+        }
+    }
+
+    val buttons = rel.div {
+        cls {
+            flexFixedSize()
+            pointerEventsAll
+        }
+    }
+}
+
+fun Node.clickItemButtons(fn: ClickItemButtons.() -> Unit) = ClickItemButtons(this).apply(fn)
 
 fun Node.breadcrumb(
     block : HTMLOListElement.() -> Unit = {}
@@ -506,6 +554,8 @@ val Cls.btnSecondary by css()
 val Cls.btnInfo by css()
 val Cls.btnSuccess by css()
 val Cls.btnPrimary by css()
+val Cls.btnOutlinePrimary by css()
+val Cls.btnOutlineSuccess by css()
 val Cls.btnDanger by css()
 val Cls.btnWarning by css()
 val Cls.btn by css()
@@ -529,6 +579,7 @@ val Cls.listGroupFlush by css()
 val Cls.navbarBrand by css()
 val Cls.formInline by css()
 val Cls.formControl by css()
+val Cls.formControlFile by css()
 val Cls.formGroup by css()
 val Cls.isInvalid by css()
 val Cls.inputGroup by css()

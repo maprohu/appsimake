@@ -8,6 +8,7 @@ import firebase.FirebaseError
 import firebase.firestore
 import firebaseshr.*
 import killable.Killable
+import killable.Killable.Companion.once
 import killable.Killables
 import kotlinx.coroutines.*
 import org.w3c.dom.Element
@@ -38,25 +39,25 @@ fun <T> queryUi(
 ): () -> Unit {
     return query
             .onSnapshot(
-                    {
-                        callback?.onNext?.invoke(it)
+                    { qs ->
+                        callback?.onNext?.invoke(qs)
 
-                        it
+                        qs
                                 .docChanges()
-                                .forEach {
-                                    when (it.typeEnum) {
+                                .forEach { dc ->
+                                    when (dc.typeEnum) {
                                         DocumentChangeType.added -> {
-                                            element.insertAt(it.newIndex, item(it.doc.data()))
+                                            element.insertAt(dc.newIndex, item(dc.doc.data()))
                                         }
                                         DocumentChangeType.removed -> {
-                                            element.removeAt(it.oldIndex)
+                                            element.removeAt(dc.oldIndex)
                                         }
                                         DocumentChangeType.modified -> {
-                                            val ie = item(it.doc.data())
-                                            if (it.newIndex == it.oldIndex) element.replaceAt(it.oldIndex, ie)
+                                            val ie = item(dc.doc.data())
+                                            if (dc.newIndex == dc.oldIndex) element.replaceAt(dc.oldIndex, ie)
                                             else {
-                                                element.removeAt(it.oldIndex)
-                                                element.insertAt(it.newIndex, ie)
+                                                element.removeAt(dc.oldIndex)
+                                                element.insertAt(dc.newIndex, ie)
                                             }
                                         }
                                     }
@@ -132,9 +133,9 @@ fun Firestore.withDefaultSettings(): Firestore {
 
 fun Query.onSnapshotNext(
     onNext: (QuerySnapshot) -> Unit
-) : () -> Unit = onSnapshot(onNext, { console.dir(it) })
+) : Killable = onSnapshot(onNext, { console.dir(it) }).let { once(it) }
 
-fun Query.idDiffs(fn: ((SetDiff<String>) -> Unit)) : () -> Unit = onSnapshotNext { qs ->
+fun Query.idDiffs(fn: ((SetDiff<String>) -> Unit)) : Killable = onSnapshotNext { qs ->
     qs.docChanges().fold(SetDiff<String>()) { d, ch ->
         when (ch.typeEnum) {
             DocumentChangeType.added -> d.copy(added = d.added + ch.doc.id)
@@ -156,18 +157,6 @@ data class ListenConfig<T>(
 ) {
     companion object {
 
-//        fun <T> docItems(
-//            list: ListenableMutableList<DocItem<T>>,
-//            create: (dynamic) -> T,
-//            update: T.(dynamic) -> Unit
-//        ): ListenConfig<DocItem<T>> {
-//            return ListenConfig(
-//                list = list,
-//                create = { id, data -> DocItem(id, create(data)) },
-//                update = { d -> update(this.data, d) },
-//                delete = { it -> it.deleted.kill() }
-//            )
-//        }
         fun <T: HasFBProps<*>> hasProps(
             list: ListenableMutableList<T>,
             collectionWrap: CollectionWrap<T>,
@@ -189,13 +178,16 @@ data class ListenConfig<T>(
             },
             remove = { t ->
                 t.props.live.now = false
-//                t.props.deleted()
-//                t.props.resetInitial()
             }
 
         )
     }
 }
+
+fun <T> QueryWrap<T>.listen(
+    killables: Killables,
+    config: ListenConfig<T>
+) = query.listen(killables, config)
 
 
 fun <T> Query.listen(
@@ -393,4 +385,8 @@ fun initBinder(
         )
 
     )
+}
+
+suspend fun DocumentReference.exists(): Boolean {
+    return get().await().exists
 }

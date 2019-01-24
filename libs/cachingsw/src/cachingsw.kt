@@ -9,8 +9,9 @@ import org.w3c.fetch.Response
 import org.w3c.workers.ExtendableEvent
 import org.w3c.workers.FetchEvent
 import org.w3c.workers.InstallEvent
+import org.w3c.workers.ServiceWorkerGlobalScope
 
-external val self : ServiceWorkerGlobalScopeIDB
+external val self : ServiceWorkerGlobalScope
 
 external interface CacheConfig {
     val enabled: Boolean
