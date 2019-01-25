@@ -1,41 +1,98 @@
 package firebaseshr
 
+import common.None
+import common.Some
+import common.dyn
 import rx.RxVal
 
 
-class BaseValProp<N, P, O: HasProps<O, N, P>>: Prop<O> {
-    val value
-    override fun extractInitial(o: dynamic) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+class BaseValProp<in O, T: BaseRootVal<T>>(
+    name: String,
+    ops: Ops<O, T>,
+    private val wrapper: (dynamic) -> T
+) : ScalarPropBase<O, T>(name, ops) {
 
-    override fun resetInitial() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun extractInitial(o: dynamic) {
+        val propValueOpt = extractPropValue(o)
+
+        initial.now = propValueOpt.map { pv ->
+            val new = wrapper(o)
+
+            fun initNew(): T {
+                new.props.extractInitial(pv)
+                return new
+            }
+
+            initial.now.map { i ->
+                if (i::class == new::class) {
+                    i.props.extractInitial(pv)
+                    i
+                } else {
+                    initNew()
+                }
+            }.getOrElse {
+                initNew()
+            }
+        }
     }
 
     override fun rollback() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun writeTo(o: dynamic) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        super.rollback()
+        current.now.forEach { it.props.rollback() }
     }
 
     override fun mergeTo(o: dynamic) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        beforeWrite()
+
+        val i = initial.now
+        val c = current.now
+
+        when {
+            i is Some && c is Some -> {
+                o[name] = if (i.value == c.value) {
+                    c.value.props.merge()
+                } else {
+                    val d = dyn()
+                    i.value.props.deleteTo(d)
+                    c.value.props.writeTo(d)
+                    d
+                }
+            }
+            i is Some -> {
+                o[name] = binderOps.delete()
+            }
+            c is Some -> {
+                o[name] = c.value.props.write()
+            }
+            else -> {}
+        }
     }
 
-    override val dirty: RxVal<Boolean>
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
+    override fun calculateDirty(): Boolean {
+        val i = initial()
+        val c = current()
+
+        return when {
+            i is Some && c is Some -> {
+                if (i.value == c.value) {
+                    c.value.props.dirty()
+                } else {
+                    true
+                }
+            }
+            else -> i == c
+        }
+    }
+
 
     override fun clearDirty() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        super.clearDirty()
+        initial.now.forEach { i -> i.props.clearDirty() }
     }
 
-    override val name: String
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-    override val validationErrors: RxVal<Set<ValidationError>>
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
-    override val isValid: RxVal<Boolean>
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    override fun calculateIsValid(): Boolean {
+        return super.calculateIsValid() && current().map { c -> c.props.isValid() }.getOrDefault(true)
+    }
+
 }

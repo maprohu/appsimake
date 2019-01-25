@@ -8,7 +8,7 @@ import kotlin.js.Promise
 import kotlin.reflect.KProperty
 
 external interface Settings {
-    var timestampsInSnapshots : Boolean
+//    var timestampsInSnapshots : Boolean
 }
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore
@@ -93,8 +93,10 @@ external interface DocumentReference {
 
     fun get(options: GetOptions = definedExternally) : Promise<DocumentSnapshot>
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentReference?authuser=0#set
     fun set(data: dynamic, options: SetOptions = definedExternally) : Promise<Unit>
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentReference?authuser=0#update
     fun update(data: Any) : Promise<Unit>
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentReference?authuser=0#delete

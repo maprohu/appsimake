@@ -4,6 +4,7 @@ import common.named
 import commonfb.FbCtx
 import commonfb.LoggedInCtx
 import commonfb.LoggingInCtx
+import commonlib.private
 import firebase.User
 import firebase.firestore.collectionRef
 import firebase.firestore.idDiffs
@@ -51,6 +52,8 @@ fun main(args: Array<String>) {
 
         object: LoggingInCtx(music, "Music") {
             override fun loggedIn(user: User): Killable {
+
+
                 val killables = Killables()
                 MusicCtx(fbCtx, user, idb).home(
                     appCtx.root,
@@ -68,7 +71,6 @@ fun main(args: Array<String>) {
 }
 
 class MusicCtx(fbCtx: FbCtx, user: User, val idb: IDBDatabase) : LoggedInCtx(fbCtx, user) {
-    val db = fbCtx.db
     val storageWrap = fbCtx.lib.app.storage
     val songsWrap = fbCtx.lib.app.songs
     val storageRef = storageWrap.collectionRef(db)

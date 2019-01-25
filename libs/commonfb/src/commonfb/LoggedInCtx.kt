@@ -18,11 +18,11 @@ open class LoggedInCtx(
     val fbCtx: FbCtx,
     val user: User
 ) {
+    val db = fbCtx.db
     val lib = fbCtx.lib
     val appCtx = fbCtx.appCtx
-    val fcmTokensRef = fbCtx.db.collection(
-        lib.app.private.doc(user.uid).fcmtokens.path
-    )
+    val privateWrap = lib.app.private.doc(user.uid)
+    val fcmTokensRef = privateWrap.fcmtokens.collectionRef(db)
 
     val killables = Killables()
 

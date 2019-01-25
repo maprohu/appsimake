@@ -1,10 +1,7 @@
 package musiclib
 
 import commonlib.*
-import firebaseshr.Base
-import firebaseshr.BaseRoot
-import firebaseshr.initFrom
-import firebaseshr.wrapper
+import firebaseshr.*
 
 val music by lib()
 
@@ -41,7 +38,7 @@ class Mp3File: Base<Mp3File>() {
 
 }
 
-abstract class ActivePlaylist<T: ActivePlaylist<T>>: BaseRoot<T>() {
+abstract class ActivePlaylist<T: ActivePlaylist<T>>: BaseRootVal<T>() {
     val position by o.scalar<Double>().prop()
 
     companion object : ActivePlaylist<Nothing>() {
@@ -61,6 +58,7 @@ class CustomPlaylist: ActivePlaylist<CustomPlaylist>() {
 
 class PlayerSettings: Base<PlayerSettings>() {
 
-    val activePlaylist by o.scalar<ActivePlaylist<*>>().prop()
+    val activePlaylist by
+        o.scalar<ActivePlaylist<*>>().baseProp(ActivePlaylist.emptyOf)
 
 }

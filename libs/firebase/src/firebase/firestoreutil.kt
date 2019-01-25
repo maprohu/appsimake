@@ -126,7 +126,7 @@ fun <T> QueryWrap<T>.listen(
 
 fun Firestore.withDefaultSettings(): Firestore {
     settings(Settings().apply {
-        timestampsInSnapshots = true
+//        timestampsInSnapshots = true
     })
     return this
 }
