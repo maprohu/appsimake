@@ -348,7 +348,10 @@ class Panel(private val root: org.w3c.dom.Node) {
 
 fun Node.column(fn: HTMLDivElement.() -> Unit): HTMLDivElement {
     return div {
-        flexColumn()
+        cls {
+            dFlex
+            flexColumn
+        }
         fn()
     }
 }
@@ -505,7 +508,9 @@ fun Element.positionRelative() {
 
 val Cls.w100 by css()
 val Cls.h100 by css()
+val Cls.alignMiddle by css()
 val Cls.textDanger by css()
+val Cls.textPrimary by css()
 val Cls.bgDanger by css()
 val Cls.bgTransparent by css()
 val Cls.bgWhite by css()
@@ -514,6 +519,7 @@ val Cls.bgLight by css()
 val Cls.bgSecondary by css()
 val Cls.bgWarning by css()
 val Cls.border by css()
+val Cls.borderPrimary by css()
 val Cls.borderTop by css()
 val Cls.borderBottom by css()
 val Cls.borderWarning by css()

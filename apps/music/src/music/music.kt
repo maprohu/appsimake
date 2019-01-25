@@ -55,7 +55,9 @@ fun main(args: Array<String>) {
 
 
                 val killables = Killables()
-                MusicCtx(fbCtx, user, idb).home(
+                MusicCtx(fbCtx, user, idb)
+
+                PlayerFrame(
                     appCtx.root,
                     killables
                 )

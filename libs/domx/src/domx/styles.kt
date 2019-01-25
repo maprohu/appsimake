@@ -56,6 +56,7 @@ val Cls.overflowHidden by def(
 )
 
 val Cls.scrollVertical by def("overflow-y: auto;" )
+val Cls.scrollHorizontal by def("overflow-x: auto;" )
 
 val Cls.dGrid by def("display: grid;" )
 val Cls.alignContentCenter by def("align-content: center;" )
