@@ -114,6 +114,10 @@ suspend fun IDBDatabase.clear(store: String) {
     return transaction(store, TransactionMode.readwrite).objectStore<Any, Any>(store).clear().await()
 }
 
+suspend fun <K> IDBDatabase.getAllKeys(store: String): Array<K> {
+    return transaction(store).objectStore<K, Any>(store).getAllKeys().await()
+}
+
 suspend fun <K> IDBDatabase.exists(store: String, key: K): Boolean {
     return transaction(store).objectStore<K, Any>(store).getKey(key).await() != null
 }
@@ -151,6 +155,9 @@ external interface IDBObjectStore<K, V> {
 
     // https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/delete
     fun delete(key: K): IDBRequest<Unit>
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAllKeys
+    fun getAllKeys(): IDBRequest<Array<K>>
 
 }
 

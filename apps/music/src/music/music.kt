@@ -71,6 +71,7 @@ fun main(args: Array<String>) {
 }
 
 class MusicCtx(fbCtx: FbCtx, user: User, val idb: IDBDatabase) : LoggedInCtx(fbCtx, user) {
+    val uid = user.uid
     val storageWrap = fbCtx.lib.app.storage
     val songsWrap = fbCtx.lib.app.songs
     val storageRef = storageWrap.collectionRef(db)
@@ -83,6 +84,11 @@ class MusicCtx(fbCtx: FbCtx, user: User, val idb: IDBDatabase) : LoggedInCtx(fbC
 
     val dbStatus = DBStatus(idb, killables)
     val tagDB = TagDB(db, killables)
+    val userSongsDB = UserSongsDB(db, uid, killables)
+    val songStoreDB = SongStorageDB(db, killables)
+
+    val playlist = Playlist(idb, userSongsDB, killables)
+
 
 }
 

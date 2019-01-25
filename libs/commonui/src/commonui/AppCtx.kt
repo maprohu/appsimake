@@ -137,16 +137,17 @@ class AppCtx(
     val networkType by lazy {
         val rxv = Var(NetworkType.unknown)
         val connection = window.navigator.connection
-        console.dir(connection)
         fun update() {
             rxv.now = connection.type
         }
         val listener : (Event) -> Unit = {
             update()
         }
-        update()
         connection.addEventListener("change", listener)
         killables += { connection.removeEventListener("change", listener) }
+        GlobalScope.launch {
+            update()
+        }
         rxv
     }
 
@@ -159,9 +160,11 @@ class AppCtx(
         val listener : (Event) -> Unit = {
             update()
         }
-        update()
         connection.addEventListener("change", listener)
         killables += { connection.removeEventListener("change", listener) }
+        GlobalScope.launch {
+            update()
+        }
         rxv
     }
 }

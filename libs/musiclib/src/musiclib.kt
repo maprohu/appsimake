@@ -16,9 +16,8 @@ class StoreState: Base<StoreState>() {
 }
 
 enum class UserSongState {
-    Exclude,
-    Download,
-    CloudOnly
+    Like,
+    DontLike
 }
 
 class UserSong: Base<UserSong>() {

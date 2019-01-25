@@ -26,23 +26,7 @@ fun MusicCtx.home(
     killables: Killables
 ) {
     GlobalScope.launch {
-        privateWrap.docRef(db).set(
-            obj {
-                inner = obj {
-                    value = "hello"
-                    value2 = "hello2"
-                }
-            }
-        ).await()
-        privateWrap.docRef(db).set(
-            obj {
-                inner = obj {
-                    value2 = FieldValue.delete()
-                    value3 = "hello3"
-                }
-            },
-            setOptionsMerge()
-        ).await()
+        playlist.next()
     }
 
     panel.newRoot {
@@ -98,7 +82,12 @@ fun MusicCtx.home(
             }
 
             main {
-                rxText { appCtx.networkEffectiveType().toString() }.addedTo(killables)
+                div {
+                    rxText { appCtx.networkEffectiveType().toString() }.addedTo(killables)
+                }
+                div {
+                    rxText { appCtx.networkType().toString() }.addedTo(killables)
+                }
             }
         }
     }

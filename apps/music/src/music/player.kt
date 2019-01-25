@@ -22,24 +22,12 @@ import kotlin.browser.document
 
 
 class Player(
+    private val playlist: Playlist,
     killables: Killables,
-    initial: State,
     idb: IDBDatabase
 ) {
-    class Item(
-        p: Item?,
-        n: Item?
-    ) {
-        var prev = p ?: this
-        var next = n ?: this
-    }
 
 
-    data class State(
-        val list: List<String>,
-        val current: Int,
-        val position: Double
-    )
 
     sealed class Status {
         object Stopped: Status()
@@ -65,25 +53,15 @@ class Player(
     }
 
     val audio = document.audio {
-        with(initial) {
-            if (list.isNotEmpty()) {
-                val hash = list[current]
-                GlobalScope.launch {
-                    val mp3 = idb.readMp3(hash)
-                    if (mp3 != null) {
-                        src = URL.createObjectURL(mp3)
-                        if (position != 0.0) {
-                            ondurationchange = {
-                                currentTime = position
-                                ondurationchange = null
-                                Unit
-                            }
-                        }
-                    }
-
+        GlobalScope.launch {
+            val hash = playlist.next()
+            if (hash != null) {
+                val mp3 = idb.readMp3(hash)
+                if (mp3 != null) {
+                    src = URL.createObjectURL(mp3)
+                    load()
                 }
             }
-
         }
 
     }
