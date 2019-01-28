@@ -10,9 +10,14 @@ import firebase.storage.UploadTask
 import indexeddb.IDBDatabase
 import indexeddb.exists
 import killable.Killables
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
+import org.w3c.files.Blob
+import org.w3c.xhr.BLOB
+import org.w3c.xhr.XMLHttpRequest
+import org.w3c.xhr.XMLHttpRequestResponseType
 
 
 class OnlineTasks(
@@ -88,8 +93,17 @@ class OnlineTasks(
                     downloadLater = c.downloadLater + id
                 )
             } else if (!idb.exists(Mp3Store, id)) {
-                val ref = storageRef.child(id)
-                ref.pu
+                val url = storageRef.child(id).getDownloadURL().await()
+                val res = CompletableDeferred<Blob>()
+                val req = XMLHttpRequest().apply {
+                    responseType = XMLHttpRequestResponseType.BLOB
+                    onload = {
+                        res.complete(response.unsafeCast<Blob>())
+                    }
+                    open("GET", url)
+                    send()
+                }
+                req.withCredentials
 
             }
 

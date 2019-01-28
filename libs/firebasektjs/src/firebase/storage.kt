@@ -48,6 +48,9 @@ external interface Reference {
     // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#putString
     fun putString(data: String, format: StringFormat = definedExternally, metadata: UploadMetadata = definedExternally): UploadTask
 
+    // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getDownloadURL
+    fun getDownloadURL(): Promise<String>
+
 }
 
 // https://firebase.google.com/docs/reference/js/firebase.storage.UploadMetadata
