@@ -476,6 +476,7 @@ fun MusicCtx.import(
                             accept = ".mp3"
                             isFolder.forEach { f ->
                                 this.asDynamic().webkitdirectory = f
+                                this.asDynamic().directory = f
                                 this.multiple = !f
                             }
 

@@ -26,13 +26,20 @@ external class Firestore {
     fun <T> runTransaction(fn: (Transaction) -> Any) : Promise<T>
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#enablePersistence
-    fun enablePersistence(): Promise<Unit>
+    fun enablePersistence(settings: PersistenceSettings = definedExternally): Promise<Unit>
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#disableNetwork
     fun disableNetwork(): Promise<Unit>
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore?authuser=0#batch
     fun batch(): WriteBatch
+
+}
+
+
+external interface PersistenceSettings {
+
+    var experimentalTabSynchronization: Boolean
 
 }
 

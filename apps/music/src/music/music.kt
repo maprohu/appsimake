@@ -1,6 +1,7 @@
 package music
 
 import common.named
+import common.obj
 import commonfb.FbCtx
 import commonfb.LoggedInCtx
 import commonfb.LoggingInCtx
@@ -53,7 +54,11 @@ fun main(args: Array<String>) {
 
         val fbCtx = FbCtx(music, "Music")
 
-        fbCtx.db.enablePersistence().await()
+        fbCtx.db.enablePersistence(
+            obj {
+                experimentalTabSynchronization = true
+            }
+        ).await()
 
         object: LoggingInCtx(fbCtx) {
             override fun loggedIn(user: User): Killable {
