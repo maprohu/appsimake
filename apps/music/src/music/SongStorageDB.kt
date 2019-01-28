@@ -17,5 +17,10 @@ class SongStorageDB(
         { StoreState() },
         killables
     )
+
+    suspend fun get(id: String, fn: StoreState.() -> Unit) = queryCache.get(id) {
+        StoreState().apply(fn)
+    }
+
 }
 

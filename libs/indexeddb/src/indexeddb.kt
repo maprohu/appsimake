@@ -109,6 +109,9 @@ suspend fun <K, V> IDBDatabase.get(store: String, key: K): V? {
 suspend fun <K, V> IDBDatabase.put(store: String, key: K, value: V) {
     return transaction(store, TransactionMode.readwrite).objectStore<K, V>(store).put(value, key).await()
 }
+suspend fun <K> IDBDatabase.delete(store: String, key: K) {
+    return transaction(store, TransactionMode.readwrite).objectStore<K, Any>(store).delete(key).await()
+}
 
 suspend fun IDBDatabase.clear(store: String) {
     return transaction(store, TransactionMode.readwrite).objectStore<Any, Any>(store).clear().await()

@@ -7,12 +7,11 @@ import commonui.screenLayout
 import commonui.showClosable
 import domx.*
 import fontawesome.*
-import indexeddb.IDBDatabase
-import indexeddb.await
-import indexeddb.clear
+import indexeddb.*
 import killable.Killables
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import musiclib.UserSongState
 import org.w3c.files.File
 import kotlin.dom.removeClass
 
@@ -95,3 +94,21 @@ fun MusicCtx.database(
 fun IDBDatabase.readMp3Store() = transaction(Mp3Store).objectStore<String, File>(Mp3Store)
 suspend fun IDBDatabase.readMp3(hash: String) = readMp3Store().get(hash).await()
 
+suspend fun maintenance(
+    idb: IDBDatabase,
+    userSongsDB: UserSongsDB
+) {
+    val hashes = idb.getAllKeys<String>(Mp3Store)
+    userSongsDB.queryCache.getAll()
+
+    for (hash in hashes) {
+        val userSong = userSongsDB.get(hash) {
+            state.cv = UserSongState.New
+        }
+
+        if (userSong.state.iv == UserSongState.DontLike) {
+            idb.delete(Mp3Store, hash)
+        }
+    }
+
+}

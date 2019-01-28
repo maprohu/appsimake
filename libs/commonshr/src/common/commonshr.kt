@@ -1,14 +1,15 @@
 package common
 
+import commonshr.Counted
+import commonshr.SetAdded
+import commonshr.SetMove
+import commonshr.SetRemoved
 import killable.Killable
 import rx.Rx
-import rx.RxVal
-import rx.Var
 import kotlin.properties.ReadOnlyProperty
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty1
+import killable.Killables
+import killable.addedTo
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun dyn() = js("{}")
@@ -232,15 +233,28 @@ open class Listeners {
 
 }
 
-open class Emitter<T> {
-
-    protected var listeners = listOf<(T) -> Unit>()
+interface EmitterIface<T> {
 
     operator fun plusAssign(listener: (T) -> Unit) {
         add(listener)
     }
 
-    open fun add(listener: (T) -> Unit) : Killable {
+    fun add(listener: (T) -> Unit) : Killable
+
+
+}
+
+interface EmitterKillable<T>: EmitterIface<T>, Killable
+
+open class Emitter<T>(
+    private val first: () -> Iterable<T> = ::emptyList
+): EmitterIface<T> {
+
+    protected var listeners = listOf<(T) -> Unit>()
+
+    override fun add(listener: (T) -> Unit) : Killable {
+        first().forEach(listener)
+
         listeners += listener
 
         return Killable.once {
@@ -254,3 +268,67 @@ open class Emitter<T> {
 
 }
 
+class MappedEmitter<T, S>(
+    private val emitter: EmitterIface<T>,
+    private val fn: (T) -> S
+): EmitterIface<S> {
+    override fun add(listener: (S) -> Unit): Killable {
+        return emitter.add { t ->
+            listener(fn(t))
+        }
+    }
+}
+
+fun <T, S> EmitterIface<T>.map(fn: (T) -> S) = MappedEmitter(this, fn)
+
+fun <T> EmitterIface<SetMove<T>>.feedTo(set: MutableSet<T>): Killable {
+    return add { m ->
+        when (m) {
+            is SetAdded -> set += m.value
+            is SetRemoved -> set -= m.value
+        }
+    }
+}
+
+fun <T> EmitterIface<SetMove<T>>.filtered(ks: Killables, rxfn: (T) -> Boolean): Emitter<SetMove<T>> {
+
+    val current = mutableSetOf<T>()
+    val kills = mutableMapOf<T, Killable>()
+
+    val f = Emitter<SetMove<T>> {
+        current.map(::SetAdded)
+    }
+
+    fun add(v: T) {
+        current += v
+        f.emit(SetAdded(v))
+    }
+    fun remove(v: T) {
+        current -= v
+        f.emit(SetRemoved(v))
+    }
+
+    ks += add { m ->
+        val v = m.value
+        when (m) {
+            is SetAdded -> {
+                val vks = ks.killables()
+                val rxv = Rx { rxfn(v) }.addedTo(vks)
+                kills[v] = rxv
+                rxv.forEach { fv ->
+                    if (fv) add(v)
+                    else remove(v)
+                }
+            }
+            is SetRemoved -> {
+                kills.remove(v)?.kill()
+
+                if (v in current) {
+                    remove(v)
+                }
+            }
+        }
+    }
+
+    return f
+}

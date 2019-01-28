@@ -148,3 +148,7 @@ operator fun <T> Optional<Set<T>>.plus(item: T) = map { it + item }.orElse { Som
 fun <T> Optional<Set<T>>.orEmpty() = getOrDefault(emptySet())
 fun <T> Optional<Collection<T>>.orEmpty() = getOrDefault(emptyList())
 
+sealed class Either<out A, out B> {
+    class Left<A>(val value: A): Either<A, Nothing>()
+    class Right<B>(val value: B): Either<Nothing, B>()
+}

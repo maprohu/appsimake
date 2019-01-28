@@ -6,6 +6,7 @@ import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.DataView
 import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.get
+import org.w3c.files.Blob
 import org.w3c.files.File
 import org.w3c.files.FileReader
 import kotlin.properties.ReadOnlyProperty
@@ -237,7 +238,7 @@ fun Uint8Array.asString(): String = asList()
     .map { b -> b.toChar() }
     .asString()
 
-suspend fun File.readAsArrayBuffer() : ArrayBuffer {
+suspend fun Blob.readAsArrayBuffer() : ArrayBuffer {
     val d = CompletableDeferred<ArrayBuffer>()
 
     val reader = FileReader()

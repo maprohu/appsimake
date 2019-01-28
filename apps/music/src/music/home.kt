@@ -25,9 +25,9 @@ fun MusicCtx.home(
     panel: RootPanel,
     killables: Killables
 ) {
-    GlobalScope.launch {
-        playlist.next()
-    }
+//    GlobalScope.launch {
+//        playlist.next()
+//    }
 
     panel.newRoot {
         fun redisplay() {
@@ -61,19 +61,19 @@ fun MusicCtx.home(
                                 }
                             }
                         }
-                        dropdownItemAnchor {
-                            icon.cls.fa.listOl
-                            text.innerText = "Playlists"
-                            anchor {
-                                clickEvent {
-                                    showClosable(
-                                        killables,
-                                        { ks, cl -> playlists(panel.sub(), ks, cl) },
-                                        ::redisplay
-                                    )
-                                }
-                            }
-                        }
+//                        dropdownItemAnchor {
+//                            icon.cls.fa.listOl
+//                            text.innerText = "Playlists"
+//                            anchor {
+//                                clickEvent {
+//                                    showClosable(
+//                                        killables,
+//                                        { ks, cl -> playlists(panel.sub(), ks, cl) },
+//                                        ::redisplay
+//                                    )
+//                                }
+//                            }
+//                        }
                     }
                 }
                 middleTitle {
@@ -82,12 +82,12 @@ fun MusicCtx.home(
             }
 
             main {
-                div {
-                    rxText { appCtx.networkEffectiveType().toString() }.addedTo(killables)
-                }
-                div {
-                    rxText { appCtx.networkType().toString() }.addedTo(killables)
-                }
+//                div {
+//                    rxText { appCtx.networkEffectiveType().toString() }.addedTo(killables)
+//                }
+//                div {
+//                    rxText { appCtx.networkType().toString() }.addedTo(killables)
+//                }
             }
         }
     }

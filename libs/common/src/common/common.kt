@@ -1,8 +1,13 @@
 package common
 
+import commonshr.SetAdded
+import commonshr.SetMove
+import commonshr.SetRemoved
 import killable.Killable
 import killable.Killables
 import org.w3c.dom.*
+import org.w3c.dom.events.Event
+import org.w3c.dom.events.EventTarget
 import rx.Rx
 import rx.RxIface
 import rx.RxVal
@@ -223,6 +228,23 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
         delegate.add(to, v)
         listeners.forEach { it.moved(from, to) }
     }
+
+    val emitter by lazy {
+        val e = Emitter<SetMove<T>> {
+            map(::SetAdded)
+        }
+
+        addListener(
+            ListenableList.Listener(
+                added = { _, item -> e.emit(SetAdded(item)) },
+                removed = { _, item -> e.emit(SetRemoved(item)) }
+            )
+        )
+
+        e
+    }
+
+
 
 
 }
@@ -565,4 +587,23 @@ data class FilteredListenableListConfig<T, K, I>(
 
 }
 
+fun EventTarget.listen(type: String, fn: (Event) -> Unit): Killable {
+    this.addEventListener(type, fn)
+    return Killable.once {
+        this.removeEventListener(type, fn)
+    }
+}
+
+fun <T: Event> EventTarget.listenAs(type: String, fn: (T) -> Unit): Killable {
+    return listen(type) { e ->
+        fn(e.unsafeCast<T>())
+    }
+}
+
+fun WindowOrWorkerGlobalScope.onInterval(timeout: Int, fn: () -> Unit): Killable {
+    val handle = setInterval(fn, timeout)
+    return Killable.once {
+        clearInterval(handle)
+    }
+}
 

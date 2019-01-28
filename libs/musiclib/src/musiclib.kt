@@ -2,6 +2,7 @@ package musiclib
 
 import commonlib.*
 import firebaseshr.*
+import rx.Rx
 
 val music by lib()
 
@@ -11,11 +12,13 @@ val DocWrap<Private>.usersongs by coll<UserSong>()
 
 class StoreState: Base<StoreState>() {
 
-    val count by o.scalar<Int>().withDefault(0).prop()
+    val uploaded by o.scalar<Boolean>().prop()
+    val count by o.scalar<Int>().prop()
 
 }
 
 enum class UserSongState {
+    New,
     Like,
     DontLike
 }
@@ -36,6 +39,9 @@ class Mp3File: Base<Mp3File>() {
     val titlefix by o.scalar<String>().prop()
 
 }
+
+fun Mp3File.fixedArtist() = Rx { artistfix.initial().orElse { artist.initial() } }
+fun Mp3File.fixedTitle() = Rx { titlefix.initial().orElse { title.initial() } }
 
 abstract class ActivePlaylist<T: ActivePlaylist<T>>: BaseRootVal<T>() {
     val position by o.scalar<Double>().prop()

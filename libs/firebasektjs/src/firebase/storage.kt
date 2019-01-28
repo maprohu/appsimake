@@ -5,6 +5,7 @@ import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.Uint8Array
 import org.w3c.files.Blob
 import org.w3c.files.File
+import kotlin.js.Promise
 
 // https://firebase.google.com/docs/reference/js/firebase.storage.Storage
 external interface Storage {
@@ -33,6 +34,10 @@ external interface Reference {
     // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#child
     fun child(path: String): Reference
 
+
+    // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getMetadata
+    fun getMetadata(): Promise<FullMetadata>
+
     // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#put
     fun put(data: Blob, metadata: UploadMetadata = definedExternally): UploadTask
     fun put(data: File, metadata: UploadMetadata = definedExternally): UploadTask
@@ -60,6 +65,12 @@ inline val StringFormat.Companion.BASE64URL: StringFormat get() = "BASE64URL".as
 inline val StringFormat.Companion.DATA_URL: StringFormat get() = "DATA_URL".asDynamic().unsafeCast<StringFormat>()
 
 // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask
-external interface UploadTask {
+external class UploadTask: Promise<UploadTaskSnapshot> {
 
 }
+
+// https://firebase.google.com/docs/reference/js/firebase.storage.UploadTaskSnapshot
+external interface UploadTaskSnapshot
+
+// https://firebase.google.com/docs/reference/js/firebase.storage.FullMetadata
+external interface FullMetadata

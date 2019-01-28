@@ -14,6 +14,7 @@ import indexeddb.await
 import indexeddb.indexedDB
 import killable.Killable
 import killable.Killables
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
@@ -50,19 +51,28 @@ fun main(args: Array<String>) {
             )
         }.await()
 
-        object: LoggingInCtx(music, "Music") {
+        val fbCtx = FbCtx(music, "Music")
+
+        fbCtx.db.enablePersistence().await()
+
+        object: LoggingInCtx(fbCtx) {
             override fun loggedIn(user: User): Killable {
+                val ctx = MusicCtx(fbCtx, user, idb)
 
+                GlobalScope.launch {
+                    maintenance(idb, ctx.userSongsDB)
 
-                val killables = Killables()
-                MusicCtx(fbCtx, user, idb)
+                    ctx.apply {
+                        home(
+                            playerFrame(
+                                appCtx.root
+                            ).innerPanel,
+                            killables
+                        )
+                    }
+                }
 
-                PlayerFrame(
-                    appCtx.root,
-                    killables
-                )
-                return killables
-
+                return ctx.killables
             }
         }.start()
     }
@@ -78,18 +88,20 @@ class MusicCtx(fbCtx: FbCtx, user: User, val idb: IDBDatabase) : LoggedInCtx(fbC
     val songsWrap = fbCtx.lib.app.songs
     val storageRef = storageWrap.collectionRef(db)
 
-    val storedHashes = Var(emptySet<String>()).also { rxs ->
-        killables += storageRef.idDiffs { diff ->
-            rxs.transform { s -> s - diff.removed + diff.added }
-        }
-    }
+//    val storedHashes = Var(emptySet<String>()).also { rxs ->
+//        killables += storageRef.idDiffs { diff ->
+//            rxs.transform { s -> s - diff.removed + diff.added }
+//        }
+//    }
 
     val dbStatus = DBStatus(idb, killables)
     val tagDB = TagDB(db, killables)
     val userSongsDB = UserSongsDB(db, uid, killables)
     val songStoreDB = SongStorageDB(db, killables)
+    val songSource = DefaultSongSource(idb, userSongsDB, tagDB, killables)
+    val onlineTasks = OnlineTasks()
 
-    val playlist = Playlist(idb, userSongsDB, killables)
+//    val playlist = Playlist(idb, userSongsDB, killables)
 
 
 }

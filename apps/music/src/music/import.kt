@@ -19,6 +19,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import musiclib.Mp3File
+import musiclib.UserSongState
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.asList
@@ -152,26 +153,33 @@ fun MusicCtx.import(
                 val buffer = f.readAsArrayBuffer()
                 val hash = buffer.hash()
 
+
+                val mp3File = tagDB.get(hash) { f to buffer }
+
                 if (
-                    (hash !in storedHashes.now) &&
-                    !idb.exists(Mp3Store, hash) &&
-                    (hash !in fileMap.now)
+                    (hash !in fileMap.now) &&
+                    (hash !in userSongsDB.dontLikeSet)
                 ) {
-                    val mp3File = tagDB.get(hash) { f to buffer }
 
-                    val ks = killables.killables()
+                    if (idb.exists(Mp3Store, hash)) {
+                        userSongsDB.get(hash) {
+                            this.state.cv = UserSongState.New
+                        }
+                    } else {
+                        val ks = killables.killables()
 
-                    val element = fileListItem(f, mp3File, ks)
-                    fileListItemEmitter.emit(element)
+                        val element = fileListItem(f, mp3File, ks)
+                        fileListItemEmitter.emit(element)
 
-                    Item(
-                        file = f,
-                        hash = hash,
-                        element = element,
-                        mp3File = mp3File,
-                        killables = ks
-                    ).also { i ->
-                        fileMap.transform { it + (hash to i) }
+                        Item(
+                            file = f,
+                            hash = hash,
+                            element = element,
+                            mp3File = mp3File,
+                            killables = ks
+                        ).also { i ->
+                            fileMap.transform { it + (hash to i) }
+                        }
                     }
 
                 }
@@ -199,10 +207,6 @@ fun MusicCtx.import(
             for (fe in fm.entries) {
                 val f = fe.value
 
-                b.set(
-                    songsWrap.doc(f.hash).docRef(db),
-                    f.mp3File.props.write()
-                )
                 bc--
                 if (bc == 0) {
                     b.commit()
@@ -210,10 +214,15 @@ fun MusicCtx.import(
                     b = db.batch()
                 }
 
+
                 idb.put(Mp3Store, f.hash, f.file)
 
                 f.killables.kill()
                 f.element.removeFromParent()
+
+                userSongsDB.get(f.hash) {
+                    this.state.cv = UserSongState.New
+                }
 
                 pendingFiles.decrease()
 
@@ -464,17 +473,19 @@ fun MusicCtx.import(
                                 widthAuto
                             }
                             type = "file"
-                            multiple = true
                             accept = ".mp3"
                             isFolder.forEach { f ->
                                 this.asDynamic().webkitdirectory = f
+                                this.multiple = !f
                             }
 
-                            changeEvent {
+                            onchange = {
                                 this@input.files?.let { fl ->
-                                    post(Event.Load(fl.asList().toList()))
+                                    val list = fl.asList().toList()
+                                    post(Event.Load(list))
                                 }
                                 value = ""
+                                Unit
                             }
                         }
                     }

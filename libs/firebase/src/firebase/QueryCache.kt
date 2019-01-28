@@ -2,12 +2,17 @@ package firebase
 
 import common.*
 import commonlib.CollectionWrap
+import commonshr.SetAdded
 import commonshr.SetDiff
+import commonshr.SetMove
 import firebase.firestore.*
 import firebaseshr.HasFBProps
+import firebaseshr.HasProps
 import killable.Killable
 import killable.Killables
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.await
 import rx.Var
 
 class WriteData(
@@ -36,25 +41,20 @@ class QueryCache<T>(
             }
     }
 
-    fun listen(fn: (SetDiff<T>) -> Unit): Killable {
-        return list.addListener(
-            ListenableList.Listener(
-                added = { _, item -> fn(SetDiff(added = setOf(item))) },
-                removed = { _, item -> fn(SetDiff(removed = setOf(item))) }
-            )
-        )
+    val emitter
+        get() = list.emitter
+
+    fun placeholder(id: String): CompletableDeferred<T> {
+        return map.getOrPut(id) {
+            CompletableDeferred()
+        }
     }
 
     init {
-
         list.addListener(
             ListenableList.Listener(
                 added = { _, t ->
-                    map.getOrPut(
-                        extractId(t)
-                    ) {
-                        CompletableDeferred()
-                    }.complete(t)
+                    placeholder(extractId(t)).complete(t)
                 },
                 removed = { _, t ->
                     map -= extractId(t)
@@ -66,7 +66,20 @@ class QueryCache<T>(
             killables,
             listenConfig(list)
         )
+    }
 
+    suspend fun getAll(): List<T> {
+        val qs = collectionReference.get().await()
+
+        val list = mutableListOf<T>()
+
+        for (qds in qs.docs) {
+            list.add(
+                placeholder(qds.id).await()
+            )
+        }
+
+        return list
     }
 
     suspend fun get(id: String, create: suspend () -> T): T {
@@ -85,10 +98,10 @@ class QueryCache<T>(
                 }
             )
 
-            def
+            def.await()
         } else {
-            current
-        }.await()
+            current.await()
+        }
     }
 
     companion object {
@@ -118,4 +131,11 @@ class QueryCache<T>(
     }
 
 }
+
+
+val <T: HasFBProps<T>> Emitter<SetMove<T>>.ids
+    get() = map { m -> m.map { v -> v.props.idOrFail } }
+
+val <T: HasFBProps<T>> QueryCache<T>.ids
+    get() = emitter.ids
 
