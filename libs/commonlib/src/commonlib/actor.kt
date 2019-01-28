@@ -42,10 +42,17 @@ abstract class Actor<Event>(
         this.process(e) ?: fn(e)
     }
     infix fun Mixin.or(
+        fn: Mixin
+    ): Mixin = this or fn.process
+
+    infix fun Mixin.or(
         fn: suspend (Event) -> Iter
     ): Loop = loop { e:Event ->
         this.process(e) ?: fn(e)
     }
+    infix fun Mixin.or(
+        fn: Loop
+    ): Loop = this or fn.process
 
     abstract val start: Loop
 

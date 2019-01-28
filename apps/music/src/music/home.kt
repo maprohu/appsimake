@@ -19,6 +19,7 @@ import killable.addedTo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
+import rx.rxClass
 import kotlin.browser.window
 
 fun MusicCtx.home(
@@ -78,6 +79,29 @@ fun MusicCtx.home(
                 }
                 middleTitle {
                     innerText = fbCtx.appCtx.title
+                }
+                right {
+                    faButton(Fa.cloud) {
+                        cls {
+                            m1
+                        }
+                        rxClass {
+                            if (onlineTasks.onlineStatus()) {
+                                Cls.btnPrimary
+                            } else {
+                                Cls.btnOutlinePrimary
+                            }
+                        }
+                        clickEvent {
+                            onlineTasks.apply {
+                                post(
+                                    if (onlineStatus.now) OnlineTasks.Event.GoOffline
+                                    else OnlineTasks.Event.GoOnline
+                                )
+                            }
+                        }
+                    }
+
                 }
             }
 

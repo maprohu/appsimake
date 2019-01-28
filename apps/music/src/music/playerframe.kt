@@ -1,6 +1,7 @@
 package music
 
 import bootstrap.*
+import common.Some
 import common.listen
 import common.onInterval
 import commonlib.Actor
@@ -18,9 +19,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import musiclib.Mp3File
-import musiclib.fixedArtist
-import musiclib.fixedTitle
+import musiclib.*
 import org.w3c.dom.HTMLAudioElement
 import org.w3c.dom.url.URL
 import rx.Var
@@ -41,7 +40,8 @@ fun MusicCtx.playerFrame(
         killables,
         songSource = songSource,
         idb = idb,
-        tagDB = tagDB
+        tagDB = tagDB,
+        userSongsDB = userSongsDB
     )
 
 }
@@ -51,7 +51,8 @@ class PlayerFrame(
     val killables: Killables,
     val songSource: SongSource,
     val idb: IDBDatabase,
-    val tagDB: TagDB
+    val tagDB: TagDB,
+    val userSongsDB: UserSongsDB
 ): Actor<PlayerFrame.Event>(killables) {
 
     override val start: Loop
@@ -65,10 +66,12 @@ class PlayerFrame(
         object End: Event()
         object Forward: Event()
         object Backward: Event()
+        object Like: Event()
+        object DontLike: Event()
     }
 
-    val canDownload = Var(false)
-    val canUpload = Var(false)
+//    val canDownload = Var(false)
+//    val canUpload = Var(false)
 
     val hidden = Var(true)
     val playing = Var(false)
@@ -77,6 +80,8 @@ class PlayerFrame(
     val currentPosition = Var(0)
     val artist = Var("artist")
     val title = Var("title")
+
+    val state = Var(UserSongState.New)
 
 
 
@@ -94,14 +99,15 @@ class PlayerFrame(
             }
         }
 
-        fun loadPlayable() = loadPlayable(nextPlayable!!)
+        suspend fun loadPlayable() = loadPlayable(nextPlayable!!)
 
-        fun loadPlayable(playable: Playable): LoadedState {
+        suspend fun loadPlayable(playable: Playable): LoadedState {
             requestNextSong()
 
             return LoadedState(
                 this,
-                playable
+                playable,
+                userSongsDB.get(playable.tag.props.idOrFail)
             )
         }
 
@@ -118,21 +124,21 @@ class PlayerFrame(
 
 
 
-        fun doNext(fn: (LoadedState) -> Loop): Change {
+        suspend fun doNext(fn: (LoadedState) -> Loop): Change {
             return Change(
                 readNextPlayable()?.let { p ->
                     fn(loadPlayable(p))
                 } ?: hiddenLoop(this)
             )
         }
-        fun playNext(): Change {
+        suspend fun playNext(): Change {
             return doNext { l ->
                 playingLoop(
                     l.startPlaying()
                 )
             }
         }
-        fun loadNext(): Change {
+        suspend fun loadNext(): Change {
             return doNext { l ->
                 pausedLoop(l)
             }
@@ -141,12 +147,17 @@ class PlayerFrame(
 
     inner class LoadedState(
         val global: GlobalState,
-        playable: Playable,
+        val playable: Playable,
+        val userSong: UserSong,
         val audio: HTMLAudioElement = document.audio,
         ks: Killables = Killables()
     ): Killable by ks {
         init {
             ks += playable
+
+            ks += userSong.state.initial.forEach { s ->
+                state.now = s.getOrDefault(UserSongState.New)
+            }
 
             playable.tag.fixedArtist().addedTo(ks).forEach { artist.now = it.getOrDefault("<unkown artist>") }
             playable.tag.fixedTitle().addedTo(ks).forEach { title.now = it.getOrDefault("<unkown title>") }
@@ -173,7 +184,7 @@ class PlayerFrame(
             return PlayingState(this)
         }
 
-        fun forward(next: () -> Iter): Iter {
+        suspend fun forward(next: suspend () -> Iter): Iter {
             val newPos = audio.currentTime + SeekSeconds
 
             return if (newPos >= audio.duration) {
@@ -206,7 +217,7 @@ class PlayerFrame(
 
     val SeekSeconds = 15.0
 
-    fun seekMixin(loaded: LoadedState) = mixin { e ->
+    fun seekMixin(loaded: LoadedState, next: suspend () -> Iter) = mixin { e ->
         when (e) {
             is Event.Beginning -> {
                 loaded.audio.currentTime = 0.0
@@ -220,17 +231,47 @@ class PlayerFrame(
                 loaded.readCounterNow()
                 Same
             }
+            is Event.Like -> {
+                loaded.userSong.apply {
+                    state.cv = UserSongState.Like
+                    props.apply {
+                        if (dirty.now) {
+                            save()
+                        }
+                    }
+                }
+                Same
+            }
+            is Event.DontLike -> {
+                loaded.userSong.apply {
+                    state.cv = UserSongState.DontLike
+                    props.apply {
+                        if (dirty.now) {
+                            save()
+                        }
+                    }
+                }
+                next()
+            }
+            is Event.Forward -> {
+                loaded.forward {
+                    next()
+                }
+            }
+            is Event.End -> {
+                next()
+            }
             else -> null
         }
     }
 
     fun pausedLoop(loaded: LoadedState): Loop {
-        fun doNext(): Iter {
+        suspend fun doNext(): Iter {
             loaded.kill()
             return loaded.global.loadNext()
         }
 
-        return seekMixin(loaded) or { e ->
+        return seekMixin(loaded) { doNext() } or { e ->
             when (e) {
                 is Event.PlayOrPause -> {
                     Change(
@@ -239,27 +280,19 @@ class PlayerFrame(
                         )
                     )
                 }
-                is Event.Forward -> {
-                    loaded.forward {
-                        doNext()
-                    }
-                }
-                is Event.End -> {
-                    doNext()
-                }
                 else -> Same
             }
         }
     }
 
     fun playingLoop(playingState: PlayingState): Loop {
-        fun doNext(): Iter {
+        suspend fun doNext(): Iter {
             playingState.kill()
             playingState.loaded.kill()
             return playingState.loaded.global.playNext()
         }
 
-        return seekMixin(playingState.loaded) or { e ->
+        return seekMixin(playingState.loaded) { doNext() } or { e ->
             when (e) {
                 is Event.PlayOrPause -> {
                     playingState.kill()
@@ -270,12 +303,7 @@ class PlayerFrame(
                         )
                     )
                 }
-                is Event.Forward -> {
-                    playingState.loaded.forward {
-                        doNext()
-                    }
-                }
-                is Event.PlayingEnded, is Event.End -> {
+                is Event.PlayingEnded -> {
                     doNext()
                 }
                 else -> Same
@@ -434,50 +462,59 @@ class PlayerFrame(
                     btnGroup
                 }
                 faButton(Fa.thumbsUp) {
-                    cls {
-                        btnOutlinePrimary
+                    rxClass {
+                        if (state() == UserSongState.Like) Cls.btnPrimary
+                        else Cls.btnOutlinePrimary
+                    }
+                    clickEvent {
+                        post(Event.Like)
                     }
                 }
                 faButton(Fa.thumbsDown) {
-                    cls {
-                        btnOutlinePrimary
+                    rxClass {
+                        if (state() == UserSongState.DontLike) Cls.btnPrimary
+                        else Cls.btnOutlinePrimary
+                    }
+                    clickEvent {
+                        post(Event.DontLike)
                     }
                 }
             }
-            div {
-                cls {
-                    btnGroup
-                    m1
-                }
-                faButton(Fa.cloudDownloadAlt) {
-                    rxClass {
-                        if (canDownload()) {
-                            Cls.btnPrimary
-                        } else {
-                            Cls.btnOutlinePrimary
-                        }
-                    }
-                    clickEvent {
-                        canDownload.transform { n -> !n }
-                    }
-                }
-                faButton(Fa.cloudUploadAlt) {
-                    rxClass {
-                        if (canUpload()) {
-                            Cls.btnPrimary
-                        } else {
-                            Cls.btnOutlinePrimary
-                        }
-                    }
-                    clickEvent {
-                        canUpload.transform { n -> !n }
-                    }
-                }
-            }
+//            div {
+//                cls {
+//                    btnGroup
+//                    m1
+//                }
+//                faButton(Fa.cloudDownloadAlt) {
+//                    rxClass {
+//                        if (canDownload()) {
+//                            Cls.btnPrimary
+//                        } else {
+//                            Cls.btnOutlinePrimary
+//                        }
+//                    }
+//                    clickEvent {
+//                        canDownload.transform { n -> !n }
+//                    }
+//                }
+//                faButton(Fa.cloudUploadAlt) {
+//                    rxClass {
+//                        if (canUpload()) {
+//                            Cls.btnPrimary
+//                        } else {
+//                            Cls.btnOutlinePrimary
+//                        }
+//                    }
+//                    clickEvent {
+//                        canUpload.transform { n -> !n }
+//                    }
+//                }
+//            }
             div {
                 cls {
                     m1
                     p1
+                    px2
                     border
                     borderPrimary
                     rounded

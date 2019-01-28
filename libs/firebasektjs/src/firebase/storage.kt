@@ -70,6 +70,9 @@ inline val StringFormat.Companion.DATA_URL: StringFormat get() = "DATA_URL".asDy
 // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask
 external class UploadTask: Promise<UploadTaskSnapshot> {
 
+    // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask#cancel
+    fun cancel(): Boolean
+
 }
 
 // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTaskSnapshot

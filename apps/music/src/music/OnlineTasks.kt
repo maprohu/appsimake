@@ -9,6 +9,7 @@ import firebase.storage.Reference
 import firebase.storage.UploadTask
 import indexeddb.IDBDatabase
 import indexeddb.exists
+import indexeddb.put
 import killable.Killables
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
@@ -18,6 +19,7 @@ import org.w3c.files.Blob
 import org.w3c.xhr.BLOB
 import org.w3c.xhr.XMLHttpRequest
 import org.w3c.xhr.XMLHttpRequestResponseType
+import rx.Var
 
 
 class OnlineTasks(
@@ -33,20 +35,57 @@ class OnlineTasks(
         class Upload(val id: String): Event()
         class Download(val id: String): Event()
         class Uploaded(val id: String): Event()
+        class Downloaded(val id: String): Event()
 
     }
+
+    val onlineStatus = Var(false)
 
     val storage = mutableSetOf<String>()
     val uploaded = mutableSetOf<String>()
 
     override val start: Loop
-        get() = offline(Transfers())
+        get() = offlineLoop(Transfers())
 
+
+    data class Later(
+        val downloads: Set<String> = setOf()
+    ) {
+        fun down(id: String) = copy(
+            downloads = downloads + id
+        )
+    }
     data class Transfers(
+        val later: Later = Later(),
         val uploads: List<String> = listOf(),
-        val downloads: List<String> = listOf(),
-        val downloadLater: List<String> = listOf()
-    )
+        val downloads: List<String> = listOf()
+    ) {
+        fun up(id: String) = copy(
+            uploads = uploads + id
+        )
+        fun down(id: String) = copy(
+            downloads = downloads + id
+        )
+
+    }
+
+    fun Transfers.uploaded(id: String, fn: (Transfers) -> Loop): Iter {
+        return if (id in later.downloads) {
+            Change(
+                fn(
+                    copy(
+                        later = later.let { l ->
+                            l.copy(
+                                downloads = l.downloads - id
+                            )
+                        }
+                    ).down(id)
+                )
+            )
+        } else {
+            Same
+        }
+    }
 
     suspend fun Transfers.processOnline(): Iter {
         var c = this
@@ -72,7 +111,7 @@ class OnlineTasks(
                     }
                 }
                 return Change(
-                    uploading(
+                    uploadingLoop(
                         Uploading(
                             id,
                             task,
@@ -90,7 +129,7 @@ class OnlineTasks(
             )
             if (id !in uploaded) {
                 c = c.copy(
-                    downloadLater = c.downloadLater + id
+                    later = c.later.down(id)
                 )
             } else if (!idb.exists(Mp3Store, id)) {
                 val url = storageRef.child(id).getDownloadURL().await()
@@ -103,12 +142,30 @@ class OnlineTasks(
                     open("GET", url)
                     send()
                 }
-                req.withCredentials
 
+                GlobalScope.launch {
+                    val file = res.await()
+
+                    idb.put(Mp3Store, id, file)
+
+                    channel.send(Event.Downloaded(id))
+                }
+
+                return Change(
+                    downloadingLoop(
+                        Downloading(
+                            id,
+                            req,
+                            c
+                        )
+                    )
+                )
             }
-
         }
 
+        return Change(
+            onlineLoop(c.later)
+        )
     }
 
     data class Uploading(
@@ -116,49 +173,128 @@ class OnlineTasks(
         val task: UploadTask,
         val transfers: Transfers
     )
+    data class Downloading(
+        val id: String,
+        val task: XMLHttpRequest,
+        val transfers: Transfers
+    )
 
-    fun uploading(up: Uploading): Loop = loop { e ->
-    }
-
-    fun processOnline(transfers: Transfers): Iter {
-        if (transfers.uploads.isNotEmpty())
-
-
-    }
-
-    fun online(transfers: Transfers): Loop = loop { e ->
-    }
-    fun offline(transfers: Transfers): Loop = loop { e ->
+    fun transferMixin(transfers: Transfers, fn: (Transfers) -> Loop) = mixin { e ->
         when (e) {
             is Event.Upload -> {
                 Change(
-                    offline(
-                        transfers.copy(
-                            uploads = transfers.uploads + e.id
-                        )
-                    )
+                    fn(transfers.up(e.id))
                 )
             }
             is Event.Download -> {
                 Change(
-                    offline(
-                        transfers.copy(
-                            uploads = transfers.downloads + e.id
-                        )
-                    )
+                    fn(transfers.down(e.id))
                 )
             }
-            Event.GoOnline -> {
 
+            else -> null
+        }
+    }
+
+    fun uploadedMixin(transfers: Transfers, fn: (Transfers) -> Loop) = mixin { e ->
+        when (e) {
+            is Event.Uploaded -> {
+                transfers.uploaded(e.id, fn)
+            }
+            else -> null
+        }
+    }
+
+    fun downloadingLoop(state: Downloading): Loop {
+        val trfn = { t: Transfers ->
+            downloadingLoop(
+                state.copy(transfers = t)
+            )
+        }
+
+        return transferMixin(state.transfers, trfn) or uploadedMixin(state.transfers, trfn) or { e ->
+            when {
+                e is Event.Downloaded && e.id == state.id -> {
+                    state.transfers.processOnline()
+                }
+                e is Event.GoOffline -> {
+                    state.task.abort()
+                    Change(
+                        offlineLoop(state.transfers.down(state.id))
+                    )
+                }
+                else -> Same
+            }
+        }
+    }
+    fun uploadingLoop(state: Uploading): Loop {
+        val trfn = { t: Transfers ->
+            uploadingLoop(
+                state.copy(transfers = t)
+            )
+        }
+
+        return transferMixin(state.transfers, trfn) or mixin { e ->
+            when {
+                e is Event.Uploaded && e.id == state.id -> {
+                    state.transfers.processOnline()
+                }
+                else -> null
+            }
+        } or uploadedMixin(state.transfers, trfn) or { e ->
+            when (e) {
+                is Event.GoOffline -> {
+                    val canceled = state.task.cancel()
+                    Change(
+                        offlineLoop(
+                            if (canceled) state.transfers.up(state.id)
+                            else state.transfers
+                        )
+                    )
+                }
+                else -> Same
+            }
+        }
+    }
+
+    fun onlineLoop(later: Later): Loop = loop { e ->
+        when (e) {
+            is Event.Upload -> {
+                Transfers(later).up(e.id).processOnline()
+            }
+            is Event.Download -> {
+                Transfers(later).down(e.id).processOnline()
+            }
+            Event.GoOffline -> {
+                Change(offlineLoop(Transfers(later)))
             }
             else -> Same
+        }
+    }
+    fun offlineLoop(transfers: Transfers): Loop {
+        onlineStatus.now = false
+        return loop { e ->
+            when (e) {
+                is Event.Upload -> {
+                    Change(offlineLoop(transfers.up(e.id)))
+                }
+                is Event.Download -> {
+                    Change(offlineLoop(transfers.down(e.id)))
+                }
+                Event.GoOnline -> {
+                    onlineStatus.now = true
+                    transfers.processOnline()
+                }
+                else -> Same
+            }
         }
     }
 
 
     init {
         GlobalScope.launch {
-            val allStorage = songStorageDB.queryCache.getAll()
+//            val allStorage =
+                songStorageDB.queryCache.getAll()
 //            storage.addAll(
 //                allStorage.map { it.props.idOrFail }
 //            )
@@ -180,11 +316,10 @@ class OnlineTasks(
                     GlobalScope.launch {
                         val localExists = idb.exists(Mp3Store, id)
                         val cloudExists = id in storage
-                        val cloudUploaded = id in uploaded
 
                         if (localExists && !cloudExists) {
                             channel.send(Event.Upload(id))
-                        } else if (!localExists && cloudExists) {
+                        } else if (!localExists) {
                             channel.send(Event.Download(id))
                         }
                     }

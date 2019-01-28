@@ -99,7 +99,13 @@ class MusicCtx(fbCtx: FbCtx, user: User, val idb: IDBDatabase) : LoggedInCtx(fbC
     val userSongsDB = UserSongsDB(db, uid, killables)
     val songStoreDB = SongStorageDB(db, killables)
     val songSource = DefaultSongSource(idb, userSongsDB, tagDB, killables)
-    val onlineTasks = OnlineTasks()
+    val onlineTasks = OnlineTasks(
+        fbCtx.app.storage().ref("music/files"),
+        idb,
+        userSongsDB,
+        songStoreDB,
+        killables
+    )
 
 //    val playlist = Playlist(idb, userSongsDB, killables)
 
