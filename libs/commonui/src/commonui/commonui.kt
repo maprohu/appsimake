@@ -6,9 +6,14 @@ import fontawesome.*
 import killable.Killable
 import killable.Killables
 import org.w3c.dom.*
+import kotlin.browser.document
 
 fun Node.nextButton(label: String, fn: () -> Unit): HTMLAnchorElement {
     return nextButton( { innerText = label }, fn )
+}
+
+val webkitdirectorySupported by lazy {
+    jsTypeOf(document.input.asDynamic().webkitdirectory.unsafeCast<Any?>()) == "boolean"
 }
 
 fun Node.nextButton(label: HTMLDivElement.() -> Unit, fn: () -> Unit): HTMLAnchorElement {

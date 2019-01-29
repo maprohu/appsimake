@@ -2,10 +2,9 @@ package music
 
 import bootstrap.*
 import common.Emitter
+import common.objectKeys
 import common.removeFromParent
-import commonui.RootPanel
-import commonui.faButton
-import commonui.screenLayout
+import commonui.*
 import domx.*
 import firebase.firestore.MaxBatchSize
 import firebase.firestore.docRef
@@ -20,10 +19,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import musiclib.Mp3File
 import musiclib.UserSongState
-import org.w3c.dom.BroadcastChannel
-import org.w3c.dom.HTMLDivElement
-import org.w3c.dom.HTMLElement
-import org.w3c.dom.asList
+import org.w3c.dom.*
 import org.w3c.dom.url.URL
 import org.w3c.files.File
 import rx.*
@@ -114,9 +110,9 @@ fun MusicCtx.import(
         val killables: Killables
     )
 
-    val fileType = Var<FileType>(FileType.Folder)
-    val isFile = Rx { fileType() == FileType.File }
-    val isFolder = Rx { fileType() == FileType.Folder }
+//    val fileType = Var<FileType>(FileType.Folder)
+//    val isFile = Rx { fileType() == FileType.File }
+//    val isFolder = Rx { fileType() == FileType.Folder }
     val pendingFiles = Var(0)
     val canceling = Var(false)
     val importing = Var(false)
@@ -441,52 +437,71 @@ fun MusicCtx.import(
                             flexRow
                             alignItemsCenter
                         }
+                        val inputContainer = this
                         div {
                             cls {
                                 btnGroup
                                 m1
                             }
-                            faButton(Fa.folder) {
-                                cls {
-                                    btnPrimary
-                                }
-                                rxClass(Cls.active, isFolder)
-                                clickEvent {
-                                    fileType.now = FileType.Folder
-                                }
-                            }
-                            faButton(Fa.file) {
-                                cls {
-                                    btnPrimary
-                                }
-                                rxClass(Cls.active, isFile)
-                                clickEvent {
-                                    fileType.now = FileType.File
-                                }
-                            }
-                        }
 
-                        input {
-                            cls {
-                                m1
-                                formControlFile
-                                widthAuto
+                            if (webkitdirectorySupported) {
+                                val inp = inputContainer.input {
+                                    cls {
+                                        dNone
+                                    }
+                                    type = "file"
+                                    this.asDynamic().webkitdirectory = true
+                                    accept = "audio/mpeg"
+                                    onchange = {
+                                        this@input.files?.let { fl ->
+                                            val list = fl.asList().toList()
+                                            post(Event.Load(list))
+                                        }
+                                        value = ""
+                                        Unit
+                                    }
+                                }
+
+                                label {
+                                    htmlFor = inp.ref
+                                    faButtonSpan {
+                                        cls.fa.folderOpen
+                                    }
+                                    cls {
+                                        btn
+                                        btnPrimary
+                                        m0
+                                    }
+                                }
+
                             }
-                            type = "file"
-                            accept = ".mp3"
-                            isFolder.forEach { f ->
-                                this.asDynamic().webkitdirectory = f
-//                                this.asDynamic().directory = f
-                                this.multiple = !f
+                            val inp = inputContainer.input {
+                                cls {
+                                    dNone
+                                }
+                                type = "file"
+                                multiple = true
+                                accept = "audio/mpeg"
+                                onchange = {
+                                    this@input.files?.let { fl ->
+                                        val list = fl.asList().toList()
+                                        post(Event.Load(list))
+                                    }
+                                    value = ""
+                                    Unit
+                                }
                             }
 
-                            onchange = {
-                                this@input.files?.let { fl ->
-                                    val list = fl.asList().toList()
-                                    post(Event.Load(list))
+                            label {
+                                htmlFor = inp.ref
+                                faButtonSpan {
+                                    cls.fa.file
                                 }
-                                value = ""
-                                Unit
+                                cls {
+                                    btn
+                                    btnPrimary
+                                    m0
+                                }
                             }
                         }
                     }
