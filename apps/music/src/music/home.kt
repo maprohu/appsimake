@@ -87,9 +87,9 @@ fun MusicCtx.home(
                         }
                         rxClass {
                             if (onlineTasks.onlineStatus()) {
-                                Cls.btnPrimary
+                                Cls.btnSuccess
                             } else {
-                                Cls.btnOutlinePrimary
+                                Cls.btnDanger
                             }
                         }
                         clickEvent {

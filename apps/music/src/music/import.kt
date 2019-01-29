@@ -20,6 +20,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import musiclib.Mp3File
 import musiclib.UserSongState
+import org.w3c.dom.BroadcastChannel
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.asList
@@ -161,7 +162,7 @@ fun MusicCtx.import(
                     (hash !in userSongsDB.dontLikeSet)
                 ) {
 
-                    if (idb.exists(Mp3Store, hash)) {
+                    if (idb.existsMp3(hash)) {
                         userSongsDB.get(hash) {
                             this.state.cv = UserSongState.New
                         }
@@ -214,8 +215,7 @@ fun MusicCtx.import(
                     b = db.batch()
                 }
 
-
-                idb.put(Mp3Store, f.hash, f.file)
+                idb.addMp3(f.hash, f.file)
 
                 f.killables.kill()
                 f.element.removeFromParent()
@@ -228,10 +228,10 @@ fun MusicCtx.import(
 
                 mfm.remove(fe.key)
 
-                dbStatus.add(
-                    size = f.mp3File.bytes.iv,
-                    duration = f.mp3File.secs.iv
-                )
+//                dbStatus.add(
+//                    size = f.mp3File.bytes.iv,
+//                    duration = f.mp3File.secs.iv
+//                )
 
                 if (canceling.now) break
             }
@@ -476,7 +476,7 @@ fun MusicCtx.import(
                             accept = ".mp3"
                             isFolder.forEach { f ->
                                 this.asDynamic().webkitdirectory = f
-                                this.asDynamic().directory = f
+//                                this.asDynamic().directory = f
                                 this.multiple = !f
                             }
 

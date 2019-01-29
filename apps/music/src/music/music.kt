@@ -28,29 +28,13 @@ import rx.Var
 import kotlin.browser.window
 import kotlin.js.Promise
 
-val Mp3Store by named { it }
-val DBSingletons by named { it }
 
 fun main(args: Array<String>) {
 
     GlobalScope.launch {
-        val idb = window.indexedDB.open("appsimake-music", 2).apply {
-            addEventListener(
-                "upgradeneeded",
-                { event ->
-                    event as IDBVersionChangeEvent
+        val idb = localDatabase()
 
-                    val db = event.target.result
-
-                    if (event.oldVersion < 1) {
-                        db.createObjectStore<Any, Any>(Mp3Store)
-                    }
-                    if (event.oldVersion < 2) {
-                        db.createObjectStore<Any, Any>(DBSingletons)
-                    }
-                }
-            )
-        }.await()
+        LocalSongs.init(idb)
 
         val fbCtx = FbCtx(music, "Music")
 
@@ -65,6 +49,10 @@ fun main(args: Array<String>) {
                 val ctx = MusicCtx(fbCtx, user, idb)
 
                 GlobalScope.launch {
+                    ctx.userSongsDB.queryCache.getAll()
+                    ctx.tagDB.queryCache.getAll()
+                    ctx.songStoreDB.queryCache.getAll()
+
                     maintenance(idb, ctx.userSongsDB)
 
                     ctx.apply {
@@ -99,8 +87,8 @@ class MusicCtx(fbCtx: FbCtx, user: User, val idb: IDBDatabase) : LoggedInCtx(fbC
 //        }
 //    }
 
-    val dbStatus = DBStatus(idb, killables)
     val tagDB = TagDB(db, killables)
+    val dbStatus = DBStatus(idb, tagDB, killables)
     val userSongsDB = UserSongsDB(db, uid, killables)
     val songStoreDB = SongStorageDB(db, killables)
     val songSource = DefaultSongSource(idb, userSongsDB, tagDB, killables)

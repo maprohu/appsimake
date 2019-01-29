@@ -1,5 +1,6 @@
 package indexeddb
 
+import commonshr.report
 import kotlinx.coroutines.*
 import org.w3c.dom.WindowOrWorkerGlobalScope
 import org.w3c.dom.events.Event
@@ -32,6 +33,8 @@ open external class IDBRequest<out T>: EventTarget {
     open val result: T
 
 }
+
+fun <T> IDBRequest<T>.then(fn: (T) -> Unit) = then(fn) { report(it) }
 
 fun <T> IDBRequest<T>.then(fn: (T) -> Unit, err: (Throwable) -> Unit) {
     addEventListener(

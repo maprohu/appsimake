@@ -16,7 +16,7 @@ inline fun dyn() = js("{}")
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T> obj() = dyn().unsafeCast<T>()
 @Suppress("NOTHING_TO_INLINE")
-inline fun dyn(fn: dynamic.() -> Unit) = (dyn() as Any?).apply(fn)
+inline fun dyn(fn: dynamic.() -> Unit) = dyn().unsafeCast<Any>().apply(fn)
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T> obj(fn: T.() -> Unit) = obj<T>().apply(fn)
 
