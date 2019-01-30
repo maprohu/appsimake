@@ -58,28 +58,3 @@ class UserSongsDB(
 
 }
 
-suspend fun like(
-    id: String,
-    userSongsDB: UserSongsDB,
-    idb: IDBDatabase
-) {
-    val userSong = userSongsDB.get(id)
-
-    if (userSong.state.iv != UserSongState.Like) {
-        userSong.state.cv = UserSongState.Like
-
-        @Suppress("DeferredResultUnused")
-        userSong.props.save()
-
-        val mp3 = idb.readMp3(id)
-
-        if (mp3 != null) {
-
-
-        }
-
-
-
-    }
-
-}

@@ -156,20 +156,3 @@ suspend fun IDBDatabase.removeMp3(id: String) {
     LocalSongs.removed(id)
 }
 
-suspend fun maintenance(
-    idb: IDBDatabase,
-    userSongsDB: UserSongsDB
-) {
-    val hashes = idb.getAllKeys<String>(Mp3Store)
-
-    for (hash in hashes) {
-        val userSong = userSongsDB.get(hash) {
-            state.cv = UserSongState.New
-        }
-
-        if (userSong.state.iv == UserSongState.DontLike) {
-            idb.removeMp3(hash)
-        }
-    }
-
-}

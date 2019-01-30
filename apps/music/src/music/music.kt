@@ -58,10 +58,11 @@ fun main(args: Array<String>) {
 
                     dbLinks.init()
 
+
                     val ctx = MusicCtx(fbCtx, user, idb, dbLinks)
                     ks += ctx.killables
 
-                    maintenance(idb, ctx.userSongsDB)
+                    startMaintenance(ks, idb, ctx.userSongsDB)
 
                     ctx.apply {
                         home(

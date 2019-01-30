@@ -15,6 +15,9 @@ import killable.Killables
 import killable.addedTo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import mediasession.MediaMetadata
+import mediasession.mediaSession
+import mediasession.mediaSessionSupported
 import musiclib.*
 import org.w3c.dom.HTMLAudioElement
 import org.w3c.dom.HTMLButtonElement
@@ -43,6 +46,7 @@ fun MusicCtx.playerFrame(
         )
     )
 
+
 }
 
 class PlayerFrame(
@@ -52,7 +56,6 @@ class PlayerFrame(
 ): Actor<PlayerFrame.Event>(killables) {
 
     interface Loop: LoopT<Event>
-
 
     sealed class Event {
         class PlayableLoaded(val playable: Playable): Event()
@@ -74,14 +77,6 @@ class PlayerFrame(
     val artist = Var("artist")
     val title = Var("title")
 
-
-//    fun String.padLeft(minLength: Int, char: Char): String {
-//        return if (length < minLength) {
-//            (length .. minLength).map { char }.toCharArray().let { String(it) } + this
-//        } else {
-//            this
-//        }
-//    }
     fun formatSecs(s: Int): String {
         val mins = s / 60.0
         val minPart = floor(mins)
@@ -98,24 +93,16 @@ class PlayerFrame(
 
     val state = Var(UserSongState.New)
 
-
     val SeekSeconds = 15.0
 
-
     interface PlayStateLoop: Loop {
-//        fun next(p: Playable)
         fun next()
     }
-//    interface NextPlayableLoop: Loop {
-//        fun next()
-//    }
     inner class VisibleLoop(
         val playable: Playable,
         startPlaying: Boolean
     ): Loop  {
         val vks = Killables()
-
-//        var nextPlayable: NextPlayableLoop = NoNextPlayable()
 
         init {
             hidden.now = false
@@ -128,6 +115,36 @@ class PlayerFrame(
 
             playable.tag.fixedArtist().addedTo(vks).forEach { artist.now = it.getOrDefault("<unkown artist>") }
             playable.tag.fixedTitle().addedTo(vks).forEach { title.now = it.getOrDefault("<unkown title>") }
+
+            if (mediaSessionSupported) {
+                window.navigator.mediaSession.apply {
+                    metadata = MediaMetadata(
+                        obj {
+                            artist = this@PlayerFrame.artist.now
+                            title = this@PlayerFrame.title.now
+                        }
+                    )
+                    setActionHandler("play") {
+                        post(Event.PlayOrPause)
+                    }
+                    setActionHandler("pause") {
+                        post(Event.PlayOrPause)
+                    }
+                    setActionHandler("seekbackward") {
+                        post(Event.Backward)
+                    }
+                    setActionHandler("seekforward") {
+                        post(Event.Forward)
+                    }
+                    setActionHandler("previoustrack") {
+                        post(Event.Beginning)
+                    }
+                    setActionHandler("nexttrack") {
+                        post(Event.End)
+                    }
+
+                }
+            }
         }
 
         val audio = document.audio {
@@ -144,7 +161,6 @@ class PlayerFrame(
 
         fun next() {
             vks.kill()
-//            nextPlayable.next()
             playState.next()
         }
 
@@ -201,37 +217,7 @@ class PlayerFrame(
                 else -> {}
             }
             playState.process(e)
-//            nextPlayable.process(e)
         }
-
-//        inner class NoNextPlayable: NextPlayableLoop {
-//
-//            init {
-//                requestNextSong()
-//            }
-//
-//            override fun next() {
-//                root = HiddenLoop()
-//            }
-//
-//            override suspend fun process(e: Event) {
-//                when (e) {
-//                    is Event.PlayableLoaded -> {
-//                        nextPlayable = HasNextPlayable(e.playable)
-//                    }
-//                    else -> {}
-//                }
-//            }
-//        }
-//        inner class HasNextPlayable(
-//            val playable: Playable
-//        ): NextPlayableLoop {
-//            override fun next() {
-//                playState.next(playable)
-//            }
-//
-//            override suspend fun process(e: Event) {}
-//        }
 
         inner class PlayingLoop: PlayStateLoop {
             val lks = Killables()
@@ -240,10 +226,6 @@ class PlayerFrame(
                 lks.kill()
                 nextState(true)
             }
-//            override fun next(p: Playable) {
-//                lks.kill()
-//                root = VisibleLoop(p, true)
-//            }
 
             init {
                 audio.play()
@@ -280,9 +262,6 @@ class PlayerFrame(
             override fun next() {
                 nextState(false)
             }
-//            override fun next(p: Playable) {
-//                root = VisibleLoop(p, false)
-//            }
 
             override suspend fun process(e: Event) {
                 when (e) {
@@ -317,10 +296,6 @@ class PlayerFrame(
         }
     }
 
-//    fun requestNextSong() {
-//    }
-
-
     fun nextState(startPlaying: Boolean) {
         val polled = songSource.poll()
         root = if (polled == null) {
@@ -338,8 +313,6 @@ class PlayerFrame(
     }
     init {
         nextState(false)
-//        root = HiddenLoop()
-//        requestNextSong()
     }
 
     val element = panel.newRoot {}
