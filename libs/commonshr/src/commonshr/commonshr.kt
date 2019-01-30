@@ -42,6 +42,10 @@ sealed class SetMove<out T> {
         is SetAdded -> set += value
         is SetRemoved -> set -= value
     }
+    fun applyTo(set: MutableList<@UnsafeVariance T>) = when(this) {
+        is SetAdded -> set += value
+        is SetRemoved -> set -= value
+    }
 }
 data class SetAdded<T>(override val value: T): SetMove<T>()
 data class SetRemoved<T>(override val value: T): SetMove<T>()

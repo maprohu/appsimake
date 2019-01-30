@@ -17,6 +17,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import musiclib.*
 import org.w3c.dom.HTMLAudioElement
+import org.w3c.dom.HTMLButtonElement
+import org.w3c.dom.Node
+import rx.Rx
 import rx.Var
 import rx.rxClass
 import styles.scrollVertical
@@ -72,6 +75,28 @@ class PlayerFrame(
     val currentPosition = Var(0)
     val artist = Var("artist")
     val title = Var("title")
+
+
+//    fun String.padLeft(minLength: Int, char: Char): String {
+//        return if (length < minLength) {
+//            (length .. minLength).map { char }.toCharArray().let { String(it) } + this
+//        } else {
+//            this
+//        }
+//    }
+    fun formatSecs(s: Int): String {
+        val mins = s / 60.0
+        val minPart = floor(mins)
+        val secPart = mins - minPart
+        val secString = ((secPart * 60).toInt() + 100).toString().substring(1)
+        val minString = minPart.toInt().toString()
+
+        return "$minString:$secString"
+    }
+
+    val totalDurationText = Rx { formatSecs(totalDuration()) }
+    val totalDurationTextLength = Rx { totalDurationText().length }
+    val currentPositionText = Rx { formatSecs(currentPosition()).padStart(totalDurationTextLength(), ' ') }
 
     val state = Var(UserSongState.New)
 
@@ -314,190 +339,162 @@ class PlayerFrame(
     val innerPanel = RootPanel(rootDiv)
 
     init {
-        element.div {
+        element.column {
             rxDisplayed { !hidden() }
             cls {
                 borderTop
                 bgLight
                 flexFixedSize()
-                dFlex
-                flexRow
-                flexWrap
             }
-            div {
-                cls {
-                    m1
-                    btnGroup
-                }
+            fun Node.mediaButton(faClass: String, btnClass: String? = Cls.btnOutlinePrimary, fn: HTMLButtonElement.() -> Unit) {
                 button {
                     cls {
                         btn
-                        btnOutlinePrimary
                     }
-                    faButtonSpan {
-                        rxClass {
-                            if (playing()) {
-                                Fa.pause
-                            } else {
-                                Fa.play
-                            }
-                        }
+                    btnClass?.let { classes += it }
+                    faButtonSpan(faClass) {
+                        cls.fa.x2
                     }
-                    clickEvent {
-                        post(Event.PlayOrPause)
-                    }
-//                    rxEnabled { !playing() }
-                }
-            }
-            div {
-                cls {
-                    m1
-                    btnGroup
-                }
-                faButton(Fa.stepBackward) {
-                    cls {
-                        btnOutlinePrimary
-                    }
-                    rxEnabled { currentPosition() != 0 || playing() }
-                    clickEvent {
-                        post(Event.Beginning)
-                    }
-                }
-                faButton(Fa.backward) {
-                    cls {
-                        btnOutlinePrimary
-                    }
-                    rxEnabled { currentPosition() != 0 || playing() }
-                    clickEvent {
-                        post(Event.Backward)
-                    }
-                }
-                faButton(Fa.question) {
-                    cls {
-                        btnOutlinePrimary
-                    }
-                }
-                faButton(Fa.forward) {
-                    cls {
-                        btnOutlinePrimary
-                    }
-                    clickEvent {
-                        post(Event.Forward)
-                    }
-                }
-                faButton(Fa.stepForward) {
-                    cls {
-                        btnOutlinePrimary
-                    }
-                    clickEvent {
-                        post(Event.End)
-                    }
+                    fn()
                 }
 
             }
-            div {
-                cls {
-                    border
-                    borderPrimary
-                    rounded
-                    m1
-                    p2
-                    flexCenter()
-                }
-                pre {
+            column {
+                row {
                     cls {
-                        m0
-                        textPrimary
+                        justifyContentCenter
                     }
-                    fun formatSecs(s: Int): String {
-                        val mins = s / 60.0
-                        val minPart = floor(mins)
-                        val secPart = mins - minPart
-                        val secString = ((secPart * 60).toInt() + 100).toString().substring(1)
-                        val minString = minPart.toInt().toString().let { ms ->
-                            if (ms.length < 3) {
-                                (ms.length .. 3).map { ' ' }.toCharArray().let { String(it) } + ms
-                            } else {
-                                ms
+                    div {
+                        cls {
+                            m1
+                            p1
+                            px2
+                            border
+                            borderPrimary
+                            rounded
+                            textPrimary
+                            scrollVertical
+                            dFlex
+                            alignItemsCenter
+                        }
+                        span {
+                            rxText { "${artist()} - ${title()}" }
+                        }
+                    }
+                    div {
+                        cls {
+                            border
+                            borderPrimary
+                            rounded
+                            m1
+                            p2
+                            flexCenter()
+                        }
+                        pre {
+                            cls {
+                                m0
+                                textPrimary
+                            }
+                            rxText {
+                                "${currentPositionText()} / ${totalDurationText()}"
+                            }
+                        }
+                    }
+
+                }
+                row {
+                    cls {
+                        flexWrap
+                        justifyContentCenter
+                    }
+                    div {
+                        cls {
+                            m1
+                            btnGroup
+                        }
+                        button {
+                            cls {
+                                btn
+                                btnOutlinePrimary
+                            }
+                            faButtonSpan {
+                                cls.fa.x2
+                                rxClass {
+                                    if (playing()) {
+                                        Fa.pause
+                                    } else {
+                                        Fa.play
+                                    }
+                                }
+                            }
+                            clickEvent {
+                                post(Event.PlayOrPause)
+                            }
+                        }
+                    }
+                    div {
+                        cls {
+                            m1
+                            btnGroup
+                        }
+                        mediaButton(Fa.stepBackward) {
+                            rxEnabled { currentPosition() != 0 || playing() }
+                            clickEvent {
+                                post(Event.Beginning)
+                            }
+                        }
+                        mediaButton(Fa.backward) {
+                            cls {
+                                btnOutlinePrimary
+                            }
+                            rxEnabled { currentPosition() != 0 || playing() }
+                            clickEvent {
+                                post(Event.Backward)
+                            }
+                        }
+                        mediaButton(Fa.forward) {
+                            cls {
+                                btnOutlinePrimary
+                            }
+                            clickEvent {
+                                post(Event.Forward)
+                            }
+                        }
+                        mediaButton(Fa.stepForward) {
+                            cls {
+                                btnOutlinePrimary
+                            }
+                            clickEvent {
+                                post(Event.End)
                             }
                         }
 
-                        return "$minString:$secString"
                     }
-                    rxText {
-                        "${formatSecs(currentPosition())} / ${formatSecs(totalDuration())}"
+                    div {
+                        cls {
+                            m1
+                            btnGroup
+                        }
+                        mediaButton(Fa.thumbsUp, null) {
+                            rxClass {
+                                if (state() == UserSongState.Like) Cls.btnPrimary
+                                else Cls.btnOutlinePrimary
+                            }
+                            clickEvent {
+                                post(Event.Like)
+                            }
+                        }
+                        mediaButton(Fa.thumbsDown, null) {
+                            rxClass {
+                                if (state() == UserSongState.DontLike) Cls.btnPrimary
+                                else Cls.btnOutlinePrimary
+                            }
+                            clickEvent {
+                                post(Event.DontLike)
+                            }
+                        }
                     }
-                }
-            }
-            div {
-                cls {
-                    m1
-                    btnGroup
-                }
-                faButton(Fa.thumbsUp) {
-                    rxClass {
-                        if (state() == UserSongState.Like) Cls.btnPrimary
-                        else Cls.btnOutlinePrimary
-                    }
-                    clickEvent {
-                        post(Event.Like)
-                    }
-                }
-                faButton(Fa.thumbsDown) {
-                    rxClass {
-                        if (state() == UserSongState.DontLike) Cls.btnPrimary
-                        else Cls.btnOutlinePrimary
-                    }
-                    clickEvent {
-                        post(Event.DontLike)
-                    }
-                }
-            }
-//            div {
-//                cls {
-//                    btnGroup
-//                    m1
-//                }
-//                faButton(Fa.cloudDownloadAlt) {
-//                    rxClass {
-//                        if (canDownload()) {
-//                            Cls.btnPrimary
-//                        } else {
-//                            Cls.btnOutlinePrimary
-//                        }
-//                    }
-//                    clickEvent {
-//                        canDownload.transform { n -> !n }
-//                    }
-//                }
-//                faButton(Fa.cloudUploadAlt) {
-//                    rxClass {
-//                        if (canUpload()) {
-//                            Cls.btnPrimary
-//                        } else {
-//                            Cls.btnOutlinePrimary
-//                        }
-//                    }
-//                    clickEvent {
-//                        canUpload.transform { n -> !n }
-//                    }
-//                }
-//            }
-            div {
-                cls {
-                    m1
-                    p1
-                    px2
-                    border
-                    borderPrimary
-                    rounded
-                    textPrimary
-                    scrollVertical
-                    dFlex
-                    alignItemsCenter
-                }
-                span {
-                    rxText { "${artist()} - ${title()}" }
+
                 }
             }
         }

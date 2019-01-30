@@ -1,253 +1,169 @@
 package music
 
+import bootstrap.btnDanger
+import bootstrap.btnSuccess
+import bootstrap.m1
 import common.feedTo
 import common.filtered
+import common.map
 import commonlib.Actor
 import commonlib.LoopT
+import commonlib.addedTo
+import commonlib.toAsync
 import commonshr.SetAdded
+import commonui.faButton
+import domx.Cls
+import domx.clickEvent
+import domx.cls
 import firebase.ids
 import firebase.storage.Reference
 import firebase.storage.UploadTask
+import fontawesome.Fa
+import fontawesome.cloud
 import indexeddb.IDBDatabase
 import indexeddb.exists
 import indexeddb.put
 import killable.Killables
+import killable.addedTo
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
+import org.w3c.dom.HTMLButtonElement
+import org.w3c.dom.Node
 import org.w3c.files.Blob
 import org.w3c.xhr.BLOB
 import org.w3c.xhr.XMLHttpRequest
 import org.w3c.xhr.XMLHttpRequestResponseType
 import rx.Var
+import rx.rxClass
 
 
 class OnlineTasks(
     private val storageRef: Reference,
     private val idb: IDBDatabase,
-    userSongsDB: UserSongsDB,
     private val songStorageDB: SongStorageDB,
-    killables: Killables
+    private val transferSongs: TransferSongs,
+    private val killables: Killables
 ): Actor<OnlineTasks.Event>(killables) {
     interface Loop: LoopT<Event>
 
     sealed class Event {
         object GoOnline: Event()
         object GoOffline: Event()
-        class Upload(val id: String): Event()
-        class Download(val id: String): Event()
-        class Uploaded(val id: String): Event()
-        class Downloaded(val id: String): Event()
+//        class Uploaded(val id: String): Event()
+//        class Downloaded(val id: String): Event()
     }
 
     val onlineStatus = Var(false)
 
-    val storage = mutableSetOf<String>()
-    val uploaded = mutableSetOf<String>()
-
-    class Later {
-        val downloads = mutableListOf<String>()
+    sealed class Transfer(val id: String) {
+        class Upload(id: String): Transfer(id)
+        class Download(id: String): Transfer(id)
     }
-    interface NetworkStateLoop: Loop {
-        suspend fun processNext() {}
-    }
-    inner class Transfers: Loop {
-        val later = Later()
-        val uploads = mutableListOf<String>()
-        val downloads = mutableListOf<String>()
 
-        var networkState : NetworkStateLoop = OfflineLoop()
+    inner class OnlineLoop: Loop {
+        val ks = killables.killables()
 
-        suspend fun processOnline() {
-            networkState = OnlineLoop()
-            networkState.processNext()
-        }
+        init {
+            val emitter = toAsync<Transfer>(
+                transferSongs.upload.map { m -> m.map { i -> Transfer.Upload(i) } },
+                transferSongs.download.map { m -> m.map { i -> Transfer.Download(i) } }
+            ).addedTo(ks)
 
-        inner class OfflineLoop: NetworkStateLoop {
-            init {
-                onlineStatus.now = false
-            }
-            override suspend fun process(e: Event) {
-                when (e) {
-                    is Event.GoOnline -> {
-                        onlineStatus.now = true
-                        processOnline()
-                    }
-                    else -> {}
-                }
-            }
-        }
-        inner class OnlineLoop: NetworkStateLoop {
-            override suspend fun processNext() {
-                while (uploads.isNotEmpty()) {
-                    val id = uploads.removeAt(0)
+            GlobalScope.launch {
+                while (true) {
+                    val tr = emitter.receive()
+                    val id = tr.id
 
-                    val file = idb.readMp3(id)
-                    if (file != null && id !in storage) {
-                        val store = songStorageDB.get(id) {
-                            uploaded.cv = false
-                            count.cv = 1
-                        }
-                        val ref = storageRef.child(id)
-                        val task = ref.put(file)
-                        GlobalScope.launch {
-                            task.await()
-                            store.apply {
-                                uploaded.cv = true
-                                props.save()
+                    when (tr) {
+                        is Transfer.Upload -> {
+                            val file = idb.readMp3(id)
+                            val store = songStorageDB.get(id) {
+                                uploaded.cv = false
+                                count.cv = 1
+                            }
+                            if (file != null && !store.uploaded.iv) {
+                                val ref = storageRef.child(id)
+                                ref.put(file).await()
+                                store.apply {
+                                    uploaded.cv = true
+                                    props.save()
+                                }
                             }
                         }
-                        networkState = UploadinLoop(id, task)
-                    }
-
-                }
-                while (downloads.isNotEmpty()) {
-                    val id = downloads.removeAt(0)
-                    if (id !in uploaded) {
-                        later.downloads += id
-                    } else if (!idb.existsMp3(id)) {
-                        val url = storageRef.child(id).getDownloadURL().await()
-                        val res = CompletableDeferred<Blob>()
-                        val req = XMLHttpRequest().apply {
-                            responseType = XMLHttpRequestResponseType.BLOB
-                            onload = {
-                                res.complete(response.unsafeCast<Blob>())
+                        is Transfer.Download -> {
+                            val url = storageRef.child(id).getDownloadURL().await()
+                            val res = CompletableDeferred<Blob>()
+                            XMLHttpRequest().apply {
+                                responseType = XMLHttpRequestResponseType.BLOB
+                                onload = {
+                                    res.complete(response.unsafeCast<Blob>())
+                                }
+                                open("GET", url)
+                                send()
                             }
-                            open("GET", url)
-                            send()
-                        }
-
-                        GlobalScope.launch {
                             val file = res.await()
-
                             idb.addMp3(id, file)
-
-                            channel.send(Event.Downloaded(id))
-                        }
-
-                        networkState = DonwloadingLoop(id, req)
-                    }
-                }
-            }
-
-            override suspend fun process(e: Event) {
-                when (e) {
-                    is Event.GoOffline -> {
-                        networkState = OfflineLoop()
-                    }
-                    else -> {}
-                }
-            }
-        }
-        inner class UploadinLoop(
-            val id: String,
-            val task: UploadTask
-        ) : NetworkStateLoop {
-            override suspend fun process(e: Event) {
-                when (e) {
-                    is Event.GoOffline -> {
-                        if (task.cancel()) {
-                            uploads += id
-                        }
-                        networkState = OfflineLoop()
-                    }
-                    is Event.Uploaded -> {
-                        if (e.id == id) {
-                            processOnline()
                         }
                     }
-                    else -> {}
                 }
-            }
-        }
-        inner class DonwloadingLoop(
-            val id: String,
-            val task: XMLHttpRequest
-        ) : NetworkStateLoop {
-            override suspend fun process(e: Event) {
-                when (e) {
-                    is Event.Downloaded -> {
-                        if (e.id == id) {
-                            processOnline()
-                        }
-                    }
-                    is Event.GoOffline -> {
-                        task.abort()
-                        downloads += id
-                        networkState = OfflineLoop()
-                    }
-                    else -> {}
-                }
-            }
 
+            }.addedTo(ks)
         }
 
         override suspend fun process(e: Event) {
             when (e) {
-                is Event.Uploaded -> {
-                    if (later.downloads.remove(e.id)) {
-                        downloads += e.id
-                    }
-                }
-                is Event.Upload -> {
-                    uploads += e.id
-                    networkState.processNext()
-                }
-                is Event.Download -> {
-                    downloads += e.id
-                    networkState.processNext()
+                is Event.GoOffline -> {
+                    ks.kill()
+                    root = OfflineLoop()
                 }
                 else -> {}
             }
-            networkState.process(e)
         }
     }
-
-
-
-
+    inner class OfflineLoop: Loop {
+        init {
+            onlineStatus.now = false
+        }
+        override suspend fun process(e: Event) {
+            when (e) {
+                is Event.GoOnline -> {
+                    onlineStatus.now = true
+                    root = OnlineLoop()
+                }
+                else -> {}
+            }
+        }
+    }
 
     init {
-        root = Transfers()
+        root = OfflineLoop()
+    }
+}
 
-        GlobalScope.launch {
-//            val allStorage =
-//            storage.addAll(
-//                allStorage.map { it.props.idOrFail }
-//            )
-//            uploaded.addAll(
-//                allStorage.filter { it.uploaded.iv }.map { it.props.idOrFail }
-//            )
-            killables += songStorageDB.queryCache.ids.feedTo(storage)
-            val uploadedEmitter = songStorageDB.queryCache.emitter.filtered(killables) { s -> s.uploaded.iv }.ids
-            killables += uploadedEmitter.feedTo(uploaded)
-            killables += uploadedEmitter.add { m ->
-                if (m is SetAdded) {
-                    post(Event.Uploaded(m.value))
-                }
+fun Node.onlineStatusButton(
+    onlineTasks: OnlineTasks,
+    killables: Killables,
+    fn: HTMLButtonElement.() -> Unit = {}
+): HTMLButtonElement {
+    return faButton(Fa.cloud) {
+        rxClass {
+            if (onlineTasks.onlineStatus()) {
+                Cls.btnSuccess
+            } else {
+                Cls.btnDanger
             }
-
-            killables += userSongsDB.like.add { m ->
-                if (m is SetAdded) {
-                    val id = m.value.props.idOrFail
-                    GlobalScope.launch {
-                        val localExists = idb.existsMp3(id)
-                        val cloudExists = id in storage
-
-                        if (localExists && !cloudExists) {
-                            channel.send(Event.Upload(id))
-                        } else if (!localExists) {
-                            channel.send(Event.Download(id))
-                        }
-                    }
-                }
+        }.addedTo(killables)
+        clickEvent {
+            onlineTasks.apply {
+                post(
+                    if (onlineStatus.now) OnlineTasks.Event.GoOffline
+                    else OnlineTasks.Event.GoOnline
+                )
             }
         }
+        fn()
     }
-
-
-
-
 
 }

@@ -81,27 +81,9 @@ fun MusicCtx.home(
                     innerText = fbCtx.appCtx.title
                 }
                 right {
-                    faButton(Fa.cloud) {
-                        cls {
-                            m1
-                        }
-                        rxClass {
-                            if (onlineTasks.onlineStatus()) {
-                                Cls.btnSuccess
-                            } else {
-                                Cls.btnDanger
-                            }
-                        }
-                        clickEvent {
-                            onlineTasks.apply {
-                                post(
-                                    if (onlineStatus.now) OnlineTasks.Event.GoOffline
-                                    else OnlineTasks.Event.GoOnline
-                                )
-                            }
-                        }
+                    onlineStatusButton(onlineTasks, killables) {
+                        cls.m1
                     }
-
                 }
             }
 

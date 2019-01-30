@@ -43,6 +43,9 @@ private fun def(s: String) = object : ReadOnlyProperty<Cls, String> {
 
 }
 
+val Cls.height0 by def(
+    "height: 0px;"
+)
 val Cls.lineHeightInherit by def(
     "line-height: inherit;"
 )

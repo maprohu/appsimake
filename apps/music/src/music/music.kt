@@ -111,11 +111,6 @@ class MusicCtx(
     val songsWrap = fbCtx.lib.app.songs
     val storageRef = storageWrap.collectionRef(db)
 
-//    val storedHashes = Var(emptySet<String>()).also { rxs ->
-//        killables += storageRef.idDiffs { diff ->
-//            rxs.transform { s -> s - diff.removed + diff.added }
-//        }
-//    }
 
     val tagDB = dbLinks.tagDB
     val songStoreDB = dbLinks.songStoreDB
@@ -127,13 +122,10 @@ class MusicCtx(
     val onlineTasks = OnlineTasks(
         fbCtx.app.storage().ref("music/files"),
         idb,
-        userSongsDB,
         songStoreDB,
+        transferSongs,
         killables
     )
-
-//    val playlist = Playlist(idb, userSongsDB, killables)
-
 
 }
 

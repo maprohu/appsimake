@@ -1,8 +1,12 @@
 package commonlib
 
+import common.AsyncEmitter
 import common.EmitterIface
+import commonshr.SetAdded
+import commonshr.SetMove
 import killable.Killable
 import killable.Killables
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -80,3 +84,47 @@ fun Job.addedTo(ks: Killables): Job {
     }
     return this
 }
+
+fun <T> toAsync(vararg emitters: EmitterIface<SetMove<T>>): AsyncEmitter<T> {
+    val killables = Killables()
+
+    val waiting = mutableListOf<CompletableDeferred<T>>()
+
+    val currents = emitters.map { emitter ->
+        val current = mutableListOf<T>()
+
+        killables += emitter.add { m ->
+            when {
+                m is SetAdded && waiting.isNotEmpty()  -> {
+                    waiting.removeAt(0).complete(m.value)
+                }
+                else -> m.applyTo(current)
+            }
+        }
+
+        current
+    }
+
+    return object : AsyncEmitter<T>, Killable by killables {
+        override suspend fun receive(): T {
+            val current = currents.find { it.isNotEmpty() }
+
+            return if (current != null) {
+                current.removeAt(0)
+            } else {
+                val cd = CompletableDeferred<T>()
+                waiting += cd
+                val rk = killables.add {
+                    waiting -= cd
+                    cd.cancel()
+                }
+                val res = cd.await()
+                rk.kill()
+                res
+            }
+        }
+    }
+
+}
+
+fun <T> EmitterIface<SetMove<T>>.toAsync(): AsyncEmitter<T> = toAsync(this)

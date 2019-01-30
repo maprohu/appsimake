@@ -2,6 +2,7 @@ package music
 
 import bootstrap.*
 import common.named
+import commonfb.scrollPanel
 import commonui.RootPanel
 import commonui.faButton
 import commonui.screenLayout
@@ -15,6 +16,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import musiclib.UserSongState
 import org.w3c.files.Blob
+import styles.height0
+import styles.lineHeightInherit
 import styles.scrollVertical
 import kotlin.browser.window
 import kotlin.dom.removeClass
@@ -36,49 +39,55 @@ fun MusicCtx.database(
                 }
 
                 right {
-                    faButton(Fa.chevronDown) {
-                        cls {
-                            m1
-                            btnSecondary
-                        }
-                        dataToggleDropdown()
+                    onlineStatusButton(onlineTasks, killables) {
+                        cls.m1
                     }
                     div {
-                        val menu = this
-                        cls {
-                            dropdownMenu
-                            dropdownMenuRight
-                        }
-                        dropdownItemAnchor {
-                            icon.cls.fa.fileImport
-                            text.innerText = "Import MP3s"
-                            anchor {
-                                clickEvent {
-                                    showClosable(
-                                        killables,
-                                        { ks, cl -> import(panel.sub(), ks, cl) },
-                                        ::redisplay
-                                    )
-                                }
+                        faButton(Fa.chevronDown) {
+                            cls {
+                                m1
+                                btnSecondary
                             }
+                            dataToggleDropdown()
                         }
-                        dropdownItemAnchor {
-                            icon.cls {
-                                fa.trashAlt
+                        div {
+                            val menu = this
+                            cls {
+                                dropdownMenu
+                                dropdownMenuRight
                             }
-                            text.innerText = "Purge Local Database"
-                            anchor {
-                                cls {
-                                    textDanger
-                                }
-                                longClick {
-                                    GlobalScope.launch {
-                                        idb.clearMp3s()
+                            dropdownItemAnchor {
+                                icon.cls.fa.fileImport
+                                text.innerText = "Import MP3s"
+                                anchor {
+                                    clickEvent {
+                                        showClosable(
+                                            killables,
+                                            { ks, cl -> import(panel.sub(), ks, cl) },
+                                            ::redisplay
+                                        )
                                     }
-                                    menu.removeClass("show")
+                                }
+                            }
+                            dropdownItemAnchor {
+                                icon.cls {
+                                    fa.trashAlt
+                                }
+                                text.innerText = "Purge Local Database"
+                                anchor {
+                                    cls {
+                                        textDanger
+                                    }
+                                    longClick {
+                                        GlobalScope.launch {
+                                            idb.clearMp3s()
+                                        }
+                                        menu.removeClass("show")
+                                    }
                                 }
                             }
                         }
+
                     }
 
                 }
@@ -87,6 +96,7 @@ fun MusicCtx.database(
             main {
                 cls {
                     scrollVertical
+                    height0
                 }
                 status(this, killables)
             }

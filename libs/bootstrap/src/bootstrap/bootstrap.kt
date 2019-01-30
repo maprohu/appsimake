@@ -358,7 +358,10 @@ fun Node.column(fn: HTMLDivElement.() -> Unit): HTMLDivElement {
 
 fun Node.row(fn: HTMLDivElement.() -> Unit): HTMLDivElement {
     return div {
-        flexRow()
+        cls {
+            dFlex
+            flexRow
+        }
         fn()
     }
 }

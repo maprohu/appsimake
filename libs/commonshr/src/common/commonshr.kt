@@ -241,8 +241,12 @@ interface EmitterIface<T> {
 
     fun add(listener: (T) -> Unit) : Killable
 
-
 }
+
+interface AsyncEmitter<T>: Killable {
+    suspend fun receive(): T
+}
+
 
 interface EmitterKillable<T>: EmitterIface<T>, Killable
 
