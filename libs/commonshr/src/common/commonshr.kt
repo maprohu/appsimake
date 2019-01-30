@@ -244,6 +244,7 @@ interface EmitterIface<T> {
 }
 
 interface AsyncEmitter<T>: Killable {
+    fun poll(): T?
     suspend fun receive(): T
 }
 

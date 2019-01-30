@@ -23,6 +23,7 @@ import org.w3c.dom.*
 import org.w3c.dom.url.URL
 import org.w3c.files.File
 import rx.*
+import styles.height0
 import styles.scrollVertical
 import styles.widthAuto
 import kotlin.browser.document
@@ -512,6 +513,7 @@ fun MusicCtx.import(
                     cls {
                         flexGrow1
                         scrollVertical
+                        height0
                     }
                     div {
                         cls {

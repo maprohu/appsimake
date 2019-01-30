@@ -36,10 +36,11 @@ fun MusicCtx.playerFrame(
     return PlayerFrame(
         panel,
         killables,
-        songSource = songSource,
-        idb = idb,
-        tagDB = tagDB,
-        userSongsDB = userSongsDB
+        songSource = randomSongSource(
+            idb,
+            tagDB,
+            userSongsDB
+        )
     )
 
 }
@@ -47,10 +48,7 @@ fun MusicCtx.playerFrame(
 class PlayerFrame(
     panel: RootPanel,
     val killables: Killables,
-    val songSource: SongSource,
-    val idb: IDBDatabase,
-    val tagDB: TagDB,
-    val userSongsDB: UserSongsDB
+    val songSource: AsyncEmitter<Playable>
 ): Actor<PlayerFrame.Event>(killables) {
 
     interface Loop: LoopT<Event>
@@ -105,21 +103,23 @@ class PlayerFrame(
 
 
     interface PlayStateLoop: Loop {
-        fun next(p: Playable)
-    }
-    interface NextPlayableLoop: Loop {
+//        fun next(p: Playable)
         fun next()
     }
+//    interface NextPlayableLoop: Loop {
+//        fun next()
+//    }
     inner class VisibleLoop(
         val playable: Playable,
         startPlaying: Boolean
     ): Loop  {
         val vks = Killables()
 
-
-        var nextPlayable: NextPlayableLoop = NoNextPlayable()
+//        var nextPlayable: NextPlayableLoop = NoNextPlayable()
 
         init {
+            hidden.now = false
+
             vks += playable
 
             vks += playable.userSong.state.initial.forEach { s ->
@@ -144,7 +144,8 @@ class PlayerFrame(
 
         fun next() {
             vks.kill()
-            nextPlayable.next()
+//            nextPlayable.next()
+            playState.next()
         }
 
         fun readCounterNow() {
@@ -200,45 +201,49 @@ class PlayerFrame(
                 else -> {}
             }
             playState.process(e)
-            nextPlayable.process(e)
+//            nextPlayable.process(e)
         }
 
-        inner class NoNextPlayable: NextPlayableLoop {
-
-            init {
-                requestNextSong()
-            }
-
-            override fun next() {
-                root = HiddenLoop()
-            }
-
-            override suspend fun process(e: Event) {
-                when (e) {
-                    is Event.PlayableLoaded -> {
-                        nextPlayable = HasNextPlayable(e.playable)
-                    }
-                    else -> {}
-                }
-            }
-        }
-        inner class HasNextPlayable(
-            val playable: Playable
-        ): NextPlayableLoop {
-            override fun next() {
-                playState.next(playable)
-            }
-
-            override suspend fun process(e: Event) {}
-        }
+//        inner class NoNextPlayable: NextPlayableLoop {
+//
+//            init {
+//                requestNextSong()
+//            }
+//
+//            override fun next() {
+//                root = HiddenLoop()
+//            }
+//
+//            override suspend fun process(e: Event) {
+//                when (e) {
+//                    is Event.PlayableLoaded -> {
+//                        nextPlayable = HasNextPlayable(e.playable)
+//                    }
+//                    else -> {}
+//                }
+//            }
+//        }
+//        inner class HasNextPlayable(
+//            val playable: Playable
+//        ): NextPlayableLoop {
+//            override fun next() {
+//                playState.next(playable)
+//            }
+//
+//            override suspend fun process(e: Event) {}
+//        }
 
         inner class PlayingLoop: PlayStateLoop {
             val lks = Killables()
 
-            override fun next(p: Playable) {
+            override fun next() {
                 lks.kill()
-                root = VisibleLoop(p, true)
+                nextState(true)
             }
+//            override fun next(p: Playable) {
+//                lks.kill()
+//                root = VisibleLoop(p, true)
+//            }
 
             init {
                 audio.play()
@@ -272,9 +277,12 @@ class PlayerFrame(
             }
         }
         inner class PausedLoop: PlayStateLoop {
-            override fun next(p: Playable) {
-                root = VisibleLoop(p, false)
+            override fun next() {
+                nextState(false)
             }
+//            override fun next(p: Playable) {
+//                root = VisibleLoop(p, false)
+//            }
 
             override suspend fun process(e: Event) {
                 when (e) {
@@ -299,7 +307,6 @@ class PlayerFrame(
         override suspend fun process(e: Event) {
             return when (e) {
                 is Event.PlayableLoaded -> {
-                    hidden.now = false
                     root = VisibleLoop(
                         e.playable,
                         false
@@ -310,20 +317,29 @@ class PlayerFrame(
         }
     }
 
-    fun requestNextSong() {
-        GlobalScope.launch {
-            channel.send(
-                Event.PlayableLoaded(
-                    songSource.request()
+//    fun requestNextSong() {
+//    }
+
+
+    fun nextState(startPlaying: Boolean) {
+        val polled = songSource.poll()
+        root = if (polled == null) {
+            GlobalScope.launch {
+                channel.send(
+                    Event.PlayableLoaded(
+                        songSource.receive()
+                    )
                 )
-            )
+            }
+            HiddenLoop()
+        } else {
+            VisibleLoop(polled, startPlaying)
         }
     }
-
-
     init {
-        root = HiddenLoop()
-        requestNextSong()
+        nextState(false)
+//        root = HiddenLoop()
+//        requestNextSong()
     }
 
     val element = panel.newRoot {}
@@ -502,4 +518,5 @@ class PlayerFrame(
 
 
 }
+
 

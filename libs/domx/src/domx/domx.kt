@@ -71,7 +71,7 @@ operator fun NamedNodeMap.set(key: String, value: String) {
 fun GlobalEventHandlers.clickEvent(fn: (MouseEvent) -> Unit) {
     onclick = {
         it.preventDefault()
-        fn(it as MouseEvent)
+        fn(it)
     }
 }
 
@@ -113,7 +113,7 @@ fun GlobalEventHandlers.clickEventSeq(fn: (Killables, MouseEvent) -> Unit): Kill
     val seq = KillableSeq()
     onclick = {
         it.preventDefault()
-        fn(seq.killables(), it as MouseEvent)
+        fn(seq.killables(), it)
     }
     return seq
 }
@@ -121,7 +121,7 @@ fun GlobalEventHandlers.clickEventSeq(fn: (Killables, MouseEvent) -> Unit): Kill
 fun GlobalEventHandlers.inputEvent(fn: (InputEvent) -> Unit) {
     oninput = {
         it.preventDefault()
-        fn(it as InputEvent)
+        fn(it)
     }
 }
 

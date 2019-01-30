@@ -2,6 +2,7 @@ package commonlib
 
 import common.AsyncEmitter
 import common.EmitterIface
+import commonlib.commonlib.RandomChooser
 import commonshr.SetAdded
 import commonshr.SetMove
 import killable.Killable
@@ -9,9 +10,7 @@ import killable.Killables
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.launch
 
 interface LoopT<in T> {
@@ -85,7 +84,9 @@ fun Job.addedTo(ks: Killables): Job {
     return this
 }
 
-fun <T> toAsync(vararg emitters: EmitterIface<SetMove<T>>): AsyncEmitter<T> {
+fun <T> toAsync(
+    vararg emitters: EmitterIface<SetMove<T>>
+): AsyncEmitter<T> {
     val killables = Killables()
 
     val waiting = mutableListOf<CompletableDeferred<T>>()
@@ -106,11 +107,15 @@ fun <T> toAsync(vararg emitters: EmitterIface<SetMove<T>>): AsyncEmitter<T> {
     }
 
     return object : AsyncEmitter<T>, Killable by killables {
-        override suspend fun receive(): T {
-            val current = currents.find { it.isNotEmpty() }
+        override fun poll(): T? {
+            return currents.find { it.isNotEmpty() }?.removeAt(0)
+        }
 
-            return if (current != null) {
-                current.removeAt(0)
+        override suspend fun receive(): T {
+            val polled = poll()
+
+            return if (polled != null) {
+                polled
             } else {
                 val cd = CompletableDeferred<T>()
                 waiting += cd
@@ -128,3 +133,6 @@ fun <T> toAsync(vararg emitters: EmitterIface<SetMove<T>>): AsyncEmitter<T> {
 }
 
 fun <T> EmitterIface<SetMove<T>>.toAsync(): AsyncEmitter<T> = toAsync(this)
+
+
+

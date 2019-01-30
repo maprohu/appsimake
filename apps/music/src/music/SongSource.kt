@@ -1,12 +1,18 @@
 package music
 
+import common.None
+import common.Optional
+import common.Some
 import commonlib.Actor
 import commonlib.LoopT
+import commonlib.commonlib.RandomChooser
 import commonshr.SetAdded
+import firebase.ids
 import indexeddb.IDBDatabase
 import indexeddb.getAllKeys
 import killable.Killable
 import killable.Killables
+import killable.addedTo
 import kotlinx.coroutines.CompletableDeferred
 import musiclib.Mp3File
 import musiclib.UserSong
@@ -206,3 +212,28 @@ class DefaultSongSource(
         return cd.await()
     }
 }
+
+fun randomSongSource(
+    idb: IDBDatabase,
+    tagDB: TagDB,
+    userSongsDB: UserSongsDB
+) = RandomChooser(
+    listOf(
+        userSongsDB.new.ids,
+        userSongsDB.like.ids
+    )
+) { id, ks ->
+    val l = PlayableSource.load(
+        id,
+        idb,
+        tagDB,
+        userSongsDB
+    )
+
+    if (l == null) {
+        None
+    } else {
+        Some(l.toPlayable().addedTo(ks))
+    }
+}
+
