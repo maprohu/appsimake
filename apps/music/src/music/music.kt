@@ -7,6 +7,7 @@ import commonfb.LoggedInCtx
 import commonfb.LoggingInCtx
 import commonlib.private
 import firebase.User
+import firebase.firestore.Firestore
 import firebase.firestore.collectionRef
 import firebase.firestore.idDiffs
 import indexeddb.IDBDatabase
@@ -46,12 +47,19 @@ fun main(args: Array<String>) {
 
         object: LoggingInCtx(fbCtx) {
             override fun loggedIn(user: User): Killable {
-                val ctx = MusicCtx(fbCtx, user, idb)
+                val ks = Killables()
 
                 GlobalScope.launch {
-                    ctx.userSongsDB.queryCache.getAll()
-                    ctx.tagDB.queryCache.getAll()
-                    ctx.songStoreDB.queryCache.getAll()
+                    val dbLinks = DBLinks(
+                        fbCtx.db,
+                        user.uid,
+                        ks
+                    )
+
+                    dbLinks.init()
+
+                    val ctx = MusicCtx(fbCtx, user, idb, dbLinks)
+                    ks += ctx.killables
 
                     maintenance(idb, ctx.userSongsDB)
 
@@ -65,7 +73,7 @@ fun main(args: Array<String>) {
                     }
                 }
 
-                return ctx.killables
+                return ks
             }
         }.start()
     }
@@ -75,7 +83,29 @@ fun main(args: Array<String>) {
 
 }
 
-class MusicCtx(fbCtx: FbCtx, user: User, val idb: IDBDatabase) : LoggedInCtx(fbCtx, user) {
+class DBLinks(
+    db: Firestore,
+    uid: String,
+    killables: Killables
+) {
+    val tagDB = TagDB(db, killables)
+    val userSongsDB = UserSongsDB(db, uid, killables)
+    val songStoreDB = SongStorageDB(db, killables)
+
+    suspend fun init() {
+        userSongsDB.queryCache.getAll()
+        tagDB.queryCache.getAll()
+        songStoreDB.queryCache.getAll()
+    }
+
+}
+
+class MusicCtx(
+    fbCtx: FbCtx,
+    user: User,
+    val idb: IDBDatabase,
+    dbLinks: DBLinks
+) : LoggedInCtx(fbCtx, user) {
     val uid = user.uid
     val storageWrap = fbCtx.lib.app.storage
     val songsWrap = fbCtx.lib.app.songs
@@ -87,11 +117,13 @@ class MusicCtx(fbCtx: FbCtx, user: User, val idb: IDBDatabase) : LoggedInCtx(fbC
 //        }
 //    }
 
-    val tagDB = TagDB(db, killables)
-    val dbStatus = DBStatus(idb, tagDB, killables)
-    val userSongsDB = UserSongsDB(db, uid, killables)
-    val songStoreDB = SongStorageDB(db, killables)
+    val tagDB = dbLinks.tagDB
+    val songStoreDB = dbLinks.songStoreDB
+    val userSongsDB = dbLinks.userSongsDB
+
     val songSource = DefaultSongSource(idb, userSongsDB, tagDB, killables)
+    val transferSongs = TransferSongs(userSongsDB, songStoreDB, killables)
+    val dbStatus = DBStatus(idb, tagDB, songStoreDB, userSongsDB, transferSongs, killables)
     val onlineTasks = OnlineTasks(
         fbCtx.app.storage().ref("music/files"),
         idb,

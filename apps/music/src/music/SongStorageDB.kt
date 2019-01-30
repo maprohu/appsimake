@@ -1,5 +1,7 @@
 package music
 
+import common.Some
+import common.filtered
 import firebase.QueryCache
 import firebase.firestore.Firestore
 import killable.Killables
@@ -20,6 +22,12 @@ class SongStorageDB(
 
     suspend fun get(id: String, fn: StoreState.() -> Unit) = queryCache.get(id) {
         StoreState().apply(fn)
+    }
+
+    val uploaded by lazy {
+        queryCache.emitter.filtered(killables) {
+            it.uploaded.initial() == Some(true)
+        }
     }
 
 }

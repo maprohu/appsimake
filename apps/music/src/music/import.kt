@@ -451,6 +451,7 @@ fun MusicCtx.import(
                                     }
                                     type = "file"
                                     this.asDynamic().webkitdirectory = true
+                                    multiple = true
                                     accept = "audio/mpeg"
                                     onchange = {
                                         this@input.files?.let { fl ->

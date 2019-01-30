@@ -18,6 +18,11 @@ interface Killable {
         }
     }
 
+    operator fun plus(k : Killable): Killable = of {
+        kill()
+        k.kill()
+    }
+
 }
 
 fun <K: Killable> K.addedTo(killables: Killables): K {

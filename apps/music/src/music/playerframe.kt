@@ -91,7 +91,6 @@ class PlayerFrame(
     ): Loop  {
         val vks = Killables()
 
-        var playState: PlayStateLoop = if (startPlaying) PlayingLoop() else PausedLoop()
 
         var nextPlayable: NextPlayableLoop = NoNextPlayable()
 
@@ -114,6 +113,9 @@ class PlayerFrame(
             currentPosition.now = 0
             load()
         }
+
+
+        var playState: PlayStateLoop = if (startPlaying) PlayingLoop() else PausedLoop()
 
         fun next() {
             vks.kill()

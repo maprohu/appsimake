@@ -7,6 +7,7 @@ import commonlib.private
 import commonshr.SetMove
 import firebase.QueryCache
 import firebase.firestore.Firestore
+import firebase.ids
 import indexeddb.IDBDatabase
 import indexeddb.get
 import killable.Killables
@@ -48,7 +49,7 @@ class UserSongsDB(
 
     private fun ids(e: Emitter<SetMove<UserSong>>) = lazy {
         val s = mutableSetOf<String>()
-        killables += e.map { m -> m.map { v -> v.props.idOrFail } }.feedTo(s)
+        killables += e.ids.feedTo(s)
         s
     }
 

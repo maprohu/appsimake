@@ -283,10 +283,7 @@ fun <T, S> EmitterIface<T>.map(fn: (T) -> S) = MappedEmitter(this, fn)
 
 fun <T> EmitterIface<SetMove<T>>.feedTo(set: MutableSet<T>): Killable {
     return add { m ->
-        when (m) {
-            is SetAdded -> set += m.value
-            is SetRemoved -> set -= m.value
-        }
+        m.applyTo(set)
     }
 }
 
@@ -331,4 +328,109 @@ fun <T> EmitterIface<SetMove<T>>.filtered(ks: Killables, rxfn: (T) -> Boolean): 
     }
 
     return f
+}
+
+fun <T> combineAnd(
+    ks: Killables,
+    e1: EmitterIface<SetMove<T>>,
+    e2: EmitterIface<SetMove<T>>
+): EmitterIface<SetMove<T>> = combine(ks, e1, e2, Boolean::and)
+
+fun <T> combineN(
+    ks: Killables,
+    pairs: Iterable<Pair<EmitterIface<SetMove<T>>, MutableSet<T>>>,
+    fn: (T) -> Boolean
+): EmitterIface<SetMove<T>> {
+    val lks = ks.killables()
+
+    val result = mutableSetOf<T>()
+    val out = Emitter<SetMove<T>> {
+        result.map { SetAdded(it) }
+    }
+
+    fun connect(emitter: EmitterIface<SetMove<T>>, thisSet: MutableSet<T>) {
+        lks += emitter.add { m ->
+            val id = m.value
+            val before = m.value in result
+            m.applyTo(thisSet)
+            val after = fn(id)
+
+            when {
+                before && !after -> {
+                    result -= id
+                    out.emit(SetRemoved(id))
+                }
+                !before && after -> {
+                    result += id
+                    out.emit(SetAdded(id))
+                }
+            }
+        }
+
+    }
+    pairs.forEach { (em, set) ->
+        connect(em, set)
+    }
+
+    return out
+
+}
+
+fun <T> combine(
+    ks: Killables,
+    e1: EmitterIface<SetMove<T>>,
+    e2: EmitterIface<SetMove<T>>,
+    e3: EmitterIface<SetMove<T>>,
+    fn: (Boolean, Boolean, Boolean) -> Boolean
+): EmitterIface<SetMove<T>> {
+    val set1 = mutableSetOf<T>()
+    val set2 = mutableSetOf<T>()
+    val set3 = mutableSetOf<T>()
+
+    val after = { id: T ->
+        val v1 = id in set1
+        val v2 = id in set2
+        val v3 = id in set3
+        fn(v1, v2, v3)
+    }
+
+    return combineN(
+        ks,
+        listOf(
+            Pair(e1, set1),
+            Pair(e2, set2),
+            Pair(e3, set3)
+        ),
+        after
+    )
+}
+
+fun <T> combine(
+    ks: Killables,
+    e1: EmitterIface<SetMove<T>>,
+    e2: EmitterIface<SetMove<T>>,
+    fn: (Boolean, Boolean) -> Boolean
+): EmitterIface<SetMove<T>> {
+
+    val set1 = mutableSetOf<T>()
+    val set2 = mutableSetOf<T>()
+
+    val after = { id: T ->
+        val v1 = id in set1
+        val v2 = id in set2
+        fn(v1, v2)
+    }
+
+    return combineN(
+        ks,
+        listOf(
+            Pair(e1, set1),
+            Pair(e2, set2)
+        ),
+        after
+    )
+}
+
+fun <T> EmitterIface<SetMove<T>>.andIn(other: EmitterIface<SetMove<T>>, ks: Killables): EmitterIface<SetMove<T>> {
+    return combineAnd(ks, this, other)
 }

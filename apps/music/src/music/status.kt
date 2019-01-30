@@ -1,199 +1,202 @@
 package music
 
 import bootstrap.*
-import common.obj
+import common.EmitterIface
+import common.Some
+import common.filtered
+import common.map
+import commonlib.addedTo
 import commonshr.SetAdded
+import commonshr.SetMove
 import commonshr.SetRemoved
 import domx.*
+import firebase.ids
 import indexeddb.*
+import killable.Killable
 import killable.Killables
 import killable.addedTo
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import musiclib.StoreState
 import org.w3c.dom.HTMLDivElement
-import org.w3c.dom.events.Event
-import org.w3c.dom.get
-import org.w3c.dom.set
-import rx.Rx
-import rx.Var
+import org.w3c.dom.MutationRecord
+import org.w3c.dom.Node
+import rx.*
 import kotlin.browser.document
-import kotlin.browser.localStorage
-import kotlin.browser.window
+import kotlin.math.roundToInt
 
-
-//private external interface Record {
-//    var count: Int
-//    var size: Int
-//    var duration: Double
-//}
-//
-//private fun defaultRecord() = obj<Record> {
-//    this.count = 0
-//    this.size = 0
-//    this.duration = 0.0
-//}
-//private fun Record?.orDefault() = this ?: defaultRecord()
-//
-//
-//private const val MusicDBStatusKey = "appsimake-music-dbstatus"
 
 class DBStatus(
     val idb: IDBDatabase,
     val tagDB: TagDB,
+    storageDB: SongStorageDB,
+    userSongsDB: UserSongsDB,
+    transferSongs: TransferSongs,
     killables: Killables
-//    record: Record
 ) {
-//    constructor(
-//        idb: IDBDatabase,
-//        killables: Killables
-//    ): this (
-//        idb,
-//        killables,
-//        localStorage[MusicDBStatusKey]?.let { s -> JSON.parse<Record>(s) }.orDefault()
-//    )
-//
-//    private suspend fun update(fn: Record.() -> Unit) {
-//        val tx = idb.transaction(DBSingletons, TransactionMode.readwrite)
-//        val store = tx.objectStore<String, Record>(DBSingletons)
-//
-//        val cd = CompletableDeferred<Unit>()
-//
-//        fun <T> IDBRequest<T>.then(fn: (T) -> Unit) {
-//            then(fn) { cd.completeExceptionally(it) }
-//        }
-//
-//        store.get(MusicDBStatusKey).then { r ->
-//            val out = r.orDefault().apply(fn)
-//
-//            localStorage[MusicDBStatusKey] = JSON.stringify(out).also { onRecordString(it) }
-//
-//            store.put(out, MusicDBStatusKey).then {
-//                cd.complete(Unit)
-//            }
-//        }
-//
-//        cd.await()
-//
-//    }
-//    suspend fun add(size: Int, duration: Double) {
-//        update {
-//            this.count += 1
-//            this.size += size
-//            this.duration += duration
-//        }
-//    }
-//
-//    suspend fun remove(size: Int, duration: Double) {
-//        update {
-//            this.count -= 1
-//            this.size -= size
-//            this.duration -= duration
-//        }
-//    }
-//    suspend fun reset() {
-//        update {
-//            this.count = 0
-//            this.size = 0
-//            this.duration = 0.0
-//        }
-//    }
-//
-//
-//    private val recordString = Var(JSON.stringify(record))
-//    private fun onRecordString(s: String) {
-//        recordString.now = s
-//    }
-//    private val recordObject = Rx { JSON.parse<Record>(recordString()) }
 
-    data class RecordObject(
-        val size: Long = 0,
-        val count: Int = 0,
-        val duration: Double = 0.0
-    )
-    val recordObject = Var(RecordObject())
+    class RecordObject {
+        val size = Var(0L)
+        val count = Var(0)
+        val duration = Var(0.0)
+        val durationInt = Rx { duration().roundToInt() }
 
-    fun reset() {
-        recordObject.now = RecordObject()
+        fun reset() {
+            size.now = 0
+            count.now = 0
+            duration.now = 0.0
+        }
+
     }
-
-    val size = Rx { recordObject().size }
-    val count = Rx { recordObject().count }
-    val duration = Rx { recordObject().duration }
+    val localDatabase = RecordObject()
+    val cloud = RecordObject()
+    val like = RecordObject()
+    val new = RecordObject()
+    val dontLike = RecordObject()
+    val upload = RecordObject()
+    val download = RecordObject()
 
     init {
-        killables += LocalSongs.emitter.add { m ->
-            val id = m.value
-            GlobalScope.launch {
-                val tag = tagDB.get(id) {
-                    val blob = idb.readMp3(id)!!
-                    blob to blob.readAsArrayBuffer()
-                }
+        val ks = killables.killables()
+
+        fun connect(
+            emitter: EmitterIface<SetMove<String>>,
+            target: RecordObject
+        ) {
+            val tagMap = mutableMapOf<String, Killable>()
+            ks += emitter.add { m ->
+                val id = m.value
                 when (m) {
                     is SetAdded -> {
-                        recordObject.transform { o ->
-                            o.copy(
-                                size = o.size + tag.bytes.iv,
-                                count = o.count + 1,
-                                duration = o.duration + tag.secs.iv
-                            )
-                        }
+                        val kst = ks.killables()
+                        tagMap[id] = kst
+
+                        kst += target.count.incremented()
+                        GlobalScope.launch {
+                            val tag = tagDB.get(id) {
+                                val blob = idb.readMp3(id)!!
+                                blob to blob.readAsArrayBuffer()
+                            }
+                            tag.secs.initial
+                                .orDefault(0.0).addedTo(kst)
+                                .feedTo(target.duration).addedTo(kst)
+                            tag.bytes.initial
+                                .orDefault(0).addedTo(kst)
+                                .feedTo(target.size).addedTo(kst)
+                        }.addedTo(kst)
                     }
-                    is SetRemoved -> {
-                        recordObject.transform { o ->
-                            o.copy(
-                                size = o.size - tag.bytes.iv,
-                                count = o.count - 1,
-                                duration = o.duration - tag.secs.iv
-                            )
-                        }
-                    }
+
+                    is SetRemoved -> tagMap[id]?.kill()
                 }
             }
+
         }
-//        val storageListener : (Event) -> Unit = {
-//            localStorage[MusicDBStatusKey]?.let{ s -> onRecordString(s) }
-//        }
-//        window.addEventListener("storage", storageListener)
-//        killables += { window.removeEventListener("storage", storageListener) }
+
+        connect(LocalSongs.emitter, localDatabase)
+        connect(
+            storageDB.queryCache.emitter
+                .filtered(ks) { it.uploaded.initial() == Some(true) }
+                .ids,
+            cloud
+        )
+        connect(
+            userSongsDB.like.ids,
+            like
+        )
+        connect(
+            userSongsDB.new.ids,
+            new
+        )
+        connect(
+            userSongsDB.dontLike.ids,
+            dontLike
+        )
+        connect(
+            transferSongs.upload,
+            upload
+        )
+        connect(
+            transferSongs.download,
+            download
+        )
+
+
+
+
     }
 
 }
 
+
 fun MusicCtx.status(
+    node: Node,
     killables: Killables
-): HTMLDivElement {
-    return document.div {
-        cls {
-            m1
-            p1
-            border
-            rounded
-        }
-        h5 {
-            innerText = "Local Database"
-        }
-        dl {
-            dt {
-                innerText = "Size"
+) {
+
+    fun Node.status(
+        title: String,
+        record: DBStatus.RecordObject
+    ) {
+        div {
+            cls {
+                m1
+                p1
+                border
+                rounded
             }
-            dd {
-                rxText { dbStatus.size().toString() }.addedTo(killables)
+            h5 {
+                innerText = title
             }
-            dt {
-                innerText = "Songs"
-            }
-            dd {
-                rxText { dbStatus.count().toString() }.addedTo(killables)
-            }
-            dt {
-                innerText = "Time"
-            }
-            dd {
-                rxText { dbStatus.duration().toString() }.addedTo(killables)
+            dl {
+                dt {
+                    innerText = "Songs"
+                }
+                dd {
+                    rxText { record.count().toString() }.addedTo(killables)
+                }
+                dt {
+                    innerText = "Time"
+                }
+                dd {
+                    rxText { record.durationInt().toString() }.addedTo(killables)
+                }
+                dt {
+                    innerText = "Size"
+                }
+                dd {
+                    rxText { record.size().toString() }.addedTo(killables)
+                }
             }
         }
 
     }
+    node.status(
+        "Local Database",
+        dbStatus.localDatabase
+    )
+    node.status(
+        "Cloud",
+        dbStatus.cloud
+    )
+    node.status(
+        "Like",
+        dbStatus.like
+    )
+    node.status(
+        "New",
+        dbStatus.new
+    )
+    node.status(
+        "Don't Like",
+        dbStatus.dontLike
+    )
+    node.status(
+        "Upload",
+        dbStatus.upload
+    )
+    node.status(
+        "Download",
+        dbStatus.download
+    )
 
 }

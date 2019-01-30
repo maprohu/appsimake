@@ -147,6 +147,49 @@ interface RxIface<out T> {
 
 }
 
+fun RxIface<Int>.feedTo(rxv: Var<Int>): Killable {
+    return fold(0) { old, new ->
+        rxv.transform { it + new - old }
+        new
+    } + Killable.once {
+        rxv.transform { it - now }
+    }
+}
+fun RxIface<Int>.feedTo(rxv: Var<Long>): Killable {
+    return fold(0) { old, new ->
+        rxv.transform { it + new - old }
+        new
+    } + Killable.once {
+        rxv.transform { it - now }
+    }
+}
+fun RxIface<Long>.feedTo(rxv: Var<Long>): Killable {
+    return fold(0L) { old, new ->
+        rxv.transform { it + new - old }
+        new
+    } + Killable.once {
+        rxv.transform { it - now }
+    }
+}
+fun RxIface<Double>.feedTo(rxv: Var<Double>): Killable {
+    return fold(0.0) { old, new ->
+        rxv.transform { it + new - old }
+        new
+    } + Killable.once {
+        rxv.transform { it - now }
+    }
+}
+
+fun <T> RxIface<Optional<T>>.orDefault(v: T) = Rx { this().getOrDefault(v) }
+
+fun Var<Int>.incremented(): Killable {
+    transform { it + 1 }
+    return Killable.once {
+        transform { it - 1 }
+    }
+}
+
+
 
 
 abstract class RxVal<T>(

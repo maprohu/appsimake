@@ -15,7 +15,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import musiclib.UserSongState
 import org.w3c.files.Blob
-import org.w3c.files.File
+import styles.scrollVertical
 import kotlin.browser.window
 import kotlin.dom.removeClass
 
@@ -74,7 +74,6 @@ fun MusicCtx.database(
                                 longClick {
                                     GlobalScope.launch {
                                         idb.clearMp3s()
-                                        dbStatus.reset()
                                     }
                                     menu.removeClass("show")
                                 }
@@ -86,9 +85,10 @@ fun MusicCtx.database(
             }
 
             main {
-                appendChild(
-                    status(killables)
-                )
+                cls {
+                    scrollVertical
+                }
+                status(this, killables)
             }
         }
     }
