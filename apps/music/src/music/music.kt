@@ -2,9 +2,8 @@ package music
 
 import common.named
 import common.obj
-import commonfb.FbCtx
-import commonfb.LoggedInCtx
-import commonfb.LoggingInCtx
+import commonfb.*
+import commonlib.commonlib.customToken
 import commonlib.private
 import firebase.User
 import firebase.firestore.Firestore
@@ -30,7 +29,19 @@ import kotlin.js.Promise
 
 
 fun main(args: Array<String>) {
+    val fbCtx = FbCtx(music, "Music")
+    GlobalScope.launch {
+        val app = fbCtx.app
+        val fn = customToken.callable(fbCtx.app)
 
+        val res = fn.call(Unit)
+        console.dir(res)
+    }
+
+//    runApp()
+}
+
+fun runApp() {
     GlobalScope.launch {
         val idb = localDatabase()
 

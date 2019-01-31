@@ -32,16 +32,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
   function implement($receiver, exports, fn) {
     implementAny($receiver, exports, fn);
   }
-  function implementAsync$lambda$lambda(closure$fn_0, closure$v_0, closure$ctx_0) {
-    return function ($receiver, continuation_0, suspended) {
-      var instance = new Coroutine$implementAsync$lambda$lambda(closure$fn_0, closure$v_0, closure$ctx_0, $receiver, this, continuation_0);
-      if (suspended)
-        return instance;
-      else
-        return instance.doResume(null);
-    };
-  }
-  function Coroutine$implementAsync$lambda$lambda(closure$fn_0, closure$v_0, closure$ctx_0, $receiver, controller, continuation_0) {
+  function Coroutine$implementAsync$lambda$lambda(closure$fn_0, closure$v_0, closure$ctx_0, $receiver_0, controller, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
     this.$controller = controller;
     this.exceptionState_0 = 1;
@@ -86,6 +77,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
       }
      while (true);
   };
+  function implementAsync$lambda$lambda(closure$fn_0, closure$v_0, closure$ctx_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$implementAsync$lambda$lambda(closure$fn_0, closure$v_0, closure$ctx_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
   function implementAsync$lambda(closure$fn) {
     return function (v, ctx) {
       return asPromise(async(coroutines.GlobalScope, void 0, void 0, implementAsync$lambda$lambda(closure$fn, v, ctx)));

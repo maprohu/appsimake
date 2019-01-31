@@ -35,16 +35,7 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
   var asPromise = $module$kotlinx_coroutines_core.kotlinx.coroutines.asPromise_ge6odz$;
   var gameIdParam;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
-  function init$lambda$lambda(closure$gameRef_0, closure$move_0, closure$firestore_0, closure$moveData_0) {
-    return function ($receiver, continuation_0, suspended) {
-      var instance = new Coroutine$init$lambda$lambda(closure$gameRef_0, closure$move_0, closure$firestore_0, closure$moveData_0, $receiver, this, continuation_0);
-      if (suspended)
-        return instance;
-      else
-        return instance.doResume(null);
-    };
-  }
-  function Coroutine$init$lambda$lambda(closure$gameRef_0, closure$move_0, closure$firestore_0, closure$moveData_0, $receiver, controller, continuation_0) {
+  function Coroutine$init$lambda$lambda(closure$gameRef_0, closure$move_0, closure$firestore_0, closure$moveData_0, $receiver_0, controller, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
     this.$controller = controller;
     this.exceptionState_0 = 1;
@@ -169,6 +160,15 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
       }
      while (true);
   };
+  function init$lambda$lambda(closure$gameRef_0, closure$move_0, closure$firestore_0, closure$moveData_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$init$lambda$lambda(closure$gameRef_0, closure$move_0, closure$firestore_0, closure$moveData_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
   function init$lambda(documentSnapshot, eventContext) {
     var tmp$;
     var firestore = documentSnapshot.ref.firestore;

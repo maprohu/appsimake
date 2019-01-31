@@ -22,24 +22,29 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   var plus = Kotlin.kotlin.collections.plus_qloxvw$;
   var minus = Kotlin.kotlin.collections.minus_2ws7j4$;
   var Unit = Kotlin.kotlin.Unit;
+  var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
+  var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
+  var getCallableRef = Kotlin.getCallableRef;
+  var Pair = Kotlin.kotlin.Pair;
+  var listOf = Kotlin.kotlin.collections.listOf_i5x0yv$;
+  var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
+  var plus_0 = Kotlin.kotlin.collections.plus_xfiyik$;
+  var minus_0 = Kotlin.kotlin.collections.minus_xfiyik$;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var Exception = Kotlin.kotlin.Exception;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var throwCCE = Kotlin.throwCCE;
   var NoSuchElementException_init = Kotlin.kotlin.NoSuchElementException_init;
-  var plus_0 = Kotlin.kotlin.collections.plus_xfiyik$;
   var setOf = Kotlin.kotlin.collections.setOf_mh5how$;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
-  var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
-  var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var PropertyMetadata = Kotlin.PropertyMetadata;
-  var minus_0 = Kotlin.kotlin.collections.minus_khz7k3$;
+  var minus_1 = Kotlin.kotlin.collections.minus_khz7k3$;
   var lazyOf = Kotlin.kotlin.lazyOf_mh5how$;
   var equals = Kotlin.equals;
   var throwUPAE = Kotlin.throwUPAE;
+  var L0 = Kotlin.Long.ZERO;
   var ensureNotNull = Kotlin.ensureNotNull;
-  var minus_1 = Kotlin.kotlin.collections.minus_xfiyik$;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
   var removeClass = Kotlin.kotlin.dom.removeClass_hhb33f$;
   Success.prototype = Object.create(Try.prototype);
@@ -50,8 +55,16 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   Some.prototype.constructor = Some;
   None.prototype = Object.create(Optional.prototype);
   None.prototype.constructor = None;
+  Either$Left.prototype = Object.create(Either.prototype);
+  Either$Left.prototype.constructor = Either$Left;
+  Either$Right.prototype = Object.create(Either.prototype);
+  Either$Right.prototype.constructor = Either$Right;
   apps.prototype = Object.create(CollectionWrap.prototype);
   apps.prototype.constructor = apps;
+  SetAdded.prototype = Object.create(SetMove.prototype);
+  SetAdded.prototype.constructor = SetAdded;
+  SetRemoved.prototype = Object.create(SetMove.prototype);
+  SetRemoved.prototype.constructor = SetRemoved;
   RxCalc.prototype = Object.create(RxChild.prototype);
   RxCalc.prototype.constructor = RxCalc;
   RxVal.prototype = Object.create(RxParent.prototype);
@@ -68,16 +81,11 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   var obj = defineInlineFunction('appsimake-commonshr.common.obj_287e2$', function () {
     return {};
   });
-  var dyn_0 = defineInlineFunction('appsimake-commonshr.common.dyn_5ij4lk$', wrapFunction(function () {
-    var Any = Object;
-    var throwCCE = Kotlin.throwCCE;
-    return function (fn) {
-      var tmp$;
-      var $receiver = (tmp$ = {}) == null || Kotlin.isType(tmp$, Any) ? tmp$ : throwCCE();
-      fn($receiver);
-      return $receiver;
-    };
-  }));
+  var dyn_0 = defineInlineFunction('appsimake-commonshr.common.dyn_5ij4lk$', function (fn) {
+    var $receiver = {};
+    fn($receiver);
+    return $receiver;
+  });
   var obj_0 = defineInlineFunction('appsimake-commonshr.common.obj_7qq44f$', function (fn) {
     var $receiver = {};
     fn($receiver);
@@ -156,12 +164,38 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
     simpleName: 'Listeners',
     interfaces: []
   };
-  function Emitter() {
-    this.listeners = emptyList();
+  function EmitterIface() {
   }
-  Emitter.prototype.plusAssign_qlkmfe$ = function (listener) {
+  EmitterIface.prototype.plusAssign_qlkmfe$ = function (listener) {
     this.add_qlkmfe$(listener);
   };
+  EmitterIface.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'EmitterIface',
+    interfaces: []
+  };
+  function AsyncEmitter() {
+  }
+  AsyncEmitter.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'AsyncEmitter',
+    interfaces: [Killable]
+  };
+  function EmitterKillable() {
+  }
+  EmitterKillable.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'EmitterKillable',
+    interfaces: [Killable, EmitterIface]
+  };
+  function Emitter(first) {
+    if (first === void 0)
+      first = getCallableRef('emptyList', function () {
+        return emptyList();
+      });
+    this.first = first;
+    this.listeners = emptyList();
+  }
   function Emitter$add$lambda(this$Emitter, closure$listener) {
     return function () {
       this$Emitter.listeners = minus(this$Emitter.listeners, closure$listener);
@@ -169,10 +203,16 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
     };
   }
   Emitter.prototype.add_qlkmfe$ = function (listener) {
+    var tmp$;
+    tmp$ = this.first().iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      listener(element);
+    }
     this.listeners = plus(this.listeners, listener);
     return Killable$Companion_getInstance().once_o14v8n$(Emitter$add$lambda(this, listener));
   };
-  Emitter.prototype.fire_11rb$ = function (t) {
+  Emitter.prototype.emit_11rb$ = function (t) {
     var tmp$;
     tmp$ = this.listeners.iterator();
     while (tmp$.hasNext()) {
@@ -183,21 +223,482 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   Emitter.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Emitter',
+    interfaces: [EmitterIface]
+  };
+  function toSetSource$ObjectLiteral(closure$sfn, this$toSetSource) {
+    this.closure$sfn = closure$sfn;
+    this.this$toSetSource = this$toSetSource;
+  }
+  Object.defineProperty(toSetSource$ObjectLiteral.prototype, 'current', {
+    get: function () {
+      return this.closure$sfn();
+    }
+  });
+  toSetSource$ObjectLiteral.prototype.listen_e4cu57$ = function (ks, fn) {
+    ks.plusAssign_wii6vi$(this.this$toSetSource.add_qlkmfe$(fn));
+    return this.closure$sfn();
+  };
+  toSetSource$ObjectLiteral.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [SetSource]
+  };
+  function toSetSource($receiver, sfn) {
+    return new toSetSource$ObjectLiteral(sfn, $receiver);
+  }
+  function MappedEmitter(emitter, fn) {
+    this.emitter_0 = emitter;
+    this.fn_0 = fn;
+  }
+  function MappedEmitter$add$lambda(closure$listener, this$MappedEmitter) {
+    return function (t) {
+      closure$listener(this$MappedEmitter.fn_0(t));
+      return Unit;
+    };
+  }
+  MappedEmitter.prototype.add_qlkmfe$ = function (listener) {
+    return this.emitter_0.add_qlkmfe$(MappedEmitter$add$lambda(listener, this));
+  };
+  MappedEmitter.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'MappedEmitter',
+    interfaces: [EmitterIface]
+  };
+  function map($receiver, fn) {
+    return new MappedEmitter($receiver, fn);
+  }
+  function feedTo$lambda(closure$set) {
+    return function (m) {
+      m.applyTo_wgjnv3$(closure$set);
+      return Unit;
+    };
+  }
+  function feedTo($receiver, set) {
+    return $receiver.add_qlkmfe$(feedTo$lambda(set));
+  }
+  var collectionSizeOrDefault = Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$;
+  var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
+  function filtered$lambda(closure$current) {
+    return function () {
+      var $receiver = closure$current;
+      var destination = ArrayList_init(collectionSizeOrDefault($receiver, 10));
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        destination.add_11rb$(new SetAdded(item));
+      }
+      return destination;
+    };
+  }
+  function filtered$add(closure$current, closure$f) {
+    return function (v) {
+      closure$current.add_11rb$(v);
+      closure$f.emit_11rb$(new SetAdded(v));
+    };
+  }
+  function filtered$remove(closure$current, closure$f) {
+    return function (v) {
+      closure$current.remove_11rb$(v);
+      closure$f.emit_11rb$(new SetRemoved(v));
+    };
+  }
+  function filtered$lambda$lambda(closure$rxfn, closure$v) {
+    return function () {
+      return closure$rxfn(closure$v);
+    };
+  }
+  function filtered$lambda$lambda_0(closure$v, closure$add, closure$remove) {
+    return function (fv) {
+      if (fv)
+        closure$add(closure$v);
+      else
+        closure$remove(closure$v);
+      return Unit;
+    };
+  }
+  function filtered$lambda_0(closure$ks, closure$rxfn, closure$kills, closure$add, closure$remove, closure$current) {
+    return function (m) {
+      var tmp$;
+      var v = m.value;
+      if (Kotlin.isType(m, SetAdded)) {
+        var vks = closure$ks.killables();
+        var rxv = addedTo(Rx_init_0(filtered$lambda$lambda(closure$rxfn, v)), vks);
+        closure$kills.put_xwzc9p$(v, rxv);
+        rxv.forEach_qlkmfe$(filtered$lambda$lambda_0(v, closure$add, closure$remove));
+      }
+       else if (Kotlin.isType(m, SetRemoved)) {
+        (tmp$ = closure$kills.remove_11rb$(v)) != null ? (tmp$.kill(), Unit) : null;
+        if (closure$current.contains_11rb$(v)) {
+          closure$remove(v);
+        }
+      }
+       else
+        Kotlin.noWhenBranchMatched();
+      return Unit;
+    };
+  }
+  var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
+  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
+  function filtered($receiver, ks, rxfn) {
+    var current = LinkedHashSet_init();
+    var kills = LinkedHashMap_init();
+    var f = new Emitter(filtered$lambda(current));
+    var add = filtered$add(current, f);
+    var remove = filtered$remove(current, f);
+    ks.plusAssign_wii6vi$($receiver.add_qlkmfe$(filtered$lambda_0(ks, rxfn, kills, add, remove, current)));
+    return f;
+  }
+  function combineAnd(ks, e1, e2) {
+    return combine_0(ks, e1, e2, getCallableRef('and', function ($receiver, other) {
+      return $receiver & other;
+    }));
+  }
+  function combineN$lambda(closure$result) {
+    return function () {
+      var $receiver = closure$result;
+      var destination = ArrayList_init(collectionSizeOrDefault($receiver, 10));
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        destination.add_11rb$(new SetAdded(item));
+      }
+      return destination;
+    };
+  }
+  function combineN$connect$lambda(closure$result, closure$thisSet, closure$fn, closure$out) {
+    return function (m) {
+      var id = m.value;
+      var before = closure$result.contains_11rb$(m.value);
+      m.applyTo_wgjnv3$(closure$thisSet);
+      var after = closure$fn(id);
+      if (before && !after) {
+        closure$result.remove_11rb$(id);
+        closure$out.emit_11rb$(new SetRemoved(id));
+      }
+       else if (!before && after) {
+        closure$result.add_11rb$(id);
+        closure$out.emit_11rb$(new SetAdded(id));
+      }
+      return Unit;
+    };
+  }
+  function combineN$connect(closure$lks, closure$result, closure$fn, closure$out) {
+    return function (emitter, thisSet) {
+      closure$lks.plusAssign_wii6vi$(emitter.add_qlkmfe$(combineN$connect$lambda(closure$result, thisSet, closure$fn, closure$out)));
+    };
+  }
+  function combineN(ks, pairs, fn) {
+    var lks = ks.killables();
+    var result = LinkedHashSet_init();
+    var out = new Emitter(combineN$lambda(result));
+    var connect = combineN$connect(lks, result, fn, out);
+    var tmp$;
+    tmp$ = pairs.iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      var em = element.component1()
+      , set = element.component2();
+      connect(em, set);
+    }
+    return out;
+  }
+  function combine$lambda(closure$set1, closure$set2, closure$set3, closure$fn) {
+    return function (id) {
+      var v1 = closure$set1.contains_11rb$(id);
+      var v2 = closure$set2.contains_11rb$(id);
+      var v3 = closure$set3.contains_11rb$(id);
+      return closure$fn(v1, v2, v3);
+    };
+  }
+  function combine(ks, e1, e2, e3, fn) {
+    var set1 = LinkedHashSet_init();
+    var set2 = LinkedHashSet_init();
+    var set3 = LinkedHashSet_init();
+    var after = combine$lambda(set1, set2, set3, fn);
+    return combineN(ks, listOf([new Pair(e1, set1), new Pair(e2, set2), new Pair(e3, set3)]), after);
+  }
+  function combine$lambda_0(closure$set1, closure$set2, closure$fn) {
+    return function (id) {
+      var v1 = closure$set1.contains_11rb$(id);
+      var v2 = closure$set2.contains_11rb$(id);
+      return closure$fn(v1, v2);
+    };
+  }
+  function combine_0(ks, e1, e2, fn) {
+    var set1 = LinkedHashSet_init();
+    var set2 = LinkedHashSet_init();
+    var after = combine$lambda_0(set1, set2, fn);
+    return combineN(ks, listOf([new Pair(e1, set1), new Pair(e2, set2)]), after);
+  }
+  function andIn($receiver, other, ks) {
+    return combineAnd(ks, $receiver, other);
+  }
+  function feedTo$lambda_0(closure$list) {
+    return function (m) {
+      m.applyTo_ufm9l7$(closure$list);
+      return Unit;
+    };
+  }
+  function feedTo_0($receiver, list) {
+    return $receiver.add_qlkmfe$(feedTo$lambda_0(list));
+  }
+  function SetSource() {
+  }
+  SetSource.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'SetSource',
     interfaces: []
   };
+  function SetSourceWithKey() {
+  }
+  SetSourceWithKey.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'SetSourceWithKey',
+    interfaces: [SetSource]
+  };
+  function map$ObjectLiteral(this$map, closure$mfn) {
+    this.this$map = this$map;
+    this.closure$mfn = closure$mfn;
+  }
+  Object.defineProperty(map$ObjectLiteral.prototype, 'current', {
+    get: function () {
+      var $receiver = this.this$map.current;
+      var transform = this.closure$mfn;
+      var destination = ArrayList_init(collectionSizeOrDefault($receiver, 10));
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        destination.add_11rb$(transform(item));
+      }
+      return toSet(destination);
+    }
+  });
+  function map$ObjectLiteral$listen$lambda(closure$fn, closure$mfn) {
+    return function (m) {
+      closure$fn(m.map_2o04qz$(closure$mfn));
+      return Unit;
+    };
+  }
+  map$ObjectLiteral.prototype.listen_e4cu57$ = function (ks, fn) {
+    var $receiver = this.this$map.listen_e4cu57$(ks, map$ObjectLiteral$listen$lambda(fn, this.closure$mfn));
+    var transform = this.closure$mfn;
+    var destination = ArrayList_init(collectionSizeOrDefault($receiver, 10));
+    var tmp$;
+    tmp$ = $receiver.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      destination.add_11rb$(transform(item));
+    }
+    return toSet(destination);
+  };
+  map$ObjectLiteral.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [SetSource]
+  };
+  function map_0($receiver, mfn) {
+    return new map$ObjectLiteral($receiver, mfn);
+  }
+  function filtered$add_0(closure$curr, closure$f) {
+    return function (v) {
+      closure$curr.v = plus_0(closure$curr.v, v);
+      closure$f.emit_11rb$(new SetAdded(v));
+    };
+  }
+  function filtered$remove_0(closure$curr, closure$f) {
+    return function (v) {
+      closure$curr.v = minus_0(closure$curr.v, v);
+      closure$f.emit_11rb$(new SetRemoved(v));
+    };
+  }
+  function filtered$process$lambda(closure$rxfn, closure$v) {
+    return function () {
+      return closure$rxfn(closure$v);
+    };
+  }
+  function filtered$process$lambda_0(closure$v, closure$add, closure$remove) {
+    return function (fv) {
+      if (fv)
+        closure$add(closure$v);
+      else
+        closure$remove(closure$v);
+      return Unit;
+    };
+  }
+  function filtered$process(closure$ks, closure$rxfn, closure$kills, closure$add, closure$remove, closure$curr) {
+    return function (m) {
+      var tmp$;
+      var v = m.value;
+      if (Kotlin.isType(m, SetAdded)) {
+        var vks = closure$ks.killables();
+        var rxv = addedTo(Rx_init_0(filtered$process$lambda(closure$rxfn, v)), vks);
+        closure$kills.put_xwzc9p$(v, rxv);
+        rxv.forEach_qlkmfe$(filtered$process$lambda_0(v, closure$add, closure$remove));
+      }
+       else if (Kotlin.isType(m, SetRemoved)) {
+        (tmp$ = closure$kills.remove_11rb$(v)) != null ? (tmp$.kill(), Unit) : null;
+        if (closure$curr.v.contains_11rb$(v)) {
+          closure$remove(v);
+        }
+      }
+       else
+        Kotlin.noWhenBranchMatched();
+    };
+  }
+  function filtered$lambda_1(closure$curr) {
+    return function () {
+      return closure$curr.v;
+    };
+  }
+  function filtered_0($receiver, ks, rxfn) {
+    var curr = {v: emptySet()};
+    var kills = LinkedHashMap_init();
+    var f = new Emitter();
+    var add = filtered$add_0(curr, f);
+    var remove = filtered$remove_0(curr, f);
+    var process = filtered$process(ks, rxfn, kills, add, remove, curr);
+    var $receiver_0 = $receiver.listen_e4cu57$(ks, getCallableRef('process', function (m) {
+      return process(m), Unit;
+    }));
+    var destination = ArrayList_init(collectionSizeOrDefault($receiver_0, 10));
+    var tmp$;
+    tmp$ = $receiver_0.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      destination.add_11rb$(new SetAdded(item));
+    }
+    var tmp$_0;
+    tmp$_0 = destination.iterator();
+    while (tmp$_0.hasNext()) {
+      var element = tmp$_0.next();
+      process(element);
+    }
+    return toSetSource(f, filtered$lambda_1(curr));
+  }
+  function combineN$connect$process(closure$result, closure$thisSet, closure$fn, closure$out) {
+    return function (m) {
+      var id = m.value;
+      var before = closure$result.v.contains_11rb$(m.value);
+      m.applyTo_wgjnv3$(closure$thisSet);
+      var after = closure$fn(id);
+      if (before && !after) {
+        closure$result.v = minus_0(closure$result.v, id);
+        closure$out.emit_11rb$(new SetRemoved(id));
+      }
+       else if (!before && after) {
+        closure$result.v = plus_0(closure$result.v, id);
+        closure$out.emit_11rb$(new SetAdded(id));
+      }
+    };
+  }
+  function combineN$connect_0(closure$result, closure$fn, closure$out, closure$ks) {
+    return function (emitter, thisSet) {
+      var process = combineN$connect$process(closure$result, thisSet, closure$fn, closure$out);
+      var $receiver = emitter.listen_e4cu57$(closure$ks, getCallableRef('process', function (m) {
+        return process(m), Unit;
+      }));
+      var destination = ArrayList_init(collectionSizeOrDefault($receiver, 10));
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        destination.add_11rb$(new SetAdded(item));
+      }
+      var tmp$_0;
+      tmp$_0 = destination.iterator();
+      while (tmp$_0.hasNext()) {
+        var element = tmp$_0.next();
+        process(element);
+      }
+    };
+  }
+  function combineN$lambda_0(closure$result) {
+    return function () {
+      return closure$result.v;
+    };
+  }
+  function combineN_0(ks, pairs, fn) {
+    var result = {v: emptySet()};
+    var out = new Emitter();
+    var connect = combineN$connect_0(result, fn, out, ks);
+    var tmp$;
+    tmp$ = pairs.iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      var em = element.component1()
+      , set = element.component2();
+      connect(em, set);
+    }
+    return toSetSource(out, combineN$lambda_0(result));
+  }
+  function combine$lambda_1(closure$set1, closure$set2, closure$set3, closure$fn) {
+    return function (id) {
+      var v1 = closure$set1.contains_11rb$(id);
+      var v2 = closure$set2.contains_11rb$(id);
+      var v3 = closure$set3.contains_11rb$(id);
+      return closure$fn(v1, v2, v3);
+    };
+  }
+  function combine_1(ks, e1, e2, e3, fn) {
+    var set1 = LinkedHashSet_init();
+    var set2 = LinkedHashSet_init();
+    var set3 = LinkedHashSet_init();
+    var after = combine$lambda_1(set1, set2, set3, fn);
+    return combineN_0(ks, listOf([new Pair(e1, set1), new Pair(e2, set2), new Pair(e3, set3)]), after);
+  }
+  function combine$lambda_2(closure$set1, closure$set2, closure$fn) {
+    return function (id) {
+      var v1 = closure$set1.contains_11rb$(id);
+      var v2 = closure$set2.contains_11rb$(id);
+      return closure$fn(v1, v2);
+    };
+  }
+  function combine_2(ks, e1, e2, fn) {
+    var set1 = LinkedHashSet_init();
+    var set2 = LinkedHashSet_init();
+    var after = combine$lambda_2(set1, set2, fn);
+    return combineN_0(ks, listOf([new Pair(e1, set1), new Pair(e2, set2)]), after);
+  }
+  function toEmitter$ObjectLiteral(this$toEmitter) {
+    this.this$toEmitter = this$toEmitter;
+  }
+  toEmitter$ObjectLiteral.prototype.add_qlkmfe$ = function (listener) {
+    var ks = new Killables();
+    var $receiver = this.this$toEmitter.listen_e4cu57$(ks, listener);
+    var destination = ArrayList_init(collectionSizeOrDefault($receiver, 10));
+    var tmp$;
+    tmp$ = $receiver.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      destination.add_11rb$(new SetAdded(item));
+    }
+    var tmp$_0;
+    tmp$_0 = destination.iterator();
+    while (tmp$_0.hasNext()) {
+      var element = tmp$_0.next();
+      listener(element);
+    }
+    return ks;
+  };
+  toEmitter$ObjectLiteral.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [EmitterIface]
+  };
+  function toEmitter($receiver) {
+    return new toEmitter$ObjectLiteral($receiver);
+  }
+  function combineAnd_0(ks, e1, e2) {
+    return combine_2(ks, e1, e2, getCallableRef('and', function ($receiver, other) {
+      return $receiver & other;
+    }));
+  }
   function Try() {
     Try$Companion_getInstance();
   }
   function Try$Companion() {
     Try$Companion_instance = this;
   }
-  Try$Companion.prototype.invoke_lnyleu$ = function (body_0, continuation_0, suspended) {
-    var instance = new Coroutine$invoke_lnyleu$(this, body_0, continuation_0);
-    if (suspended)
-      return instance;
-    else
-      return instance.doResume(null);
-  };
   function Coroutine$invoke_lnyleu$($this, body_0, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
     this.exceptionState_0 = 4;
@@ -258,6 +759,13 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
       }
      while (true);
   };
+  Try$Companion.prototype.invoke_lnyleu$ = function (body_0, continuation_0, suspended) {
+    var instance = new Coroutine$invoke_lnyleu$(this, body_0, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
+  };
   Try$Companion.$metadata$ = {
     kind: Kind_OBJECT,
     simpleName: 'Companion',
@@ -269,15 +777,6 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
       new Try$Companion();
     }
     return Try$Companion_instance;
-  }
-  function Try$map$lambda(closure$f_0, this$Try_0) {
-    return function (continuation_0, suspended) {
-      var instance = new Coroutine$Try$map$lambda(closure$f_0, this$Try_0, continuation_0);
-      if (suspended)
-        return instance;
-      else
-        return instance.doResume(null);
-    };
   }
   function Coroutine$Try$map$lambda(closure$f_0, this$Try_0, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
@@ -322,13 +821,15 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
       }
      while (true);
   };
-  Try.prototype.map_v7st1v$ = function (f_0, continuation_0, suspended) {
-    var instance = new Coroutine$map_v7st1v$(this, f_0, continuation_0);
-    if (suspended)
-      return instance;
-    else
-      return instance.doResume(null);
-  };
+  function Try$map$lambda(closure$f_0, this$Try_0) {
+    return function (continuation_0, suspended) {
+      var instance = new Coroutine$Try$map$lambda(closure$f_0, this$Try_0, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
   function Coroutine$map_v7st1v$($this, f_0, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
     this.exceptionState_0 = 1;
@@ -388,6 +889,13 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
         }
       }
      while (true);
+  };
+  Try.prototype.map_v7st1v$ = function (f_0, continuation_0, suspended) {
+    var instance = new Coroutine$map_v7st1v$(this, f_0, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
   };
   Try.prototype.flatMap_fzayo0$ = function (f) {
     var tmp$;
@@ -565,6 +1073,9 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   Some.prototype.getOrDefault_11rb$ = function (default_0) {
     return this.value;
   };
+  Some.prototype.flatMap_30i4av$ = function (fn) {
+    return fn(this.value);
+  };
   Some.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Some',
@@ -614,6 +1125,9 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   None.prototype.getOrDefault_11rb$ = function (default_0) {
     return default_0;
   };
+  None.prototype.flatMap_30i4av$ = function (fn) {
+    return None_getInstance();
+  };
   None.$metadata$ = {
     kind: Kind_OBJECT,
     simpleName: 'None',
@@ -650,6 +1164,37 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   }
   function orEmpty_1($receiver) {
     return $receiver.getOrDefault_11rb$(emptyList());
+  }
+  function Either() {
+  }
+  function Either$Left(value) {
+    Either.call(this);
+    this.value = value;
+  }
+  Either$Left.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Left',
+    interfaces: [Either]
+  };
+  function Either$Right(value) {
+    Either.call(this);
+    this.value = value;
+  }
+  Either$Right.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Right',
+    interfaces: [Either]
+  };
+  Either.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Either',
+    interfaces: []
+  };
+  function lib$lambda(it) {
+    return new Lib(it);
+  }
+  function lib() {
+    return named(lib$lambda);
   }
   function Lib(name) {
     this.name = name;
@@ -728,17 +1273,11 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
       return this.path_66n57n$_0;
     }
   });
-  CollectionWrap.prototype.docdc_3c47r3$ = function (id) {
+  CollectionWrap.prototype.docd_3c47r3$ = function (id) {
     return new DocWrap(id, this);
   };
-  CollectionWrap.prototype.docc_61zpoe$ = function (id) {
-    return this.docdc_3c47r3$(id);
-  };
-  CollectionWrap.prototype.docd_3c47r3$ = function (id) {
-    return this.docdc_3c47r3$(id);
-  };
   CollectionWrap.prototype.doc_61zpoe$ = function (id) {
-    return this.docdc_3c47r3$(id);
+    return this.docd_3c47r3$(id);
   };
   CollectionWrap.$metadata$ = {
     kind: Kind_CLASS,
@@ -835,7 +1374,7 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   }
   function SetDiff$Companion$of$lambda$lambda(closure$o) {
     return function (n) {
-      return minus_0(closure$o, n);
+      return minus_1(closure$o, n);
     };
   }
   function SetDiff$Companion$of$lambda$lambda_0(closure$o) {
@@ -853,7 +1392,7 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   }
   function SetDiff$Companion$of$lambda$lambda_1(closure$n) {
     return function (o) {
-      return minus_0(closure$n, o);
+      return minus_1(closure$n, o);
     };
   }
   function SetDiff$Companion$of$lambda$lambda_2(closure$n) {
@@ -873,7 +1412,7 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
     return new SetDiff(old.map_2o04qz$(SetDiff$Companion$of$lambda(new_0)).getOrElse_skz6lt$(SetDiff$Companion$of$lambda_0), new_0.map_2o04qz$(SetDiff$Companion$of$lambda_1(old)).getOrElse_skz6lt$(SetDiff$Companion$of$lambda_2));
   };
   SetDiff$Companion.prototype.of_lk58qy$ = function (old, new_0) {
-    return new SetDiff(minus_0(old, new_0), minus_0(new_0, old));
+    return new SetDiff(minus_1(old, new_0), minus_1(new_0, old));
   };
   SetDiff$Companion.$metadata$ = {
     kind: Kind_OBJECT,
@@ -915,6 +1454,157 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   };
   function toLazy($receiver) {
     return lazyOf($receiver);
+  }
+  function SetMove() {
+  }
+  SetMove.prototype.map_2o04qz$ = function (fn) {
+    if (Kotlin.isType(this, SetAdded))
+      return new SetAdded(fn(this.value));
+    else if (Kotlin.isType(this, SetRemoved))
+      return new SetRemoved(fn(this.value));
+    else
+      return Kotlin.noWhenBranchMatched();
+  };
+  SetMove.prototype.applyTo_wgjnv3$ = function (set) {
+    if (Kotlin.isType(this, SetAdded)) {
+      var element = this.value;
+      set.add_11rb$(element);
+    }
+     else if (Kotlin.isType(this, SetRemoved)) {
+      var element_0 = this.value;
+      set.remove_11rb$(element_0);
+    }
+     else
+      Kotlin.noWhenBranchMatched();
+  };
+  SetMove.prototype.applyTo_ufm9l7$ = function (set) {
+    if (Kotlin.isType(this, SetAdded)) {
+      var element = this.value;
+      set.add_11rb$(element);
+    }
+     else if (Kotlin.isType(this, SetRemoved)) {
+      var element_0 = this.value;
+      set.remove_11rb$(element_0);
+    }
+     else
+      Kotlin.noWhenBranchMatched();
+  };
+  SetMove.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SetMove',
+    interfaces: []
+  };
+  function SetAdded(value) {
+    SetMove.call(this);
+    this.value_doewhp$_0 = value;
+  }
+  Object.defineProperty(SetAdded.prototype, 'value', {
+    get: function () {
+      return this.value_doewhp$_0;
+    }
+  });
+  SetAdded.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SetAdded',
+    interfaces: [SetMove]
+  };
+  SetAdded.prototype.component1 = function () {
+    return this.value;
+  };
+  SetAdded.prototype.copy_11rb$ = function (value) {
+    return new SetAdded(value === void 0 ? this.value : value);
+  };
+  SetAdded.prototype.toString = function () {
+    return 'SetAdded(value=' + Kotlin.toString(this.value) + ')';
+  };
+  SetAdded.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.value) | 0;
+    return result;
+  };
+  SetAdded.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.value, other.value))));
+  };
+  function SetRemoved(value) {
+    SetMove.call(this);
+    this.value_n0uxwd$_0 = value;
+  }
+  Object.defineProperty(SetRemoved.prototype, 'value', {
+    get: function () {
+      return this.value_n0uxwd$_0;
+    }
+  });
+  SetRemoved.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SetRemoved',
+    interfaces: [SetMove]
+  };
+  SetRemoved.prototype.component1 = function () {
+    return this.value;
+  };
+  SetRemoved.prototype.copy_11rb$ = function (value) {
+    return new SetRemoved(value === void 0 ? this.value : value);
+  };
+  SetRemoved.prototype.toString = function () {
+    return 'SetRemoved(value=' + Kotlin.toString(this.value) + ')';
+  };
+  SetRemoved.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.value) | 0;
+    return result;
+  };
+  SetRemoved.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.value, other.value))));
+  };
+  function Counted(create) {
+    this.create_0 = create;
+    this.current_0 = None_getInstance();
+  }
+  function Counted$Holder($outer, value, killable) {
+    this.$outer = $outer;
+    this.value = value;
+    this.killable = killable;
+    this.count = 0;
+  }
+  Counted$Holder.prototype.release = function () {
+    this.count = this.count - 1 | 0;
+    if (this.count <= 0) {
+      this.$outer.current_0 = None_getInstance();
+      this.killable.kill();
+    }
+  };
+  Counted$Holder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Holder',
+    interfaces: []
+  };
+  function Counted$get$lambda(this$Counted) {
+    return function () {
+      var k = new Killables();
+      var $receiver = new Counted$Holder(this$Counted, this$Counted.create_0(k), k);
+      this$Counted.current_0 = new Some($receiver);
+      return $receiver;
+    };
+  }
+  function Counted$get$lambda$lambda(closure$holder) {
+    return function () {
+      closure$holder.release();
+      return Unit;
+    };
+  }
+  Counted.prototype.get_di35k5$ = function (ks) {
+    var holder = this.current_0.getOrElse_skz6lt$(Counted$get$lambda(this));
+    holder.count = holder.count + 1 | 0;
+    ks.plusAssign_wii6vi$(Killable$Companion_getInstance().once_o14v8n$(Counted$get$lambda$lambda(holder)));
+    return holder.value;
+  };
+  Counted.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Counted',
+    interfaces: []
+  };
+  function report(error) {
+    console.error(error);
   }
   function Killable() {
     Killable$Companion_getInstance();
@@ -959,6 +1649,16 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
     }
     return Killable$Companion_instance;
   }
+  function Killable$plus$lambda(this$Killable, closure$k) {
+    return function () {
+      this$Killable.kill();
+      closure$k.kill();
+      return Unit;
+    };
+  }
+  Killable.prototype.plus_wii6vi$ = function (k) {
+    return Killable$Companion_getInstance().of_o14v8n$(Killable$plus$lambda(this, k));
+  };
   Killable.$metadata$ = {
     kind: Kind_INTERFACE,
     simpleName: 'Killable',
@@ -1001,6 +1701,9 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   }
   KillableValue.prototype.kill = function () {
     return this.killable.kill();
+  };
+  KillableValue.prototype.plus_wii6vi$ = function (k) {
+    return this.killable.plus_wii6vi$(k);
   };
   KillableValue.$metadata$ = {
     kind: Kind_CLASS,
@@ -1115,6 +1818,9 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   };
   KillableSeq.prototype.kill = function () {
     return this.onKill_8be2vx$.kill();
+  };
+  KillableSeq.prototype.plus_wii6vi$ = function (k) {
+    return this.onKill_8be2vx$.plus_wii6vi$(k);
   };
   function KillableSeq_init$lambda(this$KillableSeq) {
     return function () {
@@ -1306,12 +2012,136 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
     simpleName: 'RxIface',
     interfaces: []
   };
-  var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
+  function feedTo$lambda$lambda(closure$new, closure$old) {
+    return function (it) {
+      return it + closure$new - closure$old | 0;
+    };
+  }
+  function feedTo$lambda_1(closure$rxv) {
+    return function (old, new_0) {
+      closure$rxv.transform_ru8m0w$(feedTo$lambda$lambda(new_0, old));
+      return new_0;
+    };
+  }
+  function feedTo$lambda$lambda_0(this$feedTo) {
+    return function (it) {
+      return it - this$feedTo.now | 0;
+    };
+  }
+  function feedTo$lambda_2(closure$rxv, this$feedTo) {
+    return function () {
+      closure$rxv.transform_ru8m0w$(feedTo$lambda$lambda_0(this$feedTo));
+      return Unit;
+    };
+  }
+  function feedTo_1($receiver, rxv) {
+    return $receiver.fold_b8xf17$(0, feedTo$lambda_1(rxv)).plus_wii6vi$(Killable$Companion_getInstance().once_o14v8n$(feedTo$lambda_2(rxv, $receiver)));
+  }
+  function feedTo$lambda$lambda_1(closure$new, closure$old) {
+    return function (it) {
+      return it.add(Kotlin.Long.fromInt(closure$new)).subtract(Kotlin.Long.fromInt(closure$old));
+    };
+  }
+  function feedTo$lambda_3(closure$rxv) {
+    return function (old, new_0) {
+      closure$rxv.transform_ru8m0w$(feedTo$lambda$lambda_1(new_0, old));
+      return new_0;
+    };
+  }
+  function feedTo$lambda$lambda_2(this$feedTo) {
+    return function (it) {
+      return it.subtract(Kotlin.Long.fromInt(this$feedTo.now));
+    };
+  }
+  function feedTo$lambda_4(closure$rxv, this$feedTo) {
+    return function () {
+      closure$rxv.transform_ru8m0w$(feedTo$lambda$lambda_2(this$feedTo));
+      return Unit;
+    };
+  }
+  function feedTo_2($receiver, rxv) {
+    return $receiver.fold_b8xf17$(0, feedTo$lambda_3(rxv)).plus_wii6vi$(Killable$Companion_getInstance().once_o14v8n$(feedTo$lambda_4(rxv, $receiver)));
+  }
+  function feedTo$lambda$lambda_3(closure$new, closure$old) {
+    return function (it) {
+      return it.add(closure$new).subtract(closure$old);
+    };
+  }
+  function feedTo$lambda_5(closure$rxv) {
+    return function (old, new_0) {
+      closure$rxv.transform_ru8m0w$(feedTo$lambda$lambda_3(new_0, old));
+      return new_0;
+    };
+  }
+  function feedTo$lambda$lambda_4(this$feedTo) {
+    return function (it) {
+      return it.subtract(this$feedTo.now);
+    };
+  }
+  function feedTo$lambda_6(closure$rxv, this$feedTo) {
+    return function () {
+      closure$rxv.transform_ru8m0w$(feedTo$lambda$lambda_4(this$feedTo));
+      return Unit;
+    };
+  }
+  function feedTo_3($receiver, rxv) {
+    return $receiver.fold_b8xf17$(L0, feedTo$lambda_5(rxv)).plus_wii6vi$(Killable$Companion_getInstance().once_o14v8n$(feedTo$lambda_6(rxv, $receiver)));
+  }
+  function feedTo$lambda$lambda_5(closure$new, closure$old) {
+    return function (it) {
+      return it + closure$new - closure$old;
+    };
+  }
+  function feedTo$lambda_7(closure$rxv) {
+    return function (old, new_0) {
+      closure$rxv.transform_ru8m0w$(feedTo$lambda$lambda_5(new_0, old));
+      return new_0;
+    };
+  }
+  function feedTo$lambda$lambda_6(this$feedTo) {
+    return function (it) {
+      return it - this$feedTo.now;
+    };
+  }
+  function feedTo$lambda_8(closure$rxv, this$feedTo) {
+    return function () {
+      closure$rxv.transform_ru8m0w$(feedTo$lambda$lambda_6(this$feedTo));
+      return Unit;
+    };
+  }
+  function feedTo_4($receiver, rxv) {
+    return $receiver.fold_b8xf17$(0.0, feedTo$lambda_7(rxv)).plus_wii6vi$(Killable$Companion_getInstance().once_o14v8n$(feedTo$lambda_8(rxv, $receiver)));
+  }
+  function orDefault$lambda(this$orDefault, closure$v) {
+    return function () {
+      return this$orDefault.invoke().getOrDefault_11rb$(closure$v);
+    };
+  }
+  function orDefault($receiver, v) {
+    return Rx_init_0(orDefault$lambda($receiver, v));
+  }
+  function incremented$lambda(it) {
+    return it + 1 | 0;
+  }
+  function incremented$lambda$lambda(it) {
+    return it - 1 | 0;
+  }
+  function incremented$lambda_0(this$incremented) {
+    return function () {
+      this$incremented.transform_ru8m0w$(incremented$lambda$lambda);
+      return Unit;
+    };
+  }
+  function incremented($receiver) {
+    $receiver.transform_ru8m0w$(incremented$lambda);
+    return Killable$Companion_getInstance().once_o14v8n$(incremented$lambda_0($receiver));
+  }
+  var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   function RxVal(currentValue) {
     RxParent.call(this);
     this.currentValue = currentValue;
     this.oldValue_ofkn4b$_0 = this.currentValue;
-    this.observers_8be2vx$ = ArrayList_init();
+    this.observers_8be2vx$ = ArrayList_init_0();
   }
   Object.defineProperty(RxVal.prototype, 'now', {
     get: function () {
@@ -1374,7 +2204,7 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   }
   function remove$lambda$lambda(closure$v) {
     return function (it) {
-      return minus_1(it, closure$v);
+      return minus_0(it, closure$v);
     };
   }
   function remove$lambda(closure$v) {
@@ -1430,7 +2260,7 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   }
   Var.prototype.setValue_11rb$ = function (value) {
     this.setCurrentValue_1c3m6u$(value);
-    var observers = ArrayList_init();
+    var observers = ArrayList_init_0();
     var tmp$;
     tmp$ = affected.iterator();
     while (tmp$.hasNext()) {
@@ -1469,6 +2299,18 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
     simpleName: 'Var',
     interfaces: [RxVal]
   };
+  function increase$lambda(it) {
+    return it + 1 | 0;
+  }
+  function increase($receiver) {
+    $receiver.transform_ru8m0w$(increase$lambda);
+  }
+  function decrease$lambda(it) {
+    return it - 1 | 0;
+  }
+  function decrease($receiver) {
+    $receiver.transform_ru8m0w$(decrease$lambda);
+  }
   function get_0($receiver) {
     return $receiver.now.get();
   }
@@ -1585,7 +2427,30 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   package$common.jsNew_x7e9z0$ = jsNew;
   package$common.jsNew_8jhc6t$ = jsNew_0;
   package$common.Listeners = Listeners;
+  package$common.EmitterIface = EmitterIface;
+  package$common.AsyncEmitter = AsyncEmitter;
+  package$common.EmitterKillable = EmitterKillable;
   package$common.Emitter = Emitter;
+  package$common.toSetSource_9p620j$ = toSetSource;
+  package$common.MappedEmitter = MappedEmitter;
+  package$common.map_x7fpzi$ = map;
+  package$common.feedTo_cenaja$ = feedTo;
+  package$common.filtered_duf482$ = filtered;
+  package$common.combineAnd_6vwu35$ = combineAnd;
+  package$common.combineN_pti7h3$ = combineN;
+  package$common.combine_kujoqw$ = combine;
+  package$common.combine_bust2m$ = combine_0;
+  package$common.andIn_7i9aus$ = andIn;
+  package$common.feedTo_7nd12m$ = feedTo_0;
+  package$common.SetSource = SetSource;
+  package$common.SetSourceWithKey = SetSourceWithKey;
+  package$common.map_2x290v$ = map_0;
+  package$common.filtered_k6m1gp$ = filtered_0;
+  package$common.combineN_po67i4$ = combineN_0;
+  package$common.combine_cxl1bz$ = combine_1;
+  package$common.combine_ibrrg2$ = combine_2;
+  package$common.toEmitter_i3kjy7$ = toEmitter;
+  package$common.combineAnd_f725uz$ = combineAnd_0;
   Object.defineProperty(Try, 'Companion', {
     get: Try$Companion_getInstance
   });
@@ -1605,7 +2470,11 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   package$common.plus_idxhrq$ = plus_1;
   package$common.orEmpty_m2768g$ = orEmpty_0;
   package$common.orEmpty_r4li7g$ = orEmpty_1;
+  Either.Left = Either$Left;
+  Either.Right = Either$Right;
+  package$common.Either = Either;
   var package$commonlib = _.commonlib || (_.commonlib = {});
+  package$commonlib.lib = lib;
   package$commonlib.Lib = Lib;
   package$commonlib.Function = Function;
   package$commonlib.DocWrap = DocWrap;
@@ -1630,6 +2499,11 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   var package$commonshr = _.commonshr || (_.commonshr = {});
   package$commonshr.SetDiff = SetDiff;
   package$commonshr.toLazy_eoe559$ = toLazy;
+  package$commonshr.SetMove = SetMove;
+  package$commonshr.SetAdded = SetAdded;
+  package$commonshr.SetRemoved = SetRemoved;
+  package$commonshr.Counted = Counted;
+  package$commonshr.report_tcv7n7$ = report;
   Object.defineProperty(Killable, 'Companion', {
     get: Killable$Companion_getInstance
   });
@@ -1651,6 +2525,12 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   package$rx.connect_xonuym$ = connect;
   package$rx.Obs = Obs;
   package$rx.RxIface = RxIface;
+  package$rx.feedTo_s4tckn$ = feedTo_1;
+  package$rx.feedTo_jq98q0$ = feedTo_2;
+  package$rx.feedTo_ghlndt$ = feedTo_3;
+  package$rx.feedTo_tqwc97$ = feedTo_4;
+  package$rx.orDefault_a7fhzw$ = orDefault;
+  package$rx.incremented_eoy9qo$ = incremented;
   package$rx.RxVal = RxVal;
   package$rx.killOld_o6kpy0$ = killOld;
   package$rx.add_gcz0w7$ = add_0;
@@ -1661,6 +2541,8 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   package$rx.Rx_init_klfg04$ = Rx_init_0;
   package$rx.Rx = Rx;
   package$rx.Var = Var;
+  package$rx.increase_eoy9qo$ = increase;
+  package$rx.decrease_eoy9qo$ = decrease;
   package$rx.get_kw0pia$ = get_0;
   package$rx.set_atqor6$ = set;
   package$rx.rxClass_z8puye$ = rxClass;
@@ -1672,6 +2554,17 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   package$rx.toRx_ba455$ = toRx;
   package$rx.rxClasses_dk0vnv$ = rxClasses;
   package$rx.rxClasses_cv5l32$ = rxClasses_0;
+  AsyncEmitter.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
+  EmitterKillable.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  EmitterKillable.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
+  Emitter.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  MappedEmitter.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  toEmitter$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  Killable$Companion$of$ObjectLiteral.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
+  Killable$Companion$empty$ObjectLiteral.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
+  OnceKillable.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
+  Killables.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
+  Obs.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
   RxVal.prototype.forEach_qlkmfe$ = RxIface.prototype.forEach_qlkmfe$;
   RxVal.prototype.fold_b8xf17$ = RxIface.prototype.fold_b8xf17$;
   RxVal.prototype.folded_b8xf17$ = RxIface.prototype.folded_b8xf17$;
@@ -1686,11 +2579,14 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   RxIfaceKillable.prototype.onChange_nrmh93$ = RxIface.prototype.onChange_nrmh93$;
   RxIfaceKillable.prototype.onOff_uc1utc$ = RxIface.prototype.onOff_uc1utc$;
   RxIfaceKillable.prototype.off_qlkmfe$ = RxIface.prototype.off_qlkmfe$;
+  RxIfaceKillable.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
+  RxIface$folded$ObjectLiteral.prototype.plus_wii6vi$ = RxIfaceKillable.prototype.plus_wii6vi$;
+  Rx.prototype.plus_wii6vi$ = RxIfaceKillable.prototype.plus_wii6vi$;
   private_0 = coll();
   singletons = coll();
   fcmtokens = coll();
   currentChild = null;
-  affected = ArrayList_init();
+  affected = ArrayList_init_0();
   Kotlin.defineModule('appsimake-commonshr', _);
   return _;
 });

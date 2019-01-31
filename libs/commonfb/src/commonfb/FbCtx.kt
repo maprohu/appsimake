@@ -1,18 +1,17 @@
 package commonfb
 
-import buildenv.serviceWorkerFileName
 import commonlib.CollectionWrap
 import commonlib.DocWrap
 import commonlib.Function
 import commonlib.Lib
 import commonui.AppCtx
 import firebase.AppOptions
+import firebase.app.App
 import firebase.app.firestore
 import firebase.firestore.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
-import kotlin.browser.window
 import kotlin.js.Promise
 
 
@@ -37,13 +36,6 @@ class FbCtx(
     val app by lazy {
         firebase.initializeApp(
             AppOptions().apply {
-                //            apiKey= "AIzaSyCk4evdCJvWCYS8GpodbBotuYfebdwbqHE"
-//            authDomain= "pullanapp.firebaseapp.com"
-//            databaseURL= "https://pullanapp.firebaseio.com"
-//            projectId= "pullanapp"
-//            storageBucket= "pullanapp.appspot.com"
-//            messagingSenderId= "778902419215"
-
                 apiKey = "AIzaSyDuHunYFDxjJVSvhk_3POXORpN8M49ubgU"
                 authDomain = "appsimake.firebaseapp.com"
                 databaseURL = "https://appsimake.firebaseio.com"
@@ -101,5 +93,18 @@ class FbCtx(
         return app.functions().httpsCallable(function.qualifiedName)(input)
     }
 
+}
+
+interface Callable<I, O> {
+    suspend fun call(input: I): O
+}
+
+suspend fun <I, O> Function<I, O>.callable(app: App) = object : Callable<I, O> {
+    override suspend fun call(input: I): O {
+        return app.functions().httpsCallable(qualifiedName)(input).await().unsafeCast<O>()
+    }
+}
+suspend fun <I, O> Function<I, O>.call(app: App, input: I): O {
+    return callable(app).call(input)
 }
 
