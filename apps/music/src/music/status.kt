@@ -1,14 +1,16 @@
 package music
 
 import bootstrap.*
-import common.EmitterIface
-import common.Some
-import common.filtered
-import common.map
+import common.*
+import commonfb.listNodes
 import commonlib.addedTo
+import commonlib.toRx
 import commonshr.SetAdded
 import commonshr.SetMove
 import commonshr.SetRemoved
+import commonui.RootPanel
+import commonui.screenLayout
+import commonui.showClosable
 import domx.*
 import firebase.ids
 import indexeddb.*
@@ -18,10 +20,16 @@ import killable.addedTo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import musiclib.StoreState
+import musiclib.UserSongState
 import org.w3c.dom.HTMLDivElement
+import org.w3c.dom.HTMLElement
 import org.w3c.dom.MutationRecord
 import org.w3c.dom.Node
 import rx.*
+import styles.cursorPointer
+import styles.height0
+import styles.scrollVertical
+import styles.widthAuto
 import kotlin.browser.document
 import kotlin.math.roundToInt
 
@@ -48,80 +56,96 @@ class DBStatus(
         }
 
     }
-    val localDatabase = RecordObject()
-    val cloud = RecordObject()
-    val like = RecordObject()
-    val new = RecordObject()
-    val dontLike = RecordObject()
-    val upload = RecordObject()
-    val download = RecordObject()
+//    val localDatabase = RecordObject()
+//    val cloud = RecordObject()
+//    val like = RecordObject()
+//    val new = RecordObject()
+//    val dontLike = RecordObject()
+//    val upload = RecordObject()
+//    val download = RecordObject()
 
-    init {
-        val ks = killables.killables()
+    class Stat(
+        val title: String,
+        val emitter: EmitterIface<SetMove<String>>,
+        val record: RecordObject
+    )
 
-        fun connect(
-            emitter: EmitterIface<SetMove<String>>,
-            target: RecordObject
-        ) {
-            val tagMap = mutableMapOf<String, Killable>()
-            ks += emitter.add { m ->
-                val id = m.value
-                when (m) {
-                    is SetAdded -> {
-                        val kst = ks.killables()
-                        tagMap[id] = kst
+    val ks = killables.killables()
 
-                        kst += target.count.incremented()
-                        GlobalScope.launch {
-                            val tag = tagDB.get(id) {
-                                val blob = idb.readMp3(id)!!
-                                blob to blob.readAsArrayBuffer()
-                            }
-                            tag.secs.initial
-                                .orDefault(0.0).addedTo(kst)
-                                .feedTo(target.duration).addedTo(kst)
-                            tag.bytes.initial
-                                .orDefault(0).addedTo(kst)
-                                .feedTo(target.size).addedTo(kst)
-                        }.addedTo(kst)
-                    }
+    val statuses = mutableListOf<Stat>()
 
-                    is SetRemoved -> tagMap[id]?.kill()
+    fun connect(
+        emitter: EmitterIface<SetMove<String>>,
+        title: String
+    ) {
+        val target = RecordObject()
+        val tagMap = mutableMapOf<String, Killable>()
+        ks += emitter.add { m ->
+            val id = m.value
+            when (m) {
+                is SetAdded -> {
+                    val kst = ks.killables()
+                    tagMap[id] = kst
+
+                    kst += target.count.incremented()
+                    GlobalScope.launch {
+                        val tag = tagDB.get(id) {
+                            val blob = idb.readMp3(id)!!
+                            blob to blob.readAsArrayBuffer()
+                        }
+                        tag.secs.initial
+                            .orDefault(0.0).addedTo(kst)
+                            .feedTo(target.duration).addedTo(kst)
+                        tag.bytes.initial
+                            .orDefault(0).addedTo(kst)
+                            .feedTo(target.size).addedTo(kst)
+                    }.addedTo(kst)
                 }
-            }
 
+                is SetRemoved -> tagMap[id]?.kill()
+            }
         }
 
-        connect(LocalSongs.emitter, localDatabase)
+        statuses += Stat(
+            title = title,
+            emitter = emitter,
+            record = target
+        )
+
+    }
+
+
+    init {
+        connect(
+            LocalSongs.emitter,
+            "Local Database"
+        )
         connect(
             storageDB.queryCache.emitter
                 .filtered(ks) { it.uploaded.initial() == Some(true) }
                 .ids,
-            cloud
+            "Cloud"
         )
         connect(
             userSongsDB.like.ids,
-            like
+            "Like"
         )
         connect(
             userSongsDB.new.ids,
-            new
+            "New"
         )
         connect(
             userSongsDB.dontLike.ids,
-            dontLike
+            "Don't Like"
         )
         connect(
             transferSongs.upload,
-            upload
+            "Upload"
         )
         connect(
             transferSongs.download,
-            download
+            "Download"
         )
-
-
-
 
     }
 
@@ -129,20 +153,26 @@ class DBStatus(
 
 
 fun MusicCtx.status(
-    node: Node,
+    node: HTMLElement,
+    panel: RootPanel,
+    redisplay: () -> Unit,
     killables: Killables
 ) {
 
     fun Node.status(
-        title: String,
-        record: DBStatus.RecordObject
+        stat: DBStatus.Stat
     ) {
-        div {
+        val record = stat.record
+        val title = stat.title
+        button {
             cls {
+                btn
+                widthAuto
                 m1
                 p1
                 border
                 rounded
+                listGroupItemAction
             }
             h5 {
                 innerText = title
@@ -167,36 +197,98 @@ fun MusicCtx.status(
                     rxText { record.size().toString() }.addedTo(killables)
                 }
             }
+            clickEvent {
+               showClosable(
+                   killables,
+                   { ks, cl ->
+                       songList(
+                           stat,
+                           panel.sub(),
+                           tagDB,
+                           userSongsDB,
+                           ks,
+                           cl
+                       )
+                   },
+                   redisplay
+               )
+            }
         }
 
+
     }
-    node.status(
-        "Local Database",
-        dbStatus.localDatabase
-    )
-    node.status(
-        "Cloud",
-        dbStatus.cloud
-    )
-    node.status(
-        "Like",
-        dbStatus.like
-    )
-    node.status(
-        "New",
-        dbStatus.new
-    )
-    node.status(
-        "Don't Like",
-        dbStatus.dontLike
-    )
-    node.status(
-        "Upload",
-        dbStatus.upload
-    )
-    node.status(
-        "Download",
-        dbStatus.download
-    )
+    dbStatus.statuses.forEach { s ->
+        node.status(
+            s
+        )
+    }
+}
+
+fun songList(
+    stat: DBStatus.Stat,
+    panel: RootPanel,
+    tagDB: TagDB,
+    userSongsDB: UserSongsDB,
+    killables: Killables,
+    close: () -> Unit
+) {
+    val list = ListenableMutableList<String>()
+    killables += stat.emitter.feedTo(list)
+
+    panel.newRoot {
+        screenLayout(killables) {
+            top {
+                backButton(close)
+                middleTitle {
+                    innerText = stat.title
+                }
+            }
+            main {
+                cls {
+                    scrollVertical
+                    height0
+                    dFlex
+                    flexColumn
+                }
+                listNodes(
+                    list
+                ) { id, ks ->
+                    val tagRx = tagDB.queryCache.placeholder(id).toRx()
+
+                    document.button {
+                        cls {
+                            m1
+                            p1
+                            btn
+                            widthAuto
+                            border
+                            rounded
+                            listGroupItemAction
+                        }
+                        dl {
+                            tagListItem(
+                                tagRx,
+                                ks
+                            )
+                        }
+                        clickEvent {
+                            GlobalScope.launch {
+                                val us = userSongsDB.get(id) {
+                                    state.cv = UserSongState.Like
+                                }
+                                us.state.cv = UserSongState.Like
+                                if (us.props.dirty.now) {
+                                    us.props.save()
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+
+            }
+        }
+    }
 
 }

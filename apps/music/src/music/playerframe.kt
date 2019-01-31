@@ -251,7 +251,7 @@ class PlayerFrame(
                     }
                     is Event.PlayingEnded -> {
                         if (e.loop == this) {
-                            next()
+                            this@VisibleLoop.next()
                         }
                     }
                     else -> {}

@@ -439,3 +439,9 @@ fun <T> combine(
 fun <T> EmitterIface<SetMove<T>>.andIn(other: EmitterIface<SetMove<T>>, ks: Killables): EmitterIface<SetMove<T>> {
     return combineAnd(ks, this, other)
 }
+
+fun <T> EmitterIface<SetMove<T>>.feedTo(list: MutableList<T>): Killable {
+    return add { m ->
+        m.applyTo(list)
+    }
+}

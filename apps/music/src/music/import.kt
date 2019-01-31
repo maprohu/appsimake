@@ -1,9 +1,7 @@
 package music
 
 import bootstrap.*
-import common.Emitter
-import common.objectKeys
-import common.removeFromParent
+import common.*
 import commonui.*
 import domx.*
 import firebase.firestore.MaxBatchSize
@@ -41,6 +39,57 @@ private sealed class Event {
     object Close: Event()
 }
 
+fun HTMLDListElement.tagListItem(
+    tagOpt: RxIface<Optional<Mp3File>>,
+    killables: Killables
+) {
+    dt {
+        innerText = "Artist"
+    }
+    dd {
+        rxTextOrEmpty {
+            tagOpt().flatMap { mp3File ->
+                mp3File.artistfix.initial().orElse { mp3File.artist.initial() }
+            }
+        }.addedTo(killables)
+    }
+    dt {
+        innerText = "Title"
+    }
+    dd {
+        rxTextOrEmpty {
+            tagOpt().flatMap { mp3File ->
+                mp3File.titlefix.initial().orElse { mp3File.title.initial() }
+            }
+        }.addedTo(killables)
+    }
+    dt {
+        innerText = "Duration"
+    }
+    dd {
+        rxTextOrEmpty {
+            tagOpt().flatMap { mp3File ->
+                mp3File.secs.initial().map { s ->
+                    "$s secs"
+                }
+            }
+        }.addedTo(killables)
+    }
+    dt {
+        innerText = "Size"
+    }
+    dd {
+        rxTextOrEmpty {
+            tagOpt().flatMap { mp3File ->
+                mp3File.bytes.initial().map { b ->
+                    "$b bytes"
+                }
+            }
+        }.addedTo(killables)
+    }
+
+}
+
 private fun fileListItem(
     f: File,
     mp3File: Mp3File,
@@ -57,42 +106,46 @@ private fun fileListItem(
             dd {
                 innerText = f.name
             }
-            dt {
-                innerText = "Size"
-            }
-            dd {
-                rxTextOrEmpty {
-                    mp3File.bytes.initial().map { b ->
-                        "$b bytes"
-                    }
-                }.addedTo(killables)
-            }
-            dt {
-                innerText = "Artist"
-            }
-            dd {
-                rxTextOrEmpty {
-                    mp3File.artistfix.initial().orElse { mp3File.artist.initial() }
-                }.addedTo(killables)
-            }
-            dt {
-                innerText = "Title"
-            }
-            dd {
-                rxTextOrEmpty {
-                    mp3File.titlefix.initial().orElse { mp3File.title.initial() }
-                }.addedTo(killables)
-            }
-            dt {
-                innerText = "Duration"
-            }
-            dd {
-                rxTextOrEmpty {
-                    mp3File.secs.initial().map { s ->
-                        "$s secs"
-                    }
-                }.addedTo(killables)
-            }
+            tagListItem(
+                Var(Some(mp3File)),
+                killables
+            )
+//            dt {
+//                innerText = "Size"
+//            }
+//            dd {
+//                rxTextOrEmpty {
+//                    mp3File.bytes.initial().map { b ->
+//                        "$b bytes"
+//                    }
+//                }.addedTo(killables)
+//            }
+//            dt {
+//                innerText = "Artist"
+//            }
+//            dd {
+//                rxTextOrEmpty {
+//                    mp3File.artistfix.initial().orElse { mp3File.artist.initial() }
+//                }.addedTo(killables)
+//            }
+//            dt {
+//                innerText = "Title"
+//            }
+//            dd {
+//                rxTextOrEmpty {
+//                    mp3File.titlefix.initial().orElse { mp3File.title.initial() }
+//                }.addedTo(killables)
+//            }
+//            dt {
+//                innerText = "Duration"
+//            }
+//            dd {
+//                rxTextOrEmpty {
+//                    mp3File.secs.initial().map { s ->
+//                        "$s secs"
+//                    }
+//                }.addedTo(killables)
+//            }
 
         }
     }

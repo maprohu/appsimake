@@ -96,6 +96,7 @@ sealed class Optional<out T> {
     abstract fun isEmpty(): Boolean
     abstract fun get() : T
     abstract fun <U> map(fn: (T) -> U) : Optional<U>
+    abstract fun <U> flatMap(fn: (T) -> Optional<U>) : Optional<U>
     abstract fun orElse(default: () -> Optional<@UnsafeVariance T>): Optional<T>
     abstract fun any(fn: (T) -> Boolean) : Boolean
     abstract fun forEach(fn: (T) -> Unit) : Unit
@@ -113,6 +114,7 @@ data class Some<out T>(val value: T) : Optional<T>() {
     override fun forEach(fn: (T) -> Unit) { fn(value) }
     override fun getOrElse(default: () -> @UnsafeVariance T): T = value
     override fun getOrDefault(default: @UnsafeVariance T): T = value
+    override fun <U> flatMap(fn: (T) -> Optional<U>): Optional<U> = fn(value)
 }
 
 object None : Optional<Nothing>() {
@@ -125,6 +127,7 @@ object None : Optional<Nothing>() {
     override fun forEach(fn: (Nothing) -> Unit) {}
     override fun getOrElse(default: () -> Nothing): Nothing = default()
     override fun getOrDefault(default: Nothing): Nothing = default
+    override fun <U> flatMap(fn: (Nothing) -> Optional<U>): Optional<U> = None
 }
 
 /**

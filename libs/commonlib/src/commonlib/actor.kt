@@ -1,7 +1,6 @@
 package commonlib
 
-import common.AsyncEmitter
-import common.EmitterIface
+import common.*
 import commonlib.commonlib.RandomChooser
 import commonshr.SetAdded
 import commonshr.SetMove
@@ -12,6 +11,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.launch
+import rx.RxIface
+import rx.RxIfaceKillable
+import rx.Var
 
 interface LoopT<in T> {
     suspend fun process(e: T)
@@ -133,6 +135,15 @@ fun <T> toAsync(
 }
 
 fun <T> EmitterIface<SetMove<T>>.toAsync(): AsyncEmitter<T> = toAsync(this)
+
+
+fun <T> CompletableDeferred<T>.toRx(): RxIface<Optional<T>> {
+    val rxv = Var<Optional<T>>(None)
+    GlobalScope.launch {
+        rxv.now = Some(await())
+    }
+    return rxv
+}
 
 
 

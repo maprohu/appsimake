@@ -362,65 +362,86 @@ data class SortedListenableListConfig<T, C: Comparable<C>>(
     }
 }
 
+fun <T, U: Killable> ListenableList<T>.map(
+    killables: Killables,
+    create: (T) -> U
+): ListenableList<U> {
+    return map(
+        killables,
+        create,
+        { k -> k.kill() }
+    )
+}
+
+fun <T, U> ListenableList<T>.map(
+    killables: Killables,
+    create: (T) -> U,
+    destroy: (U) -> Unit
+): ListenableList<U> {
+    val result = ListenableMutableList<U>()
+
+    killables += {
+        result.forEach { destroy(it) }
+    }
+
+    killables += addListener(
+        ListenableList.Listener(
+            added = { index, element ->
+                result.add(index, create(element))
+            },
+            removed = { index, _ ->
+                destroy(result.removeAt(index))
+            },
+            moved = { from, to ->
+                result.move(from, to)
+            }
+        )
+    )
+
+    return result
+
+}
+fun <T, U> ListenableList<T>.map(
+    killables: Killables,
+    mapper: (T, Killables) -> U
+): ListenableList<U> {
+    val result = ListenableMutableList<U>()
+    class Holder(
+        val killable: Killable
+    )
+    val holders = mutableListOf<Holder>()
+
+    killables += addListener(
+        ListenableList.Listener(
+            added = { index, element ->
+                val ks = killables.killables()
+                val node = mapper(element, ks)
+                result.add(index, node)
+                holders.add(index, Holder(ks))
+            },
+            removed = { index, _ ->
+                result.removeAt(index)
+                val holder = holders.removeAt(index)
+                holder.killable.kill()
+            },
+            moved = { from, to ->
+                result.move(from, to)
+                holders.add(to, holders.removeAt(from))
+            }
+        )
+    )
+
+    return result
+
+}
 
 data class MappedListenableListConfig<T, U>(
     val list: ListenableList<T>,
     val killables: Killables,
     val mapper: (T, Killables) -> U
 ) {
-//    data class Lifecycle<T, U>(
-//        val create: (T, Killables) -> U,
-//        val kill: (U) -> Unit
-//    ) {
-//        companion object {
-//            fun <T, U: Killable> killable(
-//                killables: Killables,
-//                create: (T, Killables) -> U
-//            ) = Lifecycle<T, U>(
-//                create = { t ->
-//                    val ks = killables.killables()
-//                    create(t, ks)
-//                },
-//                kill = Killable::kill
-//            )
-//            fun <T, U> killableValue(
-//                killables: Killables,
-//                create: (T, Killables) -> U
-//            ) = killable<T, KillableValue<U>>(
-//                killables
-//            ) { t, ks ->
-//                KillableValue(create(t, ks), ks)
-//            }
-//        }
-//    }
     fun build(): ListenableList<U> {
-        val result = ListenableMutableList<U>()
-        class Holder(
-            val killable: Killable
-        )
-        val holders = mutableListOf<Holder>()
-
-        killables += list.addListener(
-            ListenableList.Listener(
-                added = { index, element ->
-                    val ks = killables.killables()
-                    val node = mapper(element, ks)
-                    result.add(index, node)
-                    holders.add(index, Holder(ks))
-                },
-                removed = { index, _ ->
-                    result.removeAt(index)
-                    val holder = holders.removeAt(index)
-                    holder.killable.kill()
-                },
-                moved = { from, to ->
-                    result.move(from, to)
-                    holders.add(to, holders.removeAt(from))
-                }
-            )
-        )
-
-        return result
+        return list.map(killables, mapper)
     }
 }
 
@@ -606,4 +627,5 @@ fun WindowOrWorkerGlobalScope.onInterval(timeout: Int, fn: () -> Unit): Killable
         clearInterval(handle)
     }
 }
+
 

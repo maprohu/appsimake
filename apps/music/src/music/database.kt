@@ -97,8 +97,10 @@ fun MusicCtx.database(
                 cls {
                     scrollVertical
                     height0
+                    dFlex
+                    flexColumn
                 }
-                status(this, killables)
+                status(this, panel, ::redisplay, killables)
             }
         }
     }

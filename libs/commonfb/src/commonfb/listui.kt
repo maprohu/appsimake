@@ -3,6 +3,7 @@ package commonfb
 import bootstrap.*
 import common.ListenableList
 import common.ListenableMutableList
+import common.map
 import commonlib.CollectionWrap
 import commonui.RootPanel
 import commonui.showClosable
@@ -159,5 +160,27 @@ fun <T: HasFBProps<*>> T.keepAlive(
         killForeach.kill()
         killListen.kill()
     }
+}
+
+fun <T> Node.listNodes(
+    list: ListenableList<T>,
+    fn: (T, Killables) -> Node
+): Killable {
+    val ks = Killables()
+    class Holder(
+        val node: Node,
+        killable: Killable
+    ): Killable by killable
+    val ns = list.map(ks) { t ->
+        val nks = Killables()
+        Holder(
+            fn(t, nks),
+            nks
+        )
+    }
+    ks += listenableList(
+        ns
+    ) { it.node }
+    return ks
 }
 
