@@ -7,7 +7,7 @@ import firebaseadmin.admin
 
 fun tokenImpl(exports: dynamic) {
     customToken.implementAsync(exports) { _, ctx ->
-        ctx
+        ctx.auth
     }
 
 }

@@ -43,7 +43,7 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
       try {
         switch (this.state_0) {
           case 0:
-            return this.local$ctx;
+            return this.local$ctx.auth;
           case 1:
             throw this.exception_0;
           default:this.state_0 = 1;
