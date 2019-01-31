@@ -4,6 +4,7 @@ package firebaseadmin
 
 import firebaseadmin.app.App
 import firebaseadmin.app.AppOptions
+import firebaseadmin.auth.Auth
 import firebaseadmin.firestore.Firestore
 import firebaseadmin.messaging.Messaging
 
@@ -12,6 +13,9 @@ import firebaseadmin.messaging.Messaging
 val admin by lazy { js("require('firebase-admin')").unsafeCast<AdminModule>() }
 
 external interface AdminModule {
+
+    // https://firebase.google.com/docs/reference/admin/node/admin.auth
+    fun auth(app: App = definedExternally) : Auth
 
     // https://firebase.google.com/docs/reference/admin/node/admin.messaging#messaging
     fun messaging(app: App = definedExternally) : Messaging

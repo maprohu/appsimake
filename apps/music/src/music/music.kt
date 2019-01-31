@@ -32,7 +32,7 @@ fun main(args: Array<String>) {
     val fbCtx = FbCtx(music, "Music")
     GlobalScope.launch {
         val app = fbCtx.app
-        val fn = customToken.callable(fbCtx.app)
+        val fn = customToken.callable(app)
 
         val res = fn.call(Unit)
         console.dir(res)

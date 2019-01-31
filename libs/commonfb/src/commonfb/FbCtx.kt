@@ -9,6 +9,7 @@ import firebase.AppOptions
 import firebase.app.App
 import firebase.app.firestore
 import firebase.firestore.*
+import firebase.functions.HttpsCallableResult
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
@@ -89,8 +90,8 @@ class FbCtx(
         }
     }
 
-    fun <I, O> call(function: Function<I, O>, input: I): Promise<O> {
-        return app.functions().httpsCallable(function.qualifiedName)(input)
+    suspend fun <I, O> call(function: Function<I, O>, input: I): O {
+        return function.call(app, input)
     }
 
 }
@@ -99,9 +100,13 @@ interface Callable<I, O> {
     suspend fun call(input: I): O
 }
 
+fun <I, O> Function<I, O>.callPromise(app: App, input: I): Promise<HttpsCallableResult> {
+    return app.functions().httpsCallable(qualifiedName)(input)
+}
+
 suspend fun <I, O> Function<I, O>.callable(app: App) = object : Callable<I, O> {
     override suspend fun call(input: I): O {
-        return app.functions().httpsCallable(qualifiedName)(input).await().unsafeCast<O>()
+        return callPromise(app, input).await().data.unsafeCast<O>()
     }
 }
 suspend fun <I, O> Function<I, O>.call(app: App, input: I): O {
