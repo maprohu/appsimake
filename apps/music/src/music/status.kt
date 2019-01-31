@@ -171,6 +171,7 @@ fun MusicCtx.status(
                 border
                 rounded
                 btn
+                flexFixedSize()
             }
             h5 {
                 innerText = title
@@ -260,6 +261,7 @@ fun songList(
                             btn
                             border
                             rounded
+                            flexFixedSize()
                         }
                         dl {
                             tagListItem(
