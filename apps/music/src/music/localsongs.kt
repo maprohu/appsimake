@@ -3,6 +3,7 @@ package music
 import common.Emitter
 import common.feedTo
 import common.obj
+import common.toSetSource
 import commonshr.SetAdded
 import commonshr.SetMove
 import commonshr.SetRemoved
@@ -23,25 +24,26 @@ private inline val LocalSongEventType.Companion.removed get() = "removed".unsafe
 
 object LocalSongs {
 
-    private val locals = mutableSetOf<SetAdded<String>>()
-    val emitter = Emitter<SetMove<String>> {
-        locals
-    }
+    private var locals = setOf<String>()
+    private val e = Emitter<SetMove<String>>()
+    val emitter = e.toSetSource { locals }
 
     private fun emit(m: SetMove<String>) {
-        val res = when (m) {
+        val id = m.value
+        when (m) {
             is SetAdded -> {
-                locals.add(m)
+                if (id !in locals) {
+                    locals += id
+                    e.emit(m)
+                }
             }
             is SetRemoved -> {
-                locals.remove(SetAdded(m.value))
+                if (id in locals) {
+                    locals -= id
+                    e.emit(m)
+                }
             }
         }
-
-        if (res) {
-            emitter.emit(m)
-        }
-
     }
 
     private val tabsChannel = org.w3c.dom.BroadcastChannel("appsimake-music-localSongs")
@@ -61,11 +63,7 @@ object LocalSongs {
     }
 
     suspend fun init(idb: IDBDatabase) {
-        idb.readMp3Store().getAllKeys().await().forEach { id ->
-            emit(
-                SetAdded(id)
-            )
-        }
+        locals = idb.readMp3Store().getAllKeys().await().toSet()
     }
 
     fun added(id: String) {

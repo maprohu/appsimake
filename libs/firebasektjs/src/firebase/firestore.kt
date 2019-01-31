@@ -202,10 +202,18 @@ external interface DocumentChange {
     val doc: QueryDocumentSnapshot
     val newIndex : Int
     val oldIndex : Int
-    val type: String
+    val type: DocumentChangeType
 
 
 }
+
+
+@Suppress("NESTED_CLASS_IN_EXTERNAL_INTERFACE")
+external interface DocumentChangeType {
+    companion object
+}
+
+
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.QuerySnapshot?authuser=0
 external interface QuerySnapshot {

@@ -33,17 +33,14 @@ import kotlin.math.max
 
 
 fun MusicCtx.playerFrame(
-    panel: RootPanel
+    panel: RootPanel,
+    songSource: AsyncEmitter<Playable>
 ): PlayerFrame {
 
     return PlayerFrame(
         panel,
         killables,
-        songSource = randomSongSource(
-            idb,
-            tagDB,
-            userSongsDB
-        )
+        songSource
     )
 
 

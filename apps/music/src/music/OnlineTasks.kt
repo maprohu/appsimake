@@ -1,28 +1,13 @@
 package music
 
-import bootstrap.btnDanger
-import bootstrap.btnSuccess
-import bootstrap.m1
-import common.feedTo
-import common.filtered
-import common.map
-import commonlib.Actor
-import commonlib.LoopT
-import commonlib.addedTo
-import commonlib.toAsync
-import commonshr.SetAdded
+import bootstrap.*
+import common.*
+import commonlib.*
 import commonui.faButton
-import domx.Cls
-import domx.clickEvent
-import domx.cls
-import firebase.ids
+import domx.*
 import firebase.storage.Reference
-import firebase.storage.UploadTask
-import fontawesome.Fa
-import fontawesome.cloud
+import fontawesome.*
 import indexeddb.IDBDatabase
-import indexeddb.exists
-import indexeddb.put
 import killable.Killables
 import killable.addedTo
 import kotlinx.coroutines.CompletableDeferred
@@ -35,6 +20,7 @@ import org.w3c.files.Blob
 import org.w3c.xhr.BLOB
 import org.w3c.xhr.XMLHttpRequest
 import org.w3c.xhr.XMLHttpRequestResponseType
+import rx.Rx
 import rx.Var
 import rx.rxClass
 
@@ -47,6 +33,12 @@ class OnlineTasks(
     private val killables: Killables
 ): Actor<OnlineTasks.Event>(killables) {
     interface Loop: LoopT<Event>
+
+    val uploadingId = Var<Optional<String>>(None)
+    val downloadingId = Var<Optional<String>>(None)
+
+    val uploading = Rx { !uploadingId().isEmpty() }
+    val downloading = Rx { !downloadingId().isEmpty() }
 
     sealed class Event {
         object GoOnline: Event()
@@ -67,8 +59,8 @@ class OnlineTasks(
 
         init {
             val emitter = toAsync<Transfer>(
-                transferSongs.upload.map { m -> m.map { i -> Transfer.Upload(i) } },
-                transferSongs.download.map { m -> m.map { i -> Transfer.Download(i) } }
+                transferSongs.upload.toEmitter().map { m -> m.map { i -> Transfer.Upload(i) } },
+                transferSongs.download.toEmitter().map { m -> m.map { i -> Transfer.Download(i) } }
             ).addedTo(ks)
 
             GlobalScope.launch {
@@ -84,15 +76,18 @@ class OnlineTasks(
                                 count.cv = 1
                             }
                             if (file != null && !store.uploaded.iv) {
+                                uploadingId.now = Some(id)
                                 val ref = storageRef.child(id)
                                 ref.put(file).await()
                                 store.apply {
                                     uploaded.cv = true
                                     props.save()
                                 }
+                                uploadingId.now = None
                             }
                         }
                         is Transfer.Download -> {
+                            downloadingId.now = Some(id)
                             val url = storageRef.child(id).getDownloadURL().await()
                             val res = CompletableDeferred<Blob>()
                             XMLHttpRequest().apply {
@@ -105,6 +100,7 @@ class OnlineTasks(
                             }
                             val file = res.await()
                             idb.addMp3(id, file)
+                            downloadingId.now = None
                         }
                     }
                 }
@@ -165,5 +161,37 @@ fun Node.onlineStatusButton(
         }
         fn()
     }
+
+}
+
+fun Node.transferStatusIndicator(
+    onlineTasks: OnlineTasks,
+    killables: Killables
+) {
+    span {
+        rxDisplayed(onlineTasks.uploading).addedTo(killables)
+        cls {
+            m1
+            p1
+            textInfo
+            fa {
+                fw
+                cloudUploadAlt
+            }
+        }
+    }
+    span {
+        rxDisplayed(onlineTasks.downloading).addedTo(killables)
+        cls {
+            m1
+            p1
+            textInfo
+            fa {
+                fw
+                cloudDownloadAlt
+            }
+        }
+    }
+
 
 }

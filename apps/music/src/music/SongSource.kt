@@ -7,7 +7,7 @@ import commonlib.Actor
 import commonlib.LoopT
 import commonlib.commonlib.RandomChooser
 import commonshr.SetAdded
-import firebase.ids
+import firebaseshr.ids
 import indexeddb.IDBDatabase
 import indexeddb.getAllKeys
 import killable.Killable
@@ -91,127 +91,127 @@ class Playable(
 //    }
 }
 
-class DefaultSongSource(
-    val idb: IDBDatabase,
-    val userSongsDB: UserSongsDB,
-    val tagDB: TagDB,
-    killables: Killables
-): Actor<DefaultSongSource.Event>(killables), SongSource {
-
-    interface Loop: LoopT<Event>
-
-    init {
-        root = StartLoop()
-
-
-        killables += userSongsDB.new.add { m ->
-            if (m is SetAdded) {
-                post(
-                    Event.New(m.value.props.idOrFail)
-                )
-            }
-        }
-
-        killables += LocalSongs.emitter.add { m ->
-            if (m is SetAdded) {
-                post(
-                    Event.New(m.value)
-                )
-            }
-        }
-
-    }
-
-    sealed class Event {
-        class Request(val cd: CompletableDeferred<Playable>): Event()
-        class New(val id: String): Event()
-    }
-
-    private var last: String? = null
-    private val played = mutableSetOf<String>()
-    suspend fun attempt(): PlayableSource? {
-        return attemptOnce() ?: run {
-            played.clear()
-            last?.let { l -> played += l }
-            attemptOnce()
-        }
-    }
-    suspend fun attemptOnce(): PlayableSource? {
-        val maybe = (userSongsDB.newSet - played).toMutableSet()
-
-        while (maybe.isNotEmpty()) {
-            val id = maybe.random()
-            maybe -= id
-            played += id
-
-            val source = PlayableSource.load(id, idb, tagDB, userSongsDB)
-
-            if (source != null) {
-                last = id
-                return  source
-            }
-        }
-
-        return null
-    }
-
-    inner class WaitingLoop(cd: CompletableDeferred<Playable>): Loop {
-
-        private val cds = mutableListOf(cd)
-
-        override suspend fun process(e: Event) {
-            when (e) {
-                is Event.Request -> {
-                    cds += e.cd
-                }
-                is Event.New -> {
-                    val a = attempt()
-                    if (a != null) {
-                        cds.forEach { cd ->
-                            cd.complete(a.toPlayable())
-                        }
-                        root = StartLoop()
-                    }
-                }
-            }
-        }
-    }
-
-    inner class StartLoop: Loop {
-        override suspend fun process(e: Event) {
-            when (e) {
-                is Event.Request -> {
-                    val a = attempt()
-                    if (a == null) {
-                        root = WaitingLoop(e.cd)
-                    } else {
-                        e.cd.complete(a.toPlayable())
-                    }
-                }
-                else -> {}
-            }
-        }
-    }
-
-
-    override suspend fun request(): Playable {
-        val cd = CompletableDeferred<Playable>()
-        channel.send(Event.Request(cd))
-
-//        val keys = idb.getAllKeys<String>(Mp3Store)
-//        if (keys.isNotEmpty()) {
-//            Playable.load(
-//                keys.random(),
-//                idb,
-//                tagDB
-//            )?.let {
-//                cd.complete(it)
+//class DefaultSongSource(
+//    val idb: IDBDatabase,
+//    val userSongsDB: UserSongsDB,
+//    val tagDB: TagDB,
+//    killables: Killables
+//): Actor<DefaultSongSource.Event>(killables), SongSource {
+//
+//    interface Loop: LoopT<Event>
+//
+//    init {
+//        root = StartLoop()
+//
+//
+//        killables += userSongsDB.new.add { m ->
+//            if (m is SetAdded) {
+//                post(
+//                    Event.New(m.value.props.idOrFail)
+//                )
 //            }
 //        }
-
-        return cd.await()
-    }
-}
+//
+//        killables += LocalSongs.emitter.add { m ->
+//            if (m is SetAdded) {
+//                post(
+//                    Event.New(m.value)
+//                )
+//            }
+//        }
+//
+//    }
+//
+//    sealed class Event {
+//        class Request(val cd: CompletableDeferred<Playable>): Event()
+//        class New(val id: String): Event()
+//    }
+//
+//    private var last: String? = null
+//    private val played = mutableSetOf<String>()
+//    suspend fun attempt(): PlayableSource? {
+//        return attemptOnce() ?: run {
+//            played.clear()
+//            last?.let { l -> played += l }
+//            attemptOnce()
+//        }
+//    }
+//    suspend fun attemptOnce(): PlayableSource? {
+//        val maybe = (userSongsDB.newSet - played).toMutableSet()
+//
+//        while (maybe.isNotEmpty()) {
+//            val id = maybe.random()
+//            maybe -= id
+//            played += id
+//
+//            val source = PlayableSource.load(id, idb, tagDB, userSongsDB)
+//
+//            if (source != null) {
+//                last = id
+//                return  source
+//            }
+//        }
+//
+//        return null
+//    }
+//
+//    inner class WaitingLoop(cd: CompletableDeferred<Playable>): Loop {
+//
+//        private val cds = mutableListOf(cd)
+//
+//        override suspend fun process(e: Event) {
+//            when (e) {
+//                is Event.Request -> {
+//                    cds += e.cd
+//                }
+//                is Event.New -> {
+//                    val a = attempt()
+//                    if (a != null) {
+//                        cds.forEach { cd ->
+//                            cd.complete(a.toPlayable())
+//                        }
+//                        root = StartLoop()
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    inner class StartLoop: Loop {
+//        override suspend fun process(e: Event) {
+//            when (e) {
+//                is Event.Request -> {
+//                    val a = attempt()
+//                    if (a == null) {
+//                        root = WaitingLoop(e.cd)
+//                    } else {
+//                        e.cd.complete(a.toPlayable())
+//                    }
+//                }
+//                else -> {}
+//            }
+//        }
+//    }
+//
+//
+//    override suspend fun request(): Playable {
+//        val cd = CompletableDeferred<Playable>()
+//        channel.send(Event.Request(cd))
+//
+////        val keys = idb.getAllKeys<String>(Mp3Store)
+////        if (keys.isNotEmpty()) {
+////            Playable.load(
+////                keys.random(),
+////                idb,
+////                tagDB
+////            )?.let {
+////                cd.complete(it)
+////            }
+////        }
+//
+//        return cd.await()
+//    }
+//}
 
 fun randomSongSource(
     idb: IDBDatabase,

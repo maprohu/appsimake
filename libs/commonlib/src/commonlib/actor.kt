@@ -6,11 +6,8 @@ import commonshr.SetAdded
 import commonshr.SetMove
 import killable.Killable
 import killable.Killables
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
-import kotlinx.coroutines.launch
 import rx.RxIface
 import rx.RxIfaceKillable
 import rx.Var
@@ -137,7 +134,7 @@ fun <T> toAsync(
 fun <T> EmitterIface<SetMove<T>>.toAsync(): AsyncEmitter<T> = toAsync(this)
 
 
-fun <T> CompletableDeferred<T>.toRx(): RxIface<Optional<T>> {
+fun <T> Deferred<T>.toRx(): RxIface<Optional<T>> {
     val rxv = Var<Optional<T>>(None)
     GlobalScope.launch {
         rxv.now = Some(await())

@@ -81,6 +81,12 @@ fun MusicCtx.home(
                     innerText = fbCtx.appCtx.title
                 }
                 right {
+                    cls {
+                        flexRow
+                        alignItemsCenter
+                    }
+                    transferStatusIndicator(onlineTasks, killables)
+
                     onlineStatusButton(onlineTasks, killables) {
                         cls.m1
                     }

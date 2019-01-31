@@ -12,7 +12,7 @@ import commonui.RootPanel
 import commonui.screenLayout
 import commonui.showClosable
 import domx.*
-import firebase.ids
+import firebaseshr.ids
 import indexeddb.*
 import killable.Killable
 import killable.Killables
@@ -75,9 +75,10 @@ class DBStatus(
     val statuses = mutableListOf<Stat>()
 
     fun connect(
-        emitter: EmitterIface<SetMove<String>>,
+        s: SetSource<String>,
         title: String
     ) {
+        val emitter = s.toEmitter()
         val target = RecordObject()
         val tagMap = mutableMapOf<String, Killable>()
         ks += emitter.add { m ->
@@ -121,7 +122,7 @@ class DBStatus(
             "Local Database"
         )
         connect(
-            storageDB.queryCache.emitter
+            storageDB.source
                 .filtered(ks) { it.uploaded.initial() == Some(true) }
                 .ids,
             "Cloud"
@@ -252,7 +253,7 @@ fun songList(
                 listNodes(
                     list
                 ) { id, ks ->
-                    val tagRx = tagDB.queryCache.placeholder(id).toRx()
+                    val tagRx = tagDB.source.get(id).toRx()
 
                     document.button {
                         cls {

@@ -1,6 +1,5 @@
 package common
 
-import commonshr.Counted
 import commonshr.SetAdded
 import commonshr.SetMove
 import commonshr.SetRemoved
@@ -10,6 +9,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import killable.Killables
 import killable.addedTo
+import kotlinx.coroutines.Deferred
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun dyn() = js("{}")
@@ -252,7 +252,7 @@ interface AsyncEmitter<T>: Killable {
 interface EmitterKillable<T>: EmitterIface<T>, Killable
 
 open class Emitter<T>(
-    private val first: () -> Iterable<T> = ::emptyList
+    val first: () -> Iterable<T> = ::emptyList
 ): EmitterIface<T> {
 
     protected var listeners = listOf<(T) -> Unit>()
@@ -271,6 +271,16 @@ open class Emitter<T>(
         listeners.forEach { it(t) }
     }
 
+}
+
+fun <T> Emitter<SetMove<T>>.toSetSource(sfn: () -> Set<T>) = object : SetSource<T> {
+    override val current: Set<T>
+        get() = sfn()
+
+    override fun listen(ks: Killables, fn: (SetMove<T>) -> Unit): Set<T> {
+        ks += this@toSetSource.add(fn)
+        return sfn()
+    }
 }
 
 class MappedEmitter<T, S>(
@@ -445,3 +455,178 @@ fun <T> EmitterIface<SetMove<T>>.feedTo(list: MutableList<T>): Killable {
         m.applyTo(list)
     }
 }
+
+interface SetSource<T> {
+    val current: Set<T>
+    fun listen(
+        ks: Killables,
+        fn: (SetMove<T>) -> Unit
+    ): Set<T>
+}
+
+interface SetSourceWithKey<T, K>: SetSource<T> {
+    fun get(k: K): Deferred<T>
+    suspend fun getOrPut(id: K, fn: suspend (T) -> Unit): T
+}
+
+fun <T, S> SetSource<T>.map(mfn: (T) -> S) = object : SetSource<S> {
+    override val current: Set<S>
+        get() = this@map.current.map(mfn).toSet()
+
+    override fun listen(ks: Killables, fn: (SetMove<S>) -> Unit): Set<S> {
+        return this@map.listen(ks) { m -> fn(m.map(mfn)) }.map(mfn).toSet()
+    }
+}
+
+fun <T> SetSource<T>.filtered(ks: Killables, rxfn: (T) -> Boolean): SetSource<T> {
+
+    var curr = setOf<T>()
+    val kills = mutableMapOf<T, Killable>()
+
+    val f = Emitter<SetMove<T>>()
+
+    fun add(v: T) {
+        curr += v
+        f.emit(SetAdded(v))
+    }
+    fun remove(v: T) {
+        curr -= v
+        f.emit(SetRemoved(v))
+    }
+
+    fun process(m: SetMove<T>) {
+        val v = m.value
+        when (m) {
+            is SetAdded -> {
+                val vks = ks.killables()
+                val rxv = Rx { rxfn(v) }.addedTo(vks)
+                kills[v] = rxv
+                rxv.forEach { fv ->
+                    if (fv) add(v)
+                    else remove(v)
+                }
+            }
+            is SetRemoved -> {
+                kills.remove(v)?.kill()
+
+                if (v in curr) {
+                    remove(v)
+                }
+            }
+        }
+
+    }
+
+    listen(ks, ::process).also { it.map(::SetAdded).forEach(::process) }
+
+    return f.toSetSource { curr }
+}
+
+
+fun <T> combineN(
+    ks: Killables,
+    pairs: Iterable<Pair<SetSource<T>, MutableSet<T>>>,
+    fn: (T) -> Boolean
+): SetSource<T> {
+
+    var result = setOf<T>()
+    val out = Emitter<SetMove<T>>()
+
+    fun connect(emitter: SetSource<T>, thisSet: MutableSet<T>) {
+        fun process(m: SetMove<T>) {
+            val id = m.value
+            val before = m.value in result
+            m.applyTo(thisSet)
+            val after = fn(id)
+
+            when {
+                before && !after -> {
+                    result -= id
+                    out.emit(SetRemoved(id))
+                }
+                !before && after -> {
+                    result += id
+                    out.emit(SetAdded(id))
+                }
+            }
+        }
+        emitter.listen(ks, ::process).also { it.map(::SetAdded).forEach(::process) }
+    }
+    pairs.forEach { (em, set) ->
+        connect(em, set)
+    }
+
+    return out.toSetSource { result }
+
+}
+
+fun <T> combine(
+    ks: Killables,
+    e1: SetSource<T>,
+    e2: SetSource<T>,
+    e3: SetSource<T>,
+    fn: (Boolean, Boolean, Boolean) -> Boolean
+): SetSource<T> {
+    val set1 = mutableSetOf<T>()
+    val set2 = mutableSetOf<T>()
+    val set3 = mutableSetOf<T>()
+
+    val after = { id: T ->
+        val v1 = id in set1
+        val v2 = id in set2
+        val v3 = id in set3
+        fn(v1, v2, v3)
+    }
+
+    return combineN(
+        ks,
+        listOf(
+            Pair(e1, set1),
+            Pair(e2, set2),
+            Pair(e3, set3)
+        ),
+        after
+    )
+}
+
+fun <T> combine(
+    ks: Killables,
+    e1: SetSource<T>,
+    e2: SetSource<T>,
+    fn: (Boolean, Boolean) -> Boolean
+): SetSource<T> {
+
+    val set1 = mutableSetOf<T>()
+    val set2 = mutableSetOf<T>()
+
+    val after = { id: T ->
+        val v1 = id in set1
+        val v2 = id in set2
+        fn(v1, v2)
+    }
+
+    return combineN(
+        ks,
+        listOf(
+            Pair(e1, set1),
+            Pair(e2, set2)
+        ),
+        after
+    )
+}
+
+fun <T> SetSource<T>.toEmitter(): EmitterIface<SetMove<T>> = object : EmitterIface<SetMove<T>> {
+    override fun add(listener: (SetMove<T>) -> Unit): Killable {
+        val ks = Killables()
+        listen(ks, listener).also {
+            it.map(::SetAdded).forEach(listener)
+        }
+        return ks
+    }
+}
+
+fun <T> combineAnd(
+    ks: Killables,
+    e1: SetSource<T>,
+    e2: SetSource<T>
+): SetSource<T> = combine(ks, e1, e2, Boolean::and)

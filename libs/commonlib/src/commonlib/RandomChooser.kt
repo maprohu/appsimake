@@ -1,9 +1,6 @@
 package commonlib.commonlib
 
-import common.AsyncEmitter
-import common.EmitterIface
-import common.Optional
-import common.Some
+import common.*
 import commonlib.addedTo
 import commonlib.post
 import commonlib.toChannel
@@ -18,7 +15,7 @@ import kotlinx.coroutines.channels.toChannel
 import kotlinx.coroutines.launch
 
 class RandomChooser<I, O>(
-    emitters: List<EmitterIface<SetMove<I>>>,
+    emitters: List<SetSource<I>>,
     val recentSize: Int = 1,
     val cacheSize: Int = 1,
     val fn: suspend (I, Killables) -> Optional<O>
@@ -56,12 +53,14 @@ class RandomChooser<I, O>(
     }
 
     inner class Source(
-        s: EmitterIface<SetMove<I>>
+        s: SetSource<I>
     ) {
         val alreadyChosen = mutableSetOf<I>()
-        val sourceChannel = s.toChannel(ks)
         val items = mutableSetOf<I>()
         init {
+            val e = Emitter<SetMove<I>>()
+            val sourceChannel = e.toChannel(ks)
+            s.listen(ks, e::emit).also { items += it }
             GlobalScope.launch {
                 sourceChannel.map { i -> Input(this@Source, i) }.toChannel(eventChannel)
             }.addedTo(ks)

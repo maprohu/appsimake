@@ -3,7 +3,7 @@ package firebase.firestore
 import common.*
 import commonlib.CollectionWrap
 import commonlib.DocWrap
-import commonshr.SetDiff
+import commonshr.*
 import firebase.FirebaseError
 import firebase.firestore
 import firebaseshr.*
@@ -21,14 +21,9 @@ fun setOptionsMerge() = obj<SetOptions> { merge = true }
 
 fun Settings() : Settings = obj()
 
-enum class DocumentChangeType {
-    added,
-    modified,
-    removed
-}
-
-val DocumentChange.typeEnum : DocumentChangeType
-    get() = DocumentChangeType.valueOf(this.type)
+inline val DocumentChangeType.Companion.added get() = "added".unsafeCast<DocumentChangeType>()
+inline val DocumentChangeType.Companion.modified get() = "modified".unsafeCast<DocumentChangeType>()
+inline val DocumentChangeType.Companion.removed get() = "removed".unsafeCast<DocumentChangeType>()
 
 
 fun <T> queryUi(
@@ -45,7 +40,7 @@ fun <T> queryUi(
                         qs
                                 .docChanges()
                                 .forEach { dc ->
-                                    when (dc.typeEnum) {
+                                    when (dc.type) {
                                         DocumentChangeType.added -> {
                                             element.insertAt(dc.newIndex, item(dc.doc.data()))
                                         }
@@ -100,7 +95,7 @@ fun <T> QueryWrap<T>.listen(
                 qs
                         .docChanges()
                         .forEach { dc ->
-                            when (dc.typeEnum) {
+                            when (dc.type) {
                                 DocumentChangeType.added -> {
                                     list.add(dc.newIndex, Var(dc.doc.data()))
                                 }
@@ -133,11 +128,11 @@ fun Firestore.withDefaultSettings(): Firestore {
 
 fun Query.onSnapshotNext(
     onNext: (QuerySnapshot) -> Unit
-) : Killable = onSnapshot(onNext, { console.dir(it) }).let { once(it) }
+) : Killable = onSnapshot(onNext, { report(it.unsafeCast<Throwable>()) }).let { once(it) }
 
 fun Query.idDiffs(fn: ((SetDiff<String>) -> Unit)) : Killable = onSnapshotNext { qs ->
     qs.docChanges().fold(SetDiff<String>()) { d, ch ->
-        when (ch.typeEnum) {
+        when (ch.type) {
             DocumentChangeType.added -> d.copy(added = d.added + ch.doc.id)
             DocumentChangeType.removed -> d.copy(removed = d.removed + ch.doc.id)
             else -> d
@@ -203,7 +198,7 @@ fun <T> Query.listen(
         qs
             .docChanges()
             .forEach { dc ->
-                when (dc.typeEnum) {
+                when (dc.type) {
                     DocumentChangeType.added -> {
                         list.add(dc.newIndex, create(dc.doc.id, dc.doc.data()))
                     }
@@ -390,3 +385,115 @@ fun initBinder(
 suspend fun DocumentReference.exists(): Boolean {
     return get().await().exists
 }
+
+
+@UseExperimental(ExperimentalCoroutinesApi::class)
+suspend fun <T> QueryWrap<T>.toSetSource(
+    killables: Killables,
+    create: (String, dynamic) -> T,
+    update: (T, dynamic) -> Unit,
+    write: suspend (String, suspend (T) -> Unit) -> Unit
+): SetSourceWithKey<T, String> {
+    var set = emptySet<T>()
+    val cdmap = mutableMapOf<String, CompletableDeferred<T>>()
+
+    val emitter = Emitter<SetMove<T>>()
+
+    fun placeholder(id: String) = cdmap.getOrPut(id) { CompletableDeferred() }
+
+    fun addOrUpdate(id: String, data: dynamic) {
+        val cd = placeholder(id)
+        if (!cd.isCompleted) {
+            val t = create(id, data)
+            set += t
+            cd.complete(t)
+            emitter.emit(SetAdded(t))
+        } else {
+            update(cd.getCompleted(), data)
+        }
+    }
+
+    killables += query.onSnapshotNext { qs ->
+        qs.docChanges().forEach { dc ->
+            when (dc.type) {
+                DocumentChangeType.added, DocumentChangeType.modified -> {
+                    addOrUpdate(dc.doc.id, dc.doc.data())
+                }
+                DocumentChangeType.removed -> {
+                    val id = dc.doc.id
+                    val t = cdmap.remove(id)!!.getCompleted()
+                    set -= t
+                    emitter.emit(SetRemoved(t))
+                }
+            }
+        }
+    }
+
+    val qs = query.get().await()
+
+    qs.docs.forEach { qds ->
+        addOrUpdate(qds.id, qds.data())
+    }
+
+    return object : SetSourceWithKey<T, String> {
+        override val current: Set<T>
+            get() = set
+
+        override fun listen(ks: Killables, fn: (SetMove<T>) -> Unit): Set<T> {
+            ks += emitter.add(fn)
+            return set
+        }
+
+        override fun get(k: String) = placeholder(k)
+
+        override suspend fun getOrPut(id: String, fn: suspend (T) -> Unit): T {
+            val cd = placeholder(id)
+            if (!cd.isCompleted) {
+                write(id, fn)
+            }
+            return cd.await()
+        }
+    }
+}
+
+suspend fun <T: HasFBProps<T>> QueryWrap<T>.toSetSource(
+    killables: Killables,
+    collectionWrap: CollectionWrap<T>,
+    create: () -> T
+): SetSourceWithKey<T, String> {
+    fun createPersisted(id: String) = create().apply {
+        props.persisted(
+            collectionWrap.doc(id)
+        )
+    }
+    return toSetSource(
+        killables,
+        create = { id, data ->
+            createPersisted(id).apply {
+                initFrom(data)
+            }
+        },
+        update = { t, data ->
+            t.initFrom(data)
+        },
+        write = { id, fn ->
+            createPersisted(id)
+                .apply { fn(this) }
+                .props.save()
+        }
+    )
+
+}
+
+suspend fun <T: HasFBProps<T>> CollectionWrap<T>.toSetSource(
+    killables: Killables,
+    db: Firestore,
+    create: () -> T
+): SetSourceWithKey<T, String> {
+    return query(db).toSetSource(
+        killables,
+        this,
+        create
+    )
+}
+

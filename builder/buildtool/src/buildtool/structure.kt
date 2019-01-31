@@ -93,7 +93,13 @@ object buildenv : JsModule(
 )
 
 object commonshr : JsModule(
-    "libs/commonshr"
+    JsModuleConfig(
+        "libs/commonshr"
+    ).copy(
+        deps = listOf(
+            kotlinxCoroutines
+        )
+    )
 )
 
 object indexeddb : JsModule(
@@ -101,7 +107,6 @@ object indexeddb : JsModule(
         "libs/indexeddb"
     ).copy(
         deps = listOf(
-            kotlinxCoroutines,
             commonshr
         )
     )
@@ -143,8 +148,7 @@ object commonui : JsModule(
     listOf(
         bootstrap,
         fontawesome,
-        domx,
-        kotlinxCoroutines
+        domx
     )
 )
 
@@ -191,7 +195,6 @@ object cachingsw : JsModule(
     ).copy(
         deps = listOf(
             buildenv,
-            kotlinxCoroutines,
             commonshr,
             indexeddb
         )
@@ -226,8 +229,7 @@ object gymclock : JsApp(
 object firebaseshr : JsModule(
     "libs/firebaseshr",
     listOf(
-        commonshr,
-        kotlinxCoroutines
+        commonshr
     )
 )
 
@@ -236,8 +238,7 @@ object firebasektjs : JsModule(
     listOf(
         commonshr,
         firebaseshr,
-        firebaseJs,
-        kotlinxCoroutines
+        firebaseJs
     )
 )
 
@@ -247,8 +248,7 @@ object firebase : JsModule(
         common,
         commonlib,
         firebasektjs,
-        firebaseUiJs,
-        kotlinxCoroutines
+        firebaseUiJs
     )
 )
 
@@ -353,8 +353,7 @@ object functions : JsModule(
     "libs/functions",
     listOf(
         commonshr,
-        commonlib,
-        kotlinxCoroutines
+        commonlib
     )
 )
 

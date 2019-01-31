@@ -2,9 +2,9 @@ package music
 
 import common.ListenableList
 import common.ListenableMutableList
+import common.SetSourceWithKey
 import domx.audio
 import domx.invoke
-import firebase.QueryCache
 import firebase.firestore.*
 import killable.Killables
 import kotlinx.coroutines.CompletableDeferred
@@ -18,18 +18,8 @@ import org.w3c.files.File
 import kotlin.browser.document
 
 class TagDB(
-    private val db: Firestore,
-    killables: Killables
+    val source: SetSourceWithKey<Mp3File, String>
 ) {
-    val queryCache = QueryCache.hasProps(
-        db,
-        music.app.songs,
-        { Mp3File() },
-        killables
-    )
-
-
-
 
     suspend fun get(hash: String, file: Blob): Mp3File {
         return get(hash) {
@@ -38,7 +28,7 @@ class TagDB(
     }
 
     suspend fun get(hash: String, file: suspend () -> Pair<Blob, ArrayBuffer>): Mp3File {
-        return queryCache.get(hash) {
+        return source.getOrPut(hash) { t ->
 
             val ff = file()
             val f = ff.first
@@ -66,7 +56,7 @@ class TagDB(
                     .joinToString("; ")
             }
 
-            Mp3File().apply {
+            t.apply {
                 this.artist.cv = tag.artist.join()
                 this.title.cv = tag.title.join()
                 this.bytes.cv = f.size

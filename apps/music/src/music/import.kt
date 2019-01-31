@@ -209,7 +209,7 @@ fun MusicCtx.import(
 
                 if (
                     (hash !in fileMap.now) &&
-                    (hash !in userSongsDB.dontLikeSet)
+                    (hash !in userSongsDB.dontLikeSet.current)
                 ) {
 
                     if (idb.existsMp3(hash)) {

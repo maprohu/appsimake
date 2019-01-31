@@ -5,6 +5,7 @@ import commonlib.CollectionWrap
 import commonlib.DocWrap
 import commonshr.SetDiff
 import firebaseshr.firestore.Timestamp
+import killable.Killables
 import kotlinx.coroutines.Deferred
 import rx.*
 
@@ -560,5 +561,7 @@ open class BasePropFactory<in O, out N, out P, PR: Props<O, N, P>>(
 }
 
 
+val <T: HasFBProps<T>> SetSource<T>.ids
+    get() = map { it.props.idOrFail }
 
 

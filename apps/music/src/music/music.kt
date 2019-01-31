@@ -10,6 +10,7 @@ import firebase.User
 import firebase.firestore.Firestore
 import firebase.firestore.collectionRef
 import firebase.firestore.idDiffs
+import firebase.firestore.toSetSource
 import indexeddb.IDBDatabase
 import indexeddb.IDBVersionChangeEvent
 import indexeddb.await
@@ -20,9 +21,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
-import musiclib.music
-import musiclib.songs
-import musiclib.storage
+import musiclib.*
 import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.Uint8Array
 import rx.Var
@@ -50,24 +49,47 @@ fun main(args: Array<String>) {
                 val ks = Killables()
 
                 GlobalScope.launch {
-                    val dbLinks = DBLinks(
-                        fbCtx.db,
-                        user.uid,
+                    val uid = user.uid
+                    val db = fbCtx.db
+
+                    val userSongsDB = UserSongsDB(
+                        music.app.private.doc(uid).usersongs.toSetSource(ks, db) { UserSong() },
+                        ks
+                    )
+                    val tagDB = TagDB(
+                        music.app.songs.toSetSource(ks, db) { Mp3File() }
+                    )
+                    val songStorageDB = SongStorageDB(
+                        music.app.storage.toSetSource(ks, db) { StoreState() },
                         ks
                     )
 
-                    dbLinks.init()
 
 
-                    val ctx = MusicCtx(fbCtx, user, idb, dbLinks)
+                    val ctx = MusicCtx(
+                        fbCtx,
+                        user,
+                        idb,
+                        tagDB,
+                        songStorageDB,
+                        userSongsDB
+                    )
+
                     ks += ctx.killables
 
                     startMaintenance(ks, idb, ctx.userSongsDB)
 
                     ctx.apply {
+                        val songSource = randomSongSource(
+                            idb,
+                            tagDB,
+                            userSongsDB
+                        )
+
                         home(
                             playerFrame(
-                                appCtx.root
+                                appCtx.root,
+                                songSource
                             ).innerPanel,
                             killables
                         )
@@ -84,40 +106,20 @@ fun main(args: Array<String>) {
 
 }
 
-class DBLinks(
-    db: Firestore,
-    uid: String,
-    killables: Killables
-) {
-    val tagDB = TagDB(db, killables)
-    val userSongsDB = UserSongsDB(db, uid, killables)
-    val songStoreDB = SongStorageDB(db, killables)
-
-    suspend fun init() {
-        userSongsDB.queryCache.getAll()
-        tagDB.queryCache.getAll()
-        songStoreDB.queryCache.getAll()
-    }
-
-}
 
 class MusicCtx(
     fbCtx: FbCtx,
     user: User,
     val idb: IDBDatabase,
-    dbLinks: DBLinks
+    val tagDB: TagDB,
+    val songStoreDB: SongStorageDB,
+    val userSongsDB: UserSongsDB
 ) : LoggedInCtx(fbCtx, user) {
     val uid = user.uid
     val storageWrap = fbCtx.lib.app.storage
     val songsWrap = fbCtx.lib.app.songs
     val storageRef = storageWrap.collectionRef(db)
 
-
-    val tagDB = dbLinks.tagDB
-    val songStoreDB = dbLinks.songStoreDB
-    val userSongsDB = dbLinks.userSongsDB
-
-    val songSource = DefaultSongSource(idb, userSongsDB, tagDB, killables)
     val transferSongs = TransferSongs(userSongsDB, songStoreDB, killables)
     val dbStatus = DBStatus(idb, tagDB, songStoreDB, userSongsDB, transferSongs, killables)
     val onlineTasks = OnlineTasks(
