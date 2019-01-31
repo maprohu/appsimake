@@ -14,14 +14,14 @@ external fun <T> onCall(handler: (T, CallableContext) -> Any?): HttpsFunction
 
 // https://firebase.google.com/docs/reference/functions/functions.https.html#.CallableContext
 external interface CallableContext {
-    val auth: CallableContextAuth
+    val auth: CallableContextAuth?
     val instanceIdToken: String
     val rawRequest: dynamic
 }
 
 external interface CallableContextAuth {
-    val uid: String?
-    val token: DecodedIdToken?
+    val uid: String
+    val token: DecodedIdToken
 }
 
 // https://firebase.google.com/docs/reference/functions/functions.https.HttpsError

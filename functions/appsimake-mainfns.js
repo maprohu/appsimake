@@ -43,7 +43,8 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
       try {
         switch (this.state_0) {
           case 0:
-            return this.local$ctx.auth;
+            var tmp$;
+            return (tmp$ = this.local$ctx.auth) != null ? firebaseadmin.admin.auth().createCustomToken(tmp$.uid) : null;
           case 1:
             throw this.exception_0;
           default:this.state_0 = 1;
