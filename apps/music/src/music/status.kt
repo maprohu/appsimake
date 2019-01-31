@@ -166,13 +166,11 @@ fun MusicCtx.status(
         val title = stat.title
         button {
             cls {
-                btn
-                widthAuto
                 m1
                 p1
                 border
                 rounded
-                listGroupItemAction
+                btn
             }
             h5 {
                 innerText = title
@@ -260,10 +258,8 @@ fun songList(
                             m1
                             p1
                             btn
-                            widthAuto
                             border
                             rounded
-                            listGroupItemAction
                         }
                         dl {
                             tagListItem(
