@@ -12,8 +12,9 @@ function define(args, fn) {
     );
 }
 
-define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'appsimake-tictactoefns', 'appsimake-commonlib'], function (_, Kotlin, $module$appsimake_functions, $module$appsimake_testappfns, $module$appsimake_tictactoefns, $module$appsimake_commonlib) {
+define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'appsimake-tictactoefns', 'appsimake-commonlib', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_functions, $module$appsimake_testappfns, $module$appsimake_tictactoefns, $module$appsimake_commonlib, $module$appsimake_commonshr) {
   'use strict';
+  var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var firebaseadmin = $module$appsimake_functions.firebaseadmin;
   var init = $module$appsimake_testappfns.testappfns.init_za3rmp$;
   var init_0 = $module$appsimake_tictactoefns.tictactoefns.init_za3rmp$;
@@ -42,7 +43,9 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
       try {
         switch (this.state_0) {
           case 0:
-            return 'hello';
+            var $receiver = {};
+            $receiver.someField = 'blabla';
+            return $receiver;
           case 1:
             throw this.exception_0;
           default:this.state_0 = 1;
@@ -72,6 +75,7 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
     implementAsync(commonlib.customToken, exports, tokenImpl$lambda);
   }
   _.init = init_1;
+  $$importsForInline$$['appsimake-commonshr'] = $module$appsimake_commonshr;
   var package$fns = _.fns || (_.fns = {});
   package$fns.tokenImpl_za3rmp$ = tokenImpl;
   Kotlin.defineModule('appsimake-mainfns', _);

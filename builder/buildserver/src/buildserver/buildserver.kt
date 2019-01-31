@@ -49,6 +49,7 @@ fun main(args: Array<String>) {
 
     val build = handler()
     val hosting = handler("--only hosting")
+    val functions = handler("--only functions")
 
     HttpServer.create(
         InetSocketAddress(
@@ -59,6 +60,7 @@ fun main(args: Array<String>) {
     ).apply {
         createContext("/build", build)
         createContext("/hosting", hosting)
+        createContext("/functions", functions)
         createContext("/pull", handler { pull() })
         executor = null
     }.start()
