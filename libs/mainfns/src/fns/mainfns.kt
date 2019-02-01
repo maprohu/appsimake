@@ -20,9 +20,9 @@ fun init(exports: dynamic) {
 
 fun initialize(exports: dynamic) {
 
-    admin.initializeApp(
-        functions.config().firebase
-    )
+//    admin.initializeApp(
+//        functions.config().firebase
+//    )
 
     tokenImpl(exports)
 }

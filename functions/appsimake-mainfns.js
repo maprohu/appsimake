@@ -17,7 +17,6 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
   var firebaseadmin = $module$appsimake_functions.firebaseadmin;
   var init = $module$appsimake_testappfns.testappfns.init_za3rmp$;
   var init_0 = $module$appsimake_tictactoefns.tictactoefns.init_za3rmp$;
-  var firebasefunctions = $module$appsimake_functions.firebasefunctions;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var await_0 = $module$kotlinx_coroutines_core.kotlinx.coroutines.await_t11jrl$;
@@ -34,7 +33,6 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
     init_0(exports);
   }
   function initialize(exports) {
-    firebaseadmin.admin.initializeApp(firebasefunctions.functions.config().firebase);
     tokenImpl(exports);
   }
   function docRef($receiver, db) {
@@ -96,10 +94,9 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
     else
       return instance.doResume(null);
   }
-  function Coroutine$tokenImpl$lambda(closure$db_0, f_0, ctx_0, continuation_0) {
+  function Coroutine$tokenImpl$lambda(f_0, ctx_0, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
     this.exceptionState_0 = 1;
-    this.local$closure$db = closure$db_0;
     this.local$tmp$ = void 0;
     this.local$tmp$_0 = void 0;
     this.local$$receiver = void 0;
@@ -117,12 +114,12 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
       try {
         switch (this.state_0) {
           case 0:
+            var db = firebaseadmin.admin.firestore();
             if ((this.local$tmp$ = this.local$ctx.auth) != null) {
-              var closure$db = this.local$closure$db;
               var dw = get_tokens(get_users(get_admin(commonlib.shared.app))).doc_61zpoe$(this.local$tmp$.uid);
               this.local$$receiver = new TokenDeveloperClaims();
               this.state_0 = 2;
-              this.result_0 = initFrom(this.local$$receiver, dw, closure$db, this);
+              this.result_0 = initFrom(this.local$$receiver, dw, db, this);
               if (this.result_0 === COROUTINE_SUSPENDED)
                 return COROUTINE_SUSPENDED;
               continue;
@@ -159,18 +156,15 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
       }
      while (true);
   };
-  function tokenImpl$lambda(closure$db_0) {
-    return function (f_0, ctx_0, continuation_0, suspended) {
-      var instance = new Coroutine$tokenImpl$lambda(closure$db_0, f_0, ctx_0, continuation_0);
-      if (suspended)
-        return instance;
-      else
-        return instance.doResume(null);
-    };
+  function tokenImpl$lambda(f_0, ctx_0, continuation_0, suspended) {
+    var instance = new Coroutine$tokenImpl$lambda(f_0, ctx_0, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
   }
   function tokenImpl(exports) {
-    var db = firebaseadmin.admin.firestore();
-    implementAsync(commonlib.customToken, exports, tokenImpl$lambda(db));
+    implementAsync(commonlib.customToken, exports, tokenImpl$lambda);
   }
   _.init = init_1;
   _.initialize_za3rmp$ = initialize;
