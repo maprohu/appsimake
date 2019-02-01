@@ -15,6 +15,8 @@ external interface Firestore {
     fun settings(s: FirestoreSettings)
 }
 
+
+
 external interface FirestoreSettings {
     var timestampsInSnapshots : Boolean
 

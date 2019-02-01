@@ -3,7 +3,7 @@ package commonfns
 import common.obj
 import commonlib.Function
 import firebaseadmin.admin
-import functions.https.CallableContext
+import firebasefunctions.https.CallableContext
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asPromise
 import kotlinx.coroutines.async
@@ -23,7 +23,7 @@ fun <I, O> Function<I, O>.implementSync(exports: dynamic, fn: (I, CallableContex
     implementAny(exports, fn)
 }
 fun <I, O> Function<I, O>.implementAny(exports: dynamic, fn: (I, CallableContext) -> Any?) {
-    exports[qualifiedName] = functions.https.onCall(fn)
+    exports[qualifiedName] = firebasefunctions.https.onCall(fn)
 }
 
 val firestore by lazy {

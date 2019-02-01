@@ -1322,6 +1322,11 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
     simpleName: 'AppDoc',
     interfaces: []
   };
+  var admin;
+  var admin_metadata = new PropertyMetadata('admin');
+  function get_admin($receiver) {
+    return admin.getValue_lrcp0p$($receiver, admin_metadata);
+  }
   var private_0;
   var private_metadata = new PropertyMetadata('private');
   function get_private($receiver) {
@@ -1344,6 +1349,13 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   Private.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Private',
+    interfaces: []
+  };
+  function AdminDoc() {
+  }
+  AdminDoc.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'AdminDoc',
     interfaces: []
   };
   var fcmtokens;
@@ -2487,10 +2499,12 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
     get: apps_getInstance
   });
   package$commonlib.AppDoc = AppDoc;
+  package$commonlib.get_admin_6l3wi3$ = get_admin;
   package$commonlib.get_private_6l3wi3$ = get_private;
   package$commonlib.get_singletons_6l3wi3$ = get_singletons;
   package$commonlib.Singleton = Singleton;
   package$commonlib.Private = Private;
+  package$commonlib.AdminDoc = AdminDoc;
   package$commonlib.get_fcmtokens_z8qup$ = get_fcmtokens;
   package$commonlib.FcmToken = FcmToken;
   Object.defineProperty(SetDiff, 'Companion', {
@@ -2582,6 +2596,7 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   RxIfaceKillable.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
   RxIface$folded$ObjectLiteral.prototype.plus_wii6vi$ = RxIfaceKillable.prototype.plus_wii6vi$;
   Rx.prototype.plus_wii6vi$ = RxIfaceKillable.prototype.plus_wii6vi$;
+  admin = coll();
   private_0 = coll();
   singletons = coll();
   fcmtokens = coll();

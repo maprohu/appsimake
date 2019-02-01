@@ -1,10 +1,10 @@
 @file:JsModule("firebase-functions")
 @file:JsQualifier("firestore")
-package functions.firestore
+package firebasefunctions.firestore
 
 import firebaseadmin.firestore.DocumentReference
-import functions.CloudFunction
-import functions.EventContext
+import firebasefunctions.CloudFunction
+import firebasefunctions.EventContext
 
 external fun document(path: String) : DocumentBuilder
 

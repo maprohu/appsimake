@@ -1,7 +1,6 @@
 package tictactoefns
 
 import common.obj
-import commonfns.firestore
 import commonlib.fcmtokens
 import commonlib.private
 import firebaseadmin.admin
@@ -12,7 +11,7 @@ const val gameIdParam = "gameId"
 
 fun init(exports: dynamic) {
     exports[tictactoe.qualified("onMove")] =
-            functions.firestore
+            firebasefunctions.firestore
                 .document(tictactoe.app.games.doc("{$gameIdParam}").moves.doc("{moveId}").path)
                 .onCreate { documentSnapshot, eventContext ->
                     val firestore = documentSnapshot.ref.firestore

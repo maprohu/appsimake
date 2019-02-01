@@ -32,11 +32,12 @@ fun main(args: Array<String>) {
     val fbCtx = FbCtx(music, "Music")
     GlobalScope.launch {
         val app = fbCtx.app
-        app.auth().signOut().await()
         val fn = customToken.callable(app)
-
-        val res = fn.call(Unit)
-        console.dir(res)
+        val res = fn.call(Unit).unsafeCast<String?>()
+        res?.let { token ->
+            val user = app.auth().signInWithCustomToken(token).await()
+            console.dir(user)
+        }
     }
 
 //    runApp()

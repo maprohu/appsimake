@@ -1,13 +1,20 @@
 package commonlib.commonlib
 
 import common.named
-import commonlib.Lib
+import commonlib.*
+import firebaseshr.Base
 
 
 val shared by named { Lib(it) }
 
+interface AdminUsersDoc : AdminDoc
+class TokenDeveloperClaims: Base<TokenDeveloperClaims>() {
+    val adminRight by o.scalar<Boolean>().prop()
+    val musicRight by o.scalar<Boolean>().prop()
+}
+
+val CollectionWrap<AdminDoc>.users by doc<AdminUsersDoc>()
+val DocWrap<AdminUsersDoc>.tokens by coll<TokenDeveloperClaims>()
+
 val customToken by shared.function<Unit, Any>()
 
-external interface CustomToken {
-    var someField: String
-}

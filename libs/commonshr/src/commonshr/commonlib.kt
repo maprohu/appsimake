@@ -39,6 +39,7 @@ fun <D2> coll() = object : ReadOnlyProperty<DocWrap<*>, CollectionWrap<D2>> {
 }
 
 
+
 interface HasPath {
     val path: String
 }
@@ -53,9 +54,9 @@ open class CollectionWrap<in D>(
     fun doc(id: String) = docd<D>(id)
 }
 
-fun <D> doc() = object : ReadOnlyProperty<CollectionWrap<D>, DocWrap<D>> {
-    override fun getValue(thisRef: CollectionWrap<D>, property: KProperty<*>) =
-            DocWrap<D>(property.name, thisRef)
+fun <D2> doc() = object : ReadOnlyProperty<CollectionWrap<D2>, DocWrap<D2>> {
+    override fun getValue(thisRef: CollectionWrap<D2>, property: KProperty<*>) =
+            DocWrap<D2>(property.name, thisRef)
 }
 fun <D> docn() = doc<D>()
 
@@ -63,11 +64,13 @@ object apps : CollectionWrap<AppDoc>("apps", null)
 
 open class AppDoc
 
+val <D: AppDoc> DocWrap<D>.admin by coll<AdminDoc>()
 val <D: AppDoc> DocWrap<D>.private by coll<Private>()
 val <D: AppDoc> DocWrap<D>.singletons by coll<Singleton>()
 
 class Singleton
 class Private
+interface AdminDoc
 
 val <D: Private> DocWrap<D>.fcmtokens by coll<FcmToken>()
 

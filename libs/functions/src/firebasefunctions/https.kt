@@ -1,11 +1,11 @@
 @file:JsModule("firebase-functions")
 @file:JsQualifier("https")
-package functions.https
+package firebasefunctions.https
 
 import express.Request
 import express.Response
 import firebaseadmin.auth.DecodedIdToken
-import functions.HttpsFunction
+import firebasefunctions.HttpsFunction
 
 external fun onRequest(handler: (Request, Response) -> Unit): HttpsFunction
 

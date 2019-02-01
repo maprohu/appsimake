@@ -12,7 +12,7 @@ function define(args, fn) {
     );
 }
 
-define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr'], function (_, Kotlin, $module$kotlinx_coroutines_core, $module$appsimake_commonshr) {
+define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', 'appsimake-firebaseshr'], function (_, Kotlin, $module$kotlinx_coroutines_core, $module$appsimake_commonshr, $module$appsimake_firebaseshr) {
   'use strict';
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
@@ -42,8 +42,14 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr'], 
   var Lib = $module$appsimake_commonshr.commonlib.Lib;
   var named = $module$appsimake_commonshr.common.named_cq6yhu$;
   var PropertyMetadata = Kotlin.PropertyMetadata;
+  var AdminDoc = $module$appsimake_commonshr.commonlib.AdminDoc;
+  var Base = $module$appsimake_firebaseshr.firebaseshr.Base;
+  var doc = $module$appsimake_commonshr.commonlib.doc_287e2$;
+  var coll = $module$appsimake_commonshr.commonlib.coll_287e2$;
   RandomChooser$Input.prototype = Object.create(RandomChooser$Event.prototype);
   RandomChooser$Input.prototype.constructor = RandomChooser$Input;
+  TokenDeveloperClaims.prototype = Object.create(Base.prototype);
+  TokenDeveloperClaims.prototype.constructor = TokenDeveloperClaims;
   function LoopT() {
   }
   LoopT.$metadata$ = {
@@ -1392,6 +1398,45 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr'], 
   function get_shared() {
     return shared.getValue_lrcp0p$(this, shared_metadata);
   }
+  function AdminUsersDoc() {
+  }
+  AdminUsersDoc.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'AdminUsersDoc',
+    interfaces: [AdminDoc]
+  };
+  function TokenDeveloperClaims() {
+    Base.call(this);
+    this.adminRight_jf0qlt$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, TokenDeveloperClaims$adminRight_metadata);
+    this.musicRight_98wbz9$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, TokenDeveloperClaims$musicRight_metadata);
+  }
+  var TokenDeveloperClaims$adminRight_metadata = new PropertyMetadata('adminRight');
+  Object.defineProperty(TokenDeveloperClaims.prototype, 'adminRight', {
+    get: function () {
+      return this.adminRight_jf0qlt$_0.getValue_lrcp0p$(this, TokenDeveloperClaims$adminRight_metadata);
+    }
+  });
+  var TokenDeveloperClaims$musicRight_metadata = new PropertyMetadata('musicRight');
+  Object.defineProperty(TokenDeveloperClaims.prototype, 'musicRight', {
+    get: function () {
+      return this.musicRight_98wbz9$_0.getValue_lrcp0p$(this, TokenDeveloperClaims$musicRight_metadata);
+    }
+  });
+  TokenDeveloperClaims.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TokenDeveloperClaims',
+    interfaces: [Base]
+  };
+  var users;
+  var users_metadata = new PropertyMetadata('users');
+  function get_users($receiver) {
+    return users.getValue_lrcp0p$($receiver, users_metadata);
+  }
+  var tokens;
+  var tokens_metadata = new PropertyMetadata('tokens');
+  function get_tokens($receiver) {
+    return tokens.getValue_lrcp0p$($receiver, tokens_metadata);
+  }
   var customToken_metadata = new PropertyMetadata('customToken');
   var customToken;
   function get_customToken() {
@@ -1420,12 +1465,18 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr'], 
   Object.defineProperty(package$commonlib_0, 'shared', {
     get: get_shared
   });
+  package$commonlib_0.AdminUsersDoc = AdminUsersDoc;
+  package$commonlib_0.TokenDeveloperClaims = TokenDeveloperClaims;
+  package$commonlib_0.get_users_cmfbet$ = get_users;
+  package$commonlib_0.get_tokens_vfr2h5$ = get_tokens;
   Object.defineProperty(package$commonlib_0, 'customToken', {
     get: get_customToken
   });
   RandomChooser.prototype.plus_wii6vi$ = AsyncEmitter.prototype.plus_wii6vi$;
   Ignore = new Ignore$ObjectLiteral();
   shared = named(shared$lambda).provideDelegate_n5byny$(this, shared_metadata);
+  users = doc();
+  tokens = coll();
   customToken = get_shared().function_q3lmfv$().provideDelegate_n5byny$(this, customToken_metadata);
   Kotlin.defineModule('appsimake-commonlib', _);
   return _;

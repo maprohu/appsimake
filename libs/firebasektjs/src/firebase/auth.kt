@@ -5,12 +5,19 @@ import firebase.User
 import kotlin.js.Promise
 
 
+// https://firebase.google.com/docs/reference/js/firebase.auth.Auth
 external class Auth {
 
     val currentUser: User?
 
     fun signInWithPopup(provider: AuthProvider): Promise<UserCredential>
     fun signInAndRetrieveDataWithCredential(credential: AuthCredential): Promise<UserCredential>
+
+    // https://firebase.google.com/docs/reference/js/firebase.auth.Auth#signInWithCustomToken
+    fun signInWithCustomToken(token: String): Promise<UserCredential>
+
+
+
     fun setPersistence(persistence: String) : Promise<Unit>
 
     fun onAuthStateChanged(

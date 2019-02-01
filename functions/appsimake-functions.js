@@ -111,21 +111,33 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
   function get_firestore() {
     return firestore.value;
   }
+  function functions$lambda() {
+    return require('firebase-functions');
+  }
+  var functions;
+  function get_functions() {
+    return functions.value;
+  }
   var package$firebaseadmin = _.firebaseadmin || (_.firebaseadmin = {});
   Object.defineProperty(package$firebaseadmin, 'admin', {
     get: get_admin
   });
   var package$commonfns = _.commonfns || (_.commonfns = {});
-  package$commonfns.implement_bwr30u$ = implement;
-  package$commonfns.implementAsync_5bcz1w$ = implementAsync;
-  package$commonfns.implementSync_i37kts$ = implementSync;
-  package$commonfns.implementAny_w6celz$ = implementAny;
+  package$commonfns.implement_84o2jr$ = implement;
+  package$commonfns.implementAsync_1ba0c3$ = implementAsync;
+  package$commonfns.implementSync_33b3p3$ = implementSync;
+  package$commonfns.implementAny_mzwea8$ = implementAny;
   $$importsForInline$$['appsimake-commonshr'] = $module$appsimake_commonshr;
   Object.defineProperty(package$commonfns, 'firestore', {
     get: get_firestore
   });
+  var package$firebasefunctions = _.firebasefunctions || (_.firebasefunctions = {});
+  Object.defineProperty(package$firebasefunctions, 'functions', {
+    get: get_functions
+  });
   admin = lazy(admin$lambda);
   firestore = lazy(firestore$lambda);
+  functions = lazy(functions$lambda);
   Kotlin.defineModule('appsimake-functions', _);
   return _;
 });
