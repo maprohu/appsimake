@@ -5,6 +5,8 @@ import common.obj
 import commonfb.*
 import commonlib.commonlib.customToken
 import commonlib.private
+import commonshr.report
+import commonshr.reportd
 import firebase.User
 import firebase.firestore.Firestore
 import firebase.firestore.collectionRef
@@ -29,18 +31,24 @@ import kotlin.js.Promise
 
 
 fun main(args: Array<String>) {
-    val fbCtx = FbCtx(music, "Music")
-    GlobalScope.launch {
-        val app = fbCtx.app
-        val fn = customToken.callable(app)
-        val res = fn.call(Unit).unsafeCast<String?>()
-        res?.let { token ->
-            val user = app.auth().signInWithCustomToken(token).await()
-            console.dir(user)
-        }
-    }
+//    val fbCtx = FbCtx(music, "Music")
+//    fbCtx.auth.onAuthStateChanged {
+//        it?.let { console.dir(it) }
+//    }
+//    GlobalScope.launch {
+//        val app = fbCtx.app
+//        val fn = customToken.callable(app)
+//        val res = fn.call(Unit).unsafeCast<String?>()
+//        res?.let { token ->
+//            val u = app.auth().signInWithCustomToken(token).await().also(console::dir)
+//            u.user?.let { us ->
+//                us.getIdTokenResult().await().also(console::dir)
+//
+//            }
+//        }
+//    }
 
-//    runApp()
+    runApp()
 }
 
 fun runApp() {
@@ -62,6 +70,14 @@ fun runApp() {
                 val ks = Killables()
 
                 GlobalScope.launch {
+                    try {
+                        customToken.call(app, Unit)?.let { token ->
+                            app.auth().signInWithCustomToken(token).await()
+                        }
+                    } catch (d: dynamic) {
+                        reportd(d)
+                    }
+
                     val uid = user.uid
                     val db = fbCtx.db
 

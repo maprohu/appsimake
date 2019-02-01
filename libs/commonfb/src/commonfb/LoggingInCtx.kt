@@ -21,6 +21,7 @@ abstract class LoggingInCtx(
     constructor(lib: Lib, title: String) : this(FbCtx(lib, title))
 
     val appCtx = fbCtx.appCtx
+    val app = fbCtx.app
 
     private val login by lazy { Login(fbCtx.app) }
 

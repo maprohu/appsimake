@@ -7,6 +7,7 @@ import firebase.firestore.Firestore
 import firebase.functions.Functions
 import firebase.messaging.Messaging
 import firebase.storage.Storage
+import kotlin.js.Promise
 
 external interface AppOptions {
     var apiKey: String
@@ -30,6 +31,14 @@ external interface UserInfo {
 }
 
 external interface User : UserInfo {
+
+    // https://firebase.google.com/docs/reference/js/firebase.User#getIdTokenResult
+    fun getIdTokenResult(forceRefresh: Boolean = definedExternally): Promise<IdTokenResult>
+
+}
+
+// https://firebase.google.com/docs/reference/js/firebase.auth.IdTokenResult
+external interface IdTokenResult {
 
 }
 

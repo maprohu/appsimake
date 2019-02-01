@@ -16,5 +16,5 @@ class TokenDeveloperClaims: Base<TokenDeveloperClaims>() {
 val CollectionWrap<AdminDoc>.users by doc<AdminUsersDoc>()
 val DocWrap<AdminUsersDoc>.tokens by coll<TokenDeveloperClaims>()
 
-val customToken by shared.function<Unit, Any>()
+val customToken by shared.function<Unit, String?>()
 

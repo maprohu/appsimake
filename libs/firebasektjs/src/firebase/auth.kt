@@ -20,6 +20,7 @@ external class Auth {
 
     fun setPersistence(persistence: String) : Promise<Unit>
 
+    // https://firebase.google.com/docs/reference/js/firebase.auth.Auth#onAuthStateChanged
     fun onAuthStateChanged(
             next: (User?) -> Unit
     ) : () -> Unit
@@ -62,6 +63,7 @@ external interface AuthCredential {
     val signInMethod: String
 }
 
+// https://firebase.google.com/docs/reference/js/firebase.auth#.UserCredential
 external interface UserCredential {
     val user: User?
     val credential: AuthCredential?

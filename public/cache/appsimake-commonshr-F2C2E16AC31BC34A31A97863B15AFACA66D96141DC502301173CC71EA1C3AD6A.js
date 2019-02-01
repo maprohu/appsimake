@@ -1,18 +1,7 @@
-function define(args, fn) {
-    fn(
-        ...args.map(function(a) {
-            if (a == 'exports') {
-                return module.exports;
-            } else if (a.startsWith('appsimake-')) {
-                return require('./' + a);
-            } else {
-                return require(a);
-            }
-        })
-    );
+if (typeof kotlin === 'undefined') {
+  throw new Error("Error loading module 'appsimake-commonshr'. Its dependency 'kotlin' was not found. Please, check whether 'kotlin' is loaded prior to 'appsimake-commonshr'.");
 }
-
-define(['exports', 'kotlin'], function (_, Kotlin) {
+this['appsimake-commonshr'] = function (_, Kotlin) {
   'use strict';
   var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var defineInlineFunction = Kotlin.defineInlineFunction;
@@ -2608,4 +2597,4 @@ define(['exports', 'kotlin'], function (_, Kotlin) {
   affected = ArrayList_init_0();
   Kotlin.defineModule('appsimake-commonshr', _);
   return _;
-});
+}(typeof this['appsimake-commonshr'] === 'undefined' ? {} : this['appsimake-commonshr'], kotlin);
