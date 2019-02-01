@@ -26,7 +26,7 @@ fun startMaintenance(
     GlobalScope.launch {
         for (m in channel) {
             if (m is SetAdded) {
-//                idb.removeMp3(m.value)
+                idb.removeMp3(m.value)
             }
         }
     }.addedTo(ks)
