@@ -22,87 +22,64 @@ import kotlinx.coroutines.launch
 import rx.rxClass
 import kotlin.browser.window
 
-fun MusicCtx.home(
-    panel: RootPanel,
-    killables: Killables
-) {
-//    GlobalScope.launch {
-//        playlist.next()
-//    }
-
-    panel.newRoot {
-        fun redisplay() {
-            panel.setRoot(this)
-        }
-
-        screenLayout(killables) {
-            top {
-                left {
-                    faButton(Fa.bars) {
-                        cls {
-                            m1
-                            btnSecondary
-                        }
-                        dataToggleDropdown()
-                    }
-                    div {
-                        cls {
-                            dropdownMenu
-                        }
-                        dropdownItemAnchor {
-                            icon.cls.fa.database
-                            text.innerText = "Database"
-                            anchor {
-                                clickEvent {
-                                    showClosable(
-                                        killables,
-                                        { ks, cl -> database(panel.sub(), ks, cl) },
-                                        ::redisplay
-                                    )
-                                }
-                            }
-                        }
+//fun MusicCtx.home(
+//    panel: RootPanel,
+//    killables: Killables
+//) {
+//    panel.newRoot {
+//        fun redisplay() {
+//            panel.setRoot(this)
+//        }
+//
+//        screenLayout(killables) {
+//            top {
+//                left {
+//                    faButton(Fa.bars) {
+//                        cls {
+//                            m1
+//                            btnSecondary
+//                        }
+//                        dataToggleDropdown()
+//                    }
+//                    div {
+//                        cls {
+//                            dropdownMenu
+//                        }
 //                        dropdownItemAnchor {
-//                            icon.cls.fa.listOl
-//                            text.innerText = "Playlists"
+//                            icon.cls.fa.database
+//                            text.innerText = "Database"
 //                            anchor {
 //                                clickEvent {
 //                                    showClosable(
 //                                        killables,
-//                                        { ks, cl -> playlists(panel.sub(), ks, cl) },
+//                                        { ks, cl -> database(panel.sub(), ks, cl) },
 //                                        ::redisplay
 //                                    )
 //                                }
 //                            }
 //                        }
-                    }
-                }
-                middleTitle {
-                    innerText = fbCtx.appCtx.title
-                }
-                right {
-                    cls {
-                        flexRow
-                        alignItemsCenter
-                    }
-                    transferStatusIndicator(onlineTasks, killables)
-
-                    onlineStatusButton(onlineTasks, killables) {
-                        cls.m1
-                    }
-                }
-            }
-
-            main {
-//                div {
-//                    rxText { appCtx.networkEffectiveType().toString() }.addedTo(killables)
+//                    }
 //                }
-//                div {
-//                    rxText { appCtx.networkType().toString() }.addedTo(killables)
+//                middleTitle {
+//                    innerText = fbCtx.appCtx.title
 //                }
-            }
-        }
-    }
-
-
-}
+//                right {
+//                    cls {
+//                        flexRow
+//                        alignItemsCenter
+//                    }
+//                    transferStatusIndicator(onlineTasks, killables)
+//
+//                    onlineStatusButton(onlineTasks, killables) {
+//                        cls.m1
+//                    }
+//                }
+//            }
+//
+//            main {
+//            }
+//        }
+//    }
+//
+//
+//}

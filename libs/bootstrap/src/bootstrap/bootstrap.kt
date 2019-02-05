@@ -74,7 +74,7 @@ fun Node.breadcrumb(
     block : HTMLOListElement.() -> Unit = {}
 ): HTMLOListElement {
     return ol {
-        flexGrow1()
+        cls.flexGrow1
         classes += "breadcrumb mb-0 bg-transparent"
         block()
     }
@@ -89,9 +89,6 @@ fun Node.dropdownToggleButton(fn: HTMLButtonElement.() -> Unit = {}): HTMLButton
     }
 }
 
-fun Element.dropdown() {
-    classes += "dropdown"
-}
 fun Element.dropdownToggle() {
     classes += "dropdown-toggle"
 }
@@ -141,9 +138,7 @@ fun HTMLElement.dropdownGroup(btnStyle: String? = null, fn: DropdownGroup.() -> 
     element.cls.btnGroup
     fn()
 }
-fun HTMLElement.dropdownDiv(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply {
-    fn()
-}
+fun HTMLElement.dropdownDiv(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply(fn)
 
 //fun Node.dropdownDiv(
 //    block : HTMLDivElement.() -> Unit = {}
@@ -238,8 +233,9 @@ fun Node.commandButton(label: String, fn: () -> Unit): HTMLAnchorElement {
 
 fun Node.centerDiv(block : HTMLDivElement.() -> Unit): HTMLDivElement {
     return div {
-        fullSize()
-        flexCenter()
+        cls {
+            flexCenter()
+        }
         block()
     }
 }
@@ -255,11 +251,11 @@ fun Element.flexAlignItemsCenter() {
     classes += "align-items-center"
 }
 
-fun Element.flexCenter() {
-    flex()
-    flexJustifyContentCenter()
-    flexAlignItemsCenter()
-}
+//fun Element.flexCenter() {
+//    flex()
+//    flexJustifyContentCenter()
+//    flexAlignItemsCenter()
+//}
 
 fun HTMLElement.rxDisplay(rxVal: () ->Boolean): Killable {
     val rxv = Rx { rxVal() }
@@ -305,14 +301,20 @@ fun HTMLElement.rxTextOrEmpty(fn: () -> Optional<String>): Killable {
 }
 
 fun setupFullScreen() {
-    document.body!!.apply {
-        fullSize()
-        flex()
-        flexColumn()
+    document.body!! {
+        cls {
+            w100
+            h100
+            dFlex
+            flexColumn
+        }
 
-        parentElement!!.apply {
-            fullSize()
-            cls.overflowHidden
+        parentElement!! {
+            cls {
+                w100
+                h100
+                overflowHidden
+            }
         }
     }
 }
@@ -421,9 +423,6 @@ fun Element.paddingRight2() {
 fun Element.paddingLeft2() {
     classes += "pl-2"
 }
-fun Element.flexGrow1() {
-    classes += "flex-grow-1"
-}
 fun Element.flexGrow0() {
     classes += "flex-grow-0"
 }
@@ -476,9 +475,6 @@ fun Element.formCheck() {
 }
 fun Element.formCheckInput() {
     classes += "form-check-input"
-}
-fun Element.dropdownMenu() {
-    classes += "dropdown-menu"
 }
 fun Element.dropdownMenuRight() {
     classes += "dropdown-menu-right"
@@ -537,6 +533,7 @@ val Cls.cardTitle by css()
 val Cls.spinnerBorder by css()
 val Cls.spinnerBorderSm by css()
 val Cls.spinnerGrow by css()
+val Cls.textLeft by css()
 val Cls.m0 by css()
 val Cls.m1 by css()
 val Cls.m2 by css()

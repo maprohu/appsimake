@@ -4,27 +4,23 @@ import bootstrap.*
 import common.*
 import commonlib.Actor
 import commonlib.LoopT
-import commonui.RootPanel
-import commonui.faButton
-import commonui.faButtonSpan
+import commonui.*
 import domx.*
 import fontawesome.*
-import indexeddb.IDBDatabase
-import killable.Killable
 import killable.Killables
 import killable.addedTo
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import mediasession.MediaMetadata
 import mediasession.mediaSession
 import mediasession.mediaSessionSupported
 import musiclib.*
-import org.w3c.dom.HTMLAudioElement
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.Node
-import rx.Rx
-import rx.Var
-import rx.rxClass
+import rx.*
 import styles.scrollVertical
 import kotlin.browser.document
 import kotlin.browser.window
@@ -32,24 +28,29 @@ import kotlin.math.floor
 import kotlin.math.max
 
 
-fun MusicCtx.playerFrame(
-    panel: RootPanel,
-    songSource: AsyncEmitter<Playable>
-): PlayerFrame {
+fun playerFrame(
+    killables: Killables,
+    panel: SetPanel,
+    songSource: AsyncEmitter<Playable>,
+    userSongsDB: RxIface<Optional<UserSongsDB>>
+): SetPanel {
 
     return PlayerFrame(
         panel,
         killables,
-        songSource
-    )
-
+        songSource,
+        userSongsDB
+    ).run {
+        runPanel(rootDiv.div)
+    }
 
 }
 
 class PlayerFrame(
-    panel: RootPanel,
+    val panel: SetPanel,
     val killables: Killables,
-    val songSource: AsyncEmitter<Playable>
+    val songSource: AsyncEmitter<Playable>,
+    val userSongsDB: RxIface<Optional<UserSongsDB>>
 ): Actor<PlayerFrame.Event>(killables) {
 
     interface Loop: LoopT<Event>
@@ -68,6 +69,8 @@ class PlayerFrame(
 
     val hidden = Var(true)
     val playing = Var(false)
+
+    val hasUserDB = Rx { !userSongsDB().isEmpty() }.addedTo(killables)
 
     val totalDuration = Var(0)
     val currentPosition = Var(0)
@@ -89,6 +92,8 @@ class PlayerFrame(
     val currentPositionText = Rx { formatSecs(currentPosition()).padStart(totalDurationTextLength(), ' ') }
 
     val state = Var(UserSongState.New)
+    val stateLoading = Var(false)
+    val likeButtonsDisabled = Rx { !hasUserDB() || stateLoading() }
 
     val SeekSeconds = 15.0
 
@@ -101,14 +106,41 @@ class PlayerFrame(
     ): Loop  {
         val vks = Killables()
 
+        suspend fun applyUserSong(fn: UserSong.() -> Unit) {
+            userSongsDB.now.let { us ->
+                when (us) {
+                    is Some -> fn(us.value.get(playable.id))
+                    else -> {}
+                }
+            }
+        }
+
         init {
+            val usdbch = Channel<Optional<UserSongsDB>>().also { vks += { it.close() } }
+            userSongsDB.forEach { usdbch.offer(it) }.addedTo(vks)
+            GlobalScope.launch {
+                val kseq = vks.seq()
+                for (udb in usdbch) {
+                    when(udb) {
+                        None -> {
+                            state.now = UserSongState.New
+                            kseq += {}
+                        }
+                        is Some -> {
+                            stateLoading.now = true
+                            val userSong = udb.value.get(playable.id)
+                            kseq += userSong.state.initial.forEach { s ->
+                                state.now = s.getOrDefault(UserSongState.New)
+                            }
+                            stateLoading.now = false
+                        }
+                    }
+                }
+            }
+
             hidden.now = false
 
             vks += playable
-
-            vks += playable.userSong.state.initial.forEach { s ->
-                state.now = s.getOrDefault(UserSongState.New)
-            }
 
             playable.tag.fixedArtist().addedTo(vks).forEach { artist.now = it.getOrDefault("<unkown artist>") }
             playable.tag.fixedTitle().addedTo(vks).forEach { title.now = it.getOrDefault("<unkown title>") }
@@ -178,7 +210,7 @@ class PlayerFrame(
                     readCounterNow()
                 }
                 is Event.Like -> {
-                    playable.userSong.apply {
+                    applyUserSong {
                         state.cv = UserSongState.Like
                         props.apply {
                             if (dirty.now) {
@@ -188,7 +220,7 @@ class PlayerFrame(
                     }
                 }
                 is Event.DontLike -> {
-                    playable.userSong.apply {
+                    applyUserSong {
                         state.cv = UserSongState.DontLike
                         props.apply {
                             if (dirty.now) {
@@ -312,7 +344,11 @@ class PlayerFrame(
         nextState(false)
     }
 
-    val element = panel.newRoot {}
+    val element = document.column {
+        cls {
+            flexGrow1
+        }
+    }
 
     val rootDiv = element.div {
         cls {
@@ -322,9 +358,9 @@ class PlayerFrame(
         }
     }
 
-    val innerPanel = RootPanel(rootDiv)
-
     init {
+        panel %= element
+
         element.column {
             rxDisplayed { !hidden() }
             cls {
@@ -462,6 +498,7 @@ class PlayerFrame(
                             btnGroup
                         }
                         mediaButton(Fa.thumbsUp, null) {
+                            likeButtonsDisabled.forEach { disabled = it }
                             rxClass {
                                 if (state() == UserSongState.Like) Cls.btnPrimary
                                 else Cls.btnOutlinePrimary
@@ -471,6 +508,7 @@ class PlayerFrame(
                             }
                         }
                         mediaButton(Fa.thumbsDown, null) {
+                            likeButtonsDisabled.forEach { disabled = it }
                             rxClass {
                                 if (state() == UserSongState.DontLike) Cls.btnPrimary
                                 else Cls.btnOutlinePrimary

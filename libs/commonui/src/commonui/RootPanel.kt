@@ -53,17 +53,7 @@ class RootPanel(
     }
 
     fun setHourglass(): HTMLDivElement {
-        return newRoot {
-            cls {
-                dFlex
-                flexColumn
-                alignItemsCenter
-                justifyContentCenter
-            }
-            div {
-                cls.spinnerBorder
-            }
-        }
+        return document.hourglass.also(::setRoot)
     }
 
     fun sub(): RootPanel {

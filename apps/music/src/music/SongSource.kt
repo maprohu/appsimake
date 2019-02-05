@@ -26,14 +26,14 @@ interface SongSource {
 
 class PlayableSource(
     val tag: Mp3File,
-    val userSong: UserSong,
+//    val userSong: UserSong,
     val file: Blob
 ) {
     fun toPlayable(): Playable {
         val url = URL.createObjectURL(file)
         return Playable(
             tag = tag,
-            userSong = userSong,
+//            userSong = userSong,
             url = url,
             killable = Killable.once {
                 URL.revokeObjectURL(url)
@@ -45,15 +45,15 @@ class PlayableSource(
         suspend fun load(
             id: String,
             idb: IDBDatabase,
-            tagDB: TagDB,
-            userSongsDB: UserSongsDB
+            tagDB: TagDB
+//            userSongsDB: UserSongsDB
         ): PlayableSource? {
             val mp3 = idb.readMp3(id)
 
             return mp3?.let { f ->
                 PlayableSource(
                     tag = tagDB.get(id, f),
-                    userSong = userSongsDB.get(id),
+//                    userSong = userSongsDB.get(id),
                     file = f
                 )
             }
@@ -64,10 +64,11 @@ class PlayableSource(
 }
 class Playable(
     val tag: Mp3File,
-    val userSong: UserSong,
+//    val userSong: UserSong,
     val url: String,
     killable: Killable
 ): Killable by killable {
+    val id = tag.props.idOrFail
 //    companion object {
 //        suspend fun load(
 //            id: String,
@@ -213,6 +214,27 @@ class Playable(
 //    }
 //}
 
+fun localSongSource(
+    idb: IDBDatabase,
+    tagDB: TagDB
+) = RandomChooser(
+    listOf(
+        LocalSongs.emitter
+    )
+) { id, ks ->
+    val l = PlayableSource.load(
+        id,
+        idb,
+        tagDB
+    )
+
+    if (l == null) {
+        None
+    } else {
+        Some(l.toPlayable().addedTo(ks))
+    }
+}
+
 fun randomSongSource(
     idb: IDBDatabase,
     tagDB: TagDB,
@@ -226,8 +248,7 @@ fun randomSongSource(
     val l = PlayableSource.load(
         id,
         idb,
-        tagDB,
-        userSongsDB
+        tagDB
     )
 
     if (l == null) {

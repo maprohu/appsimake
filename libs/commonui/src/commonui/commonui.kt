@@ -20,20 +20,19 @@ fun Node.nextButton(label: HTMLDivElement.() -> Unit, fn: () -> Unit): HTMLAncho
     return listButton(fn) {
         flexRow()
         div {
-            flexGrow1()
+            cls.flexGrow1
             label()
         }
         cls.fa.chevronRight
     }
 }
 
-fun Element.hourglass(): HTMLDivElement {
-    return centerDiv {
+val Node.hourglass: HTMLDivElement
+    get() = centerDiv {
         cls {
             spinnerBorder
         }
     }
-}
 
 fun showClosable(
     killables: Killables,

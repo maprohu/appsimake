@@ -6,6 +6,7 @@ import common.Some
 import commonshr.SetDiff
 import killable.Killable
 import killable.Killables
+import killable.Trigger
 import org.w3c.dom.Element
 import org.w3c.dom.GlobalEventHandlers
 import kotlin.dom.addClass
@@ -98,6 +99,34 @@ interface RxIface<out T> {
             z = fn(z, it)
         }
     }
+
+    fun foldKills(fn: (T) -> Killable) : Killable {
+        var z = Killable.empty
+
+        val fe = forEach {
+            z.kill()
+            z = fn(it)
+        }
+
+        return Killable.once {
+            fe.kill()
+            z.kill()
+        }
+    }
+
+    fun <F: Killable> foldKills(z0: F, fn: (F, T) -> F) : Killable {
+        var z = z0
+
+        val fe = forEach {
+            z = fn(z, it)
+        }
+
+        return Killable.once {
+            fe.kill()
+            z.kill()
+        }
+    }
+
 
     fun <F> folded(z0: F, fn: (F, T) -> F) : RxIfaceKillable<F> {
         return object : Var<F>(z0), RxIfaceKillable<F> {

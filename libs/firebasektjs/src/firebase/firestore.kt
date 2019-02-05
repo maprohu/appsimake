@@ -1,7 +1,6 @@
 @file:JsQualifier("firebase.firestore")
 package firebase.firestore
 
-import common.obj
 import firebase.FirebaseError
 import kotlin.js.Date
 import kotlin.js.Promise
@@ -30,6 +29,9 @@ external class Firestore {
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#disableNetwork
     fun disableNetwork(): Promise<Unit>
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore#enableNetwork
+    fun enableNetwork(): Promise<Unit>
 
     // https://firebase.google.com/docs/reference/js/firebase.firestore.Firestore?authuser=0#batch
     fun batch(): WriteBatch

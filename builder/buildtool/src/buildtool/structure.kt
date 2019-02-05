@@ -236,9 +236,21 @@ object firebaseshr : JsModule(
 object firebasektjs : JsModule(
     "libs/firebasektjs",
     listOf(
-        commonshr,
-        firebaseshr,
-        firebaseJs
+        firebaseJs,
+        firebaseshr
+    )
+)
+object firebaseuiktjs : JsModule(
+    "libs/firebaseuiktjs",
+    listOf(
+        firebasektjs,
+        firebaseUiJs
+    )
+)
+object firebaseui : JsModule(
+    "libs/firebaseui",
+    listOf(
+        firebaseuiktjs
     )
 )
 
@@ -248,7 +260,7 @@ object firebase : JsModule(
         common,
         commonlib,
         firebasektjs,
-        firebaseUiJs
+        firebaseshr
     )
 )
 

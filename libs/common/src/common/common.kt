@@ -74,6 +74,13 @@ fun Node.removeFromParent() {
     parentElement?.removeChild(this)
 }
 
+fun Node.replaceWith(node: Node) {
+    parentNode!!.apply {
+        insertBefore(node, this@replaceWith)
+        removeChild(this@replaceWith)
+    }
+}
+
 
 
 

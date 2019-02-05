@@ -18,16 +18,39 @@ import kotlin.reflect.KProperty
 //fun Node.spinner() = fa("spinner fa-spin")
 
 val Cls.fas by css()
+val Cls.fab by css()
 
-open class Fa(val cls: Cls) {
+class FaIcon(
+    val fn: Cls.() -> Fa
+) {
+    companion object {
+        fun fa(fn: Fa.() -> Unit) = FaIcon { fa.apply(fn) }
+        fun fa(str: String) = FaIcon { fa.apply { element { classes += str} } }
+        fun faBrands(fn: FaBrands.() -> Unit) = FaIcon { faBrands.apply(fn) }
+        fun faBrands(str: String) = FaIcon { faBrands.apply { element { classes += str} } }
+    }
+}
+
+fun Cls.fa(icon: FaIcon, fn: Fa.() -> Unit = {}): Fa {
+    return this.run(icon.fn).apply(fn)
+}
+
+open class Fa(val cls: Cls, faCls: String = Cls.fas) {
     init {
-        cls.fas
+        cls.element {
+            classes += faCls
+        }
     }
     companion object: Fa(Cls)
+}
+open class FaBrands(cls: Cls): Fa(cls, Cls.fab) {
+    companion object: FaBrands(Cls)
 }
 
 val Cls.fa
     get() = Fa(this)
+val Cls.faBrands
+    get() = FaBrands(this)
 
 operator fun Fa.invoke(fn: Fa.() -> Unit) = apply(fn)
 
@@ -98,6 +121,11 @@ val Fa.cloud by facss()
 val Fa.thumbsUp by facss()
 val Fa.thumbsDown by facss()
 val Fa.question by facss()
+val Fa.signOutAlt by facss()
+val Fa.signInAlt by facss()
+val Fa.at by facss()
+val Fa.user by facss()
+val FaBrands.google by facss()
 
 val Fa.x2 by facss("2x")
 val Fa.x3 by facss("3x")

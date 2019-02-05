@@ -8,7 +8,7 @@ import java.nio.file.Paths
 import kotlin.streams.toList
 
 
-fun main(args: Array<String>) {
+fun main() {
 
     val modules = listOf(
         buildenv,
@@ -18,6 +18,8 @@ fun main(args: Array<String>) {
         domx,
         bootstrap,
         firebasektjs,
+        firebaseuiktjs,
+        firebaseui,
         firebase,
         fontawesome,
         commonui,

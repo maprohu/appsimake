@@ -36,6 +36,13 @@ external class Auth {
 
     fun signOut() : Promise<Unit>
 
+    // https://firebase.google.com/docs/reference/js/firebase.auth.Auth#signInWithRedirect
+    fun signInWithRedirect(provider: AuthProvider): Promise<Unit>
+
+    // https://firebase.google.com/docs/reference/js/firebase.auth.Auth#signInAnonymously
+    fun signInAnonymously(): Promise<UserCredential>
+
+
     companion object {
         val Persistence : Persistence
 

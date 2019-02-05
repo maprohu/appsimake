@@ -7,7 +7,6 @@ import commonlib.Lib
 import commonui.AppCtx
 import firebase.AppOptions
 import firebase.app.App
-import firebase.app.firestore
 import firebase.firestore.*
 import firebase.functions.HttpsCallableResult
 import kotlinx.coroutines.GlobalScope
@@ -15,6 +14,28 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.await
 import kotlin.js.Promise
 
+object FB {
+
+    val app by lazy {
+        firebase.initializeApp(
+            AppOptions().apply {
+                apiKey = "AIzaSyDuHunYFDxjJVSvhk_3POXORpN8M49ubgU"
+                authDomain = "appsimake.firebaseapp.com"
+                databaseURL = "https://appsimake.firebaseio.com"
+                projectId = "appsimake"
+                storageBucket = "appsimake.appspot.com"
+                messagingSenderId = "850641545175"
+            }
+        )
+    }
+
+    val db by lazy {
+        app.firestore().withDefaultSettings().also { db ->
+            initBinder(db)
+        }
+    }
+
+}
 
 interface HasDB {
     val db: Firestore
@@ -30,28 +51,14 @@ class FbCtx(
     val appCtx: AppCtx,
     val lib: Lib
 ) : HasDB {
+    val app = FB.app
+
     val name = lib.name
 
     constructor(lib: Lib, title: String) : this(AppCtx(title), lib)
 
-    val app by lazy {
-        firebase.initializeApp(
-            AppOptions().apply {
-                apiKey = "AIzaSyDuHunYFDxjJVSvhk_3POXORpN8M49ubgU"
-                authDomain = "appsimake.firebaseapp.com"
-                databaseURL = "https://appsimake.firebaseio.com"
-                projectId = "appsimake"
-                storageBucket = "appsimake.appspot.com"
-                messagingSenderId = "850641545175"
-            }
-        )
-    }
 
-    override val db by lazy {
-        app.firestore().withDefaultSettings().also { db ->
-            initBinder(db)
-        }
-    }
+    override val db = FB.db
     val auth by lazy { app.auth() }
     val messaging by lazy {
         GlobalScope.async {

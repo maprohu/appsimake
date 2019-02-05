@@ -82,11 +82,12 @@ class AppCtx(
         Rx { visible() && hasFocus() }
     }
 
-    val root = RootPanel(document.body!!)
+    val root by lazy {
+        RootPanel(document.body!!).also { it.setHourglass() }
+    }
 
     init {
         setupFullScreen()
-        hourglass()
     }
 
     fun hourglass() {

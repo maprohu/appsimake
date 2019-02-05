@@ -1,9 +1,6 @@
 package commonui
 
-import bootstrap.column
-import bootstrap.flex
-import bootstrap.flexGrow1
-import bootstrap.padding2
+import bootstrap.*
 import common.resizeEvent
 import domx.classes
 import domx.cls
@@ -41,8 +38,10 @@ fun HTMLElement.aspectRatio(
     fn: HTMLDivElement.() -> Unit
 ): HTMLDivElement {
     return div {
-        flexGrow1()
-        flex()
+        cls {
+            dFlex
+            flexGrow1
+        }
 
         val size = Var(Size(offsetWidth, offsetHeight))
         killables += window.resizeEvent {
@@ -91,10 +90,10 @@ fun HTMLElement.aspectRatio(
             }
 
             column {
-                flexGrow1()
+                cls.flexGrow1
 
                 div {
-                    flexGrow1()
+                    cls.flexGrow1
                     style.position = "relative"
 
                     fn()

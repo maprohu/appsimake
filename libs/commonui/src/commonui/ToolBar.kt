@@ -56,8 +56,10 @@ class ToolBar private constructor(val element: HTMLDivElement, killables: Killab
 
     val middle =
         element.div {
-            flex()
-            flexGrow1()
+            cls {
+                dFlex
+                flexGrow1
+            }
         }.opt()
 
     fun middleTitle(fn: HTMLElement.() -> Unit): HTMLElement {
@@ -142,6 +144,7 @@ fun Node.insertAfter(what: Node, afterWhat: Node?) {
     )
 }
 
+
 class NodeHolder<T: Node>(
     internal val wrapped: T,
     private val parent: Node,
@@ -204,6 +207,32 @@ fun Node.nodes(
     NodesFactory(this, killables).apply(fn)
 }
 
+abstract external class HTMLDivElementTopbar: HTMLDivElement
+
+val Node.topbarP1 get() = topbar {
+    cls.p1
+}
+
+val Node.topbar get() = row {
+    cls {
+        navTabs
+        flexFixedSize()
+        bgLight
+    }
+
+}.unsafeCast<HTMLDivElementTopbar>()
+
+fun HTMLDivElementTopbar.backButton(inbox: Inbox) {
+    faButton(Fa.chevronLeft) {
+        cls {
+            btnSecondary
+            m1
+        }
+        clickEvent {
+            inbox += Back
+        }
+    }
+}
 
 fun Node.toolbar(killables: Killables, fn: ToolBar.() -> Unit = {}) = ToolBar(this, killables).apply(fn)
 fun Node.topbar(killables: Killables, fn: ToolBar.() -> Unit = {}) = toolbar(killables, fn).also { it.element.borderBottom() }

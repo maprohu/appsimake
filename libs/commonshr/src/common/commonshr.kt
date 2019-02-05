@@ -9,7 +9,10 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import killable.Killables
 import killable.addedTo
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun dyn() = js("{}")
@@ -247,9 +250,56 @@ interface AsyncEmitter<T>: Killable {
     fun poll(): T?
     suspend fun receive(): T
 }
+fun <T> emptyAsyncEmitter() = object : AsyncEmitter<T> {
+    override fun poll(): T? = null
+
+    override suspend fun receive(): T = CompletableDeferred<T>().await()
+
+    override fun kill() {}
+}
+
+class DynamicAsyncEmitter<T>(
+    initial: AsyncEmitter<T>
+): AsyncEmitter<T> {
+    override fun poll(): T? {
+        return current.poll()
+    }
+
+    private val cds = mutableListOf<CompletableDeferred<T>>()
+
+    private fun CompletableDeferred<T>.listen() {
+        val cd = this
+        val c = current
+        GlobalScope.launch {
+            val p = c.receive()
+            if (!cd.isCompleted) {
+                cd.complete(p)
+            }
+            cds -= cd
+        }
+    }
+    override suspend fun receive(): T {
+        val cd = CompletableDeferred<T>()
+        cds += cd
+        cd.listen()
+        return cd.await()
+    }
+
+    override fun kill() {
+        current.kill()
+        current = emptyAsyncEmitter()
+    }
+
+    private var current = initial
+
+    fun setCurrent(c: AsyncEmitter<T>) {
+        current.kill()
+        current = c
+        cds.forEach { it.listen() }
+    }
 
 
-interface EmitterKillable<T>: EmitterIface<T>, Killable
+}
 
 open class Emitter<T>(
     val first: () -> Iterable<T> = ::emptyList
