@@ -4,9 +4,9 @@ import common.None
 import common.Optional
 import common.Some
 import commonshr.SetDiff
-import killable.Killable
-import killable.Killables
-import killable.Trigger
+import killable.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
 import org.w3c.dom.Element
 import org.w3c.dom.GlobalEventHandlers
 import kotlin.dom.addClass
@@ -97,6 +97,20 @@ interface RxIface<out T> {
 
         return forEach {
             z = fn(z, it)
+        }
+    }
+
+    fun foldKillsTrigger(fn: (T) -> Trigger) : Trigger {
+        var z = {}
+
+        val fe = forEach {
+            z()
+            z = fn(it)
+        }
+
+        return {
+            fe()
+            z()
         }
     }
 
@@ -410,3 +424,9 @@ fun Element.rxClasses(
     )
 }
 
+fun <T> RxIface<T>.toChannel(ks: KillSet): ReceiveChannel<T> {
+    val ch = Channel<T>(Channel.UNLIMITED)
+    ks += { ch.close() }
+    forEach { t -> ch.offer(t) }.addedTo(ks)
+    return ch
+}

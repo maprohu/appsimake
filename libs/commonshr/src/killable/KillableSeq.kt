@@ -28,6 +28,7 @@ class KillableSeq private constructor(
     }
     fun set(fn: () -> Unit) = set(Killable.once(fn))
 
+    operator fun remAssign(fn: Trigger) = set(fn)
     operator fun plusAssign(fn: () -> Unit) = set(fn)
     operator fun plusAssign(fn: Killable) = set(fn)
     fun clear() = set(Killable.empty)

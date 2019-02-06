@@ -7,9 +7,8 @@ import commonshr.*
 import firebase.FirebaseError
 import firebase.firestore
 import firebaseshr.*
-import killable.Killable
+import killable.*
 import killable.Killable.Companion.once
-import killable.Killables
 import kotlinx.coroutines.*
 import org.w3c.dom.Element
 import rx.RxVal
@@ -128,9 +127,9 @@ fun Firestore.withDefaultSettings(): Firestore {
 
 fun Query.onSnapshotNext(
     onNext: (QuerySnapshot) -> Unit
-) : Killable = onSnapshot(onNext, { report(it.unsafeCast<Throwable>()) }).let { once(it) }
+) : Trigger = onSnapshot(onNext, { report(it.unsafeCast<Throwable>()) })
 
-fun Query.idDiffs(fn: ((SetDiff<String>) -> Unit)) : Killable = onSnapshotNext { qs ->
+fun Query.idDiffs(fn: ((SetDiff<String>) -> Unit)) : Trigger = onSnapshotNext { qs ->
     qs.docChanges().fold(SetDiff<String>()) { d, ch ->
         when (ch.type) {
             DocumentChangeType.added -> d.copy(added = d.added + ch.doc.id)
@@ -389,7 +388,7 @@ suspend fun DocumentReference.exists(): Boolean {
 
 @UseExperimental(ExperimentalCoroutinesApi::class)
 suspend fun <T> QueryWrap<T>.toSetSource(
-    killables: Killables,
+    killables: KillSet,
     create: (String, dynamic) -> T,
     update: (T, dynamic) -> Unit,
     write: suspend (String, suspend (T) -> Unit) -> Unit
@@ -439,7 +438,7 @@ suspend fun <T> QueryWrap<T>.toSetSource(
         override val current: Set<T>
             get() = set
 
-        override fun listen(ks: Killables, fn: (SetMove<T>) -> Unit): Set<T> {
+        override fun listen(ks: KillSet, fn: (SetMove<T>) -> Unit): Set<T> {
             ks += emitter.add(fn)
             return set
         }
@@ -457,7 +456,7 @@ suspend fun <T> QueryWrap<T>.toSetSource(
 }
 
 suspend fun <T: HasFBProps<T>> QueryWrap<T>.toSetSource(
-    killables: Killables,
+    killables: KillSet,
     collectionWrap: CollectionWrap<T>,
     create: () -> T
 ): SetSourceWithKey<T, String> {
@@ -486,7 +485,7 @@ suspend fun <T: HasFBProps<T>> QueryWrap<T>.toSetSource(
 }
 
 suspend fun <T: HasFBProps<T>> CollectionWrap<T>.toSetSource(
-    killables: Killables,
+    killables: KillSet,
     db: Firestore,
     create: () -> T
 ): SetSourceWithKey<T, String> {

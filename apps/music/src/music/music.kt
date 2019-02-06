@@ -28,105 +28,106 @@ import kotlin.browser.window
 import kotlin.js.Promise
 
 fun main() {
-    boot()
-
+    GlobalScope.launch {
+        boot()
+    }
 }
 
-fun runAppV2() {
-
-    val panel = runPanel()
-    panel.hourglass()
-
-    val ks = Killables()
-    GlobalScope.launch {
-        val idb = localDatabase()
-        LocalSongs.init(idb)
-
-        db.enablePersistence(
-            obj {
-                experimentalTabSynchronization = true
-            }
-        ).await()
-
-        db.disableNetwork().await()
-
-
-        val tagDB = TagDB(
-            music.app.songs.toSetSource(ks, db) { Mp3File() }
-        )
-
-        val source = DynamicAsyncEmitter(
-            emptyAsyncEmitter<Playable>()
-        )
-
-        val userSongDB = Var<Optional<UserSongsDB>>(None)
-
-
-        val currentUid = asyncKills(ks.killSet, idb.readLastUserId()) { uid ->
-            idb.writeLastUserId(uid)
-
-            if (uid == null) {
-                source.setCurrent(
-                    localSongSource(idb, tagDB)
-                )
-
-                userSongDB.now = None
-
-                {}
-            } else {
-                val uks = Killables()
-
-                val usdb = UserSongsDB(
-                    music.app.private.doc(uid).usersongs.toSetSource(uks, db) { UserSong() },
-                    uks
-                )
-
-                source.setCurrent(
-                    randomSongSource(idb, tagDB, usdb)
-                )
-
-                userSongDB.now = Some(usdb)
-
-                uks.toTrigger()
-            }
-        }
-
-
-        val innerPanel = playerFrame(
-            ks,
-            panel,
-            source,
-            userSongDB
-        )
-
-
-//        val loop = runLoop().apply { runLoginEvents(ks.killSet) }
+//fun runAppV2() {
 //
-//        val procs = object {
-//            val initial : Proc = { e ->
-//                when (e) {
-//                    NotLoggedIn -> {
-//                        currentUid %= idb.readLastUserId()
-//                        loggedOut(innerPanel, loops)
-//                    }
-//                    is LoggedIn -> {
-//                        currentUid %= e.user.uid
-//                        loggedIn(LoopsPanel(loops, innerPanel))
-//                    }
-//                }
+//    val panel = runPanel()
+//    panel.hourglass()
+//
+//    val ks = Killables()
+//    GlobalScope.launch {
+//        val idb = localDatabase()
+//        LocalSongs.init(idb)
+//
+//        db.enablePersistence(
+//            obj {
+//                experimentalTabSynchronization = true
 //            }
+//        ).await()
 //
-//            val loops = loop.loops(initial)
+//        db.disableNetwork().await()
 //
+//
+//        val tagDB = TagDB(
+//            music.app.songs.toSetSource(ks, db) { Mp3File() }
+//        )
+//
+//        val source = DynamicAsyncEmitter(
+//            emptyAsyncEmitter<Playable>()
+//        )
+//
+//        val userSongDB = Var<Optional<UserSongsDB>>(None)
+//
+//
+//        val currentUid = asyncKills(ks.killSet, idb.readLastUserId()) { uid ->
+//            idb.writeLastUserId(uid)
+//
+//            if (uid == null) {
+//                source.setCurrent(
+//                    localSongSource(idb, tagDB)
+//                )
+//
+//                userSongDB.now = None
+//
+//                {}
+//            } else {
+//                val uks = Killables()
+//
+//                val usdb = UserSongsDB(
+//                    music.app.private.doc(uid).usersongs.toSetSource(uks, db) { UserSong() },
+//                    uks
+//                )
+//
+//                source.setCurrent(
+//                    randomSongSource(idb, tagDB, usdb)
+//                )
+//
+//                userSongDB.now = Some(usdb)
+//
+//                uks.toTrigger()
+//            }
 //        }
 //
-//        procs.loops.handle %= procOrElse()
-
-
-
-    }
-
-}
+//
+//        val innerPanel = playerFrame(
+//            ks,
+//            panel,
+//            source,
+//            userSongDB
+//        )
+//
+//
+////        val loop = runLoop().apply { runLoginEvents(ks.killSet) }
+////
+////        val procs = object {
+////            val initial : Proc = { e ->
+////                when (e) {
+////                    NotLoggedIn -> {
+////                        currentUid %= idb.readLastUserId()
+////                        loggedOut(innerPanel, loops)
+////                    }
+////                    is LoggedIn -> {
+////                        currentUid %= e.user.uid
+////                        loggedIn(LoopsPanel(loops, innerPanel))
+////                    }
+////                }
+////            }
+////
+////            val loops = loop.loops(initial)
+////
+////        }
+////
+////        procs.loops.handle %= procOrElse()
+//
+//
+//
+//    }
+//
+//}
 
 fun runApp() {
     GlobalScope.launch {
@@ -326,8 +327,8 @@ class MusicCtx(
     val songsWrap = fbCtx.lib.app.songs
     val storageRef = storageWrap.collectionRef(db)
 
-    val transferSongs = TransferSongs(userSongsDB, songStoreDB, killables)
-    val dbStatus = DBStatus(idb, tagDB, songStoreDB, userSongsDB, transferSongs, killables)
+    val transferSongs = TransferSongs(userSongsDB, songStoreDB, killables.killSet)
+    val dbStatus = DBStatus(idb, tagDB, songStoreDB, userSongsDB, transferSongs, killables.killSet)
     val onlineTasks = OnlineTasks(
         fbCtx.app.storage().ref("music/files"),
         idb,

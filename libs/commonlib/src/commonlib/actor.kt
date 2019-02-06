@@ -4,8 +4,7 @@ import common.*
 import commonlib.commonlib.RandomChooser
 import commonshr.SetAdded
 import commonshr.SetMove
-import killable.Killable
-import killable.Killables
+import killable.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
 import rx.RxIface
@@ -51,7 +50,7 @@ fun <T> SendChannel<T>.post(item: T) {
     }
 }
 
-fun <T> EmitterIface<T>.toChannel(ks: Killables): ReceiveChannel<T> {
+fun <T> EmitterIface<T>.toChannel(ks: KillSet): ReceiveChannel<T> {
     val out = Channel<T>()
 
     val list = mutableListOf<T>()
@@ -63,9 +62,7 @@ fun <T> EmitterIface<T>.toChannel(ks: Killables): ReceiveChannel<T> {
                 out.send(t)
             }
         }
-    }.also { j ->
-        ks += Killable.once { j.cancel() }
-    }
+    }.addedTo(ks)
 
     ks += add { t ->
         list += t
@@ -76,9 +73,13 @@ fun <T> EmitterIface<T>.toChannel(ks: Killables): ReceiveChannel<T> {
 }
 
 fun Job.addedTo(ks: Killables): Job {
+    return addedTo(ks.killSet)
+}
+
+fun Job.addedTo(ks: KillSet): Job {
     val remove = ks.add { cancel() }
     invokeOnCompletion {
-        remove.kill()
+        remove()
     }
     return this
 }

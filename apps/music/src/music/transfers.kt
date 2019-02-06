@@ -5,13 +5,14 @@ import common.combine
 import common.combineAnd
 import commonshr.SetMove
 import firebaseshr.ids
+import killable.KillSet
 import killable.Killable
 import killable.Killables
 
 class TransferSongs(
     userSongsDB: UserSongsDB,
     storageDB: SongStorageDB,
-    ks: Killables
+    ks: KillSet
 ) {
 
     val upload = combine(

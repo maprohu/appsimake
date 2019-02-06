@@ -14,9 +14,7 @@ import commonui.showClosable
 import domx.*
 import firebaseshr.ids
 import indexeddb.*
-import killable.Killable
-import killable.Killables
-import killable.addedTo
+import killable.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import musiclib.StoreState
@@ -40,7 +38,7 @@ class DBStatus(
     storageDB: SongStorageDB,
     userSongsDB: UserSongsDB,
     transferSongs: TransferSongs,
-    killables: Killables
+    killables: KillSet
 ) {
 
     class RecordObject {
@@ -123,7 +121,7 @@ class DBStatus(
         )
         connect(
             storageDB.source
-                .filtered(ks) { it.uploaded.initial() == Some(true) }
+                .filtered(ks.killSet) { it.uploaded.initial() == Some(true) }
                 .ids,
             "Cloud"
         )

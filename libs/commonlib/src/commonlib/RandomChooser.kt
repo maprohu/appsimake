@@ -59,8 +59,8 @@ class RandomChooser<I, O>(
         val items = mutableSetOf<I>()
         init {
             val e = Emitter<SetMove<I>>()
-            val sourceChannel = e.toChannel(ks)
-            s.listen(ks, e::emit).also { items += it }
+            val sourceChannel = e.toChannel(ks.killSet)
+            s.listen(ks.killSet, e::emit).also { items += it }
             GlobalScope.launch {
                 sourceChannel.map { i -> Input(this@Source, i) }.toChannel(eventChannel)
             }.addedTo(ks)

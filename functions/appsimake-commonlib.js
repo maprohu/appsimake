@@ -23,11 +23,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
   var launch = $module$kotlinx_coroutines_core.kotlinx.coroutines.launch_s496o7$;
   var Channel = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.Channel_ww73n8$;
   var toList = Kotlin.kotlin.collections.toList_7wnvza$;
-  var Killable = $module$appsimake_commonshr.killable.Killable;
+  var plusAssign = $module$appsimake_commonshr.killable.plusAssign_1wvaoy$;
+  var add = $module$appsimake_commonshr.killable.add_1wvaoy$;
   var Killables = $module$appsimake_commonshr.killable.Killables;
   var SetAdded = $module$appsimake_commonshr.commonshr.SetAdded;
   var CompletableDeferred = $module$kotlinx_coroutines_core.kotlinx.coroutines.CompletableDeferred_xptg6w$;
   var AsyncEmitter = $module$appsimake_commonshr.common.AsyncEmitter;
+  var Killable = $module$appsimake_commonshr.killable.Killable;
   var common = $module$appsimake_commonshr.common;
   var Var = $module$appsimake_commonshr.rx.Var;
   var Some = $module$appsimake_commonshr.common.Some;
@@ -376,12 +378,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
         return instance.doResume(null);
     };
   }
-  function toChannel$lambda$lambda(closure$j) {
-    return function () {
-      closure$j.cancel();
-      return Unit;
-    };
-  }
   function toChannel$lambda_0(closure$list, closure$inp) {
     return function (t) {
       closure$list.add_11rb$(t);
@@ -394,10 +390,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
     var out = Channel();
     var list = ArrayList_init();
     var inp = Channel();
-    var $receiver_0 = launch(coroutines.GlobalScope, void 0, void 0, toChannel$lambda(inp, list, out));
-    ks.plusAssign_wii6vi$(Killable.Companion.once_o14v8n$(toChannel$lambda$lambda($receiver_0)));
-    ks.plusAssign_wii6vi$($receiver.add_qlkmfe$(toChannel$lambda_0(list, inp)));
+    addedTo_0(launch(coroutines.GlobalScope, void 0, void 0, toChannel$lambda(inp, list, out)), ks);
+    plusAssign(ks, $receiver.add_qlkmfe$(toChannel$lambda_0(list, inp)));
     return out;
+  }
+  function addedTo($receiver, ks) {
+    return addedTo_0($receiver, ks.killSet);
   }
   function addedTo$lambda(this$addedTo) {
     return function () {
@@ -407,12 +405,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
   }
   function addedTo$lambda_0(closure$remove) {
     return function (it) {
-      closure$remove.kill();
+      closure$remove();
       return Unit;
     };
   }
-  function addedTo($receiver, ks) {
-    var remove = ks.add_o14v8n$(addedTo$lambda($receiver));
+  function addedTo_0($receiver, ks) {
+    var remove = add(ks, addedTo$lambda($receiver));
     $receiver.invokeOnCompletion_f05bi3$(addedTo$lambda_0(remove));
     return $receiver;
   }
@@ -552,7 +550,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
       var item = emitters[tmp$];
       var tmp$_0 = destination.add_11rb$;
       var current = ArrayList_init();
-      killables.plusAssign_wii6vi$(item.add_qlkmfe$(toAsync$lambda$lambda(waiting, current)));
+      killables.plusAssign_o14v8n$(item.add_qlkmfe$(toAsync$lambda$lambda(waiting, current)));
       tmp$_0.call(destination, current);
     }
     var currents = destination;
@@ -693,8 +691,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
     this.alreadyChosen = LinkedHashSet_init();
     this.items = LinkedHashSet_init();
     var e = new Emitter();
-    var sourceChannel = toChannel_0(e, this.$outer.ks);
-    addAll(this.items, s.listen_e4cu57$(this.$outer.ks, getCallableRef('emit', function ($receiver, t) {
+    var sourceChannel = toChannel_0(e, this.$outer.ks.killSet);
+    addAll(this.items, s.listen_cp6tho$(this.$outer.ks.killSet, getCallableRef('emit', function ($receiver, t) {
       return $receiver.emit_11rb$(t), Unit;
     }.bind(null, e))));
     addedTo(launch(coroutines.GlobalScope, void 0, void 0, RandomChooser$RandomChooser$Source_init$lambda(sourceChannel, this, this.$outer)), this.$outer.ks);
@@ -1451,8 +1449,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
   });
   package$commonlib.Actor = Actor;
   package$commonlib.post_rmur43$ = post;
-  package$commonlib.toChannel_98x4yj$ = toChannel_0;
+  package$commonlib.toChannel_10flag$ = toChannel_0;
   package$commonlib.addedTo_cflf3n$ = addedTo;
+  package$commonlib.addedTo_tjw9ba$ = addedTo_0;
   package$commonlib.toAsync_nmg1i6$ = toAsync;
   package$commonlib.toAsync_jr4bl4$ = toAsync_0;
   package$commonlib.toRx_ge6odz$ = toRx;

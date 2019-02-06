@@ -3,12 +3,10 @@ package common
 import commonshr.SetAdded
 import commonshr.SetMove
 import commonshr.SetRemoved
-import killable.Killable
+import killable.*
 import rx.Rx
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
-import killable.Killables
-import killable.addedTo
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
@@ -242,7 +240,7 @@ interface EmitterIface<T> {
         add(listener)
     }
 
-    fun add(listener: (T) -> Unit) : Killable
+    fun add(listener: (T) -> Unit) : Trigger
 
 }
 
@@ -307,12 +305,12 @@ open class Emitter<T>(
 
     protected var listeners = listOf<(T) -> Unit>()
 
-    override fun add(listener: (T) -> Unit) : Killable {
+    override fun add(listener: (T) -> Unit) : Trigger {
         first().forEach(listener)
 
         listeners += listener
 
-        return Killable.once {
+        return {
             listeners -= listener
         }
     }
@@ -327,7 +325,7 @@ fun <T> Emitter<SetMove<T>>.toSetSource(sfn: () -> Set<T>) = object : SetSource<
     override val current: Set<T>
         get() = sfn()
 
-    override fun listen(ks: Killables, fn: (SetMove<T>) -> Unit): Set<T> {
+    override fun listen(ks: KillSet, fn: (SetMove<T>) -> Unit): Set<T> {
         ks += this@toSetSource.add(fn)
         return sfn()
     }
@@ -337,7 +335,7 @@ class MappedEmitter<T, S>(
     private val emitter: EmitterIface<T>,
     private val fn: (T) -> S
 ): EmitterIface<S> {
-    override fun add(listener: (S) -> Unit): Killable {
+    override fun add(listener: (S) -> Unit): Trigger {
         return emitter.add { t ->
             listener(fn(t))
         }
@@ -346,7 +344,7 @@ class MappedEmitter<T, S>(
 
 fun <T, S> EmitterIface<T>.map(fn: (T) -> S) = MappedEmitter(this, fn)
 
-fun <T> EmitterIface<SetMove<T>>.feedTo(set: MutableSet<T>): Killable {
+fun <T> EmitterIface<SetMove<T>>.feedTo(set: MutableSet<T>): Trigger {
     return add { m ->
         m.applyTo(set)
     }
@@ -500,7 +498,7 @@ fun <T> EmitterIface<SetMove<T>>.andIn(other: EmitterIface<SetMove<T>>, ks: Kill
     return combineAnd(ks, this, other)
 }
 
-fun <T> EmitterIface<SetMove<T>>.feedTo(list: MutableList<T>): Killable {
+fun <T> EmitterIface<SetMove<T>>.feedTo(list: MutableList<T>): Trigger {
     return add { m ->
         m.applyTo(list)
     }
@@ -509,7 +507,7 @@ fun <T> EmitterIface<SetMove<T>>.feedTo(list: MutableList<T>): Killable {
 interface SetSource<T> {
     val current: Set<T>
     fun listen(
-        ks: Killables,
+        ks: KillSet,
         fn: (SetMove<T>) -> Unit
     ): Set<T>
 }
@@ -523,12 +521,12 @@ fun <T, S> SetSource<T>.map(mfn: (T) -> S) = object : SetSource<S> {
     override val current: Set<S>
         get() = this@map.current.map(mfn).toSet()
 
-    override fun listen(ks: Killables, fn: (SetMove<S>) -> Unit): Set<S> {
+    override fun listen(ks: KillSet, fn: (SetMove<S>) -> Unit): Set<S> {
         return this@map.listen(ks) { m -> fn(m.map(mfn)) }.map(mfn).toSet()
     }
 }
 
-fun <T> SetSource<T>.filtered(ks: Killables, rxfn: (T) -> Boolean): SetSource<T> {
+fun <T> SetSource<T>.filtered(ks: KillSet, rxfn: (T) -> Boolean): SetSource<T> {
 
     var curr = setOf<T>()
     val kills = mutableMapOf<T, Killable>()
@@ -574,7 +572,7 @@ fun <T> SetSource<T>.filtered(ks: Killables, rxfn: (T) -> Boolean): SetSource<T>
 
 
 fun <T> combineN(
-    ks: Killables,
+    ks: KillSet,
     pairs: Iterable<Pair<SetSource<T>, MutableSet<T>>>,
     fn: (T) -> Boolean
 ): SetSource<T> {
@@ -611,7 +609,7 @@ fun <T> combineN(
 }
 
 fun <T> combine(
-    ks: Killables,
+    ks: KillSet,
     e1: SetSource<T>,
     e2: SetSource<T>,
     e3: SetSource<T>,
@@ -640,7 +638,7 @@ fun <T> combine(
 }
 
 fun <T> combine(
-    ks: Killables,
+    ks: KillSet,
     e1: SetSource<T>,
     e2: SetSource<T>,
     fn: (Boolean, Boolean) -> Boolean
@@ -666,17 +664,17 @@ fun <T> combine(
 }
 
 fun <T> SetSource<T>.toEmitter(): EmitterIface<SetMove<T>> = object : EmitterIface<SetMove<T>> {
-    override fun add(listener: (SetMove<T>) -> Unit): Killable {
+    override fun add(listener: (SetMove<T>) -> Unit): Trigger {
         val ks = Killables()
-        listen(ks, listener).also {
+        listen(ks.killSet, listener).also {
             it.map(::SetAdded).forEach(listener)
         }
-        return ks
+        return ks.toTrigger()
     }
 }
 
 fun <T> combineAnd(
-    ks: Killables,
+    ks: KillSet,
     e1: SetSource<T>,
     e2: SetSource<T>
 ): SetSource<T> = combine(ks, e1, e2, Boolean::and)

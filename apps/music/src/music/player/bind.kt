@@ -7,6 +7,14 @@ import rx.Var
 
 class PlayerBind {
 
+    object PlayOrPause
+    object Beginning
+    object End
+    object Forward
+    object Backward
+    object Like
+    object DontLike
+
     val state = Var(UserSongState.New)
     val stateLoading = Var(false)
     val hasUserDB = Var(false)

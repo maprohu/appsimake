@@ -4,7 +4,7 @@ import killable.Killable.Companion.empty
 import killable.Killable.Companion.once
 
 typealias Trigger = () -> Unit
-typealias KillSet = (() -> Unit) -> (() -> Unit)
+typealias KillSet = (Trigger) -> Trigger
 
 infix fun Trigger.with(trigger: Trigger): Trigger = {
     this()
@@ -13,8 +13,10 @@ infix fun Trigger.with(trigger: Trigger): Trigger = {
 
 operator fun KillSet.plusAssign(trigger: Trigger) { this(trigger) }
 fun KillSet.add(killable: Killable): Trigger = this(killable::kill)
+fun KillSet.add(killable: Trigger): Trigger = this(killable)
 
 fun KillSet.killables() = Killables().also { it += add(it) }
+fun KillSet.seq() = KillableSeq().also { it += add(it) }
 
 fun Trigger.addedTo(ks: KillSet) = apply { ks += this }
 

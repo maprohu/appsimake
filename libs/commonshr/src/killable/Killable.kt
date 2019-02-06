@@ -28,6 +28,11 @@ interface Killable {
 @Suppress("NOTHING_TO_INLINE")
 inline fun Killable.toTrigger(): Trigger = { kill() }
 
+fun <K: Killable> K.addedTo(killables: KillSet): K {
+    killables.add(this)
+    return this
+}
+
 fun <K: Killable> K.addedTo(killables: Killables): K {
     killables.add(this)
     return this

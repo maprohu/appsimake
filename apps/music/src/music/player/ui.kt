@@ -7,6 +7,7 @@ import fontawesome.*
 import music.PlayerFrame
 import musiclib.UserSongState
 import org.w3c.dom.HTMLButtonElement
+import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Node
 import rx.Rx
 import rx.rxClass
@@ -14,7 +15,7 @@ import styles.scrollVertical
 import kotlin.browser.document
 import kotlin.math.floor
 
-fun PlayerBind.ui() {
+fun PlayerBind.ui(): Node {
 
     fun formatSecs(s: Int): String {
         val mins = s / 60.0
@@ -31,7 +32,7 @@ fun PlayerBind.ui() {
     val currentPositionText = Rx { formatSecs(currentPosition()).padStart(totalDurationTextLength(), ' ') }
     val likeButtonsDisabled = Rx { !hasUserDB() || stateLoading() }
 
-    document.div {
+    return document.div {
         cls {
             borderTop
             bgLight

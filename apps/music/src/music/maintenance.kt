@@ -7,13 +7,14 @@ import commonlib.toChannel
 import commonshr.SetAdded
 import firebaseshr.ids
 import indexeddb.IDBDatabase
+import killable.KillSet
 import killable.Killables
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
 fun startMaintenance(
-    ks: Killables,
+    ks: KillSet,
     idb: IDBDatabase,
     userSongsDB: UserSongsDB
 ) {
