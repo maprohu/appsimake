@@ -104,6 +104,11 @@ sealed class Optional<out T> {
     abstract fun getOrDefault(default: @UnsafeVariance T) : T
 }
 
+fun <T: Any> Optional<T>.getOrNull(): T? = when (this) {
+    None -> null
+    is Some -> this.value
+}
+
 data class Some<out T>(val value: T) : Optional<T>() {
     override fun isEmpty(): Boolean = false
     override fun toString() = "Some($value)"

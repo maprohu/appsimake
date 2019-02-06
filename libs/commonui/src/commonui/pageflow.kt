@@ -1,7 +1,9 @@
 package commonui
 
 import domx.div
+import killable.Assign
 import killable.Trigger
+import killable.remAssign
 import killable.with
 import org.w3c.dom.Node
 import kotlin.browser.document
@@ -18,14 +20,14 @@ class PageIn(
     val back: Trigger
 )
 
-typealias SetPageOut = Setter<PageOut>
+typealias SetPageOut = Assign<PageOut>
 
 class NodeSlot(
     val node: SetPageOut
 )
 fun runNode(
     node: Node,
-    proc: SetProcOrElse
+    proc: AssignProcOrElse
 ): SetPageOut {
     val panel = runPanel(node)
 
@@ -41,7 +43,7 @@ fun runNode(
     }
 }
 
-fun bodyPage(proc: SetProcOrElse): SetPageOut = runNode(document.body!!.div, proc)
+fun bodyPage(proc: AssignProcOrElse): SetPageOut = runNode(document.body!!.div, proc)
 
 
 class PageSlot(
@@ -63,7 +65,7 @@ infix fun SubPages.with(page: PageOut) = PageOut(
 )
 
 //fun subPages(): SubPages {
-//    val procs = ProcOrElseSet()
+//    val procs = ProcOrElseList()
 //
 //
 //

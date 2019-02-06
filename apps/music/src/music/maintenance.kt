@@ -9,6 +9,7 @@ import firebaseshr.ids
 import indexeddb.IDBDatabase
 import killable.KillSet
 import killable.Killables
+import killable.addedTo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 

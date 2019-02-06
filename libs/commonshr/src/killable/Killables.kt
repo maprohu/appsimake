@@ -2,21 +2,48 @@ package killable
 
 import killable.Killable.Companion.empty
 import killable.Killable.Companion.once
+import kotlinx.coroutines.Job
+
+typealias Assign<T> = (T) -> Unit
+
+@Suppress("NOTHING_TO_INLINE")
+inline operator fun <T> Assign<T>.remAssign(value: T) = this(value)
 
 typealias Trigger = () -> Unit
-typealias KillSet = (Trigger) -> Trigger
+typealias Add<T> = (T) -> Trigger
+typealias KillSet = Add<Trigger>
+
+fun Trigger.once(): Trigger {
+    var triggered = false
+
+    return {
+        if (!triggered) {
+            triggered = true
+            this()
+        }
+    }
+}
+
+fun Job.addedTo(ks: KillSet): Job {
+    val remove = ks.add { cancel() }
+    invokeOnCompletion {
+        remove()
+    }
+    return this
+}
 
 infix fun Trigger.with(trigger: Trigger): Trigger = {
     this()
     trigger()
 }
 
-operator fun KillSet.plusAssign(trigger: Trigger) { this(trigger) }
+operator fun <T> Add<T>.plusAssign(trigger: T) { this(trigger) }
 fun KillSet.add(killable: Killable): Trigger = this(killable::kill)
+operator fun KillSet.plusAssign(killable: Killable) { add(killable) }
 fun KillSet.add(killable: Trigger): Trigger = this(killable)
 
 fun KillSet.killables() = Killables().also { it += add(it) }
-fun KillSet.seq() = KillableSeq().also { it += add(it) }
+fun KillSet.seq() = KillableSeq().also { it.onKill += add(it) }
 
 fun Trigger.addedTo(ks: KillSet) = apply { ks += this }
 

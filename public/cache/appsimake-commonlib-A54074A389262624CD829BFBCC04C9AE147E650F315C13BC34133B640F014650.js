@@ -1,18 +1,16 @@
-function define(args, fn) {
-    fn(
-        ...args.map(function(a) {
-            if (a == 'exports') {
-                return module.exports;
-            } else if (a.startsWith('appsimake-')) {
-                return require('./' + a);
-            } else {
-                return require(a);
-            }
-        })
-    );
+if (typeof kotlin === 'undefined') {
+  throw new Error("Error loading module 'appsimake-commonlib'. Its dependency 'kotlin' was not found. Please, check whether 'kotlin' is loaded prior to 'appsimake-commonlib'.");
 }
-
-define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', 'appsimake-firebaseshr'], function (_, Kotlin, $module$kotlinx_coroutines_core, $module$appsimake_commonshr, $module$appsimake_firebaseshr) {
+if (typeof this['kotlinx-coroutines-core'] === 'undefined') {
+  throw new Error("Error loading module 'appsimake-commonlib'. Its dependency 'kotlinx-coroutines-core' was not found. Please, check whether 'kotlinx-coroutines-core' is loaded prior to 'appsimake-commonlib'.");
+}
+if (typeof this['appsimake-commonshr'] === 'undefined') {
+  throw new Error("Error loading module 'appsimake-commonlib'. Its dependency 'appsimake-commonshr' was not found. Please, check whether 'appsimake-commonshr' is loaded prior to 'appsimake-commonlib'.");
+}
+if (typeof this['appsimake-firebaseshr'] === 'undefined') {
+  throw new Error("Error loading module 'appsimake-commonlib'. Its dependency 'appsimake-firebaseshr' was not found. Please, check whether 'appsimake-firebaseshr' is loaded prior to 'appsimake-commonlib'.");
+}
+this['appsimake-commonlib'] = function (_, Kotlin, $module$kotlinx_coroutines_core, $module$appsimake_commonshr, $module$appsimake_firebaseshr) {
   'use strict';
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
@@ -1461,4 +1459,4 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
   customToken = get_shared().function_q3lmfv$().provideDelegate_n5byny$(this, customToken_metadata);
   Kotlin.defineModule('appsimake-commonlib', _);
   return _;
-});
+}(typeof this['appsimake-commonlib'] === 'undefined' ? {} : this['appsimake-commonlib'], kotlin, this['kotlinx-coroutines-core'], this['appsimake-commonshr'], this['appsimake-firebaseshr']);

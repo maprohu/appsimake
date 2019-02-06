@@ -76,13 +76,6 @@ fun Job.addedTo(ks: Killables): Job {
     return addedTo(ks.killSet)
 }
 
-fun Job.addedTo(ks: KillSet): Job {
-    val remove = ks.add { cancel() }
-    invokeOnCompletion {
-        remove()
-    }
-    return this
-}
 
 fun <T> toAsync(
     vararg emitters: EmitterIface<SetMove<T>>

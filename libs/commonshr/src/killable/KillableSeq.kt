@@ -28,13 +28,17 @@ class KillableSeq private constructor(
     }
     fun set(fn: () -> Unit) = set(Killable.once(fn))
 
+    val assign: Assign<Trigger> = { t -> set(t) }
+
     operator fun remAssign(fn: Trigger) = set(fn)
+    operator fun remAssign(fn: Killable) = set(fn)
     operator fun plusAssign(fn: () -> Unit) = set(fn)
     operator fun plusAssign(fn: Killable) = set(fn)
     fun clear() = set(Killable.empty)
 
     fun killables() = Killables().also { set(it) }
     fun seq() = KillableSeq().also { set(it) }
+    fun killSet() = Killables().also { set(it) }.killSet
 
 }
 

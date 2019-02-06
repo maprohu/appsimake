@@ -1,18 +1,10 @@
-function define(args, fn) {
-    fn(
-        ...args.map(function(a) {
-            if (a == 'exports') {
-                return module.exports;
-            } else if (a.startsWith('appsimake-')) {
-                return require('./' + a);
-            } else {
-                return require(a);
-            }
-        })
-    );
+if (typeof kotlin === 'undefined') {
+  throw new Error("Error loading module 'appsimake-commonshr'. Its dependency 'kotlin' was not found. Please, check whether 'kotlin' is loaded prior to 'appsimake-commonshr'.");
 }
-
-define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $module$kotlinx_coroutines_core) {
+if (typeof this['kotlinx-coroutines-core'] === 'undefined') {
+  throw new Error("Error loading module 'appsimake-commonshr'. Its dependency 'kotlinx-coroutines-core' was not found. Please, check whether 'kotlinx-coroutines-core' is loaded prior to 'appsimake-commonshr'.");
+}
+this['appsimake-commonshr'] = function (_, Kotlin, $module$kotlinx_coroutines_core) {
   'use strict';
   var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var defineInlineFunction = Kotlin.defineInlineFunction;
@@ -2952,4 +2944,4 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   affected = ArrayList_init();
   Kotlin.defineModule('appsimake-commonshr', _);
   return _;
-});
+}(typeof this['appsimake-commonshr'] === 'undefined' ? {} : this['appsimake-commonshr'], kotlin, this['kotlinx-coroutines-core']);

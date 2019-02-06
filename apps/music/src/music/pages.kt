@@ -3,28 +3,18 @@ package music
 import bootstrap.*
 import common.AsyncEmitter
 import common.DynamicAsyncEmitter
-import common.emptyAsyncEmitter
 import common.obj
 import commonfb.FB
-import commonlib.doc
 import commonui.*
-import domx.button
 import domx.cls
 import domx.div
 import domx.invoke
 import firebase.app.App
 import firebase.firestore.Firestore
-import firebase.firestore.toSetSource
-import killable.KillSet
-import killable.Killables
-import killable.addedTo
-import killable.plusAssign
+import killable.*
 import kotlinx.coroutines.await
-import music.player.PlayerBind
-import music.player.control
-import musiclib.Mp3File
-import musiclib.music
-import musiclib.songs
+import music.player.Bind
+import music.player.Control
 import rx.Rx
 import rx.RxIface
 import kotlin.browser.document
@@ -33,6 +23,9 @@ suspend fun boot(
     app: App = FB.app,
     db: Firestore = FB.db
 ) {
+    val panel = runPanel()
+    panel.hourglass()
+
     val killables = Killables()
     val ks = killables.killSet
     val idb = localDatabase()
@@ -58,7 +51,6 @@ suspend fun boot(
     }
 
     val loop = runLoop()
-    val panel = runPanel()
 
     ks += {
         loop.inbox.close()
@@ -69,7 +61,7 @@ suspend fun boot(
         loop.inbox,
         loop.proc.toSetProcOrElse(),
         panel,
-        Rx { uctx()?.uid?.userSongsDB }.addedTo(ks),
+        Rx { uctx().uid?.userSongsDB }.addedTo(ks),
         source
     )
 }
@@ -78,7 +70,7 @@ suspend fun boot(
 fun playerbar(
     ks: KillSet,
     inbox: Inbox,
-    proc: SetProcOrElse,
+    proc: AssignProcOrElse,
     panel: SetPanel,
     udb: RxIface<UserSongsDB?>,
     songSource: AsyncEmitter<Playable>
@@ -99,15 +91,15 @@ fun playerbar(
         cls.flexGrow1
     }
 
-    val ps = proc.assignProcSet()
-    val mainProc = ps.addProcVar()
-    val playerProc = ps.addProcVar()
+    val ps = proc.assignProcAdd()
+    val mainProc = ps.addProcAssign()
+    val playerProc = ps.addProcAssign()
 
-    PlayerBind().control(
+    Control(
+        Bind(inbox),
         ks,
-        inbox,
         playerWidget.node,
-        playerProc.set,
+        playerProc,
         udb,
         songSource
     )

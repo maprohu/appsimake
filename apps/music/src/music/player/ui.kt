@@ -1,21 +1,33 @@
 package music.player
 
 import bootstrap.*
+import common.obj
+import common.toOptional
 import commonui.faButtonSpan
+import commonui.plusAssign
 import domx.*
 import fontawesome.*
-import music.PlayerFrame
+import killable.KillSet
+import killable.addedTo
+import mediasession.MediaMetadata
+import mediasession.mediaSession
+import mediasession.mediaSessionSupported
+import music.Playable
 import musiclib.UserSongState
+import musiclib.fixedArtist
+import musiclib.fixedTitle
 import org.w3c.dom.HTMLButtonElement
-import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Node
 import rx.Rx
 import rx.rxClass
 import styles.scrollVertical
 import kotlin.browser.document
+import kotlin.browser.window
 import kotlin.math.floor
 
-fun PlayerBind.ui(): Node {
+fun Bind.ui(
+    kills: KillSet
+): Node {
 
     fun formatSecs(s: Int): String {
         val mins = s / 60.0
@@ -30,7 +42,68 @@ fun PlayerBind.ui(): Node {
     val totalDurationText = Rx { formatSecs(totalDuration()) }
     val totalDurationTextLength = Rx { totalDurationText().length }
     val currentPositionText = Rx { formatSecs(currentPosition()).padStart(totalDurationTextLength(), ' ') }
-    val likeButtonsDisabled = Rx { !hasUserDB() || stateLoading() }
+    val likeButtonsDisabled = Rx { userSong() == null }
+    val state = Rx { userSong()?.let { us -> us.state.initial().getOrDefault(UserSongState.New) } ?: UserSongState.New }
+
+    val tag = Rx { playable()?.tag.toOptional() }
+
+    val artistTitle = Rx {
+        val opt = tag()
+
+        AritstTitle(
+            opt.flatMap { t -> t.fixedArtist() }.getOrDefault("<unkown artist>"),
+            opt.flatMap { t -> t.fixedTitle() }.getOrDefault("<unkown title>")
+        )
+    }.addedTo(kills)
+
+    val artist = Rx { artistTitle().artist }
+    val title = Rx { artistTitle(). title }
+
+    fun withPlayable(fn: Playable.() -> Unit) {
+        val p = playable.now
+        if (p != null) {
+            fn(p)
+        }
+    }
+
+    if (mediaSessionSupported) {
+        window.navigator.mediaSession.apply {
+            artistTitle.forEach { at ->
+                metadata = MediaMetadata(
+                    obj {
+                        this.artist = at.artist
+                        this.title = at.title
+                    }
+                )
+            }
+
+            playable.forEach { p ->
+                if (p != null) {
+                    with(p) {
+                        setActionHandler("play") {
+                            inbox += PlayOrPause
+                        }
+                        setActionHandler("pause") {
+                            inbox += PlayOrPause
+                        }
+                        setActionHandler("seekbackward") {
+                            inbox += Backward
+                        }
+                        setActionHandler("seekforward") {
+                            inbox += Forward
+                        }
+                        setActionHandler("previoustrack") {
+                            inbox += Beginning
+                        }
+                        setActionHandler("nexttrack") {
+                            inbox += End
+                        }
+                    }
+                }
+            }
+
+        }
+    }
 
     return document.div {
         cls {
@@ -119,7 +192,9 @@ fun PlayerBind.ui(): Node {
                         }
                     }
                     clickEvent {
-                        post(PlayerFrame.Event.PlayOrPause)
+                        withPlayable {
+                            inbox += (PlayOrPause)
+                        }
                     }
                 }
             }
@@ -131,7 +206,9 @@ fun PlayerBind.ui(): Node {
                 mediaButton(Fa.stepBackward) {
                     rxEnabled { currentPosition() != 0 || playing() }
                     clickEvent {
-                        post(PlayerFrame.Event.Beginning)
+                        withPlayable {
+                            inbox += (Beginning)
+                        }
                     }
                 }
                 mediaButton(Fa.backward) {
@@ -140,7 +217,9 @@ fun PlayerBind.ui(): Node {
                     }
                     rxEnabled { currentPosition() != 0 || playing() }
                     clickEvent {
-                        post(PlayerFrame.Event.Backward)
+                        withPlayable {
+                            inbox += (Backward)
+                        }
                     }
                 }
                 mediaButton(Fa.forward) {
@@ -148,7 +227,9 @@ fun PlayerBind.ui(): Node {
                         btnOutlinePrimary
                     }
                     clickEvent {
-                        post(PlayerFrame.Event.Forward)
+                        withPlayable {
+                            inbox += (Forward)
+                        }
                     }
                 }
                 mediaButton(Fa.stepForward) {
@@ -156,7 +237,9 @@ fun PlayerBind.ui(): Node {
                         btnOutlinePrimary
                     }
                     clickEvent {
-                        post(PlayerFrame.Event.End)
+                        withPlayable {
+                            inbox += (End)
+                        }
                     }
                 }
 
@@ -173,7 +256,9 @@ fun PlayerBind.ui(): Node {
                         else Cls.btnOutlinePrimary
                     }
                     clickEvent {
-                        post(PlayerFrame.Event.Like)
+                        withPlayable {
+                            inbox += (Like)
+                        }
                     }
                 }
                 mediaButton(Fa.thumbsDown, null) {
@@ -183,7 +268,9 @@ fun PlayerBind.ui(): Node {
                         else Cls.btnOutlinePrimary
                     }
                     clickEvent {
-                        post(PlayerFrame.Event.DontLike)
+                        withPlayable {
+                            inbox += (DontLike)
+                        }
                     }
                 }
             }

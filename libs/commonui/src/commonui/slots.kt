@@ -1,8 +1,9 @@
 package commonui
 
-import common.Emitter
 import common.removeFromParent
 import common.replaceWith
+import killable.Assign
+import killable.remAssign
 import org.w3c.dom.Node
 
 private const val SlotsAttribute = "appsimakeSlots"
@@ -10,8 +11,8 @@ val Node.slots : Slots
     get() = asDynamic()[SlotsAttribute].unsafeCast<Slots?>()
         ?: Slots(this).also { asDynamic()[SlotsAttribute] = it }
 
-typealias OptSetter<T> = Setter<T?>
-typealias Slot = OptSetter<Node>
+typealias OptAssign<T> = Assign<T?>
+typealias Slot = OptAssign<Node>
 
 class Slots(
     private val node: Node
@@ -91,7 +92,7 @@ fun Node.widget(ps: Widget) { ps.slot %= widget }
 
 class Widget internal constructor(
     val node: Slot,
-    val slot: Setter<Slot>
+    val slot: Assign<Slot>
 ) {
     operator fun remAssign(n: Node?) { node %= n }
 }

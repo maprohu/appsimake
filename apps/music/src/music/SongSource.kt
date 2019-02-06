@@ -64,11 +64,19 @@ class PlayableSource(
 }
 class Playable(
     val tag: Mp3File,
-//    val userSong: UserSong,
     val url: String,
     killable: Killable
 ): Killable by killable {
     val id = tag.props.idOrFail
+
+    val PlayOrPause = object {}
+    val Beginning = object{}
+    val End = object{}
+    val Forward = object{}
+    val Backward = object{}
+    val Like = object{}
+    val DontLike = object{}
+
 //    companion object {
 //        suspend fun load(
 //            id: String,

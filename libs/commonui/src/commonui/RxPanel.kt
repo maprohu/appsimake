@@ -4,6 +4,9 @@ import bootstrap.flexCenter
 import bootstrap.flexGrow1
 import bootstrap.setupFullScreen
 import bootstrap.spinnerBorder
+import common.None
+import common.Optional
+import common.Some
 import common.replaceWith
 import domx.cls
 import domx.div
@@ -15,21 +18,19 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import org.w3c.dom.Node
+import rx.Rx
+import rx.RxIface
 import rx.Var
 import kotlin.browser.document
 
 
-typealias Setter<T> = (T) -> Unit
 
-@Suppress("NOTHING_TO_INLINE")
-inline operator fun <T> Setter<T>.remAssign(value: T) = this(value)
-
-fun <T> Setter<T>.first(trigger: Trigger) = { t:T ->
+fun <T> Assign<T>.first(trigger: Trigger) = { t:T ->
     trigger()
     this(t)
 }
 
-typealias SetPanel = Setter<Node>
+typealias SetPanel = Assign<Node>
 fun runPanel(
     node: Node = run {
         setupFullScreen()
@@ -61,120 +62,62 @@ fun procOrElse(msg: Any, fn: suspend () -> Unit): ProcOrElse = { e, els ->
 infix fun ProcOrElse.with(proc: Proc): Proc = { e -> this(e, proc) }
 infix fun ProcOrElse.with(procOrElse: ProcOrElse): ProcOrElse = { e, els -> this(e) { e2 -> procOrElse(e2, els) } }
 
-typealias SetProc = Setter<Proc>
-typealias SetProcOrElse = Setter<ProcOrElse>
-//typealias SetSubHandle = Setter<SubHandle>
+typealias SetProc = Assign<Proc>
+typealias AssignProcOrElse = Assign<ProcOrElse>
+//typealias SetSubHandle = Assign<SubHandle>
 
-fun SetProc.toSetProcOrElse(default: Proc = proc()): SetProcOrElse = { p ->
+fun SetProc.toSetProcOrElse(default: Proc = proc()): AssignProcOrElse = { p ->
     this %= p.with(default)
 }
 
-class ProcOrElseSet {
+typealias AddProcOrElse = Add<ProcOrElse>
+
+class ProcOrElseList {
     private val procs = mutableListOf<ProcOrElse>()
+
+    private suspend fun next(
+        iter: Iterator<ProcOrElse>,
+        e: Any,
+        els: Proc
+    ) {
+        if (iter.hasNext()) {
+            val n = iter.next()
+            n(e) { next(iter, e, els) }
+        } else {
+            els(e)
+        }
+    }
 
     val proc: ProcOrElse = { e, els ->
         val it = procs.iterator()
 
-        suspend fun next() {
-            if (it.hasNext()) {
-                it.next()(e) { next() }
-            } else {
-                els(e)
-            }
-        }
-
-        next()
+        next(it, e, els)
     }
 
-    operator fun plusAssign(proc: ProcOrElse) { procs += proc }
+    operator fun plusAssign(proc: ProcOrElse) { add(proc) }
+
+    val add: AddProcOrElse = { proc ->
+        procs += proc
+
+        {
+            procs -= proc
+        }
+    }
+
 }
+
+
+fun AddProcOrElse.process(msg: Any, fn: suspend () -> Unit) = this(procOrElse(msg, fn))
 
 object Back
 
 fun back(fn: suspend () -> Unit): ProcOrElse = procOrElse(Back, fn)
 
-//operator fun SetSubHandle.remAssign(proc: ProcOrElse) { this %= SubHandle(proc) }
 typealias Inbox = SendChannel<Any>
-//typealias SubProc = (change: (SubHandle) -> Unit, other: Proc) -> suspend (Any) -> Unit
 class LoopControl(
     val proc: SetProc,
     val inbox: Inbox
-) {
-//    fun loops(initial: SubHandle, default: Proc = {}): LoopsControl {
-//        var current = initial
-//
-//        fun activate() {
-//            proc %= current.proc with default
-//            current.activate()
-//        }
-//
-//        val handles : SetSubHandle = { sh ->
-//            current.kill()
-//            current = sh
-//            activate()
-//        }
-//
-//        val sub = {
-//            activate()
-//
-//            LoopsControl(
-//
-//            )
-//        }
-//
-//        return LoopsControl(
-//            handles,
-//            sub,
-//            inbox
-//        )
-//    }
-}
-
-//class LoopsControl(
-//    val handle: SetSubHandle,
-//    val sub: () -> LoopsControl,
-//    val inbox: SendChannel<Any>
-//
-//)
-
-//class LoopsPanel(
-//    val loops: LoopsControl,
-//    val panel: SetPanel
-//) {
-//    val inbox = loops.inbox
-//    val handle = loops.handle
-//
-//    fun sub(
-//        node: Node,
-//        proc: ProcOrElse
-//    ): LoopsPanel {
-//        return LoopsPanel(
-//            LoopsControl(
-//                inbox
-//            ),
-//            panel
-//
-//        )
-//
-//    }
-//}
-
-//data class SubHandle(
-//    val activate: Trigger,
-//    val proc: ProcOrElse = procOrElse(),
-//    val kill: Trigger = {}
-//) {
-//    constructor(proc: ProcOrElse, killable: Killable): this(proc, killable.toTrigger())
-//
-//    companion object {
-//        fun from(kills: KillSet, fn: (KillSet) -> ProcOrElse): SubHandle {
-//            val ks = kills.killables()
-//            return SubHandle(fn(ks.killSet), ks)
-//        }
-//    }
-//}
-
-
+)
 
 operator fun <T> SendChannel<T>.plusAssign(msg: T) { this.offer(msg) }
 
@@ -231,9 +174,6 @@ fun ((Node) -> Unit).hourglass() {
     )
 }
 
-typealias Page = (loop: LoopControl, panel: SetPanel, kills: KillSet) -> ProcOrElse
-typealias SubPage = (loop: LoopControl, panel: SetPanel, kills: KillSet, back: Trigger) -> Proc
-
 typealias AsyncSetter<T> = suspend (T) -> Unit
 suspend operator fun <T> AsyncSetter<T>.remAssign(v: T) { this(v) }
 
@@ -261,7 +201,7 @@ suspend fun <T> asyncKills(ks: KillSet, initial: T, fn: suspend (T) -> Trigger):
 
 class ProcOrElseVar private constructor(
     val proc: ProcOrElse,
-    val set: SetProcOrElse
+    val assign: AssignProcOrElse
 ) {
     companion object {
         operator fun invoke(initial: ProcOrElse = procOrElse()): ProcOrElseVar {
@@ -269,21 +209,80 @@ class ProcOrElseVar private constructor(
 
             return ProcOrElseVar(
                 proc = { e, els -> proc(e, els) },
-                set = { p -> proc = p }
+                assign = { p -> proc = p }
             )
         }
     }
 
-    operator fun remAssign(proc: ProcOrElse) { set %= proc }
+    operator fun remAssign(proc: ProcOrElse) { assign %= proc }
 }
 
 fun procVar() = ProcOrElseVar()
-fun procSet() = ProcOrElseSet()
+fun procOrElses() = ProcOrElseList()
 
-fun ProcOrElseSet.assignedTo(pvar: SetProcOrElse) = also { pvar %= proc }
-fun ProcOrElseSet.assignedTo(pvar: ProcOrElseVar) = also { pvar %= proc }
-fun ProcOrElseVar.addedTo(pset: ProcOrElseSet) = also { pset += proc }
+fun ProcOrElseList.assignedTo(pvar: AssignProcOrElse) = also { pvar %= proc }
+fun ProcOrElseList.assignedTo(pvar: ProcOrElseVar) = also { pvar %= proc }
+fun ProcOrElseVar.addedTo(pset: ProcOrElseList) = also { pset += proc }
+fun ProcOrElseVar.addedTo(pset: AddProcOrElse) = also { pset += proc }
 
-fun ProcOrElseSet.addProcVar() = commonui.procVar().addedTo(this)
-fun SetProcOrElse.assignProcSet() = commonui.procSet().assignedTo(this)
+fun AddProcOrElse.addProcAssign() = commonui.procVar().addedTo(this).assign
+fun ProcOrElseList.addProcAssign() = add.addProcAssign()
 
+fun AssignProcOrElse.assignProcAdd() = procOrElses().assignedTo(this).add
+
+fun rxProc(ks: KillSet, fn: () -> ProcOrElse): ProcOrElse {
+    val rxv = Rx { fn() }.addedTo(ks)
+
+    return { e, els ->
+        rxv.now(e, els)
+    }
+}
+fun <T: Any> rxProcIf(ks: KillSet, rxv: RxIface<T?>, fn: (T) -> ProcOrElse): ProcOrElse {
+    return rxProc(ks) {
+        rxv().let { us ->
+            if (us == null) {
+                procOrElse()
+            } else {
+                fn(us)
+            }
+        }
+    }
+}
+
+class AsyncHolder<T>(initial: Optional<T> = None) {
+    constructor(initial: T): this(Some(initial))
+    internal var opt = initial
+    val value get() = opt.get()
+}
+fun <T> Inbox.async(ks: KillSet, fn: suspend () -> T): AsyncHolder<T> {
+    val msg = AsyncHolder<T>()
+    GlobalScope.launch {
+        msg.opt = Some(fn())
+        this@async += msg
+    }.addedTo(ks)
+    return msg
+}
+
+infix fun <T> AsyncHolder<T>.processedBy(fn: suspend (T) -> Unit): ProcOrElse {
+    return procOrElse(this) {
+        fn(this.value)
+    }
+}
+
+fun <T> Inbox.channel(ks: KillSet, ch: ReceiveChannel<T>, fn: suspend (T) -> Unit): ProcOrElse {
+    val procs = ProcOrElseList()
+    GlobalScope.launch {
+        for (t in ch) {
+            val tks = ks.killables()
+            tks += procs.add(
+                AsyncHolder(t).also {
+                    this@channel += it
+                }.processedBy {
+                    fn(it)
+                    tks.kill()
+                }
+            )
+        }
+    }
+    return procs.proc
+}

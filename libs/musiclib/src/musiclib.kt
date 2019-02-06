@@ -40,8 +40,8 @@ class Mp3File: Base<Mp3File>() {
 
 }
 
-fun Mp3File.fixedArtist() = Rx { artistfix.initial().orElse { artist.initial() } }
-fun Mp3File.fixedTitle() = Rx { titlefix.initial().orElse { title.initial() } }
+fun Mp3File.fixedArtist() = artistfix.initial().orElse { artist.initial() }
+fun Mp3File.fixedTitle() = titlefix.initial().orElse { title.initial() }
 
 abstract class ActivePlaylist<T: ActivePlaylist<T>>: BaseRootVal<T>() {
     val position by o.scalar<Double>().prop()

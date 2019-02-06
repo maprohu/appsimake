@@ -484,6 +484,15 @@ interface HasFBProps<in O>: HasProps<O, CollectionWrap<O>, DocWrap<O>> {
 
 }
 
+fun HasFBProps<*>.saveIfDirty() {
+    props.apply {
+        if (dirty.now) {
+            save()
+        }
+    }
+}
+
+
 open class BaseVal<out T, N, P, PS: Props<@kotlin.UnsafeVariance T, N, P>, PF: BasePropFactory<@kotlin.UnsafeVariance T, N, P, PS>>(val o: PF) : HasProps<@kotlin.UnsafeVariance T, N, P> by o
 
 @Suppress("DELEGATED_MEMBER_HIDES_SUPERTYPE_OVERRIDE")

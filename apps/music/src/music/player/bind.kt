@@ -1,28 +1,27 @@
 package music.player
 
+import common.None
+import common.Optional
+import commonui.Inbox
+import music.Playable
+import musiclib.Mp3File
+import musiclib.UserSong
 import musiclib.UserSongState
-import rx.Rx
 import rx.Var
 
+data class AritstTitle(
+    val artist: String,
+    val title: String
+)
 
-class PlayerBind {
+class Bind(
+    val inbox: Inbox
+) {
 
-    object PlayOrPause
-    object Beginning
-    object End
-    object Forward
-    object Backward
-    object Like
-    object DontLike
-
-    val state = Var(UserSongState.New)
-    val stateLoading = Var(false)
-    val hasUserDB = Var(false)
+    val playable = Var<Playable?>(null)
     val playing = Var(false)
     val totalDuration = Var(0)
     val currentPosition = Var(0)
-    val artist = Var("artist")
-    val title = Var("title")
+    val userSong = Var<UserSong?>(null)
 
-    fun post(msg: Any) {}
 }
