@@ -79,8 +79,12 @@ external interface Transaction {
 // https://firebase.google.com/docs/reference/js/firebase.firestore.GetOptions
 external interface GetOptions {
 
-    var source : String
+    var source : GetOptionsSource
 
+}
+@Suppress("NESTED_CLASS_IN_EXTERNAL_INTERFACE")
+external interface GetOptionsSource {
+    companion object
 }
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.SetOptions?authuser=0

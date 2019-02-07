@@ -9,11 +9,6 @@ import musiclib.UserSong
 import musiclib.UserSongState
 import rx.Var
 
-data class AritstTitle(
-    val artist: String,
-    val title: String
-)
-
 class Bind(
     val inbox: Inbox
 ) {

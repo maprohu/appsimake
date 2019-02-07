@@ -5,8 +5,10 @@ import common.Optional
 import common.Some
 import commonshr.SetDiff
 import killable.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import org.w3c.dom.Element
 import org.w3c.dom.GlobalEventHandlers
 import kotlin.dom.addClass
@@ -429,4 +431,30 @@ fun <T> RxIface<T>.toChannel(ks: KillSet): ReceiveChannel<T> {
     ks += { ch.close() }
     forEach { t -> ch.offer(t) }.addedTo(ks)
     return ch
+}
+fun <T> RxIface<T>.toChannelLater(ks: KillSet): ReceiveChannel<T> {
+    val ch = Channel<T>(Channel.UNLIMITED)
+    ks += { ch.close() }
+    forEachLater { t -> ch.offer(t) }.addedTo(ks)
+    return ch
+}
+
+suspend fun <T, S> RxIface<T>.mapAsync(
+    ks: KillSet,
+    fn: suspend (T, KillSet) -> S
+): RxIface<S> {
+    val kseq = ks.seq()
+
+    suspend fun calc(t: T): S = fn(t, kseq.killSet())
+
+    val rxv = Var(calc(now))
+    val ch = toChannelLater(ks)
+
+    GlobalScope.launch {
+        for (t in ch) {
+            rxv.now = calc(t)
+        }
+    }.addedTo(ks)
+
+    return rxv
 }

@@ -6,9 +6,7 @@ import commonlib.private
 import firebase.firestore.Firestore
 import firebase.firestore.toSetSource
 import firebaseshr.ids
-import indexeddb.IDBDatabase
 import killable.KillSet
-import killable.Killables
 import musiclib.*
 
 class UserSongsDB(
@@ -16,13 +14,13 @@ class UserSongsDB(
     private val killables: KillSet
 ) {
     companion object {
-        suspend fun of(
+        suspend operator fun invoke(
             uks: KillSet,
             uid: String,
             db: Firestore = FB.db
         ): UserSongsDB {
             return UserSongsDB(
-                    music.app.private.doc(uid).usersongs.toSetSource(uks, db) { UserSong() },
+                    musicLib.app.private.doc(uid).usersongs.toSetSource(uks, db) { UserSong() },
                     uks
             )
         }
@@ -49,6 +47,8 @@ class UserSongsDB(
 
     val dontLikeSet = dontLike.ids
     val newSet = new.ids
+    val likeSet = like.ids
 
 }
+
 

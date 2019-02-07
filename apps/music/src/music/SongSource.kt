@@ -14,6 +14,7 @@ import killable.Killable
 import killable.Killables
 import killable.addedTo
 import kotlinx.coroutines.CompletableDeferred
+import music.data.SongInfoSource
 import musiclib.Mp3File
 import musiclib.UserSong
 import org.w3c.dom.url.URL
@@ -41,25 +42,24 @@ class PlayableSource(
         )
     }
 
-    companion object {
-        suspend fun load(
-            id: String,
-            idb: IDBDatabase,
-            tagDB: TagDB
-//            userSongsDB: UserSongsDB
-        ): PlayableSource? {
-            val mp3 = idb.readMp3(id)
-
-            return mp3?.let { f ->
-                PlayableSource(
-                    tag = tagDB.get(id, f),
-//                    userSong = userSongsDB.get(id),
-                    file = f
-                )
-            }
-        }
-
-    }
+//    companion object {
+//        suspend fun load(
+//            id: String,
+//            idb: IDBDatabase,
+//            tags: SongInfoSource
+//        ): PlayableSource? {
+//            val mp3 = idb.readMp3(id)
+//
+//            return mp3?.let { f ->
+//                PlayableSource(
+//                    tag = tagDB.get(id, f),
+////                    userSong = userSongsDB.get(id),
+//                    file = f
+//                )
+//            }
+//        }
+//
+//    }
 
 }
 class Playable(
@@ -222,47 +222,47 @@ class Playable(
 //    }
 //}
 
-fun localSongSource(
-    idb: IDBDatabase,
-    tagDB: TagDB
-) = RandomChooser(
-    listOf(
-        LocalSongs.emitter
-    )
-) { id, ks ->
-    val l = PlayableSource.load(
-        id,
-        idb,
-        tagDB
-    )
-
-    if (l == null) {
-        None
-    } else {
-        Some(l.toPlayable().addedTo(ks))
-    }
-}
-
-fun randomSongSource(
-    idb: IDBDatabase,
-    tagDB: TagDB,
-    userSongsDB: UserSongsDB
-) = RandomChooser(
-    listOf(
-        userSongsDB.new.ids,
-        userSongsDB.like.ids
-    )
-) { id, ks ->
-    val l = PlayableSource.load(
-        id,
-        idb,
-        tagDB
-    )
-
-    if (l == null) {
-        None
-    } else {
-        Some(l.toPlayable().addedTo(ks))
-    }
-}
+//fun localSongSource(
+//    idb: IDBDatabase,
+//    tagDB: TagDB
+//) = RandomChooser(
+//    listOf(
+//        LocalSongs.emitter
+//    )
+//) { id, ks ->
+//    val l = PlayableSource.load(
+//        id,
+//        idb,
+//        tagDB
+//    )
+//
+//    if (l == null) {
+//        None
+//    } else {
+//        Some(l.toPlayable().addedTo(ks))
+//    }
+//}
+//
+//fun randomSongSource(
+//    idb: IDBDatabase,
+//    tagDB: TagDB,
+//    userSongsDB: UserSongsDB
+//) = RandomChooser(
+//    listOf(
+//        userSongsDB.new.ids,
+//        userSongsDB.like.ids
+//    )
+//) { id, ks ->
+//    val l = PlayableSource.load(
+//        id,
+//        idb,
+//        tagDB
+//    )
+//
+//    if (l == null) {
+//        None
+//    } else {
+//        Some(l.toPlayable().addedTo(ks))
+//    }
+//}
 

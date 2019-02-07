@@ -1,5 +1,5 @@
 package buildserver
 
-fun main(args: Array<String>) {
+fun main() {
     run("hosting")
 }

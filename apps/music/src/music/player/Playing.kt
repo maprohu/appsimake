@@ -7,12 +7,12 @@ import killable.plusAssign
 import kotlin.browser.window
 
 class Playing(
-    val visible: Visible
-) {
+    visible: Visible
+): VisibleWrap(visible) {
     val PlayingEnded = object {}
 
     fun next() {
-        visible.control.next(true)
+        visible.player.next(true)
     }
 
     init {
@@ -39,7 +39,7 @@ class Playing(
                 }
             }
 
-            with (control) {
+            with (player) {
                 kills += audio.listen("ended") {
                     bind.inbox += PlayingEnded
                 }

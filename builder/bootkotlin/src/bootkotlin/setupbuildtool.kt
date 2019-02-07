@@ -8,7 +8,7 @@ val buildtoolDeps = listOf(
     kotlinxCoroutinesCoreCommon
 )
 
-fun main(args: Array<String>) {
+fun main() {
 
     buildtoolDeps.forEach { it.download() }
 

@@ -26,10 +26,11 @@ import rx.Var
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.js.Promise
+import music.boot.Boot
 
 fun main() {
     GlobalScope.launch {
-        boot()
+        Boot()
     }
 }
 

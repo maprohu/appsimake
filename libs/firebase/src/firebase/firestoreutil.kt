@@ -24,6 +24,9 @@ inline val DocumentChangeType.Companion.added get() = "added".unsafeCast<Documen
 inline val DocumentChangeType.Companion.modified get() = "modified".unsafeCast<DocumentChangeType>()
 inline val DocumentChangeType.Companion.removed get() = "removed".unsafeCast<DocumentChangeType>()
 
+inline val GetOptionsSource.Companion.default get() = "default".unsafeCast<GetOptionsSource>()
+inline val GetOptionsSource.Companion.server  get() = "server".unsafeCast<GetOptionsSource>()
+inline val GetOptionsSource.Companion.cache   get() = "cache".unsafeCast<GetOptionsSource>()
 
 fun <T> queryUi(
         query: Query,

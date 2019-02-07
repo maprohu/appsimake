@@ -8,8 +8,8 @@ import killable.plusAssign
 import musiclib.UserSongState
 
 class Paused(
-    val visible: Visible
-) {
+    visible: Visible
+): VisibleWrap(visible) {
     init {
         with (visible) {
             val kills = stateSeq.killSet()

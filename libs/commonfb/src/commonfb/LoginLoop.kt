@@ -1,16 +1,45 @@
 package commonfb
 
-import bootstrap.*
 import commonui.*
-import domx.*
 import firebase.User
 import firebase.app.App
-import firebase.auth.GoogleAuthProvider
-import fontawesome.*
 import killable.*
-import org.w3c.dom.HTMLElement
-import org.w3c.dom.Node
-import kotlin.browser.document
+import rx.Rx
+import rx.RxIface
+import rx.Var
+
+
+sealed class UserState {
+    object Unknown: UserState()
+    object NotLoggedIn: UserState()
+    class LoggedIn(val user: User): UserState()
+}
+fun userState(
+    ks: KillSet,
+    app: App = FB.app
+): RxIface<UserState> {
+    val rxv = Var<UserState>(UserState.Unknown)
+
+    ks += app.auth().onAuthStateChanged { u ->
+        rxv.now = if (u == null) {
+            UserState.NotLoggedIn
+        } else {
+            UserState.LoggedIn(u)
+        }
+    }
+
+    return rxv
+}
+
+fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx {
+    val u = this()
+    when (u) {
+        is UserState.LoggedIn -> u.user
+        else -> null
+    }
+}.addedTo(ks)
+
+fun RxIface<User?>.toUid(ks: KillSet) = Rx { this()?.uid }.addedTo(ks)
 
 object SignOut
 object SignIn

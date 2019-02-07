@@ -10,6 +10,8 @@ import kotlin.reflect.KProperty
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 
 @Suppress("NOTHING_TO_INLINE")
@@ -510,6 +512,96 @@ interface SetSource<T> {
         ks: KillSet,
         fn: (SetMove<T>) -> Unit
     ): Set<T>
+}
+
+fun <T> SetSource<T>.random(ks: KillSet, globalExclude: Set<T>): ReceiveChannel<T> {
+    val channel = Channel<T>(Channel.RENDEZVOUS)
+    ks += { channel.close() }
+
+    val total = mutableSetOf<T>()
+    val exclude = mutableSetOf<T>()
+
+    var cd: CompletableDeferred<T>? = null
+
+    total += listen(ks) { m ->
+        val v = m.value
+        when (m) {
+            is SetRemoved -> {
+                total -= v
+            }
+            is SetAdded -> {
+                total += v
+                if (v !in exclude && v !in globalExclude) {
+                    cd?.let { d ->
+                        d.complete(v)
+                        cd = null
+                    }
+                }
+            }
+        }
+    }
+
+    GlobalScope.launch {
+        suspend fun wait(): T {
+           return CompletableDeferred<T>().also { cd = it }.await()
+        }
+
+        while (true) {
+            val available = total - exclude - globalExclude
+            val next = if (available.isEmpty()) {
+                val restart = total - globalExclude
+
+                if (restart.isNotEmpty()) {
+                    exclude.clear()
+                    restart.random()
+                } else {
+                    wait()
+                }
+            } else {
+                available.random()
+            }
+            exclude += next
+            channel.send(next)
+        }
+    }.addedTo(ks)
+
+    return channel
+}
+
+fun <T> priorityMerge(
+    kills: KillSet,
+    vararg channels: ReceiveChannel<T>
+): ReceiveChannel<T> {
+    val channel = Channel<T>(Channel.RENDEZVOUS)
+
+    val seq = channels.asSequence()
+    GlobalScope.launch {
+        suspend fun first(): T {
+            val fks = Killables()
+            val cd = CompletableDeferred<T>()
+
+            channels.forEach {  ch ->
+                launch {
+                    cd.complete(
+                        ch.receive()
+                    )
+                    fks.kill()
+                }.addedTo(fks.killSet)
+            }
+
+            return cd.await()
+        }
+
+        while (true) {
+            channel.send(
+                seq.map { it.poll() }.firstOrNull { it != null } ?: first()
+            )
+        }
+    }.addedTo(kills)
+
+
+
+    return channel
 }
 
 interface SetSourceWithKey<T, K>: SetSource<T> {

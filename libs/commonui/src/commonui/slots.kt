@@ -95,6 +95,7 @@ class Widget internal constructor(
     val slot: Assign<Slot>
 ) {
     operator fun remAssign(n: Node?) { node %= n }
+    operator fun remAssign(n: HasNode) { node %= n.node }
 }
 
 fun widget(initial: Node? = null): Widget {

@@ -1,28 +1,33 @@
 package music.player
 
-import common.AsyncEmitter
-import commonui.*
+import commonui.addProcAssign
+import commonui.async
+import commonui.processedBy
 import killable.*
 import music.Playable
-import music.UserSongsDB
-import rx.RxIface
+import music.boot.Boot
+import music.boot.BootWrap
 
 const val SeekSeconds = 15.0
 
-class Control(
-    val bind: Bind,
-    kills: KillSet,
-    private val panel: Slot,
-    val proc: AssignProcOrElse,
-    val usdb: RxIface<UserSongsDB?>,
-    val songSource: AsyncEmitter<Playable>
-) {
-    private val ui = bind.ui(kills)
+open class PlayerWrap(
+    val player: Player
+): BootWrap(player.boot)
 
+class Player(
+    boot: Boot
+): BootWrap(boot) {
+    val bind = Bind(inbox)
+    private val panel = boot.bind.playerWidget
+    val proc = boot.procs.addProcAssign()
+
+
+    val kills = boot.kills
     val kseq = kills.seq()
+    private val ui = UI(kills, bind)
 
     private fun poll(next: (Playable) -> Unit) {
-        val polled = songSource.poll()
+        val polled = boot.songSource.poll()
         if (polled == null) {
             hidden()
         } else {
@@ -48,7 +53,7 @@ class Control(
         panel %= null
         kseq.clear()
         proc %= bind.inbox.async(kseq.killSet()) {
-            songSource.receive()
+            boot.songSource.receive()
         } processedBy { playable ->
             show(playable)
         }

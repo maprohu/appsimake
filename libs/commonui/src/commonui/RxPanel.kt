@@ -31,6 +31,15 @@ fun <T> Assign<T>.first(trigger: Trigger) = { t:T ->
 }
 
 typealias SetPanel = Assign<Node>
+
+interface HasNode {
+    val node: Node
+}
+open class NodeWrap(
+    override val node: Node
+): HasNode
+operator fun SetPanel.remAssign(node: HasNode) { this %= node.node }
+
 fun runPanel(
     node: Node = run {
         setupFullScreen()
@@ -49,7 +58,8 @@ fun runPanel(
 }
 
 
-typealias Proc = suspend (Any) -> Unit
+typealias ProcT<T> = suspend (T) -> Unit
+typealias Proc = ProcT<Any>
 typealias ProcOrElse = suspend (msg: Any, orElse: Proc) -> Unit
 fun proc(): Proc = {}
 fun procOrElse(): ProcOrElse = { e, els -> els(e) }
@@ -116,6 +126,10 @@ fun back(fn: suspend () -> Unit): ProcOrElse = procOrElse(Back, fn)
 typealias Inbox = SendChannel<Any>
 class LoopControl(
     val proc: SetProc,
+    val inbox: Inbox
+)
+
+open class InboxWrap(
     val inbox: Inbox
 )
 
@@ -268,21 +282,32 @@ infix fun <T> AsyncHolder<T>.processedBy(fn: suspend (T) -> Unit): ProcOrElse {
         fn(this.value)
     }
 }
-
-fun <T> Inbox.channel(ks: KillSet, ch: ReceiveChannel<T>, fn: suspend (T) -> Unit): ProcOrElse {
+fun <T> AddProcOrElse.processOnce(kills: KillSet, msg: T, inbox: Inbox, fn: ProcT<T>) {
+    val tks = kills.killables()
+    tks += this(
+        AsyncHolder(msg).also {
+            inbox += it
+        }.processedBy {
+            fn(it)
+            tks.kill()
+        }
+    )
+}
+fun <T> Inbox.channel(ks: KillSet, ch: ReceiveChannel<T>, fn: ProcT<T>): ProcOrElse {
     val procs = ProcOrElseList()
     GlobalScope.launch {
         for (t in ch) {
-            val tks = ks.killables()
-            tks += procs.add(
-                AsyncHolder(t).also {
-                    this@channel += it
-                }.processedBy {
-                    fn(it)
-                    tks.kill()
-                }
-            )
+            procs.add.processOnce(ks, t, this@channel, fn)
         }
     }
+    return procs.proc
+}
+fun <T> Inbox.rx(ks: KillSet, fnx: () -> T, fn: ProcT<T>): ProcOrElse = rx(ks, Rx { fnx() }.addedTo(ks), fn)
+
+fun <T> Inbox.rx(ks: KillSet, ch: RxIface<T>, fn: ProcT<T>): ProcOrElse {
+    val procs = ProcOrElseList()
+    ch.forEach { t ->
+        procs.add.processOnce(ks, t, this, fn)
+    }.addedTo(ks)
     return procs.proc
 }

@@ -1,6 +1,5 @@
 package music.player
 
-import common.Some
 import common.listen
 import commonui.*
 import domx.audio
@@ -10,7 +9,6 @@ import killable.KillSet
 import killable.plusAssign
 import killable.seq
 import music.Playable
-import musiclib.Mp3File
 import musiclib.UserSong
 import musiclib.UserSongState
 import rx.Var
@@ -19,17 +17,21 @@ import kotlin.browser.document
 import kotlin.math.max
 
 
+open class VisibleWrap(
+    val visible: Visible
+): PlayerWrap(visible.player)
+
 class Visible(
-    val control: Control,
+    player: Player,
     val playable: Playable,
     startPlaying: Boolean
-) {
-    private val procs = control.proc.assignProcAdd()
+): PlayerWrap(player) {
+    private val procs = player.proc.assignProcAdd()
 
-    val kills = control.kseq.killSet()
+    val kills = player.kseq.killSet()
 
     val audio = document.audio {
-        with (control.bind) {
+        with (player.bind) {
             kills += listen("durationchange") {
                 totalDuration.now = duration.toInt()
             }
@@ -40,14 +42,14 @@ class Visible(
     }
 
     fun readCounterNow() {
-        control.bind.currentPosition.now = audio.currentTime.toInt()
+        player.bind.currentPosition.now = audio.currentTime.toInt()
     }
 
     val stateSeq = kills.seq()
     val stateProc = procs.addProcAssign()
     val userSong = Var<UserSong?>(null).also {
         kills += it.forEach { us ->
-            control.bind.userSong.now = us
+            player.bind.userSong.now = us
         }
     }
 
@@ -61,7 +63,7 @@ class Visible(
 
     fun nextProc(kills: KillSet, startPlaying: Boolean): ProcOrElse {
         fun next() {
-            control.next(startPlaying)
+            player.next(startPlaying)
         }
         return with (playable) {
             procOrElses().apply {
@@ -100,9 +102,9 @@ class Visible(
             Paused(this)
         }
 
-        with (control) {
+        with (player) {
 
-            procs += bind.inbox.channel(kills, usdb.toChannel(kills)) { udb ->
+            procs += bind.inbox.channel(kills, boot.usdb.toChannel(kills)) { udb ->
                 userSong.now = udb?.let { it.get(playable.id) }
             }
             bind.playable.now = playable

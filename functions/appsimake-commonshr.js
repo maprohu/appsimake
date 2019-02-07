@@ -32,9 +32,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var getCallableRef = Kotlin.getCallableRef;
   var Pair = Kotlin.kotlin.Pair;
   var listOf = Kotlin.kotlin.collections.listOf_i5x0yv$;
+  var Channel = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.Channel_ww73n8$;
+  var minus_0 = Kotlin.kotlin.collections.minus_khz7k3$;
+  var asSequence = Kotlin.kotlin.collections.asSequence_us0mfu$;
+  var map = Kotlin.kotlin.sequences.map_z5avom$;
   var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
   var plus_0 = Kotlin.kotlin.collections.plus_xfiyik$;
-  var minus_0 = Kotlin.kotlin.collections.minus_xfiyik$;
+  var minus_1 = Kotlin.kotlin.collections.minus_xfiyik$;
   var Exception = Kotlin.kotlin.Exception;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var throwCCE = Kotlin.throwCCE;
@@ -43,14 +47,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var setOf = Kotlin.kotlin.collections.setOf_mh5how$;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
   var PropertyMetadata = Kotlin.PropertyMetadata;
-  var minus_1 = Kotlin.kotlin.collections.minus_khz7k3$;
   var lazyOf = Kotlin.kotlin.lazyOf_mh5how$;
   var throwUPAE = Kotlin.throwUPAE;
   var L0 = Kotlin.Long.ZERO;
   var ensureNotNull = Kotlin.ensureNotNull;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
   var removeClass = Kotlin.kotlin.dom.removeClass_hhb33f$;
-  var Channel = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.Channel_ww73n8$;
   Success.prototype = Object.create(Try.prototype);
   Success.prototype.constructor = Success;
   Failure.prototype = Object.create(Try.prototype);
@@ -377,7 +379,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'MappedEmitter',
     interfaces: [EmitterIface]
   };
-  function map($receiver, fn) {
+  function map_0($receiver, fn) {
     return new MappedEmitter($receiver, fn);
   }
   function feedTo$lambda(closure$set) {
@@ -564,6 +566,414 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'SetSource',
     interfaces: []
   };
+  function random$lambda(closure$channel) {
+    return function () {
+      closure$channel.close_dbl4no$();
+      return Unit;
+    };
+  }
+  function random$lambda_0(closure$total, closure$exclude, closure$globalExclude, closure$cd) {
+    return function (m) {
+      var tmp$;
+      var v = m.value;
+      if (Kotlin.isType(m, SetRemoved)) {
+        closure$total.remove_11rb$(v);
+      }
+       else if (Kotlin.isType(m, SetAdded)) {
+        closure$total.add_11rb$(v);
+        if (!closure$exclude.contains_11rb$(v) && !closure$globalExclude.contains_11rb$(v)) {
+          if ((tmp$ = closure$cd.v) != null) {
+            var closure$cd_0 = closure$cd;
+            tmp$.complete_11rb$(v);
+            closure$cd_0.v = null;
+          }
+        }
+      }
+      return Unit;
+    };
+  }
+  function Coroutine$random$lambda$wait(closure$cd_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$closure$cd = closure$cd_0;
+  }
+  Coroutine$random$lambda$wait.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$random$lambda$wait.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$random$lambda$wait.prototype.constructor = Coroutine$random$lambda$wait;
+  Coroutine$random$lambda$wait.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            var $receiver = CompletableDeferred();
+            this.local$closure$cd.v = $receiver;
+            this.state_0 = 2;
+            this.result_0 = $receiver.await(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return this.result_0;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function random$lambda$wait(closure$cd_0) {
+    return function (continuation_0, suspended) {
+      var instance = new Coroutine$random$lambda$wait(closure$cd_0, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  var Random = Kotlin.kotlin.random.Random;
+  var random = Kotlin.kotlin.collections.random_iscd7z$;
+  function Coroutine$random$lambda(closure$cd_0, closure$total_0, closure$exclude_0, closure$globalExclude_0, closure$channel_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$cd = closure$cd_0;
+    this.local$closure$total = closure$total_0;
+    this.local$closure$exclude = closure$exclude_0;
+    this.local$closure$globalExclude = closure$globalExclude_0;
+    this.local$closure$channel = closure$channel_0;
+    this.local$tmp$ = void 0;
+    this.local$wait = void 0;
+  }
+  Coroutine$random$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$random$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$random$lambda.prototype.constructor = Coroutine$random$lambda;
+  Coroutine$random$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$wait = random$lambda$wait(this.local$closure$cd);
+            this.state_0 = 2;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            var available = minus_0(minus_0(this.local$closure$total, this.local$closure$exclude), this.local$closure$globalExclude);
+            if (available.isEmpty()) {
+              var restart = minus_0(this.local$closure$total, this.local$closure$globalExclude);
+              if (!restart.isEmpty()) {
+                this.local$closure$exclude.clear();
+                this.local$tmp$ = random(restart, Random.Default);
+                this.state_0 = 4;
+                continue;
+              }
+               else {
+                this.state_0 = 3;
+                this.result_0 = this.local$wait(this);
+                if (this.result_0 === COROUTINE_SUSPENDED)
+                  return COROUTINE_SUSPENDED;
+                continue;
+              }
+            }
+             else {
+              this.local$tmp$ = random(available, Random.Default);
+              this.state_0 = 5;
+              continue;
+            }
+
+          case 3:
+            this.local$tmp$ = this.result_0;
+            this.state_0 = 4;
+            continue;
+          case 4:
+            this.state_0 = 5;
+            continue;
+          case 5:
+            var next = this.local$tmp$;
+            this.local$closure$exclude.add_11rb$(next);
+            this.state_0 = 6;
+            this.result_0 = this.local$closure$channel.send_11rb$(next, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 6:
+            this.state_0 = 2;
+            continue;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function random$lambda_1(closure$cd_0, closure$total_0, closure$exclude_0, closure$globalExclude_0, closure$channel_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$random$lambda(closure$cd_0, closure$total_0, closure$exclude_0, closure$globalExclude_0, closure$channel_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  var addAll = Kotlin.kotlin.collections.addAll_ipc267$;
+  function random_0($receiver, ks, globalExclude) {
+    var channel = Channel(0);
+    plusAssign(ks, random$lambda(channel));
+    var total = LinkedHashSet_init();
+    var exclude = LinkedHashSet_init();
+    var cd = {v: null};
+    addAll(total, $receiver.listen_cp6tho$(ks, random$lambda_0(total, exclude, globalExclude, cd)));
+    addedTo_1(launch(coroutines.GlobalScope, void 0, void 0, random$lambda_1(cd, total, exclude, globalExclude, channel)), ks);
+    return channel;
+  }
+  function Coroutine$priorityMerge$lambda$first$lambda$lambda(closure$cd_0, closure$ch_0, closure$fks_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$cd = closure$cd_0;
+    this.local$closure$ch = closure$ch_0;
+    this.local$closure$fks = closure$fks_0;
+  }
+  Coroutine$priorityMerge$lambda$first$lambda$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$priorityMerge$lambda$first$lambda$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$priorityMerge$lambda$first$lambda$lambda.prototype.constructor = Coroutine$priorityMerge$lambda$first$lambda$lambda;
+  Coroutine$priorityMerge$lambda$first$lambda$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.state_0 = 2;
+            this.result_0 = this.local$closure$ch.receive(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.local$closure$cd.complete_11rb$(this.result_0);
+            return this.local$closure$fks.kill(), Unit;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function priorityMerge$lambda$first$lambda$lambda(closure$cd_0, closure$ch_0, closure$fks_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$priorityMerge$lambda$first$lambda$lambda(closure$cd_0, closure$ch_0, closure$fks_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function Coroutine$priorityMerge$lambda$first(closure$channels_0, this$_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$closure$channels = closure$channels_0;
+    this.local$this$ = this$_0;
+  }
+  Coroutine$priorityMerge$lambda$first.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$priorityMerge$lambda$first.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$priorityMerge$lambda$first.prototype.constructor = Coroutine$priorityMerge$lambda$first;
+  Coroutine$priorityMerge$lambda$first.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            var fks = new Killables();
+            var cd = CompletableDeferred();
+            var $receiver = this.local$closure$channels;
+            var tmp$;
+            for (tmp$ = 0; tmp$ !== $receiver.length; ++tmp$) {
+              var element = $receiver[tmp$];
+              addedTo_1(launch(this.local$this$, void 0, void 0, priorityMerge$lambda$first$lambda$lambda(cd, element, fks)), fks.killSet);
+            }
+
+            this.state_0 = 2;
+            this.result_0 = cd.await(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return this.result_0;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function priorityMerge$lambda$first(closure$channels_0, this$_0) {
+    return function (continuation_0, suspended) {
+      var instance = new Coroutine$priorityMerge$lambda$first(closure$channels_0, this$_0, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function priorityMerge$lambda$lambda(it) {
+    return it.poll();
+  }
+  function Coroutine$priorityMerge$lambda(closure$channels_0, closure$channel_0, closure$seq_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$channels = closure$channels_0;
+    this.local$closure$channel = closure$channel_0;
+    this.local$closure$seq = closure$seq_0;
+    this.local$tmp$ = void 0;
+    this.local$first = void 0;
+    this.local$$receiver = $receiver_0;
+  }
+  Coroutine$priorityMerge$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$priorityMerge$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$priorityMerge$lambda.prototype.constructor = Coroutine$priorityMerge$lambda;
+  Coroutine$priorityMerge$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$first = priorityMerge$lambda$first(this.local$closure$channels, this.local$$receiver);
+            this.state_0 = 2;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            var $receiver = map(this.local$closure$seq, priorityMerge$lambda$lambda);
+            var firstOrNull$result;
+            firstOrNull$break: do {
+              var tmp$;
+              tmp$ = $receiver.iterator();
+              while (tmp$.hasNext()) {
+                var element = tmp$.next();
+                if (element != null) {
+                  firstOrNull$result = element;
+                  break firstOrNull$break;
+                }
+              }
+              firstOrNull$result = null;
+            }
+             while (false);
+            this.local$tmp$ = firstOrNull$result;
+            if (this.local$tmp$ == null) {
+              this.state_0 = 3;
+              this.result_0 = this.local$first(this);
+              if (this.result_0 === COROUTINE_SUSPENDED)
+                return COROUTINE_SUSPENDED;
+              continue;
+            }
+             else {
+              this.state_0 = 4;
+              continue;
+            }
+
+          case 3:
+            this.local$tmp$ = this.result_0;
+            this.state_0 = 4;
+            continue;
+          case 4:
+            this.state_0 = 5;
+            this.result_0 = this.local$closure$channel.send_11rb$(this.local$tmp$, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 5:
+            this.state_0 = 2;
+            continue;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function priorityMerge$lambda(closure$channels_0, closure$channel_0, closure$seq_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$priorityMerge$lambda(closure$channels_0, closure$channel_0, closure$seq_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function priorityMerge(kills, channels) {
+    var channel = Channel(0);
+    var seq = asSequence(channels);
+    addedTo_1(launch(coroutines.GlobalScope, void 0, void 0, priorityMerge$lambda(channels, channel, seq)), kills);
+    return channel;
+  }
   function SetSourceWithKey() {
   }
   SetSourceWithKey.$metadata$ = {
@@ -611,7 +1021,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     kind: Kind_CLASS,
     interfaces: [SetSource]
   };
-  function map_0($receiver, mfn) {
+  function map_1($receiver, mfn) {
     return new map$ObjectLiteral($receiver, mfn);
   }
   function filtered$add_0(closure$curr, closure$f) {
@@ -622,7 +1032,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function filtered$remove_0(closure$curr, closure$f) {
     return function (v) {
-      closure$curr.v = minus_0(closure$curr.v, v);
+      closure$curr.v = minus_1(closure$curr.v, v);
       closure$f.emit_11rb$(new SetRemoved(v));
     };
   }
@@ -697,7 +1107,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       m.applyTo_wgjnv3$(closure$thisSet);
       var after = closure$fn(id);
       if (before && !after) {
-        closure$result.v = minus_0(closure$result.v, id);
+        closure$result.v = minus_1(closure$result.v, id);
         closure$out.emit_11rb$(new SetRemoved(id));
       }
        else if (!before && after) {
@@ -1514,7 +1924,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function SetDiff$Companion$of$lambda$lambda(closure$o) {
     return function (n) {
-      return minus_1(closure$o, n);
+      return minus_0(closure$o, n);
     };
   }
   function SetDiff$Companion$of$lambda$lambda_0(closure$o) {
@@ -1532,7 +1942,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function SetDiff$Companion$of$lambda$lambda_1(closure$n) {
     return function (o) {
-      return minus_1(closure$n, o);
+      return minus_0(closure$n, o);
     };
   }
   function SetDiff$Companion$of$lambda$lambda_2(closure$n) {
@@ -1552,7 +1962,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     return new SetDiff(old.map_2o04qz$(SetDiff$Companion$of$lambda(new_0)).getOrElse_skz6lt$(SetDiff$Companion$of$lambda_0), new_0.map_2o04qz$(SetDiff$Companion$of$lambda_1(old)).getOrElse_skz6lt$(SetDiff$Companion$of$lambda_2));
   };
   SetDiff$Companion.prototype.of_lk58qy$ = function (old, new_0) {
-    return new SetDiff(minus_1(old, new_0), minus_1(new_0, old));
+    return new SetDiff(minus_0(old, new_0), minus_0(new_0, old));
   };
   SetDiff$Companion.$metadata$ = {
     kind: Kind_OBJECT,
@@ -2523,7 +2933,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function remove$lambda$lambda(closure$v) {
     return function (it) {
-      return minus_0(it, closure$v);
+      return minus_1(it, closure$v);
     };
   }
   function remove$lambda(closure$v) {
@@ -2753,6 +3163,222 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     addedTo($receiver.forEach_qlkmfe$(toChannel$lambda_0(ch)), ks);
     return ch;
   }
+  function toChannelLater$lambda(closure$ch) {
+    return function () {
+      closure$ch.close_dbl4no$();
+      return Unit;
+    };
+  }
+  function toChannelLater$lambda_0(closure$ch) {
+    return function (t) {
+      closure$ch.offer_11rb$(t);
+      return Unit;
+    };
+  }
+  function toChannelLater($receiver, ks) {
+    var ch = Channel(2147483647);
+    plusAssign(ks, toChannelLater$lambda(ch));
+    addedTo($receiver.forEachLater_qlkmfe$(toChannelLater$lambda_0(ch)), ks);
+    return ch;
+  }
+  function Coroutine$mapAsync$calc(closure$fn_0, closure$kseq_0, t_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$closure$fn = closure$fn_0;
+    this.local$closure$kseq = closure$kseq_0;
+    this.local$t = t_0;
+  }
+  Coroutine$mapAsync$calc.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$mapAsync$calc.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$mapAsync$calc.prototype.constructor = Coroutine$mapAsync$calc;
+  Coroutine$mapAsync$calc.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.state_0 = 2;
+            this.result_0 = this.local$closure$fn(this.local$t, this.local$closure$kseq.killSet(), this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return this.result_0;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function mapAsync$calc(closure$fn_0, closure$kseq_0) {
+    return function (t_0, continuation_0, suspended) {
+      var instance = new Coroutine$mapAsync$calc(closure$fn_0, closure$kseq_0, t_0, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function Coroutine$mapAsync$lambda(closure$ch_0, closure$calc_0, closure$rxv_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$ch = closure$ch_0;
+    this.local$closure$calc = closure$calc_0;
+    this.local$closure$rxv = closure$rxv_0;
+    this.local$tmp$ = void 0;
+    this.local$tmp$_0 = void 0;
+  }
+  Coroutine$mapAsync$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$mapAsync$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$mapAsync$lambda.prototype.constructor = Coroutine$mapAsync$lambda;
+  Coroutine$mapAsync$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$tmp$ = this.local$closure$ch.iterator();
+            this.state_0 = 2;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.state_0 = 3;
+            this.result_0 = this.local$tmp$.hasNext(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 3:
+            if (!this.result_0) {
+              this.state_0 = 7;
+              continue;
+            }
+             else {
+              this.state_0 = 4;
+              continue;
+            }
+
+          case 4:
+            this.state_0 = 5;
+            this.result_0 = this.local$tmp$.next(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 5:
+            var t = this.result_0;
+            this.local$tmp$_0 = this.local$closure$rxv;
+            this.state_0 = 6;
+            this.result_0 = this.local$closure$calc(t, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 6:
+            this.local$tmp$_0.now = this.result_0;
+            this.state_0 = 2;
+            continue;
+          case 7:
+            return Unit;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function mapAsync$lambda(closure$ch_0, closure$calc_0, closure$rxv_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$mapAsync$lambda(closure$ch_0, closure$calc_0, closure$rxv_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function Coroutine$mapAsync($receiver_0, ks_0, fn_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$calc = void 0;
+    this.local$$receiver = $receiver_0;
+    this.local$ks = ks_0;
+    this.local$fn = fn_0;
+  }
+  Coroutine$mapAsync.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$mapAsync.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$mapAsync.prototype.constructor = Coroutine$mapAsync;
+  Coroutine$mapAsync.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            var kseq = seq(this.local$ks);
+            this.local$calc = mapAsync$calc(this.local$fn, kseq);
+            this.state_0 = 2;
+            this.result_0 = this.local$calc(this.local$$receiver.now, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            var rxv = new Var(this.result_0);
+            var ch = toChannelLater(this.local$$receiver, this.local$ks);
+            addedTo_1(launch(coroutines.GlobalScope, void 0, void 0, mapAsync$lambda(ch, this.local$calc, rxv)), this.local$ks);
+            return rxv;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function mapAsync($receiver_0, ks_0, fn_0, continuation_0, suspended) {
+    var instance = new Coroutine$mapAsync($receiver_0, ks_0, fn_0, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
+  }
   var package$common = _.common || (_.common = {});
   package$common.dyn = dyn;
   $$importsForInline$$['appsimake-commonshr'] = _;
@@ -2771,7 +3397,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$common.Emitter = Emitter;
   package$common.toSetSource_9p620j$ = toSetSource;
   package$common.MappedEmitter = MappedEmitter;
-  package$common.map_x7fpzi$ = map;
+  package$common.map_x7fpzi$ = map_0;
   package$common.feedTo_cenaja$ = feedTo;
   package$common.filtered_duf482$ = filtered;
   package$common.combineAnd_6vwu35$ = combineAnd;
@@ -2781,8 +3407,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$common.andIn_7i9aus$ = andIn;
   package$common.feedTo_7nd12m$ = feedTo_0;
   package$common.SetSource = SetSource;
+  package$common.random_txoh8m$ = random_0;
+  package$common.priorityMerge_lvgc0e$ = priorityMerge;
   package$common.SetSourceWithKey = SetSourceWithKey;
-  package$common.map_2x290v$ = map_0;
+  package$common.map_2x290v$ = map_1;
   package$common.filtered_tu02nm$ = filtered_0;
   package$common.combineN_oy6zd9$ = combineN_0;
   package$common.combine_eiygni$ = combine_1;
@@ -2910,6 +3538,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.rxClasses_dk0vnv$ = rxClasses;
   package$rx.rxClasses_cv5l32$ = rxClasses_0;
   package$rx.toChannel_tgu8ha$ = toChannel;
+  package$rx.toChannelLater_tgu8ha$ = toChannelLater;
+  package$rx.mapAsync_wvb2ro$ = mapAsync;
   AsyncEmitter.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
   emptyAsyncEmitter$ObjectLiteral.prototype.plus_wii6vi$ = AsyncEmitter.prototype.plus_wii6vi$;
   DynamicAsyncEmitter.prototype.plus_wii6vi$ = AsyncEmitter.prototype.plus_wii6vi$;
