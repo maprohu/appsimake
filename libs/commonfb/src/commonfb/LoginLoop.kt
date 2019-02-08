@@ -4,6 +4,9 @@ import commonui.*
 import firebase.User
 import firebase.app.App
 import killable.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import rx.Rx
 import rx.RxIface
 import rx.Var
@@ -16,16 +19,28 @@ sealed class UserState {
 }
 fun userState(
     ks: KillSet,
-    app: App = FB.app
+    app: App = FB.app,
+    fn: suspend (User?) -> Unit
 ): RxIface<UserState> {
     val rxv = Var<UserState>(UserState.Unknown)
 
-    ks += app.auth().onAuthStateChanged { u ->
-        rxv.now = if (u == null) {
-            UserState.NotLoggedIn
-        } else {
-            UserState.LoggedIn(u)
+    val ch = Channel<User?>()
+    ks += { ch.close() }
+
+    GlobalScope.launch {
+        for (u in ch) {
+            fn(u)
+            rxv.now = if (u == null) {
+                UserState.NotLoggedIn
+            } else {
+                UserState.LoggedIn(u)
+            }
+
         }
+    }
+
+    ks += app.auth().onAuthStateChanged { u ->
+        ch.offer(u)
     }
 
     return rxv
@@ -41,26 +56,24 @@ fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx {
 
 fun RxIface<User?>.toUid(ks: KillSet) = Rx { this()?.uid }.addedTo(ks)
 
-object SignOut
-object SignIn
 
 //fun Proc.withSignOut(
 //    app: App = FB.app,
 //    fn: suspend () -> Unit = {}
 //) = with(signOut(app, fn))
 
-fun signOut(
-    app: App = FB.app,
-    fn: suspend () -> Unit = {}
-) : ProcOrElse = { e, els ->
-    when (e) {
-        SignOut -> {
-            app.auth().signOut()
-            fn()
-        }
-        else -> els(e)
-    }
-}
+//fun signOut(
+//    app: App = FB.app,
+//    fn: suspend () -> Unit = {}
+//) : ProcOrElse = { e, els ->
+//    when (e) {
+//        SignOut -> {
+//            app.auth().signOut()
+//            fn()
+//        }
+//        else -> els(e)
+//    }
+//}
 
 //fun loginPage(addLoginUi: (HTMLElement) -> Unit): Node = document.column {
 //    topbar {
@@ -159,77 +172,8 @@ fun Inbox.runLoginEvents(
 //    panel: SetPanel,
 //    back: Trigger
 //) {
-//    class Msg
-//    val Google = Msg()
-////    val Email = Msg()
-//    val Guest = Msg()
 //
-//    loops.handle %= { e, els ->
-//        when (e) {
-//            Google -> {
-//                val provider = GoogleAuthProvider()
-//                firebase.auth().signInWithPopup(provider)
-//                back()
-//            }
-//            Guest -> {
-//                firebase.auth().signInAnonymously()
-//                back()
-//            }
-//            else -> els(e)
-//        }
-//    }
 //
-//    panel %= document.column {
-//        cls {
-//            flexGrow1
-//        }
-//        topbar {
-//            cls {
-//                p1
-//            }
-//            h5 {
-//                cls {
-//                    m1
-//                }
-//                innerText = "Please Sign In"
-//            }
-//        }
-//        column {
-//            cls {
-//                flexGrow1
-//                alignItemsCenter
-//                p1
-//            }
-//            column {
-//                fun butt(faIcon: FaIcon, text: String, msg: Msg): HTMLElement {
-//                    return button {
-//                        cls {
-//                            btn
-//                            btnPrimary
-//                            m1
-//                            textLeft
-//                        }
-//                        span {
-//                            cls {
-//                                fa(faIcon) {
-//                                    fw
-//                                }
-//                                mr2
-//                            }
-//                        }
-//                        span {
-//                            innerText = text
-//                        }
-//                        clickEvent {
-//                            loops.inbox += msg
-//                        }
-//                    }
-//                }
-//                butt(FaIcon.faBrands { google }, "Sign in with Google", Google)
-////                butt(FaIcon.fa { at }, "Sign in with email", Email)
-//                butt(FaIcon.fa { user }, "Continue as guest", Guest)
-//            }
-//        }
 //
 //    }
 //}

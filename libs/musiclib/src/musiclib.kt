@@ -4,7 +4,7 @@ import commonlib.*
 import firebaseshr.*
 import rx.Rx
 
-val musicLib by lib()
+val musicLib = Lib("music")
 
 val DocWrap<AppDoc>.songs by coll<Mp3File>()
 val DocWrap<AppDoc>.storage by coll<StoreState>()

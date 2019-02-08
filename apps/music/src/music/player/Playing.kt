@@ -11,7 +11,7 @@ class Playing(
 ): VisibleWrap(visible) {
     val PlayingEnded = object {}
 
-    fun next() {
+    suspend fun next() {
         visible.player.next(true)
     }
 

@@ -5,7 +5,11 @@ import commonfb.toUid
 import firebase.User
 import indexeddb.IDBDatabase
 import killable.KillSet
+import killable.Trigger
+import killable.addedTo
+import killable.plusAssign
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import music.readLastUserId
 import music.writeLastUserId
@@ -14,22 +18,36 @@ import rx.RxIface
 import rx.Var
 import rx.toChannel
 
+class LatestUid(
+    val rxv: RxIface<String?>,
+    val clear: Trigger
+)
 suspend fun RxIface<User?>.toLatestUid(
     ks: KillSet,
     idb: IDBDatabase
-): RxIface<String?> {
+): LatestUid {
     val uid = toUid(ks)
 
     val latestUid = Var(idb.readLastUserId())
 
+    val ch = Channel<String?>()
+    ks += { ch.close() }
+
     GlobalScope.launch {
-        for (u in uid.toChannel(ks)) {
-            if (u != null) {
-                idb.writeLastUserId(u)
-                latestUid.now = u
-            }
+        for (id in ch) {
+            idb.writeLastUserId(id)
         }
+    }.addedTo(ks)
+
+    uid.forEach { id ->
+        ch.offer(id)
+        latestUid.now = id
+    }.addedTo(ks)
+
+    return LatestUid(
+        Rx { uid()  ?: latestUid()  }
+    ) {
+        ch.offer(null)
     }
 
-    return Rx { uid() ?: latestUid() }
 }

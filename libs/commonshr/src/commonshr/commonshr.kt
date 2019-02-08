@@ -1,6 +1,7 @@
 package commonshr
 
 import common.Optional
+import rx.Var
 
 data class SetDiff<T>(
     val removed: Set<T> = setOf(),
@@ -45,6 +46,10 @@ sealed class SetMove<out T> {
     fun applyTo(set: MutableList<@UnsafeVariance T>) = when(this) {
         is SetAdded -> set += value
         is SetRemoved -> set -= value
+    }
+    fun applyTo(set: Var<Set<@UnsafeVariance T>>) = when(this) {
+        is SetAdded -> set.transform { it + value }
+        is SetRemoved -> set.transform { it - value }
     }
 }
 data class SetAdded<T>(override val value: T): SetMove<T>()

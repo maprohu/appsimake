@@ -6,11 +6,15 @@ import domx.audio
 import domx.invoke
 import firebaseshr.saveIfDirty
 import killable.KillSet
+import killable.addedTo
 import killable.plusAssign
 import killable.seq
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import music.Playable
 import musiclib.UserSong
 import musiclib.UserSongState
+import org.w3c.dom.url.URL
 import rx.Var
 import rx.toChannel
 import kotlin.browser.document
@@ -26,7 +30,7 @@ class Visible(
     val playable: Playable,
     startPlaying: Boolean
 ): PlayerWrap(player) {
-    private val procs = player.proc.assignProcAdd()
+    private val procs = player.visibleProc.assignProcAdd()
 
     val kills = player.kseq.killSet()
 
@@ -37,7 +41,10 @@ class Visible(
             }
             currentPosition.now = 0
         }
-        src = playable.url
+        src = URL.createObjectURL(playable.blob)
+        kills += {
+            URL.revokeObjectURL(src)
+        }
         load()
     }
 
@@ -62,7 +69,7 @@ class Visible(
     }
 
     fun nextProc(kills: KillSet, startPlaying: Boolean): ProcOrElse {
-        fun next() {
+        suspend fun next() {
             player.next(startPlaying)
         }
         return with (playable) {
@@ -94,7 +101,11 @@ class Visible(
 
 
     init {
-        kills += playable
+        GlobalScope.launch {
+            kills += boot.songInfoSource(playable.id, playable.blob).forEach {
+                player.bind.tag.now = it
+            }
+        }.addedTo(kills)
 
         if (startPlaying) {
             Playing(this)

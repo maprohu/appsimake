@@ -20,7 +20,8 @@ object jquery : JsDownload(
     "https://code.jquery.com/jquery-3.3.1.js"
 )
 
-val firebaseVersion = "5.8.0"
+
+val firebaseVersion = "5.8.2"
 val firebaseBaseName = "firebase-bower-$firebaseVersion"
 object firebaseJs : JsDownload(
     url = URL("https://codeload.github.com/firebase/firebase-bower/zip/v$firebaseVersion"),
@@ -35,7 +36,6 @@ object firebaseJs : JsDownload(
             "$firebaseBaseName/firebase-storage.js"
         )
     )
-//    "https://www.gstatic.com/firebasejs/5.7.0/firebase.js"
 )
 
 val firebaseUiVersion = "3.4.1"

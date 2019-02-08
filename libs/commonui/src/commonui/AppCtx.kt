@@ -12,12 +12,36 @@ import kotlinx.coroutines.*
 import org.w3c.dom.events.Event
 import org.w3c.notifications.Notification
 import org.w3c.notifications.NotificationOptions
+import org.w3c.workers.ServiceWorkerRegistration
 import rx.Rx
 import rx.RxVal
 import rx.Var
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.js.Promise
+
+object APP {
+
+    val isServiceWorkerSupported by lazy {
+        window.navigator.serviceWorker as? Any != null
+    }
+
+    val isFcmSupported by lazy {
+        isServiceWorkerSupported
+    }
+
+    private val registerServiceWorkerPromise by lazy {
+        window.navigator.serviceWorker.register(serviceWorkerFileName)
+    }
+
+    suspend fun registerServiceWorker(): ServiceWorkerRegistration? {
+        return if (isServiceWorkerSupported) {
+            registerServiceWorkerPromise.await()
+        } else {
+            null
+        }
+    }
+}
 
 class AppCtx(
     val title: String

@@ -458,3 +458,5 @@ suspend fun <T, S> RxIface<T>.mapAsync(
 
     return rxv
 }
+
+fun <T> KillSet.rx(fn: () -> T): RxIface<T> = Rx(fn).addedTo(this)

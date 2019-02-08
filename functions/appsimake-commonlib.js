@@ -1388,8 +1388,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
   };
   function TokenDeveloperClaims() {
     Base.call(this);
-    this.adminRight_jf0qlt$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, TokenDeveloperClaims$adminRight_metadata);
-    this.musicRight_98wbz9$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, TokenDeveloperClaims$musicRight_metadata);
+    this.adminRight_jf0qlt$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, TokenDeveloperClaims$adminRight_metadata);
+    this.musicRight_98wbz9$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, TokenDeveloperClaims$musicRight_metadata);
   }
   var TokenDeveloperClaims$adminRight_metadata = new PropertyMetadata('adminRight');
   Object.defineProperty(TokenDeveloperClaims.prototype, 'adminRight', {

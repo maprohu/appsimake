@@ -10,6 +10,9 @@ import commonshr.SetRemoved
 import indexeddb.IDBDatabase
 import indexeddb.await
 import org.w3c.dom.MessageEvent
+import org.w3c.files.Blob
+import rx.RxIface
+import rx.Var
 
 private external interface LocalSongEvent {
     var id: String
@@ -24,22 +27,24 @@ private inline val LocalSongEventType.Companion.removed get() = "removed".unsafe
 
 object LocalSongs {
 
-    private var locals = setOf<String>()
+    private var locals = Var(setOf<String>())
     private val e = Emitter<SetMove<String>>()
-    val emitter = e.toSetSource { locals }
+    val emitter = e.toSetSource { locals.now }
+
+    val rxv: RxIface<Set<String>> = locals
 
     private fun emit(m: SetMove<String>) {
         val id = m.value
         when (m) {
             is SetAdded -> {
-                if (id !in locals) {
-                    locals += id
+                if (id !in locals.now) {
+                    locals.transform { it + id }
                     e.emit(m)
                 }
             }
             is SetRemoved -> {
-                if (id in locals) {
-                    locals -= id
+                if (id in locals.now) {
+                    locals.transform { it - id }
                     e.emit(m)
                 }
             }
@@ -63,7 +68,7 @@ object LocalSongs {
     }
 
     suspend fun init(idb: IDBDatabase) {
-        locals = idb.readMp3Store().getAllKeys().await().toSet()
+        locals.now = idb.readMp3Store().getAllKeys().await().toSet()
     }
 
     fun added(id: String) {
@@ -87,6 +92,15 @@ object LocalSongs {
         emit(
             SetRemoved(id)
         )
+    }
+
+    suspend fun load(idb: IDBDatabase, id: String) : Blob? {
+        val blob = idb.readMp3(id)
+        if (blob == null) {
+            emit(SetRemoved(id))
+        }
+        return blob
+
     }
 
 }

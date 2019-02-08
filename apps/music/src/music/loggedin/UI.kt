@@ -6,7 +6,9 @@ import bootstrap.flexGrow1
 import bootstrap.m1
 import commonui.NodeWrap
 import commonui.faButton
+import commonui.plusAssign
 import commonui.topbar
+import domx.clickEvent
 import domx.cls
 import domx.div
 import domx.invoke
@@ -31,6 +33,9 @@ class UI(
                         btnSecondary
                         m1
                     }
+                }
+                clickEvent {
+                    inbox += SignOut
                 }
             }
         }

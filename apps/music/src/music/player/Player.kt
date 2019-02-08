@@ -1,8 +1,6 @@
 package music.player
 
-import commonui.addProcAssign
-import commonui.async
-import commonui.processedBy
+import commonui.*
 import killable.*
 import music.Playable
 import music.boot.Boot
@@ -19,26 +17,24 @@ class Player(
 ): BootWrap(boot) {
     val bind = Bind(inbox)
     private val panel = boot.bind.playerWidget
-    val proc = boot.procs.addProcAssign()
+    val procs = boot.procs.addProcAssign().assignProcAdd()
+    val visibleProc = procs.addProcAssign()
 
 
     val kills = boot.kills
     val kseq = kills.seq()
     private val ui = UI(kills, bind)
 
-    private fun poll(next: (Playable) -> Unit) {
-        val polled = boot.songSource.poll()
-        if (polled == null) {
-            hidden()
-        } else {
-            next(polled)
+    private suspend fun poll(fn: (Playable) -> Unit) {
+        boot.songSource.now?.invoke()?.let { p ->
+            fn(p)
         }
     }
 
     private fun visible(p: Playable, startPlaying: Boolean) {
         Visible(this, p, startPlaying)
     }
-    fun next(startPlaying: Boolean) {
+    suspend fun next(startPlaying: Boolean) {
         poll {
             visible(it, startPlaying)
         }
@@ -51,17 +47,19 @@ class Player(
 
     private fun hidden() {
         panel %= null
+        visibleProc %= procOrElse()
         kseq.clear()
-        proc %= bind.inbox.async(kseq.killSet()) {
-            boot.songSource.receive()
-        } processedBy { playable ->
-            show(playable)
-        }
     }
 
     init {
-        poll {
-            show(it)
+        procs += bind.inbox.rx(kills, { boot.songSource() != null }) { hasPlayable ->
+            if (hasPlayable) {
+                poll {
+                    show(it)
+                }
+            } else {
+                hidden()
+            }
         }
     }
 

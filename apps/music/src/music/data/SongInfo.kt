@@ -1,12 +1,17 @@
 package music.data
 
 import common.Either
+import common.Optional
+import common.Some
 import commonfb.FB
+import commonfb.LazyCache
 import commonfb.initFrom
+import commonfb.lazy
 import domx.audio
 import domx.invoke
 import firebase.firestore.Firestore
 import firebaseshr.saveIfDirty
+import killable.KillSet
 import kotlinx.coroutines.CompletableDeferred
 import music.extractMp3Tag
 import music.readAsArrayBuffer
@@ -16,34 +21,47 @@ import musiclib.songs
 import org.khronos.webgl.ArrayBuffer
 import org.w3c.dom.url.URL
 import org.w3c.files.Blob
+import rx.RxIface
+import rx.Var
 import kotlin.browser.document
 
-typealias SongInfoSource = suspend (String) -> Either<Mp3File, suspend (Blob) -> Mp3File>
+typealias SongInfoSource = suspend (String, Blob) -> RxIface<Optional<Mp3File>>
 
-suspend fun SongInfoSource.get(id: String, blob: Blob): Mp3File {
-    val ei = this(id)
-    return when (ei) {
-        is Either.Left -> ei.value
-        is Either.Right -> ei.value(blob)
+fun localSongInfoSource(): SongInfoSource {
+    val map = mutableMapOf<String, Mp3File>()
+    return { id, blob ->
+        map.getOrPut(id) {
+            Mp3File().apply {
+                initFrom(blob)
+                props.clearDirty()
+            }
+        }.let { Var(Some(it)) }
     }
 }
 
-fun songInfoSource(
+fun cloudSongInfoSource(
+    ks: KillSet,
     db: Firestore = FB.db
-): SongInfoSource = { id ->
-    val dw = musicLib.app.songs.doc(id)
+): SongInfoSource {
+    val cache = musicLib.app.songs.lazy(ks, db) { Mp3File() }
+    return { id, blob ->
+        val tag = cache(id)
 
-    val mp3 = Mp3File()
+        if (tag.now.isEmpty()) {
+            Mp3File().apply {
+                initFrom(blob)
+                props.apply {
+                    persisted(
+                        musicLib.app.songs.doc(id)
+                    )
 
-    if (mp3.initFrom(dw, db)) {
-        Either.Left(mp3)
-    } else {
-        Either.Right { b ->
-            mp3.apply {
-                initFrom(b)
-                saveIfDirty()
+                    @Suppress("DeferredResultUnused")
+                    save()
+                }
             }
         }
+
+        tag
     }
 }
 

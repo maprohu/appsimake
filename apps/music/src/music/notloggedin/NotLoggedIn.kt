@@ -1,10 +1,10 @@
 package music.notloggedin
 
-import commonui.Slot
-import commonui.remAssign
-import killable.KillSet
+import commonfb.login.Login
+import commonui.*
+import killable.killables
+import killable.remAssign
 import music.boot.Boot
-import music.boot.BootWrap
 import music.boot.MainBase
 
 class NotLoggedIn(
@@ -14,6 +14,30 @@ class NotLoggedIn(
     private val ui = UI(kills, bind)
 
     init {
-        panel %= ui
+        val procs = procOrElses()
+        fun display() {
+            panel %= ui
+            proc %= procs.proc
+        }
+        display()
+
+        with(bind) {
+            procs.add.process(SignIn) {
+                val ks = kills.killables()
+                Login(
+                    ks.killSet,
+                    inbox,
+                    proc,
+                    panel,
+                    back = {
+                        ks.kill()
+                        display()
+                    },
+                    loggingIn = {
+                        boot.userUnknown()
+                    }
+                )
+            }
+        }
     }
 }

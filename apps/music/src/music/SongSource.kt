@@ -21,53 +21,10 @@ import org.w3c.dom.url.URL
 import org.w3c.files.Blob
 import org.w3c.files.File
 
-interface SongSource {
-    suspend fun request(): Playable
-}
-
-class PlayableSource(
-    val tag: Mp3File,
-//    val userSong: UserSong,
-    val file: Blob
-) {
-    fun toPlayable(): Playable {
-        val url = URL.createObjectURL(file)
-        return Playable(
-            tag = tag,
-//            userSong = userSong,
-            url = url,
-            killable = Killable.once {
-                URL.revokeObjectURL(url)
-            }
-        )
-    }
-
-//    companion object {
-//        suspend fun load(
-//            id: String,
-//            idb: IDBDatabase,
-//            tags: SongInfoSource
-//        ): PlayableSource? {
-//            val mp3 = idb.readMp3(id)
-//
-//            return mp3?.let { f ->
-//                PlayableSource(
-//                    tag = tagDB.get(id, f),
-////                    userSong = userSongsDB.get(id),
-//                    file = f
-//                )
-//            }
-//        }
-//
-//    }
-
-}
 class Playable(
-    val tag: Mp3File,
-    val url: String,
-    killable: Killable
-): Killable by killable {
-    val id = tag.props.idOrFail
+    val id: String,
+    val blob: Blob
+) {
 
     val PlayOrPause = object {}
     val Beginning = object{}
@@ -77,27 +34,6 @@ class Playable(
     val Like = object{}
     val DontLike = object{}
 
-//    companion object {
-//        suspend fun load(
-//            id: String,
-//            idb: IDBDatabase,
-//            tagDB: TagDB
-//        ): Playable? {
-//            val mp3 = idb.readMp3(id)
-//
-//            return mp3?.let { f ->
-//                val url = URL.createObjectURL(f)
-//                Playable(
-//                    tag = tagDB.get(id, f),
-//                    url = url,
-//                    killable = Killable.once {
-//                        URL.revokeObjectURL(url)
-//                    }
-//                )
-//            }
-//        }
-//
-//    }
 }
 
 //class DefaultSongSource(

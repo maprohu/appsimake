@@ -299,20 +299,25 @@ class QueryWrap<in T>(
 fun <T: HasFBProps<*>> T.onSnapshot(d: DocumentSnapshot) {
     if (d.exists) {
         val data = d.data<dynamic>()
+        props.deleted = false
         props.extractInitial(data)
     } else {
-        props.deleted()
+        props.deleted = true
     }
 }
 
 fun <T: HasFBProps<*>> DocumentReference.listen(
-    target: T
+    target: T,
+    onFirst: Trigger = {}
 ) : Killable {
     require(!target.props.live.now)
     target.props.live.now = true
 
+    val firstOnce = onFirst.once()
+
     val killSnapshot = onSnapshot { d ->
         target.onSnapshot(d)
+        firstOnce()
     }
 
     return Killable.once {

@@ -54,8 +54,6 @@ class UI(
         val likeButtonsDisabled = Rx { userSong() == null }
         val state = Rx { userSong()?.let { us -> us.state.initial().getOrDefault(UserSongState.New) } ?: UserSongState.New }
 
-        val tag = Rx { playable()?.tag.toOptional() }
-
         val artistTitle = Rx {
             val opt = tag()
 

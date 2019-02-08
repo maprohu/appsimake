@@ -1,4 +1,4 @@
-//@file:JsQualifier("firebase.storage")
+@file:JsQualifier("firebase.storage")
 package firebase.storage
 
 import org.khronos.webgl.ArrayBuffer
@@ -62,10 +62,6 @@ external interface UploadMetadata
 external interface StringFormat {
     companion object
 }
-inline val StringFormat.Companion.RAW: StringFormat get() = "RAW".asDynamic().unsafeCast<StringFormat>()
-inline val StringFormat.Companion.BASE64: StringFormat get() = "BASE64".asDynamic().unsafeCast<StringFormat>()
-inline val StringFormat.Companion.BASE64URL: StringFormat get() = "BASE64URL".asDynamic().unsafeCast<StringFormat>()
-inline val StringFormat.Companion.DATA_URL: StringFormat get() = "DATA_URL".asDynamic().unsafeCast<StringFormat>()
 
 // https://firebase.google.com/docs/reference/js/firebase.storage.UploadTask
 external class UploadTask: Promise<UploadTaskSnapshot> {

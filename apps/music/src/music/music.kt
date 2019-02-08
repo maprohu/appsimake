@@ -27,10 +27,16 @@ import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.js.Promise
 import music.boot.Boot
+import music.boot.boot
 
 fun main() {
+
     GlobalScope.launch {
-        Boot()
+        boot()
+//        FB.app
+//        FB.db
+//        val idb = localDatabase()
+//        LocalSongs.init(idb)
     }
 }
 
@@ -315,30 +321,30 @@ fun Node.mainDropMenu(
 //}
 
 
-class MusicCtx(
-    fbCtx: FbCtx,
-    user: User,
-    val idb: IDBDatabase,
-    val tagDB: TagDB,
-    val songStoreDB: SongStorageDB,
-    val userSongsDB: UserSongsDB
-) : LoggedInCtx(fbCtx, user) {
-    val uid = user.uid
-    val storageWrap = fbCtx.lib.app.storage
-    val songsWrap = fbCtx.lib.app.songs
-    val storageRef = storageWrap.collectionRef(db)
-
-    val transferSongs = TransferSongs(userSongsDB, songStoreDB, killables.killSet)
-    val dbStatus = DBStatus(idb, tagDB, songStoreDB, userSongsDB, transferSongs, killables.killSet)
-    val onlineTasks = OnlineTasks(
-        fbCtx.app.storage().ref("music/files"),
-        idb,
-        songStoreDB,
-        transferSongs,
-        killables
-    )
-
-}
+//class MusicCtx(
+//    fbCtx: FbCtx,
+//    user: User,
+//    val idb: IDBDatabase,
+//    val tagDB: TagDB,
+//    val songStoreDB: SongStorageDB,
+//    val userSongsDB: UserSongsDB
+//) : LoggedInCtx(fbCtx, user) {
+//    val uid = user.uid
+//    val storageWrap = fbCtx.lib.app.storage
+//    val songsWrap = fbCtx.lib.app.songs
+//    val storageRef = storageWrap.collectionRef(db)
+//
+//    val transferSongs = TransferSongs(userSongsDB, songStoreDB, killables.killSet)
+//    val dbStatus = DBStatus(idb, tagDB, songStoreDB, userSongsDB, transferSongs, killables.killSet)
+//    val onlineTasks = OnlineTasks(
+//        fbCtx.app.storage().ref("music/files"),
+//        idb,
+//        songStoreDB,
+//        transferSongs,
+//        killables
+//    )
+//
+//}
 
 suspend fun ArrayBuffer.hash(): String {
     val hashBuffer = window

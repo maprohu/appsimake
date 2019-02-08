@@ -32,25 +32,24 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var getCallableRef = Kotlin.getCallableRef;
   var Pair = Kotlin.kotlin.Pair;
   var listOf = Kotlin.kotlin.collections.listOf_i5x0yv$;
-  var Channel = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.Channel_ww73n8$;
-  var minus_0 = Kotlin.kotlin.collections.minus_khz7k3$;
-  var asSequence = Kotlin.kotlin.collections.asSequence_us0mfu$;
-  var map = Kotlin.kotlin.sequences.map_z5avom$;
+  var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
+  var ensureNotNull = Kotlin.ensureNotNull;
+  var equals = Kotlin.equals;
+  var getValue = Kotlin.kotlin.collections.getValue_t9ocha$;
   var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
+  var minus_0 = Kotlin.kotlin.collections.minus_khz7k3$;
+  var Kind_OBJECT = Kotlin.Kind.OBJECT;
+  var Channel = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.Channel_ww73n8$;
   var plus_0 = Kotlin.kotlin.collections.plus_xfiyik$;
   var minus_1 = Kotlin.kotlin.collections.minus_xfiyik$;
   var Exception = Kotlin.kotlin.Exception;
-  var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var throwCCE = Kotlin.throwCCE;
-  var equals = Kotlin.equals;
   var NoSuchElementException_init = Kotlin.kotlin.NoSuchElementException_init;
   var setOf = Kotlin.kotlin.collections.setOf_mh5how$;
-  var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
   var PropertyMetadata = Kotlin.PropertyMetadata;
   var lazyOf = Kotlin.kotlin.lazyOf_mh5how$;
   var throwUPAE = Kotlin.throwUPAE;
   var L0 = Kotlin.Long.ZERO;
-  var ensureNotNull = Kotlin.ensureNotNull;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
   var removeClass = Kotlin.kotlin.dom.removeClass_hhb33f$;
   Success.prototype = Object.create(Try.prototype);
@@ -119,8 +118,33 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'NamedDelegate',
     interfaces: []
   };
+  function NamedThisDelegate(init) {
+    this.init_0 = init;
+  }
+  function NamedThisDelegate$provideDelegate$ObjectLiteral(closure$value) {
+    this.closure$value = closure$value;
+  }
+  NamedThisDelegate$provideDelegate$ObjectLiteral.prototype.getValue_lrcp0p$ = function (thisRef, property) {
+    return this.closure$value;
+  };
+  NamedThisDelegate$provideDelegate$ObjectLiteral.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [ReadOnlyProperty]
+  };
+  NamedThisDelegate.prototype.provideDelegate_lrcp0p$ = function (thisRef, prop) {
+    var value = this.init_0(thisRef, prop.callableName);
+    return new NamedThisDelegate$provideDelegate$ObjectLiteral(value);
+  };
+  NamedThisDelegate.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'NamedThisDelegate',
+    interfaces: []
+  };
   function named(fn) {
     return new NamedDelegate(fn);
+  }
+  function namedThis(fn) {
+    return new NamedThisDelegate(fn);
   }
   var jsNew = defineInlineFunction('appsimake-commonshr.common.jsNew_x7e9z0$', wrapFunction(function () {
     var Any = Object;
@@ -139,6 +163,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }));
   function Listeners() {
+    this.trigger = Listeners$trigger$lambda(this);
     this.listeners = emptyList();
   }
   Listeners.prototype.invoke_o14v8n$ = function (listener) {
@@ -165,6 +190,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       element();
     }
   };
+  function Listeners$trigger$lambda(this$Listeners) {
+    return function () {
+      this$Listeners.fire();
+      return Unit;
+    };
+  }
   Listeners.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Listeners',
@@ -379,7 +410,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'MappedEmitter',
     interfaces: [EmitterIface]
   };
-  function map_0($receiver, fn) {
+  function map($receiver, fn) {
     return new MappedEmitter($receiver, fn);
   }
   function feedTo$lambda(closure$set) {
@@ -566,6 +597,260 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'SetSource',
     interfaces: []
   };
+  function toRx$process(closure$items) {
+    return function (m) {
+      m.applyTo_w79gfz$(closure$items);
+    };
+  }
+  function toRx$lambda(closure$process) {
+    return function (it) {
+      closure$process(it);
+      return Unit;
+    };
+  }
+  function toRx($receiver, ks) {
+    var items = new Var(emptySet());
+    var process = toRx$process(items);
+    var tmp$;
+    tmp$ = $receiver.listen_cp6tho$(ks, toRx$lambda(process)).iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      process(new SetAdded(element));
+    }
+    return items;
+  }
+  function CircularList() {
+    this.map_0 = LinkedHashMap_init();
+    this.head_0 = null;
+  }
+  function CircularList$Holder(item, next, prev) {
+    if (next === void 0)
+      next = null;
+    if (prev === void 0)
+      prev = null;
+    this.item = item;
+    this.next = next;
+    this.prev = prev;
+  }
+  CircularList$Holder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Holder',
+    interfaces: []
+  };
+  Object.defineProperty(CircularList.prototype, 'next', {
+    get: function () {
+      var h = ensureNotNull(this.head_0);
+      this.head_0 = h.next;
+      return h.item;
+    }
+  });
+  CircularList.prototype.removeNohead_0 = function ($receiver) {
+    var n = ensureNotNull($receiver.next);
+    var p = ensureNotNull($receiver.prev);
+    n.prev = p;
+    p.next = n;
+    $receiver.next = null;
+    $receiver.prev = null;
+  };
+  CircularList.prototype.remove_0 = function ($receiver) {
+    if (equals(this.head_0, $receiver)) {
+      var pr = ensureNotNull($receiver.prev);
+      this.removeNohead_0($receiver);
+      this.head_0 = pr.next;
+    }
+     else {
+      this.removeNohead_0($receiver);
+    }
+  };
+  CircularList.prototype.remove_11rb$ = function (item) {
+    this.remove_0(getValue(this.map_0, item));
+  };
+  var Random = Kotlin.kotlin.random.Random;
+  var random = Kotlin.kotlin.collections.random_iscd7z$;
+  function CircularList$insertItem$lambda(it) {
+    return random(it, Random.Default);
+  }
+  CircularList.prototype.insertItem_h6hr7q$ = function (item, after) {
+    if (after === void 0)
+      after = CircularList$insertItem$lambda;
+    var holder = new CircularList$Holder(item);
+    if (this.head_0 == null) {
+      this.head_0 = holder;
+      holder.next = holder;
+      holder.prev = holder;
+    }
+     else {
+      var afterId = after(this.map_0.keys);
+      var prev = getValue(this.map_0, afterId);
+      var next = ensureNotNull(prev.next);
+      holder.prev = prev;
+      holder.next = next;
+      prev.next = holder;
+      next.prev = holder;
+    }
+    this.map_0.put_xwzc9p$(item, holder);
+  };
+  function CircularList$moveHead$lambda(it) {
+    return random(it, Random.Default);
+  }
+  CircularList.prototype.moveHead_gney3$ = function (fn) {
+    if (fn === void 0)
+      fn = CircularList$moveHead$lambda;
+    if (!this.map_0.keys.isEmpty()) {
+      this.head_0 = getValue(this.map_0, fn(this.map_0.keys));
+    }
+  };
+  CircularList.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CircularList',
+    interfaces: []
+  };
+  function RandomSource(available, next) {
+    RandomSource$Companion_getInstance();
+    this.available = available;
+    this.next = next;
+  }
+  function RandomSource$Companion() {
+    RandomSource$Companion_instance = this;
+  }
+  function RandomSource$Companion$invoke$Holder(item, next, prev) {
+    if (next === void 0)
+      next = null;
+    if (prev === void 0)
+      prev = null;
+    this.item = item;
+    this.next = next;
+    this.prev = prev;
+  }
+  RandomSource$Companion$invoke$Holder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Holder',
+    interfaces: []
+  };
+  function RandomSource$Companion$invoke$removeNohead($receiver) {
+    var n = ensureNotNull($receiver.next);
+    var p = ensureNotNull($receiver.prev);
+    n.prev = p;
+    p.next = n;
+    $receiver.next = null;
+    $receiver.prev = null;
+  }
+  function RandomSource$Companion$invoke$remove(closure$head, closure$removeNohead) {
+    return function ($receiver) {
+      if (equals(closure$head.v, $receiver)) {
+        var pr = ensureNotNull($receiver.prev);
+        closure$removeNohead($receiver);
+        closure$head.v = pr.next;
+      }
+       else {
+        closure$removeNohead($receiver);
+      }
+    };
+  }
+  function RandomSource$Companion$invoke$remove_0(closure$map, closure$remove) {
+    return function (item) {
+      closure$remove(getValue(closure$map, item));
+    };
+  }
+  function RandomSource$Companion$invoke$insert(closure$map, closure$head) {
+    return function (item) {
+      var holder = new RandomSource$Companion$invoke$Holder(item);
+      closure$map.put_xwzc9p$(item, holder);
+      if (closure$head.v == null) {
+        closure$head.v = holder;
+        holder.next = holder;
+        holder.prev = holder;
+      }
+       else {
+        var prev = random(closure$map.values, Random.Default);
+        var next = ensureNotNull(prev.next);
+        holder.prev = prev;
+        holder.next = next;
+        prev.next = holder;
+        next.prev = holder;
+      }
+    };
+  }
+  function RandomSource$Companion$invoke$updateTotal(closure$map, closure$total) {
+    return function () {
+      closure$total.now = toSet(closure$map.keys);
+    };
+  }
+  function RandomSource$Companion$invoke$lambda(closure$remove, closure$insert, closure$updateTotal) {
+    return function (m) {
+      var v = m.value;
+      if (Kotlin.isType(m, SetRemoved))
+        closure$remove(v);
+      else if (Kotlin.isType(m, SetAdded))
+        closure$insert(v);
+      closure$updateTotal();
+      return Unit;
+    };
+  }
+  function RandomSource$Companion$invoke$lambda_0(closure$total, closure$exclude) {
+    return function () {
+      var tot = closure$total.invoke();
+      var ex = closure$exclude.invoke();
+      var av = minus_0(tot, ex);
+      if (av.isEmpty()) {
+        return tot;
+      }
+       else {
+        return av;
+      }
+    };
+  }
+  function RandomSource$Companion$invoke$lambda_1(closure$available) {
+    return function () {
+      return !closure$available.invoke().isEmpty();
+    };
+  }
+  function RandomSource$Companion$invoke$lambda_2(closure$head, closure$available) {
+    return function () {
+      var h = ensureNotNull(closure$head.v);
+      do {
+        h = ensureNotNull(h.next);
+      }
+       while (!closure$available.now.contains_11rb$(h.item));
+      closure$head.v = h;
+      return h.item;
+    };
+  }
+  RandomSource$Companion.prototype.invoke_yiwcrw$ = function (ks, source, exclude) {
+    var map = LinkedHashMap_init();
+    var head = {v: null};
+    var removeNohead = RandomSource$Companion$invoke$removeNohead;
+    var remove = RandomSource$Companion$invoke$remove(head, removeNohead);
+    var remove_0 = RandomSource$Companion$invoke$remove_0(map, remove);
+    var insert = RandomSource$Companion$invoke$insert(map, head);
+    var total = new Var(emptySet());
+    var updateTotal = RandomSource$Companion$invoke$updateTotal(map, total);
+    var tmp$;
+    tmp$ = source.listen_cp6tho$(ks, RandomSource$Companion$invoke$lambda(remove_0, insert, updateTotal)).iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      insert(element);
+    }
+    var available = addedTo(Rx_init_0(RandomSource$Companion$invoke$lambda_0(total, exclude)), ks);
+    return new RandomSource(addedTo(Rx_init_0(RandomSource$Companion$invoke$lambda_1(available)), ks), RandomSource$Companion$invoke$lambda_2(head, available));
+  };
+  RandomSource$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
+  var RandomSource$Companion_instance = null;
+  function RandomSource$Companion_getInstance() {
+    if (RandomSource$Companion_instance === null) {
+      new RandomSource$Companion();
+    }
+    return RandomSource$Companion_instance;
+  }
+  RandomSource.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RandomSource',
+    interfaces: []
+  };
   function random$lambda(closure$channel) {
     return function () {
       closure$channel.close_dbl4no$();
@@ -645,8 +930,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
         return instance.doResume(null);
     };
   }
-  var Random = Kotlin.kotlin.random.Random;
-  var random = Kotlin.kotlin.collections.random_iscd7z$;
   function Coroutine$random$lambda(closure$cd_0, closure$total_0, closure$exclude_0, closure$globalExclude_0, closure$channel_0, $receiver_0, controller, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
     this.$controller = controller;
@@ -754,226 +1037,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     addedTo_1(launch(coroutines.GlobalScope, void 0, void 0, random$lambda_1(cd, total, exclude, globalExclude, channel)), ks);
     return channel;
   }
-  function Coroutine$priorityMerge$lambda$first$lambda$lambda(closure$cd_0, closure$ch_0, closure$fks_0, $receiver_0, controller, continuation_0) {
-    CoroutineImpl.call(this, continuation_0);
-    this.$controller = controller;
-    this.exceptionState_0 = 1;
-    this.local$closure$cd = closure$cd_0;
-    this.local$closure$ch = closure$ch_0;
-    this.local$closure$fks = closure$fks_0;
-  }
-  Coroutine$priorityMerge$lambda$first$lambda$lambda.$metadata$ = {
-    kind: Kotlin.Kind.CLASS,
-    simpleName: null,
-    interfaces: [CoroutineImpl]
-  };
-  Coroutine$priorityMerge$lambda$first$lambda$lambda.prototype = Object.create(CoroutineImpl.prototype);
-  Coroutine$priorityMerge$lambda$first$lambda$lambda.prototype.constructor = Coroutine$priorityMerge$lambda$first$lambda$lambda;
-  Coroutine$priorityMerge$lambda$first$lambda$lambda.prototype.doResume = function () {
-    do
-      try {
-        switch (this.state_0) {
-          case 0:
-            this.state_0 = 2;
-            this.result_0 = this.local$closure$ch.receive(this);
-            if (this.result_0 === COROUTINE_SUSPENDED)
-              return COROUTINE_SUSPENDED;
-            continue;
-          case 1:
-            throw this.exception_0;
-          case 2:
-            this.local$closure$cd.complete_11rb$(this.result_0);
-            return this.local$closure$fks.kill(), Unit;
-          default:this.state_0 = 1;
-            throw new Error('State Machine Unreachable execution');
-        }
-      }
-       catch (e) {
-        if (this.state_0 === 1) {
-          this.exceptionState_0 = this.state_0;
-          throw e;
-        }
-         else {
-          this.state_0 = this.exceptionState_0;
-          this.exception_0 = e;
-        }
-      }
-     while (true);
-  };
-  function priorityMerge$lambda$first$lambda$lambda(closure$cd_0, closure$ch_0, closure$fks_0) {
-    return function ($receiver_0, continuation_0, suspended) {
-      var instance = new Coroutine$priorityMerge$lambda$first$lambda$lambda(closure$cd_0, closure$ch_0, closure$fks_0, $receiver_0, this, continuation_0);
-      if (suspended)
-        return instance;
-      else
-        return instance.doResume(null);
-    };
-  }
-  function Coroutine$priorityMerge$lambda$first(closure$channels_0, this$_0, continuation_0) {
-    CoroutineImpl.call(this, continuation_0);
-    this.exceptionState_0 = 1;
-    this.local$closure$channels = closure$channels_0;
-    this.local$this$ = this$_0;
-  }
-  Coroutine$priorityMerge$lambda$first.$metadata$ = {
-    kind: Kotlin.Kind.CLASS,
-    simpleName: null,
-    interfaces: [CoroutineImpl]
-  };
-  Coroutine$priorityMerge$lambda$first.prototype = Object.create(CoroutineImpl.prototype);
-  Coroutine$priorityMerge$lambda$first.prototype.constructor = Coroutine$priorityMerge$lambda$first;
-  Coroutine$priorityMerge$lambda$first.prototype.doResume = function () {
-    do
-      try {
-        switch (this.state_0) {
-          case 0:
-            var fks = new Killables();
-            var cd = CompletableDeferred();
-            var $receiver = this.local$closure$channels;
-            var tmp$;
-            for (tmp$ = 0; tmp$ !== $receiver.length; ++tmp$) {
-              var element = $receiver[tmp$];
-              addedTo_1(launch(this.local$this$, void 0, void 0, priorityMerge$lambda$first$lambda$lambda(cd, element, fks)), fks.killSet);
-            }
-
-            this.state_0 = 2;
-            this.result_0 = cd.await(this);
-            if (this.result_0 === COROUTINE_SUSPENDED)
-              return COROUTINE_SUSPENDED;
-            continue;
-          case 1:
-            throw this.exception_0;
-          case 2:
-            return this.result_0;
-          default:this.state_0 = 1;
-            throw new Error('State Machine Unreachable execution');
-        }
-      }
-       catch (e) {
-        if (this.state_0 === 1) {
-          this.exceptionState_0 = this.state_0;
-          throw e;
-        }
-         else {
-          this.state_0 = this.exceptionState_0;
-          this.exception_0 = e;
-        }
-      }
-     while (true);
-  };
-  function priorityMerge$lambda$first(closure$channels_0, this$_0) {
-    return function (continuation_0, suspended) {
-      var instance = new Coroutine$priorityMerge$lambda$first(closure$channels_0, this$_0, continuation_0);
-      if (suspended)
-        return instance;
-      else
-        return instance.doResume(null);
-    };
-  }
-  function priorityMerge$lambda$lambda(it) {
-    return it.poll();
-  }
-  function Coroutine$priorityMerge$lambda(closure$channels_0, closure$channel_0, closure$seq_0, $receiver_0, controller, continuation_0) {
-    CoroutineImpl.call(this, continuation_0);
-    this.$controller = controller;
-    this.exceptionState_0 = 1;
-    this.local$closure$channels = closure$channels_0;
-    this.local$closure$channel = closure$channel_0;
-    this.local$closure$seq = closure$seq_0;
-    this.local$tmp$ = void 0;
-    this.local$first = void 0;
-    this.local$$receiver = $receiver_0;
-  }
-  Coroutine$priorityMerge$lambda.$metadata$ = {
-    kind: Kotlin.Kind.CLASS,
-    simpleName: null,
-    interfaces: [CoroutineImpl]
-  };
-  Coroutine$priorityMerge$lambda.prototype = Object.create(CoroutineImpl.prototype);
-  Coroutine$priorityMerge$lambda.prototype.constructor = Coroutine$priorityMerge$lambda;
-  Coroutine$priorityMerge$lambda.prototype.doResume = function () {
-    do
-      try {
-        switch (this.state_0) {
-          case 0:
-            this.local$first = priorityMerge$lambda$first(this.local$closure$channels, this.local$$receiver);
-            this.state_0 = 2;
-            continue;
-          case 1:
-            throw this.exception_0;
-          case 2:
-            var $receiver = map(this.local$closure$seq, priorityMerge$lambda$lambda);
-            var firstOrNull$result;
-            firstOrNull$break: do {
-              var tmp$;
-              tmp$ = $receiver.iterator();
-              while (tmp$.hasNext()) {
-                var element = tmp$.next();
-                if (element != null) {
-                  firstOrNull$result = element;
-                  break firstOrNull$break;
-                }
-              }
-              firstOrNull$result = null;
-            }
-             while (false);
-            this.local$tmp$ = firstOrNull$result;
-            if (this.local$tmp$ == null) {
-              this.state_0 = 3;
-              this.result_0 = this.local$first(this);
-              if (this.result_0 === COROUTINE_SUSPENDED)
-                return COROUTINE_SUSPENDED;
-              continue;
-            }
-             else {
-              this.state_0 = 4;
-              continue;
-            }
-
-          case 3:
-            this.local$tmp$ = this.result_0;
-            this.state_0 = 4;
-            continue;
-          case 4:
-            this.state_0 = 5;
-            this.result_0 = this.local$closure$channel.send_11rb$(this.local$tmp$, this);
-            if (this.result_0 === COROUTINE_SUSPENDED)
-              return COROUTINE_SUSPENDED;
-            continue;
-          case 5:
-            this.state_0 = 2;
-            continue;
-          default:this.state_0 = 1;
-            throw new Error('State Machine Unreachable execution');
-        }
-      }
-       catch (e) {
-        if (this.state_0 === 1) {
-          this.exceptionState_0 = this.state_0;
-          throw e;
-        }
-         else {
-          this.state_0 = this.exceptionState_0;
-          this.exception_0 = e;
-        }
-      }
-     while (true);
-  };
-  function priorityMerge$lambda(closure$channels_0, closure$channel_0, closure$seq_0) {
-    return function ($receiver_0, continuation_0, suspended) {
-      var instance = new Coroutine$priorityMerge$lambda(closure$channels_0, closure$channel_0, closure$seq_0, $receiver_0, this, continuation_0);
-      if (suspended)
-        return instance;
-      else
-        return instance.doResume(null);
-    };
-  }
-  function priorityMerge(kills, channels) {
-    var channel = Channel(0);
-    var seq = asSequence(channels);
-    addedTo_1(launch(coroutines.GlobalScope, void 0, void 0, priorityMerge$lambda(channels, channel, seq)), kills);
-    return channel;
-  }
   function SetSourceWithKey() {
   }
   SetSourceWithKey.$metadata$ = {
@@ -1021,7 +1084,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     kind: Kind_CLASS,
     interfaces: [SetSource]
   };
-  function map_1($receiver, mfn) {
+  function map_0($receiver, mfn) {
     return new map$ObjectLiteral($receiver, mfn);
   }
   function filtered$add_0(closure$curr, closure$f) {
@@ -2037,6 +2100,24 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       set.remove_11rb$(element_0);
     }
      else
+      Kotlin.noWhenBranchMatched();
+  };
+  function SetMove$applyTo$lambda(this$SetMove) {
+    return function (it) {
+      return plus_0(it, this$SetMove.value);
+    };
+  }
+  function SetMove$applyTo$lambda_0(this$SetMove) {
+    return function (it) {
+      return minus_1(it, this$SetMove.value);
+    };
+  }
+  SetMove.prototype.applyTo_w79gfz$ = function (set) {
+    if (Kotlin.isType(this, SetAdded))
+      set.transform_ru8m0w$(SetMove$applyTo$lambda(this));
+    else if (Kotlin.isType(this, SetRemoved))
+      set.transform_ru8m0w$(SetMove$applyTo$lambda_0(this));
+    else
       Kotlin.noWhenBranchMatched();
   };
   SetMove.$metadata$ = {
@@ -3123,11 +3204,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function rxClassOpt($receiver, style) {
     return style.onOff_uc1utc$(rxClassOpt$lambda($receiver), rxClassOpt$lambda_0($receiver));
   }
-  function toRx($receiver) {
+  function toRx_0($receiver) {
     return Rx_init_0($receiver);
   }
   function rxClasses($receiver, style) {
-    return rxClasses_0($receiver, toRx(style));
+    return rxClasses_0($receiver, toRx_0(style));
   }
   var copyToArray = Kotlin.kotlin.collections.copyToArray;
   function rxClasses$lambda(this$rxClasses) {
@@ -3379,6 +3460,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     else
       return instance.doResume(null);
   }
+  function rx($receiver, fn) {
+    return addedTo(Rx_init_0(fn), $receiver);
+  }
   var package$common = _.common || (_.common = {});
   package$common.dyn = dyn;
   $$importsForInline$$['appsimake-commonshr'] = _;
@@ -3386,7 +3470,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$common.dyn_5ij4lk$ = dyn_0;
   package$common.obj_7qq44f$ = obj_0;
   package$common.NamedDelegate = NamedDelegate;
+  package$common.NamedThisDelegate = NamedThisDelegate;
   package$common.named_cq6yhu$ = named;
+  package$common.namedThis_5cxx4g$ = namedThis;
   package$common.jsNew_x7e9z0$ = jsNew;
   package$common.jsNew_8jhc6t$ = jsNew_0;
   package$common.Listeners = Listeners;
@@ -3397,7 +3483,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$common.Emitter = Emitter;
   package$common.toSetSource_9p620j$ = toSetSource;
   package$common.MappedEmitter = MappedEmitter;
-  package$common.map_x7fpzi$ = map_0;
+  package$common.map_x7fpzi$ = map;
   package$common.feedTo_cenaja$ = feedTo;
   package$common.filtered_duf482$ = filtered;
   package$common.combineAnd_6vwu35$ = combineAnd;
@@ -3407,10 +3493,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$common.andIn_7i9aus$ = andIn;
   package$common.feedTo_7nd12m$ = feedTo_0;
   package$common.SetSource = SetSource;
+  package$common.toRx_lwypm1$ = toRx;
+  package$common.CircularList = CircularList;
+  Object.defineProperty(RandomSource, 'Companion', {
+    get: RandomSource$Companion_getInstance
+  });
+  package$common.RandomSource = RandomSource;
   package$common.random_txoh8m$ = random_0;
-  package$common.priorityMerge_lvgc0e$ = priorityMerge;
   package$common.SetSourceWithKey = SetSourceWithKey;
-  package$common.map_2x290v$ = map_1;
+  package$common.map_2x290v$ = map_0;
   package$common.filtered_tu02nm$ = filtered_0;
   package$common.combineN_oy6zd9$ = combineN_0;
   package$common.combine_eiygni$ = combine_1;
@@ -3534,12 +3625,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.rxClass_3s5dpe$ = rxClass_1;
   package$rx.rxClass_4ic22z$ = rxClass_2;
   package$rx.rxClassOpt_ywk6sc$ = rxClassOpt;
-  package$rx.toRx_ba455$ = toRx;
+  package$rx.toRx_ba455$ = toRx_0;
   package$rx.rxClasses_dk0vnv$ = rxClasses;
   package$rx.rxClasses_cv5l32$ = rxClasses_0;
   package$rx.toChannel_tgu8ha$ = toChannel;
   package$rx.toChannelLater_tgu8ha$ = toChannelLater;
   package$rx.mapAsync_wvb2ro$ = mapAsync;
+  package$rx.rx_qoyk5l$ = rx;
   AsyncEmitter.prototype.plus_wii6vi$ = Killable.prototype.plus_wii6vi$;
   emptyAsyncEmitter$ObjectLiteral.prototype.plus_wii6vi$ = AsyncEmitter.prototype.plus_wii6vi$;
   DynamicAsyncEmitter.prototype.plus_wii6vi$ = AsyncEmitter.prototype.plus_wii6vi$;

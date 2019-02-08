@@ -8,11 +8,13 @@ import firebase.firestore.toSetSource
 import firebaseshr.ids
 import killable.KillSet
 import musiclib.*
+import rx.Rx
 
 class UserSongsDB(
     val source: SetSourceWithKey<UserSong, String>,
     private val killables: KillSet
 ) {
+
     companion object {
         suspend operator fun invoke(
             uks: KillSet,

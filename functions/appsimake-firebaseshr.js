@@ -25,7 +25,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var getCallableRef = Kotlin.getCallableRef;
-  var named = $module$appsimake_commonshr.common.named_cq6yhu$;
+  var namedThis = $module$appsimake_commonshr.common.namedThis_5cxx4g$;
   var setOf = Kotlin.kotlin.collections.setOf_mh5how$;
   var plus = Kotlin.kotlin.collections.plus_khz7k3$;
   var defineInlineFunction = Kotlin.defineInlineFunction;
@@ -38,6 +38,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   var lazy = Kotlin.kotlin.lazy_klfg04$;
   var lazyOf = Kotlin.kotlin.lazyOf_mh5how$;
   var Error_init = Kotlin.kotlin.Error_init_pdl1vj$;
+  var named = $module$appsimake_commonshr.common.named_cq6yhu$;
   var to = Kotlin.kotlin.to_ujzrz7$;
   var toSet = Kotlin.kotlin.collections.toSet_us0mfu$;
   var SetDiff = $module$appsimake_commonshr.commonshr.SetDiff;
@@ -344,8 +345,9 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     simpleName: 'PropRegsitry',
     interfaces: []
   };
-  function ScalarProp(name, ops) {
+  function ScalarProp(thisRef, name, ops) {
     ScalarPropBase.call(this, name, ops);
+    this.thisRef = thisRef;
   }
   ScalarProp.prototype.extractInitial_za3rmp$ = function (o) {
     this.initial.now = this.extractPropValue_za3rmp$(o).map_2o04qz$(this.ops.read);
@@ -453,16 +455,16 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     this.validate = validate;
   }
   function ScalarPropBase$Ops$prop$lambda(closure$fn, this$Ops) {
-    return function (it) {
-      return closure$fn(it, this$Ops);
+    return function (tr, n) {
+      return closure$fn(tr, n, this$Ops);
     };
   }
-  ScalarPropBase$Ops.prototype.prop_absfod$ = function (fn) {
+  ScalarPropBase$Ops.prototype.prop_aspey6$ = function (fn) {
     if (fn === void 0)
-      fn = getCallableRef('ScalarProp', function (name, ops) {
-        return new ScalarProp(name, ops);
+      fn = getCallableRef('ScalarProp', function (thisRef, name, ops) {
+        return new ScalarProp(thisRef, name, ops);
       });
-    return named(ScalarPropBase$Ops$prop$lambda(fn, this));
+    return namedThis(ScalarPropBase$Ops$prop$lambda(fn, this));
   };
   function ScalarPropBase$Ops$withDefault$lambda(closure$v) {
     return function () {
@@ -861,7 +863,13 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   function IdState$New(id) {
     IdState.call(this);
     this.id = id;
+    this.deleted_a7d36n$_0 = false;
   }
+  Object.defineProperty(IdState$New.prototype, 'deleted', {
+    get: function () {
+      return this.deleted_a7d36n$_0;
+    }
+  });
   IdState$New.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'New',
@@ -872,8 +880,13 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
       deleted = false;
     IdState.call(this);
     this.id = id;
-    this.deleted = deleted;
+    this.deleted_bghjos$_0 = deleted;
   }
+  Object.defineProperty(IdState$Persisted.prototype, 'deleted', {
+    get: function () {
+      return this.deleted_bghjos$_0;
+    }
+  });
   IdState$Persisted.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Persisted',
@@ -980,6 +993,11 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     }
     return block$result;
   };
+  FBProps.prototype.saveIfDirty = function () {
+    if (this.dirty.now) {
+      this.save();
+    }
+  };
   FBProps.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'FBProps',
@@ -1019,13 +1037,22 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   Props.prototype.persisted_11rd$ = function (idv) {
     this.id.now = new IdState$Persisted(idv);
   };
-  function Props$deleted$lambda(i) {
-    var tmp$;
-    return (Kotlin.isType(tmp$ = i, IdState$Persisted) ? tmp$ : throwCCE()).copy_iuyhfk$(void 0, true);
+  function Props$set_Props$deleted$lambda(closure$v) {
+    return function (s) {
+      if (Kotlin.isType(s, IdState$Persisted))
+        return s.copy_iuyhfk$(void 0, closure$v);
+      else
+        return s;
+    };
   }
-  Props.prototype.deleted = function () {
-    this.id.transform_ru8m0w$(Props$deleted$lambda);
-  };
+  Object.defineProperty(Props.prototype, 'deleted', {
+    get: function () {
+      return this.id.now.deleted;
+    },
+    set: function (v) {
+      this.id.transform_ru8m0w$(Props$set_Props$deleted$lambda(v));
+    }
+  });
   Props.prototype.extractInitial_za3rmp$ = function (o) {
     var tmp$;
     tmp$ = this.list_8be2vx$.iterator();
@@ -1118,15 +1145,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   }
   function Props$isDeleted$lambda$lambda(this$Props) {
     return function () {
-      var i = this$Props.id.invoke();
-      var block$result;
-      if (Kotlin.isType(i, IdState$Persisted)) {
-        block$result = i.deleted;
-      }
-       else {
-        block$result = false;
-      }
-      return block$result;
+      return this$Props.id.invoke().deleted;
     };
   }
   function Props$isDeleted$lambda(this$Props) {
@@ -1227,10 +1246,30 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     interfaces: [HasProps]
   };
   function saveIfDirty($receiver) {
-    var $receiver_0 = $receiver.props;
-    if ($receiver_0.dirty.now) {
-      $receiver_0.save();
-    }
+    $receiver.props.saveIfDirty();
+  }
+  function SetAndSaveProp() {
+  }
+  SetAndSaveProp.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'SetAndSaveProp',
+    interfaces: []
+  };
+  function get_saved$ObjectLiteral(this$saved) {
+    this.this$saved = this$saved;
+  }
+  get_saved$ObjectLiteral.prototype.remAssign_11rb$ = function (v) {
+    this.this$saved.cv = v;
+    var $receiver = this.this$saved.thisRef.props;
+    $receiver.saveIfDirty();
+    $receiver.clearDirty();
+  };
+  get_saved$ObjectLiteral.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [SetAndSaveProp]
+  };
+  function get_saved($receiver) {
+    return new get_saved$ObjectLiteral($receiver);
   }
   function BaseVal(o) {
     this.o = o;
@@ -1263,7 +1302,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   };
   function BaseRootVal() {
     BaseVal.call(this, new PropFactory(Unit));
-    this.type_dn9lyg$_0 = this.o.scalar_287e2$().withDefault_skz6mo$(BaseRootVal$type$lambda(this)).prop_absfod$().provideDelegate_n5byny$(this, BaseRootVal$type_metadata);
+    this.type_dn9lyg$_0 = this.o.scalar_287e2$().withDefault_skz6mo$(BaseRootVal$type$lambda(this)).prop_aspey6$().provideDelegate_lrcp0p$(this, BaseRootVal$type_metadata);
   }
   var BaseRootVal$type_metadata = new PropertyMetadata('type');
   Object.defineProperty(BaseRootVal.prototype, 'type', {
@@ -1283,7 +1322,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   };
   function BaseRoot() {
     Base.call(this);
-    this.type_isyvtp$_0 = this.o.scalar_287e2$().withDefault_skz6mo$(BaseRoot$type$lambda(this)).prop_absfod$().provideDelegate_n5byny$(this, BaseRoot$type_metadata);
+    this.type_isyvtp$_0 = this.o.scalar_287e2$().withDefault_skz6mo$(BaseRoot$type$lambda(this)).prop_aspey6$().provideDelegate_lrcp0p$(this, BaseRoot$type_metadata);
   }
   var BaseRoot$type_metadata = new PropertyMetadata('type');
   Object.defineProperty(BaseRoot.prototype, 'type', {
@@ -1456,6 +1495,8 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   package$firebaseshr.HasProps = HasProps;
   package$firebaseshr.HasFBProps = HasFBProps;
   package$firebaseshr.saveIfDirty_4zsub3$ = saveIfDirty;
+  package$firebaseshr.SetAndSaveProp = SetAndSaveProp;
+  package$firebaseshr.get_saved_2xbzbx$ = get_saved;
   package$firebaseshr.BaseVal = BaseVal;
   package$firebaseshr.Base = Base;
   package$firebaseshr.BaseRootVal = BaseRootVal;

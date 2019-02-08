@@ -59,8 +59,8 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
   }
   function Player() {
     Base.call(this);
-    this.active_ir98gi$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, Player$active_metadata);
-    this.game_u70256$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, Player$game_metadata);
+    this.active_ir98gi$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Player$active_metadata);
+    this.game_u70256$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Player$game_metadata);
   }
   var Player$active_metadata = new PropertyMetadata('active');
   Object.defineProperty(Player.prototype, 'active', {
@@ -81,9 +81,9 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
   };
   function Game() {
     Base.call(this);
-    this.players_7xo8u1$_0 = this.o.array_287e2$().prop_absfod$().provideDelegate_n5byny$(this, Game$players_metadata);
-    this.originalPlayers_6ak8tm$_0 = this.o.array_287e2$().prop_absfod$().provideDelegate_n5byny$(this, Game$originalPlayers_metadata);
-    this.isOver_3nqnrf$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, Game$isOver_metadata);
+    this.players_7xo8u1$_0 = this.o.array_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Game$players_metadata);
+    this.originalPlayers_6ak8tm$_0 = this.o.array_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Game$originalPlayers_metadata);
+    this.isOver_3nqnrf$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Game$isOver_metadata);
   }
   var Game$players_metadata = new PropertyMetadata('players');
   Object.defineProperty(Game.prototype, 'players', {
@@ -111,8 +111,8 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
   function Move() {
     Move$Companion_getInstance();
     BaseRoot.call(this);
-    this.sequence_hl9azr$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, Move$sequence_metadata);
-    this.player_q0tkjr$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, Move$player_metadata);
+    this.sequence_hl9azr$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Move$sequence_metadata);
+    this.player_q0tkjr$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Move$player_metadata);
   }
   var Move$sequence_metadata = new PropertyMetadata('sequence');
   Object.defineProperty(Move.prototype, 'sequence', {
@@ -170,8 +170,8 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
   };
   function Placement() {
     Move.call(this);
-    this.x_by76mu$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, Placement$x_metadata);
-    this.y_by76np$_0 = this.o.scalar_287e2$().prop_absfod$().provideDelegate_n5byny$(this, Placement$y_metadata);
+    this.x_by76mu$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Placement$x_metadata);
+    this.y_by76np$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Placement$y_metadata);
   }
   var Placement$x_metadata = new PropertyMetadata('x');
   Object.defineProperty(Placement.prototype, 'x', {

@@ -14,6 +14,7 @@ class Bind(
 ) {
 
     val playable = Var<Playable?>(null)
+    val tag = Var<Optional<Mp3File>>(None)
     val playing = Var(false)
     val totalDuration = Var(0)
     val currentPosition = Var(0)

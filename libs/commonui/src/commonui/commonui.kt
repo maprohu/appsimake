@@ -29,8 +29,10 @@ fun Node.nextButton(label: HTMLDivElement.() -> Unit, fn: () -> Unit): HTMLAncho
 
 val Node.hourglass: HTMLDivElement
     get() = centerDiv {
-        cls {
-            spinnerBorder
+        div {
+            cls {
+                spinnerBorder
+            }
         }
     }
 

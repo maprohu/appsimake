@@ -74,6 +74,7 @@ interface PropRegsitry<in O> {
 }
 
 class ScalarProp<in O, T>(
+    val thisRef: @UnsafeVariance O,
     name: String,
     ops: Ops<O, T>
 ) : ScalarPropBase<O, T>(name, ops) {
@@ -107,6 +108,8 @@ class ScalarProp<in O, T>(
     }
 
 }
+
+
 
 abstract class ScalarPropBase<in O, T>(
     override val name: String,
@@ -144,7 +147,9 @@ abstract class ScalarPropBase<in O, T>(
         val defaultValue: () -> Optional<T> = { None },
         val validate: (Optional<T>) -> Set<ValidationError> = ValidationError.emptyValidator
     ) {
-        fun prop(fn: (String, Ops<O, T>) -> ScalarProp<@UnsafeVariance O, T> = ::ScalarProp) = named { fn(it, this) }
+        fun prop(fn: (@UnsafeVariance O, String, Ops<O, T>) -> ScalarProp<@UnsafeVariance O, T> = ::ScalarProp) =
+            namedThis<Any, ScalarProp<@UnsafeVariance O, T>> { tr, n ->  fn(tr.unsafeCast<O>(), n, this) }
+
         fun withDefault(v: () -> T) = copy(defaultValue = { Some(v()) } )
         fun withDefault(v: T) = copy(defaultValue = { Some(v) } )
         fun withIgnoreDirty(v: Boolean = true) = copy(ignoreDirty = v)
@@ -253,6 +258,7 @@ abstract class ScalarPropBase<in O, T>(
 
 }
 
+
 fun <O, T: BaseRootVal<T>> ScalarPropBase.Ops<O, T>.baseProp(
     wrapper: (dynamic) -> T
 ) = named { n ->
@@ -326,11 +332,16 @@ fun <O, T: Comparable<T>> ScalarPropBase.Ops<O, Array<T>>.sorted() = map(
 //)
 
 sealed class IdState<out N, out P> {
-    class New<C>(val id: C) : IdState<C, Nothing>()
+    class New<C>(val id: C) : IdState<C, Nothing>() {
+        override val deleted: Boolean = false
+    }
     data class Persisted<P>(
         val id: P,
-        val deleted: Boolean = false
+        override val deleted: Boolean = false
     ) : IdState<Nothing, P>()
+
+    abstract val deleted: Boolean
+
 }
 //data class IdState<I>(
 //    val id: I,
@@ -385,6 +396,12 @@ open class FBProps<in O>(initial: CollectionWrap<O>) : Props<O, CollectionWrap<O
         }
     }
 
+    fun saveIfDirty() {
+        if (dirty.now) {
+            save()
+        }
+    }
+
 }
 
 
@@ -396,16 +413,7 @@ open class Props<in O, out N, out P>(initial: N) : PropTasks<O> {
     internal var list : List<Prop<@UnsafeVariance O>> = listOf()
 
     val isPersisted by lazy { Rx { id() is IdState.Persisted } }
-    val isDeleted by lazy {
-        Rx {
-            id().let { i ->
-                when (i) {
-                    is IdState.Persisted -> i.deleted
-                    else -> false
-                }
-            }
-        }
-    }
+    val isDeleted by lazy { Rx { id().deleted } }
     val isValid: RxVal<Boolean> by lazy {
         Rx { list.all { it.isValid() } }
     }
@@ -423,11 +431,22 @@ open class Props<in O, out N, out P>(initial: N) : PropTasks<O> {
 
     val live = Var(false)
 
-    fun deleted() {
-        id.transform { i ->
-            (i as IdState.Persisted).copy(deleted = true)
+    var deleted
+        get() = id.now.deleted
+        set(v) {
+            id.transform { s ->
+                when (s) {
+                    is IdState.Persisted -> s.copy(deleted = v)
+                    else -> s
+                }
+            }
         }
-    }
+
+//    fun deleted() {
+//        id.transform { i ->
+//            (i as IdState.Persisted).copy(deleted = true)
+//        }
+//    }
 
     override fun extractInitial(o: dynamic) {
         list.forEach { it.extractInitial(o) }
@@ -485,12 +504,23 @@ interface HasFBProps<in O>: HasProps<O, CollectionWrap<O>, DocWrap<O>> {
 }
 
 fun HasFBProps<*>.saveIfDirty() {
-    props.apply {
-        if (dirty.now) {
-            save()
+    props.saveIfDirty()
+}
+
+interface SetAndSaveProp<T> {
+    operator fun remAssign(v: T)
+}
+
+val <O: HasFBProps<O>, T> ScalarProp<O, T>.saved : SetAndSaveProp<T>
+    get() = object : SetAndSaveProp<T> {
+        override fun remAssign(v: T) {
+            cv = v
+            thisRef.props.apply {
+                saveIfDirty()
+                clearDirty()
+            }
         }
     }
-}
 
 
 open class BaseVal<out T, N, P, PS: Props<@kotlin.UnsafeVariance T, N, P>, PF: BasePropFactory<@kotlin.UnsafeVariance T, N, P, PS>>(val o: PF) : HasProps<@kotlin.UnsafeVariance T, N, P> by o
