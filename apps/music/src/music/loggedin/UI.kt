@@ -1,51 +1,30 @@
 package music.loggedin
 
-import bootstrap.btnSecondary
-import bootstrap.column
-import bootstrap.flexGrow1
-import bootstrap.m1
+import commonshr.invoke
 import commonui.*
-import domx.clickEvent
-import domx.cls
-import domx.div
-import domx.invoke
-import fontawesome.Fa
+import fontawesome.bars
 import fontawesome.signOutAlt
 import killable.KillSet
-import music.loggedin.Bind
-import org.w3c.dom.Node
-import kotlin.browser.document
 
-class UI(
+fun UI(
     kills: KillSet,
     parent: Slot,
     bind: Bind
-): ScreenWrap(parent, bind) {
-    override val node = with(bind) {
-        document.screen {
-            top {
-                left 
-
-            }
-        }
-
-        document.column {
-            cls {
-                flexGrow1
-            }
+) = ui(parent, bind) {
+    with(bind) {
+        screen {
             topbar {
-                dropdown {
-                    node {
-                        cls.m1
+                left.dropdown {
+                    button {
+                        m1p2
+                        secondary
+                        fa.bars
                     }
-                }
-                faButton(Fa.signOutAlt) {
-                    cls {
-                        btnSecondary
-                        m1
-                    }
-                    clickEvent {
-                        inbox += SignOut
+                    menu {
+                        item(SignOut) {
+                            fa.signOutAlt
+                            text %= "Sign Out"
+                        }
                     }
                 }
             }

@@ -11,12 +11,12 @@ class NotLoggedIn(
     boot: Boot
 ): MainBase(boot) {
     val bind = Bind(inbox)
-    private val ui = UI(kills, bind)
+    private val ui = UI(kills, panel, bind)
 
     init {
         val procs = procOrElses()
         fun display() {
-            panel %= ui
+            ui.visible()
             proc %= procs.proc
         }
         display()

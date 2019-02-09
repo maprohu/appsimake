@@ -6,6 +6,7 @@ import org.w3c.dom.*
 import rx.*
 import kotlin.browser.document
 import common.*
+import commonshr.invoke
 import domx.*
 import org.w3c.dom.events.MouseEvent
 import styles.*
@@ -385,10 +386,6 @@ fun Element.fullSize() {
 fun Element.flex() {
     classes += "d-flex"
 }
-fun Element.flexColumn() {
-    flex()
-    classes += "flex-column"
-}
 fun Element.flexRow() {
     flex()
     classes += "flex-row"
@@ -618,6 +615,14 @@ val Cls.positionAbsolute by css()
 
 
 
+fun Cls.flexColumn() {
+    dFlex
+    flexColumn
+}
+fun Cls.flexRow() {
+    dFlex
+    flexRow
+}
 fun Cls.flexCenter() {
     dFlex
     justifyContentCenter

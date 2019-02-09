@@ -1,6 +1,7 @@
 package commonui
 
 import bootstrap.*
+import commonshr.invoke
 import domx.*
 import fontawesome.*
 import killable.Killable

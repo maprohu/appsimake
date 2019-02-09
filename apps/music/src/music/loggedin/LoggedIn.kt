@@ -1,9 +1,6 @@
 package music.loggedin
 
-import commonui.Slot
-import commonui.assignProcAdd
-import commonui.process
-import commonui.remAssign
+import commonui.*
 import killable.KillSet
 import music.boot.Boot
 import music.boot.BootWrap
@@ -13,12 +10,12 @@ class LoggedIn(
     boot: Boot
 ): MainBase(boot) {
     val bind = Bind(inbox)
-    private val ui = UI(kills, bind)
+    private val ui = UI(kills, panel, bind)
 
     val procs = proc.assignProcAdd()
 
     init {
-        panel %= ui
+        ui.visible()
 
         with(bind) {
             procs.process(SignOut) {

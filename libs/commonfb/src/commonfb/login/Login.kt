@@ -5,6 +5,7 @@ import firebase.auth.GoogleAuthProvider
 import killable.KillSet
 import killable.Trigger
 
+
 class Login(
     kills: KillSet,
     inbox: Inbox,
@@ -14,11 +15,11 @@ class Login(
     loggingIn: Trigger
 ) {
     val bind = Bind(inbox)
-    private val ui = UI(kills, bind)
+    private val ui = UI(kills, panel, bind)
     val procs = proc.assignProcAdd()
 
     init {
-        panel %= ui
+        ui.visible()
 
         with(bind) {
             procs.process(Google) {

@@ -2,6 +2,7 @@ package commonui
 
 import bootstrap.*
 import common.resizeEvent
+import commonshr.invoke
 import domx.classes
 import domx.cls
 import domx.div

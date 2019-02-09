@@ -5,6 +5,7 @@ import common.ListenableList
 import common.ListenableMutableList
 import common.map
 import commonlib.CollectionWrap
+import commonshr.invoke
 import commonui.RootPanel
 import commonui.showClosable
 import domx.*

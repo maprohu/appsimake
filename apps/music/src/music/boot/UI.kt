@@ -2,6 +2,7 @@ package music.boot
 
 import bootstrap.column
 import bootstrap.flexGrow1
+import commonshr.invoke
 import commonui.NodeWrap
 import commonui.widget
 import domx.cls

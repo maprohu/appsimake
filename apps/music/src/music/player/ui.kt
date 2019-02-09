@@ -3,6 +3,7 @@ package music.player
 import bootstrap.*
 import common.obj
 import common.toOptional
+import commonshr.invoke
 import commonui.NodeWrap
 import commonui.faButtonSpan
 import commonui.plusAssign

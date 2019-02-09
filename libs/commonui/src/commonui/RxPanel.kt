@@ -8,6 +8,7 @@ import common.None
 import common.Optional
 import common.Some
 import common.replaceWith
+import commonshr.invoke
 import domx.cls
 import domx.div
 import domx.invoke
@@ -17,6 +18,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
+import org.w3c.dom.Element
 import org.w3c.dom.Node
 import rx.Rx
 import rx.RxIface
@@ -36,6 +38,11 @@ interface HasNode {
     val node: Node
     val slot get() = node.widget
 }
+interface HasElement: HasNode {
+    override val node: Element
+    val cls get() = node.cls
+}
+
 fun <T: HasNode> T.appendTo(parent: Node) = apply {
     parent.appendChild(node)
 }

@@ -1,10 +1,11 @@
 package commonfb.login
 
 import commonui.Inbox
+import commonui.InboxWrap
 
 class Bind(
-    val inbox: Inbox
-) {
+    inbox: Inbox
+): InboxWrap(inbox) {
 
     val Google = object {}
     val Guest = object {}

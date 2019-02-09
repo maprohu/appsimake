@@ -2187,6 +2187,17 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   SetRemoved.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.value, other.value))));
   };
+  function InvokeApply() {
+  }
+  InvokeApply.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'InvokeApply',
+    interfaces: []
+  };
+  function invoke($receiver, fn) {
+    fn($receiver);
+    return $receiver;
+  }
   function Counted(create) {
     this.create_0 = create;
     this.current_0 = None_getInstance();
@@ -2333,7 +2344,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'OnceKillable',
     interfaces: [Killable]
   };
-  function invoke($receiver) {
+  function invoke_0($receiver) {
     $receiver.kill();
   }
   function add$lambda(closure$killable) {
@@ -2525,7 +2536,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       k.kill();
     }
      else {
-      invoke(this.current_0);
+      invoke_0(this.current_0);
       this.current_0 = k;
     }
   };
@@ -2571,7 +2582,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function KillableSeq_init$lambda(this$KillableSeq) {
     return function () {
       this$KillableSeq.killed_0 = true;
-      invoke(this$KillableSeq.current_0);
+      invoke_0(this$KillableSeq.current_0);
       this$KillableSeq.current_0 = Killable$Companion_getInstance().empty;
       return Unit;
     };
@@ -2712,7 +2723,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function RxIface$foldKillsTrigger$lambda_1(closure$fe, closure$z) {
     return function () {
-      invoke(closure$fe);
+      invoke_0(closure$fe);
       closure$z.v();
       return Unit;
     };
@@ -3562,6 +3573,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.SetMove = SetMove;
   package$commonshr.SetAdded = SetAdded;
   package$commonshr.SetRemoved = SetRemoved;
+  package$commonshr.InvokeApply = InvokeApply;
+  package$commonshr.invoke_fiuc92$ = invoke;
   package$commonshr.Counted = Counted;
   package$commonshr.reportd_za3rmp$ = reportd;
   package$commonshr.report_s8jyv4$ = report;
@@ -3574,7 +3587,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$killable.addedTo_8nlz5n$ = addedTo;
   package$killable.addedTo_60he60$ = addedTo_0;
   package$killable.OnceKillable = OnceKillable;
-  package$killable.invoke_di35i9$ = invoke;
+  package$killable.invoke_di35i9$ = invoke_0;
   package$killable.add_8dof8l$ = add;
   package$killable.KillableValue_init_vsvlef$ = KillableValue_init;
   package$killable.KillableValue = KillableValue;

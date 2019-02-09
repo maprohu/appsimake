@@ -1,5 +1,6 @@
 package fontawesome
 
+import commonshr.InvokeApply
 import domx.*
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
@@ -35,7 +36,7 @@ fun Cls.fa(icon: FaIcon, fn: Fa.() -> Unit = {}): Fa {
     return this.run(icon.fn).apply(fn)
 }
 
-open class Fa(val cls: Cls, faCls: String = Cls.fas) {
+open class Fa(val cls: Cls, faCls: String = Cls.fas): InvokeApply {
     init {
         cls.element {
             classes += faCls
@@ -51,8 +52,6 @@ val Cls.fa
     get() = Fa(this)
 val Cls.faBrands
     get() = FaBrands(this)
-
-operator fun Fa.invoke(fn: Fa.() -> Unit) = apply(fn)
 
 class FaCssClass(val name: String) : ReadOnlyProperty<Fa, String> {
     override fun getValue(thisRef: Fa, property: KProperty<*>) : String {

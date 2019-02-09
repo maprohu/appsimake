@@ -1,43 +1,33 @@
 package music.notloggedin
 
-import bootstrap.btnSecondary
-import bootstrap.column
-import bootstrap.flexGrow1
-import bootstrap.m1
-import commonui.NodeWrap
-import commonui.faButton
-import commonui.plusAssign
-import commonui.topbar
-import domx.clickEvent
-import domx.cls
-import domx.div
-import domx.invoke
-import fontawesome.Fa
+import commonshr.invoke
+import commonui.*
+import fontawesome.bars
 import fontawesome.signInAlt
-import fontawesome.signOutAlt
 import killable.KillSet
-import kotlin.browser.document
 
-class UI(
+fun UI(
     kills: KillSet,
+    panel: Slot,
     bind: Bind
-): NodeWrap(
+) = ui(panel, bind) {
     with(bind) {
-        document.column {
-            cls {
-                flexGrow1
-            }
+        screen {
             topbar {
-                faButton(Fa.signInAlt) {
-                    cls {
-                        btnSecondary
-                        m1
+                left.dropdown {
+                    button {
+                        m1p2
+                        secondary
+                        fa.bars
                     }
-                    clickEvent {
-                        inbox += SignIn
+                    menu {
+                        item(SignIn) {
+                            fa.signInAlt
+                            text %= "Sign In"
+                        }
                     }
                 }
             }
         }
     }
-)
+}

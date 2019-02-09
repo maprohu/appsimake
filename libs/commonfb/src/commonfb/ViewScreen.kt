@@ -3,6 +3,7 @@ package commonfb
 import bootstrap.*
 import common.Optional
 import commonlib.DocWrap
+import commonshr.invoke
 import commonui.RootPanel
 import commonui.ToolBar
 import commonui.faButton

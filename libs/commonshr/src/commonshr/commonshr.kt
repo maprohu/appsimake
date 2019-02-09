@@ -54,3 +54,6 @@ sealed class SetMove<out T> {
 }
 data class SetAdded<T>(override val value: T): SetMove<T>()
 data class SetRemoved<T>(override val value: T): SetMove<T>()
+
+interface InvokeApply
+operator fun <T: InvokeApply> T.invoke(fn: T.() -> Unit) = apply(fn)

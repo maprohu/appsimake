@@ -3,6 +3,7 @@ package commonui
 import bootstrap.*
 import common.insertAt
 import common.removeFromParent
+import commonshr.invoke
 import domx.*
 import fontawesome.chevronLeft
 import fontawesome.*

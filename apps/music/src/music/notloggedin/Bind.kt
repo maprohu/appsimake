@@ -2,9 +2,10 @@ package music.notloggedin
 
 import common.obj
 import commonui.Inbox
+import commonui.InboxWrap
 
 class Bind(
-    val inbox: Inbox
-) {
+    inbox: Inbox
+): InboxWrap(inbox) {
     val SignIn = object {}
 }

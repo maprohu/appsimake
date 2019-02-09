@@ -1,6 +1,7 @@
 package domx
 
 import common.*
+import commonshr.InvokeApply
 import killable.*
 import org.w3c.dom.*
 import org.w3c.dom.css.ElementCSSInlineStyle
@@ -296,8 +297,7 @@ class CssClassProvider {
     ) = CssClass(prop.name.toCss())
 }
 
-open class Cls(val element: (Element.() -> Unit) -> Unit = {}) {
-    operator fun invoke(fn: Cls.() -> Unit) = this.apply(fn)
+open class Cls(val element: (Element.() -> Unit) -> Unit = {}): InvokeApply {
     companion object : Cls()
 }
 val Element.cls

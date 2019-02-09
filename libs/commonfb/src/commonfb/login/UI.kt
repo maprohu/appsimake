@@ -2,73 +2,69 @@ package commonfb.login
 
 import bootstrap.*
 import commonfb.login.Bind
-import commonui.NodeWrap
-import commonui.faButton
-import commonui.plusAssign
-import commonui.topbar
+import commonshr.invoke
+import commonui.*
 import domx.*
 import fontawesome.*
 import killable.KillSet
+import killable.remAssign
 import org.w3c.dom.HTMLElement
 import kotlin.browser.document
 
-class UI(
+fun UI(
     kills: KillSet,
+    panel: Slot,
     bind: Bind
-): NodeWrap(
+) = ui(panel, bind) {
     with(bind) {
-        document.column {
-            cls {
-                flexGrow1
-            }
+        screen {
             topbar {
-                cls {
-                    alignItemsCenter
+                alignItemsCenter
+                left.button(Back) {
+                    m1p2
+                    secondary
+                    fa.chevronLeft
                 }
-                faButton(Fa.chevronLeft) {
-                    cls {
-                        m1
-                        btnSecondary
-                    }
-                    clickEvent {
-                        inbox += Back
-                    }
-                }
-                h5 {
+                middle {
                     cls {
                         m1
                     }
-                    innerText = "Please Sign In"
+                    h5 {
+                        innerText = "Signing In"
+                    }
                 }
             }
-            column {
+            main.div {
                 cls {
-                    flexGrow1
-                    alignItemsCenter
                     p1
+                    flexGrow1
+                    flexColumn()
+                    alignItemsCenter
                 }
                 column {
-                    fun butt(faIcon: FaIcon, text: String, msg: Any): HTMLElement {
-                        return button {
+                    fun butt(faIcon: FaIcon, label: String, msg: Any): Button {
+                        return widget.factory.button(msg) {
+                            primary
                             cls {
-                                btn
-                                btnPrimary
                                 m1
-                                textLeft
+                                p1
+                                flexRow()
+                                alignItemsCenter
                             }
-                            span {
+                            icon {
                                 cls {
+                                    m1
                                     fa(faIcon) {
                                         fw
                                     }
-                                    mr2
                                 }
                             }
-                            span {
-                                innerText = text
-                            }
-                            clickEvent {
-                                inbox += msg
+
+                            text {
+                                cls {
+                                    m1
+                                }
+                                innerText = label
                             }
                         }
                     }
@@ -79,4 +75,4 @@ class UI(
             }
         }
     }
-)
+}
