@@ -303,3 +303,7 @@ fun Node.faTab(faIcon: String, act: RxIface<Boolean>, fn: HTMLAnchorElement.() -
 
 }
 
+
+operator fun HTMLElement.remAssign(text: String) { innerText = text }
+
+

@@ -34,6 +34,16 @@ typealias SetPanel = Assign<Node>
 
 interface HasNode {
     val node: Node
+    val slot get() = node.widget
+}
+fun <T: HasNode> T.appendTo(parent: Node) = apply {
+    parent.appendChild(node)
+}
+fun <T: HasNode> T.setTo(parent: Slot) = apply {
+    parent %= node
+}
+fun <T: Node> T.setTo(parent: Slot) = apply {
+    parent %= this
 }
 open class NodeWrap(
     override val node: Node
@@ -130,8 +140,8 @@ class LoopControl(
 )
 
 open class InboxWrap(
-    val inbox: Inbox
-)
+    override val inbox: Inbox
+): HasInbox
 
 operator fun <T> SendChannel<T>.plusAssign(msg: T) { this.offer(msg) }
 
