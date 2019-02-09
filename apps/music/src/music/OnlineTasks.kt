@@ -15,6 +15,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
+import music.common.LocalSongs
+import music.common.readMp3
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.Node
 import org.w3c.files.Blob
@@ -28,6 +30,7 @@ import rx.rxClass
 
 class OnlineTasks(
     private val storageRef: Reference,
+    val localSongs: LocalSongs,
     private val idb: IDBDatabase,
     private val songStorageDB: SongStorageDB,
     private val transferSongs: TransferSongs,
@@ -100,7 +103,7 @@ class OnlineTasks(
                                 send()
                             }
                             val file = res.await()
-                            idb.addMp3(id, file)
+                            localSongs.addMp3(id, file)
                             downloadingId.now = None
                         }
                     }

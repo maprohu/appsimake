@@ -115,8 +115,8 @@ class Visible(
 
         with (player) {
 
-            procs += bind.inbox.channel(kills, boot.usdb.toChannel(kills)) { udb ->
-                userSong.now = udb?.let { it.get(playable.id) }
+            procs += bind.inbox.channel(kills, boot.userSongsDB.toChannel(kills)) { udb ->
+                userSong.now = udb?.get(playable.id)
             }
             bind.playable.now = playable
 

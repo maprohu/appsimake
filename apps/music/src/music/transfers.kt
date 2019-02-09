@@ -1,15 +1,12 @@
 package music
 
-import common.EmitterIface
 import common.combine
-import common.combineAnd
-import commonshr.SetMove
 import firebaseshr.ids
 import killable.KillSet
-import killable.Killable
-import killable.Killables
+import music.common.LocalSongs
 
 class TransferSongs(
+    localSongs: LocalSongs,
     userSongsDB: UserSongsDB,
     storageDB: SongStorageDB,
     ks: KillSet
@@ -19,14 +16,14 @@ class TransferSongs(
         ks,
         userSongsDB.like.ids,
         storageDB.uploaded.ids,
-        LocalSongs.emitter
+        localSongs.emitter
     ) { like, up, local -> like && !up && local }
 
     val download = combine(
         ks,
         userSongsDB.like.ids,
         storageDB.uploaded.ids,
-        LocalSongs.emitter
+        localSongs.emitter
     ) { like, up, local -> like && up && !local }
 
 

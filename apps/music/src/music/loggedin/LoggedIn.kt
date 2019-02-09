@@ -1,14 +1,12 @@
 package music.loggedin
 
 import commonui.*
-import killable.KillSet
 import music.boot.Boot
-import music.boot.BootWrap
-import music.boot.MainBase
+import music.boot.LoginBase
 
 class LoggedIn(
     boot: Boot
-): MainBase(boot) {
+): LoginBase(boot) {
     val bind = Bind(inbox)
     private val ui = UI(kills, panel, bind)
 
@@ -20,8 +18,34 @@ class LoggedIn(
         with(bind) {
             procs.process(SignOut) {
                 boot.userUnknown()
-                boot.signOut()
+                boot.signOut.now()
             }
         }
     }
+
+//    companion object {
+//        suspend operator fun invoke(boot: Boot) = with(boot) {
+//            FB.setupMessaging()
+//            val functions = FB.functions()
+//
+//            val custTokenCall = customToken.callable(functions)
+//            userState(ks) {
+//                if (it != null) {
+////            try {
+////                custTokenCall.call(Unit)?.let { token ->
+////                    app.auth().signInWithCustomToken(token).await()
+////                }
+////            } catch (d: dynamic) {
+////                reportd(d)
+////            }
+//////            db.enableNetwork().await()
+//                } else {
+////            db.disableNetwork().await()
+//                }
+//            }.forEach {
+//                userState.now = it
+//            }
+//
+//        }
+//    }
 }

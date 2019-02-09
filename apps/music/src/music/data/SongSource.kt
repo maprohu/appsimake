@@ -9,7 +9,7 @@ import commonshr.SetMove
 import commonshr.SetRemoved
 import indexeddb.IDBDatabase
 import killable.*
-import music.LocalSongs
+import music.common.LocalSongs
 import music.Playable
 import music.UserSongsDB
 import musiclib.UserSong
@@ -18,14 +18,12 @@ import rx.Rx
 import rx.RxIface
 import rx.Var
 
-interface PlayableProvider {
-    suspend operator fun invoke(): Playable?
-}
-typealias SongSource = RxIface<PlayableProvider?>
+typealias SongSource = RxIface<(suspend () -> Playable?)?>
 
 
 fun loggedInSongSourceInclude(
     ks: KillSet,
+    localSongs: LocalSongs,
     userSongsDB: UserSongsDB
 ): RxIface<Set<String>> {
     data class Songs(
@@ -75,7 +73,7 @@ fun loggedInSongSourceInclude(
 
     return Rx {
         val s = songs()
-        val local = LocalSongs.rxv()
+        val local = localSongs.rxv()
 
         if (s.new.intersect(local).isNotEmpty()) {
             s.new
@@ -88,10 +86,11 @@ fun loggedInSongSourceInclude(
 fun songSource(
     ks: KillSet,
     includeSongs: RxIface<Set<String>>,
+    localSongsDB: LocalSongs,
     idb: IDBDatabase
 ): SongSource {
     val songRing = CircularList<String>()
-    val localSongs = LocalSongs.rxv
+    val localSongs = localSongsDB.rxv
     fun process(m: SetMove<String>) {
         val v = m.value
         when (m) {
@@ -103,7 +102,7 @@ fun songSource(
             }
         }
     }
-    LocalSongs.emitter.listen(ks) { m ->
+    localSongsDB.emitter.listen(ks) { m ->
         process(m)
     }.forEach {
         process(SetAdded(it))
@@ -120,7 +119,7 @@ fun songSource(
             val id = songRing.next
 
             if (id in includeSongs.now) {
-                val blob = LocalSongs.load(idb, id)
+                val blob = localSongsDB.load(idb, id)
 
                 if (blob != null) {
                     return Playable(id, blob)
@@ -136,67 +135,9 @@ fun songSource(
         if (av.isEmpty()) {
             null
         } else {
-            object : PlayableProvider {
-                override suspend fun invoke(): Playable? {
-                    return next()
-                }
-            }
+            suspend { next() }
         }
     }.addedTo(ks)
 
 }
-
-//fun songIdSource(
-//    kills: KillSet,
-//    exclude: RxIface<Set<String>>
-//    vararg sources: SetSource<String>
-//): ReceiveChannel<String> {
-//    val randoms = sources.map { s ->
-//        RandomSource(kills, s, exclude)
-//    }
-//
-//    val first = Rx {
-//        randoms.find { it.available() }
-//    }
-//}
-//
-//fun loggedInSongSource(
-//    userSongsDB: UserSongsDB
-//) {
-//    val likes = Var()
-//
-//}
-
-
-
-//class SongSource(
-//    val channel: ReceiveChannel<String>,
-//    val set: Assign<List<SetSource<String>>>
-//) {
-//    companion object {
-//        operator fun invoke(ks: KillSet): SongSource {
-//            val exclude = mutableSetOf<String>()
-//
-//            val channel = Channel<String>(Channel.RENDEZVOUS)
-//
-//            val kseq = ks.seq()
-//
-//            return SongSource(channel) { chs ->
-//                val cks = kseq.killSet()
-//
-//                val src = songIdSource(cks, exclude, *chs.toTypedArray())
-//
-//                GlobalScope.launch {
-//                    for (id in src) {
-//                        exclude.clear()
-//                        exclude += id
-//                        channel.send(id)
-//                    }
-//                }.addedTo(cks)
-//            }
-//
-//        }
-//    }
-//}
-//
 

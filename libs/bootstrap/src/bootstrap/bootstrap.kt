@@ -615,11 +615,11 @@ val Cls.positionAbsolute by css()
 
 
 
-fun Cls.flexColumn() {
+fun Cls.column() {
     dFlex
     flexColumn
 }
-fun Cls.flexRow() {
+fun Cls.row() {
     dFlex
     flexRow
 }

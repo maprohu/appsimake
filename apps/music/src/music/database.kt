@@ -1,25 +1,11 @@
 package music
 
-import bootstrap.*
 import common.named
-import commonfb.scrollPanel
-import commonlib.Singleton
-import commonui.*
-import domx.*
-import fontawesome.*
 import indexeddb.*
-import killable.Killables
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import musiclib.UserSongState
+import music.common.LocalSongs
 import org.w3c.files.Blob
-import styles.height0
-import styles.lineHeightInherit
-import styles.scrollVertical
-import kotlin.browser.document
 import kotlin.browser.window
-import kotlin.dom.removeClass
 
 object DatabaseManagement
 
@@ -117,7 +103,7 @@ object DatabaseManagement
 //
 //}
 
-private val Mp3Store by named { it }
+val Mp3Store by named { it }
 private val DBSingletons by named { it }
 
 suspend fun localDatabase(): IDBDatabase {
@@ -142,33 +128,8 @@ suspend fun localDatabase(): IDBDatabase {
 
 fun IDBDatabase.readSingletons() = transaction(DBSingletons).objectStore<String, Any>(DBSingletons)
 fun IDBDatabase.writeSingletons() = transaction(DBSingletons, TransactionMode.readwrite).objectStore<String, Any>(DBSingletons)
-fun IDBDatabase.readMp3Store() = transaction(Mp3Store).objectStore<String, Blob>(Mp3Store)
-fun IDBDatabase.writeMp3Store() = transaction(Mp3Store, TransactionMode.readwrite).objectStore<String, Blob>(Mp3Store)
-suspend fun IDBDatabase.readMp3(hash: String) = readMp3Store().get(hash).await()
-suspend fun IDBDatabase.existsMp3(hash: String) = exists(Mp3Store, hash)
 
-suspend fun IDBDatabase.clearMp3s() {
-    val cd = CompletableDeferred<Unit>()
-    val st = writeMp3Store()
-    st.getAllKeys().then { keys ->
-        st.clear().then {
-            keys.forEach { id ->
-                LocalSongs.removed(id)
-            }
-            cd.complete(Unit)
-        }
-    }
-    cd.await()
-}
 
-suspend fun IDBDatabase.addMp3(id: String, blob: Blob) {
-    writeMp3Store().put(blob, id).await()
-    LocalSongs.added(id)
-}
-suspend fun IDBDatabase.removeMp3(id: String) {
-    writeMp3Store().delete(id).await()
-    LocalSongs.removed(id)
-}
 
 object Singletons {
     val LastUserID by named { it }

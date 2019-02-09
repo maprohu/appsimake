@@ -1,4 +1,4 @@
-package music.template
+package music.database
 
 import bootstrap.m1
 import commonshr.invoke
@@ -21,7 +21,7 @@ fun UI(
     with(bind) {
         screen {
             topbar {
-                backTitle(Back, "Screen Title")
+                backTitle(Back, "Database")
             }
         }
     }

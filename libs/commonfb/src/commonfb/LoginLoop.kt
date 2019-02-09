@@ -1,5 +1,6 @@
 package commonfb
 
+import commonshr.report
 import commonui.*
 import firebase.User
 import firebase.app.App
@@ -17,31 +18,35 @@ sealed class UserState {
     object NotLoggedIn: UserState()
     class LoggedIn(val user: User): UserState()
 }
-fun userState(
+fun runUserState(
     ks: KillSet,
     app: App = FB.app,
-    fn: suspend (User?) -> Unit
+    fn: suspend (UserState) -> UserState = { it }
 ): RxIface<UserState> {
     val rxv = Var<UserState>(UserState.Unknown)
 
-    val ch = Channel<User?>()
+    val ch = Channel<UserState>()
     ks += { ch.close() }
 
     GlobalScope.launch {
         for (u in ch) {
-            fn(u)
-            rxv.now = if (u == null) {
+            rxv.now = fn(u)
+        }
+    }
+
+    ks += app.auth().onAuthStateChanged(
+        { u ->
+            ch += if (u == null) {
                 UserState.NotLoggedIn
             } else {
                 UserState.LoggedIn(u)
             }
-
+        },
+        { e ->
+            report(e)
+            ch += UserState.NotLoggedIn
         }
-    }
-
-    ks += app.auth().onAuthStateChanged { u ->
-        ch.offer(u)
-    }
+    )
 
     return rxv
 }
@@ -55,51 +60,6 @@ fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx {
 }.addedTo(ks)
 
 fun RxIface<User?>.toUid(ks: KillSet) = Rx { this()?.uid }.addedTo(ks)
-
-
-//fun Proc.withSignOut(
-//    app: App = FB.app,
-//    fn: suspend () -> Unit = {}
-//) = with(signOut(app, fn))
-
-//fun signOut(
-//    app: App = FB.app,
-//    fn: suspend () -> Unit = {}
-//) : ProcOrElse = { e, els ->
-//    when (e) {
-//        SignOut -> {
-//            app.auth().signOut()
-//            fn()
-//        }
-//        else -> els(e)
-//    }
-//}
-
-//fun loginPage(addLoginUi: (HTMLElement) -> Unit): Node = document.column {
-//    topbar {
-//        cls {
-//            p1
-//        }
-//        h5 {
-//            cls {
-//                m1
-//            }
-//            innerText = "Please Sign In"
-//        }
-//    }
-//    div {
-//        cls {
-//            flexGrow1
-//            p1
-//            alignItemsCenter
-//        }
-//
-//        addLoginUi(div)
-//    }
-//}
-
-
-
 
 
 object NotLoggedIn

@@ -13,8 +13,10 @@ import org.w3c.dom.Node
 import kotlin.browser.document
 
 class Factory(val parent: Parent, val after: ScreenWrap.() -> Unit = {}) {
+    val <T: Element> T.wrapped get() = ScreenNodeWrap(parent, this)
+
     private val <T: ScreenWrap> T.applied get() = apply(after)
-    private val <T: Element> T.applied get() = apply { ScreenNodeWrap(parent, this).applied }
+    private val <T: Element> T.applied get() = apply { wrapped.applied }
 
     val screen get() = Screen(parent).applied
     val dropdown get() = Dropdown(parent).applied
@@ -23,6 +25,7 @@ class Factory(val parent: Parent, val after: ScreenWrap.() -> Unit = {}) {
     val div get() = document.div.applied
     fun button(msg: () -> Any, fn: Button.() -> Unit) = Button(parent, msg).apply(fn).applied
     fun button(msg: Any, fn: Button.() -> Unit) = button({msg}, fn)
+    val hourglass get() = Hourglass(parent).applied
 }
 
 fun ui(
@@ -34,6 +37,8 @@ fun ui(
 interface HasInbox {
     val inbox: Inbox
     val Node.child get() = Parent(widget, inbox)
+    fun child(sl: Slot) = Parent(sl, inbox)
+    val Slot.factory get() = child(this).factory
 }
 
 abstract class ScreenWrap(parent: Slot, inbox: Inbox): Parent(parent, inbox), InvokeApply, HasElement {
@@ -41,12 +46,10 @@ abstract class ScreenWrap(parent: Slot, inbox: Inbox): Parent(parent, inbox), In
     constructor(parent: Slot, inbox: HasInbox): this(parent, inbox.inbox)
 
     val child get() = Parent(slot, inbox)
-    fun child(sl: Slot) = Parent(sl, inbox)
-    val Slot.factory get() = child(this).factory
 }
 fun <T: ScreenWrap> T.visible() = apply { parent %= node }
 
-class ScreenNodeWrap(parent: Parent, override val node: Element) : ScreenWrap(parent)
+class ScreenNodeWrap<T: Element>(parent: Parent, override val node: T) : ScreenWrap(parent)
 
 open class Parent(val parent: Slot, inbox: Inbox): InboxWrap(inbox) {
     val factory get() = Factory(this) { visible() }
@@ -163,6 +166,20 @@ class Dropdown(sp: Parent): ScreenWrap(sp) {
 
     val menu = DropdownMenu(child).visible()
 }
+class Hourglass(sp: Parent): ScreenWrap(sp) {
+    override val node = document.div {
+        cls {
+            flexGrow1
+            flexCenter()
+        }
+        div {
+            cls {
+                spinnerBorder
+            }
+        }
+    }
+}
+
 class Button(sp: Parent, msg: (() -> Any)? = null): ScreenWrap(sp) {
     override val node = document.button {
         cls {

@@ -8,6 +8,7 @@ import common.None
 import common.Optional
 import common.Some
 import common.replaceWith
+import commonlib.doc
 import commonshr.invoke
 import domx.cls
 import domx.div
@@ -150,6 +151,7 @@ open class InboxWrap(
     override val inbox: Inbox
 ): HasInbox
 
+
 operator fun <T> SendChannel<T>.plusAssign(msg: T) { this.offer(msg) }
 
 class ProcVar(
@@ -159,10 +161,9 @@ class ProcVar(
 }
 
 fun runLoop(
-    initial: Proc = {}
-): LoopControl {
-    val channel = Channel<Any>(Channel.UNLIMITED)
-    val procVar = ProcVar(initial)
+    channel: Channel<Any>
+): SetProc {
+    val procVar = ProcVar()
 
     runLoop(
         channel
@@ -170,10 +171,7 @@ fun runLoop(
         procVar.proc(e)
     }
 
-    return LoopControl(
-        procVar.setter,
-        channel
-    )
+    return procVar.setter
 }
 
 

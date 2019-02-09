@@ -38,7 +38,7 @@ fun UI(
                 cls {
                     p1
                     flexGrow1
-                    flexColumn()
+                    column()
                     alignItemsCenter
                 }
                 column {

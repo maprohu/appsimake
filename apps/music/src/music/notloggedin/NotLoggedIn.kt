@@ -1,15 +1,16 @@
 package music.notloggedin
 
+import commonfb.UserState
 import commonfb.login.Login
 import commonui.*
 import killable.killables
 import killable.remAssign
 import music.boot.Boot
-import music.boot.MainBase
+import music.boot.LoginBase
 
 class NotLoggedIn(
     boot: Boot
-): MainBase(boot) {
+): LoginBase(boot) {
     val bind = Bind(inbox)
     private val ui = UI(kills, panel, bind)
 
@@ -34,7 +35,7 @@ class NotLoggedIn(
                         display()
                     },
                     loggingIn = {
-                        boot.userUnknown()
+                        boot.userState.now = UserState.Unknown
                     }
                 )
             }
