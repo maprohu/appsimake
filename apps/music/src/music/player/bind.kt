@@ -2,7 +2,8 @@ package music.player
 
 import common.None
 import common.Optional
-import commonui.Inbox
+import commonui.widget.Inbox
+import commonui.widget.InboxWrap
 import music.Playable
 import musiclib.Mp3File
 import musiclib.UserSong
@@ -10,8 +11,8 @@ import musiclib.UserSongState
 import rx.Var
 
 class Bind(
-    val inbox: Inbox
-) {
+    inbox: Inbox
+): InboxWrap(inbox) {
 
     val playable = Var<Playable?>(null)
     val tag = Var<Optional<Mp3File>>(None)

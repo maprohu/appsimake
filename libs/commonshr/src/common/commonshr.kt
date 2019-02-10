@@ -1,8 +1,6 @@
 package common
 
-import commonshr.SetAdded
-import commonshr.SetMove
-import commonshr.SetRemoved
+import commonshr.*
 import killable.*
 import rx.Rx
 import kotlin.properties.ReadOnlyProperty
@@ -347,7 +345,7 @@ fun <T> Emitter<SetMove<T>>.toSetSource(sfn: () -> Set<T>) = object : SetSource<
         get() = sfn()
 
     override fun listen(ks: KillSet, fn: (SetMove<T>) -> Unit): Set<T> {
-        ks += this@toSetSource.add(fn)
+        ks += (this@toSetSource.add(fn))
         return sfn()
     }
 }

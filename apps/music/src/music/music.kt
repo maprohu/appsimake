@@ -6,8 +6,9 @@ import commonfb.*
 import commonfb.FB.app
 import commonfb.FB.db
 import commonlib.private
-import commonshr.invoke
+import commonshr.*
 import commonui.*
+import commonui.widget.*
 import domx.*
 import firebase.User
 import firebase.firestore.collectionRef

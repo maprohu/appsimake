@@ -3,10 +3,11 @@ package music.player
 import bootstrap.*
 import common.obj
 import common.toOptional
-import commonshr.invoke
-import commonui.NodeWrap
+import commonshr.*
 import commonui.faButtonSpan
-import commonui.plusAssign
+import commonui.widget.*
+import commonui.widget.Slot
+import commonui.widget.ui
 import domx.*
 import fontawesome.*
 import killable.KillSet
@@ -32,11 +33,11 @@ data class AritstTitle(
     val title: String
 )
 
-class UI(
+fun UI(
     kills: KillSet,
+    panel: Factory,
     bind: Bind
-): NodeWrap(
-
+) = with (panel) {
     with(bind) {
 
         fun formatSecs(s: Int): String {
@@ -53,7 +54,8 @@ class UI(
         val totalDurationTextLength = Rx { totalDurationText().length }
         val currentPositionText = Rx { formatSecs(currentPosition()).padStart(totalDurationTextLength(), ' ') }
         val likeButtonsDisabled = Rx { userSong() == null }
-        val state = Rx { userSong()?.let { us -> us.state.initial().getOrDefault(UserSongState.New) } ?: UserSongState.New }
+        val state =
+            Rx { userSong()?.let { us -> us.state.initial().getOrDefault(UserSongState.New) } ?: UserSongState.New }
 
         val artistTitle = Rx {
             val opt = tag()
@@ -65,7 +67,7 @@ class UI(
         }.addedTo(kills)
 
         val artist = Rx { artistTitle().artist }
-        val title = Rx { artistTitle(). title }
+        val title = Rx { artistTitle().title }
 
         fun withPlayable(fn: Playable.() -> Unit) {
             val p = playable.now
@@ -113,13 +115,17 @@ class UI(
             }
         }
 
-        document.div {
+        wraps.div {
             cls {
                 borderTop
                 bgLight
                 flexFixedSize()
             }
-            fun Node.mediaButton(faClass: String, btnClass: String? = Cls.btnOutlinePrimary, fn: HTMLButtonElement.() -> Unit) {
+            fun Node.mediaButton(
+                faClass: String,
+                btnClass: String? = Cls.btnOutlinePrimary,
+                fn: HTMLButtonElement.() -> Unit
+            ) {
                 button {
                     cls {
                         btn
@@ -289,4 +295,4 @@ class UI(
 
     }
 
-)
+}

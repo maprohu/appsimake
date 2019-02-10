@@ -2,10 +2,8 @@ package music.template
 
 import bootstrap.m1
 import commonshr.invoke
-import commonui.NodeWrap
-import commonui.Slot
-import commonui.remAssign
-import commonui.ui
+import commonui.widget.Slot
+import commonui.widget.ui
 import domx.div
 import domx.h5
 import domx.invoke

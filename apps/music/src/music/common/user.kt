@@ -2,10 +2,10 @@ package music.common
 
 import commonfb.UserState
 import commonfb.toUid
+import commonshr.*
 import firebase.User
 import indexeddb.IDBDatabase
 import killable.KillSet
-import killable.Trigger
 import killable.addedTo
 import killable.plusAssign
 import kotlinx.coroutines.GlobalScope

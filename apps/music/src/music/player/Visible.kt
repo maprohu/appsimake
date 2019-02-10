@@ -1,7 +1,8 @@
 package music.player
 
 import common.listen
-import commonui.*
+import commonshr.*
+import commonui.widget.*
 import domx.audio
 import domx.invoke
 import firebaseshr.saveIfDirty
@@ -20,6 +21,8 @@ import rx.toChannel
 import kotlin.browser.document
 import kotlin.math.max
 
+
+private const val SeekSeconds = 15.0
 
 open class VisibleWrap(
     val visible: Visible

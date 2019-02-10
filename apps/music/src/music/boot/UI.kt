@@ -1,16 +1,7 @@
 package music.boot
 
-import bootstrap.column
-import bootstrap.flexColumn
-import bootstrap.flexGrow1
 import commonshr.invoke
-import commonui.NodeWrap
-import commonui.Slot
-import commonui.ui
-import commonui.widget
-import domx.cls
-import domx.invoke
-import kotlin.browser.document
+import commonui.widget.*
 
 fun UI(
     panel: Slot,
@@ -18,14 +9,16 @@ fun UI(
 ) = ui(panel, bind) {
 
     with(bind) {
-        div {
-            cls {
-                column()
-                flexGrow1
+        screen {
+            top = slots.top.factory
+            player = slots.bottom.factory
+            bind.main = toastSlots.content
+            bind.toasts = toastSlots.toasts.let { tsts ->
+                { fn ->
+                    tsts.toast.apply(fn)
+                }
             }
-            widget(mainWidget)
-            widget(playerWidget)
-        }.wrapped
+        }
     }
 
 }

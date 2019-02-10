@@ -386,10 +386,6 @@ fun Element.fullSize() {
 fun Element.flex() {
     classes += "d-flex"
 }
-fun Element.flexRow() {
-    flex()
-    classes += "flex-row"
-}
 fun Element.margin1() {
     classes += "m-1"
 }
@@ -569,15 +565,20 @@ val Cls.dBlock by css()
 val Cls.dFlex by css()
 val Cls.dNone by css()
 val Cls.flexRow by css()
+val Cls.flexRowReverse by css()
 val Cls.flexColumn by css()
+val Cls.flexColumnReverse by css()
 val Cls.flexWrap by css()
 val Cls.flexGrow1 by css()
 val Cls.flexGrow0 by css()
 val Cls.flexShrink0 by css()
 val Cls.justifyContentStart by css()
+val Cls.justifyContentEnd by css()
 val Cls.justifyContentCenter by css()
 val Cls.alignItemsCenter by css()
 val Cls.alignItemsStretch by css()
+val Cls.alignItemsStart by css()
+val Cls.alignItemsEnd by css()
 val Cls.listGroup by css()
 val Cls.listGroupItem by css()
 val Cls.listGroupItemAction by css()
@@ -612,6 +613,9 @@ val Cls.navLink by css()
 val Cls.active by css()
 val Cls.positionRelative by css()
 val Cls.positionAbsolute by css()
+val Cls.toast by css()
+val Cls.toastHeader by css()
+val Cls.toastBody by css()
 
 
 
@@ -631,5 +635,9 @@ fun Cls.flexCenter() {
 fun Cls.flexFixedSize() {
     flexGrow0
     flexShrink0
+}
+fun Cls.overlay() {
+    positionAbsolute
+    leftRightTopBottom0
 }
 

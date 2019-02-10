@@ -4,6 +4,8 @@ import bootstrap.*
 import common.insertAt
 import common.removeFromParent
 import commonshr.invoke
+import commonui.widget.Inbox
+import commonui.widget.plusAssign
 import domx.*
 import fontawesome.chevronLeft
 import fontawesome.*
@@ -223,17 +225,17 @@ val Node.topbar get() = row {
 
 }.unsafeCast<HTMLDivElementTopbar>()
 
-fun HTMLDivElementTopbar.backButton(inbox: Inbox) {
-    faButton(Fa.chevronLeft) {
-        cls {
-            btnSecondary
-            m1
-        }
-        clickEvent {
-            inbox += Back
-        }
-    }
-}
+//fun HTMLDivElementTopbar.backButton(inbox: Inbox) {
+//    faButton(Fa.chevronLeft) {
+//        cls {
+//            btnSecondary
+//            m1
+//        }
+//        clickEvent {
+//            inbox += Back
+//        }
+//    }
+//}
 
 fun Node.toolbar(killables: Killables, fn: ToolBar.() -> Unit = {}) = ToolBar(this, killables).apply(fn)
 fun Node.topbar(killables: Killables, fn: ToolBar.() -> Unit = {}) = toolbar(killables, fn).also { it.element.borderBottom() }
@@ -305,6 +307,5 @@ fun Node.faTab(faIcon: String, act: RxIface<Boolean>, fn: HTMLAnchorElement.() -
 }
 
 
-operator fun HTMLElement.remAssign(text: String) { innerText = text }
 
 

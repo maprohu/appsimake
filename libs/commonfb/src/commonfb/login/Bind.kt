@@ -1,7 +1,8 @@
 package commonfb.login
 
-import commonui.Inbox
-import commonui.InboxWrap
+import commonui.widget.Inbox
+import commonui.widget.InboxWrap
+
 
 class Bind(
     inbox: Inbox

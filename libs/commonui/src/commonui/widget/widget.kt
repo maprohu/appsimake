@@ -1,18 +1,51 @@
-package commonui
+package commonui.widget
 
 import common.removeFromParent
 import common.replaceWith
-import killable.Assign
-import killable.remAssign
+import commonshr.Assign
+import commonshr.OptAssign
+import commonshr.remAssign
+import commonui.insertAfter
+import domx.cls
+import kotlinx.coroutines.channels.SendChannel
+import org.w3c.dom.Element
+import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 
+typealias Inbox = SendChannel<Any>
+operator fun <T> SendChannel<T>.plusAssign(msg: T) { this.offer(msg) }
+
+interface HasInbox {
+    val inbox: Inbox
+    val Node.child get() = Parent(widget, inbox)
+    val Slot.child get() = Parent(this, inbox)
+    val Slot.insert get() = child.insert
+    val Slot.factory get() = child.factory
+}
+open class InboxWrap(
+    override val inbox: Inbox
+): HasInbox
+
 private const val SlotsAttribute = "appsimakeSlots"
+typealias Slot = OptAssign<Node>
 val Node.slots : Slots
     get() = asDynamic()[SlotsAttribute].unsafeCast<Slots?>()
         ?: Slots(this).also { asDynamic()[SlotsAttribute] = it }
 
-typealias OptAssign<T> = Assign<T?>
-typealias Slot = OptAssign<Node>
+val Node.append : Slot
+    get() {
+        var n: Node? = null
+
+        return {
+            if (it == null) {
+                n?.removeFromParent()
+                n = null
+            } else {
+                this.appendChild(it)
+                n = it
+            }
+        }
+    }
 
 class Slots(
     private val node: Node
@@ -79,10 +112,6 @@ class Slots(
     val slot: Slot
         get() = SlotItem(ref()).also { list += it }.setter
 
-    fun slot(ps: PageSlot) {
-        ps.node(slot)
-    }
-
 }
 
 val Node.widget
@@ -121,4 +150,26 @@ fun widget(initial: Node? = null): Widget {
 
 }
 
-
+interface HasNode {
+    val node: Node
+    val slot get() = node.widget
+}
+open class NodeWrap(
+    override val node: Node
+): HasNode
+interface HasElement: HasNode {
+    override val node: Element
+    val cls get() = node.cls
+}
+interface HasHTMLElement: HasElement {
+    override val node: HTMLElement
+}
+fun <T: HasNode> T.appendTo(parent: Node) = apply {
+    parent.appendChild(node)
+}
+fun <T: HasNode> T.setTo(parent: Slot) = apply {
+    parent %= node
+}
+fun <T: Node> T.setTo(parent: Slot) = apply {
+    parent %= this
+}

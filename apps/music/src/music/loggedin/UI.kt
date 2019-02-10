@@ -1,18 +1,19 @@
 package music.loggedin
 
-import commonshr.invoke
-import commonui.*
+import commonshr.*
+import commonui.widget.*
 import fontawesome.bars
 import fontawesome.signOutAlt
 import killable.KillSet
 
 fun UI(
     kills: KillSet,
-    parent: Slot,
+    top: Factory,
+    main: Factory,
     bind: Bind
-) = ui(parent, bind) {
-    with(bind) {
-        screen {
+) = with(bind) {
+    ui {
+        it += with(top) {
             topbar {
                 left.dropdown {
                     button {
@@ -29,5 +30,7 @@ fun UI(
                 }
             }
         }
+        it += main.empty
     }
 }
+

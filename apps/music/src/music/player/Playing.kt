@@ -2,7 +2,8 @@ package music.player
 
 import common.listen
 import common.onInterval
-import commonui.*
+import commonshr.*
+import commonui.widget.*
 import killable.plusAssign
 import kotlin.browser.window
 

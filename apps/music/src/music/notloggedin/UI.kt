@@ -1,18 +1,23 @@
 package music.notloggedin
 
 import commonshr.invoke
+import commonshr.plusAssign
 import commonui.*
+import commonui.widget.Factory
+import commonui.widget.Slot
+import commonui.widget.ui
 import fontawesome.bars
 import fontawesome.signInAlt
 import killable.KillSet
 
 fun UI(
     kills: KillSet,
-    panel: Slot,
+    top: Factory,
+    main: Factory,
     bind: Bind
-) = ui(panel, bind) {
-    with(bind) {
-        screen {
+) = with(bind) {
+    ui {
+        it += with(top) {
             topbar {
                 left.dropdown {
                     button {
@@ -29,5 +34,6 @@ fun UI(
                 }
             }
         }
+        it += main.empty
     }
 }

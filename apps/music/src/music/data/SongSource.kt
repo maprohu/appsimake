@@ -7,6 +7,7 @@ import common.Some
 import commonshr.SetAdded
 import commonshr.SetMove
 import commonshr.SetRemoved
+import commonshr.Trigger
 import indexeddb.IDBDatabase
 import killable.*
 import music.common.LocalSongs

@@ -2251,6 +2251,283 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function report(error) {
     console.error(error);
   }
+  var remAssign = defineInlineFunction('appsimake-commonshr.commonshr.remAssign_t3h96y$', function ($receiver, value) {
+    $receiver(value);
+  });
+  function Coroutine$remAssign($receiver_0, v_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$$receiver = $receiver_0;
+    this.local$v = v_0;
+  }
+  Coroutine$remAssign.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$remAssign.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$remAssign.prototype.constructor = Coroutine$remAssign;
+  Coroutine$remAssign.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.state_0 = 2;
+            this.result_0 = this.local$$receiver(this.local$v, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function remAssign_0($receiver_0, v_0, continuation_0, suspended) {
+    var instance = new Coroutine$remAssign($receiver_0, v_0, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
+  }
+  function once$lambda(closure$triggered, this$once) {
+    return function () {
+      if (!closure$triggered.v) {
+        closure$triggered.v = true;
+        this$once();
+      }
+      return Unit;
+    };
+  }
+  function once($receiver) {
+    var triggered = {v: false};
+    return once$lambda(triggered, $receiver);
+  }
+  function first$lambda(closure$trigger, this$first) {
+    return function (t) {
+      closure$trigger();
+      this$first(t);
+      return Unit;
+    };
+  }
+  function first($receiver, trigger) {
+    return first$lambda(trigger, $receiver);
+  }
+  function with$lambda(this$with, closure$trigger) {
+    return function () {
+      this$with();
+      closure$trigger();
+      return Unit;
+    };
+  }
+  function with_0($receiver, trigger) {
+    return with$lambda($receiver, trigger);
+  }
+  function plusAssign($receiver, trigger) {
+    $receiver(trigger);
+  }
+  function asyncKills$State(value, kill) {
+    this.value = value;
+    this.kill = kill;
+  }
+  asyncKills$State.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'State',
+    interfaces: []
+  };
+  function toTrigger$lambda_0(this$toTrigger) {
+    return function () {
+      this$toTrigger.kill();
+      return Unit;
+    };
+  }
+  function Coroutine$asyncKills$state(closure$ks_0, closure$fn_0, v_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$closure$ks = closure$ks_0;
+    this.local$closure$fn = closure$fn_0;
+    this.local$vks = void 0;
+    this.local$v = v_0;
+  }
+  Coroutine$asyncKills$state.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$asyncKills$state.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$asyncKills$state.prototype.constructor = Coroutine$asyncKills$state;
+  Coroutine$asyncKills$state.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$vks = killables(this.local$closure$ks);
+            this.state_0 = 2;
+            this.result_0 = this.local$closure$fn(this.local$v, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.local$vks.plusAssign_o14v8n$(this.result_0);
+            return new asyncKills$State(this.local$v, toTrigger$lambda_0(this.local$vks));
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function asyncKills$state(closure$ks_0, closure$fn_0) {
+    return function (v_0, continuation_0, suspended) {
+      var instance = new Coroutine$asyncKills$state(closure$ks_0, closure$fn_0, v_0, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function Coroutine$asyncKills$lambda(closure$current_0, closure$state_0, v_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$closure$current = closure$current_0;
+    this.local$closure$state = closure$state_0;
+    this.local$v = v_0;
+  }
+  Coroutine$asyncKills$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$asyncKills$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$asyncKills$lambda.prototype.constructor = Coroutine$asyncKills$lambda;
+  Coroutine$asyncKills$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            if (!equals(this.local$v, this.local$closure$current.v.value)) {
+              this.local$closure$current.v.kill();
+              this.state_0 = 2;
+              this.result_0 = this.local$closure$state(this.local$v, this);
+              if (this.result_0 === COROUTINE_SUSPENDED)
+                return COROUTINE_SUSPENDED;
+              continue;
+            }
+             else {
+              this.state_0 = 3;
+              continue;
+            }
+
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return this.local$closure$current.v = this.result_0, Unit;
+          case 3:
+            return Unit;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function asyncKills$lambda(closure$current_0, closure$state_0) {
+    return function (v_0, continuation_0, suspended) {
+      var instance = new Coroutine$asyncKills$lambda(closure$current_0, closure$state_0, v_0, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function Coroutine$asyncKills(ks_0, initial_0, fn_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$state = void 0;
+    this.local$ks = ks_0;
+    this.local$initial = initial_0;
+    this.local$fn = fn_0;
+  }
+  Coroutine$asyncKills.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$asyncKills.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$asyncKills.prototype.constructor = Coroutine$asyncKills;
+  Coroutine$asyncKills.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$state = asyncKills$state(this.local$ks, this.local$fn);
+            this.state_0 = 2;
+            this.result_0 = this.local$state(this.local$initial, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            var current = {v: this.result_0};
+            return asyncKills$lambda(current, this.local$state);
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function asyncKills(ks_0, initial_0, fn_0, continuation_0, suspended) {
+    var instance = new Coroutine$asyncKills(ks_0, initial_0, fn_0, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
+  }
   function Killable() {
     Killable$Companion_getInstance();
   }
@@ -2376,22 +2653,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     KillableValue.call($this, value, Killable$Companion_getInstance().once_o14v8n$(fn));
     return $this;
   }
-  var remAssign = defineInlineFunction('appsimake-commonshr.killable.remAssign_t3h96y$', function ($receiver, value) {
-    $receiver(value);
-  });
-  function once$lambda(closure$triggered, this$once) {
-    return function () {
-      if (!closure$triggered.v) {
-        closure$triggered.v = true;
-        this$once();
-      }
-      return Unit;
-    };
-  }
-  function once($receiver) {
-    var triggered = {v: false};
-    return once$lambda(triggered, $receiver);
-  }
   function addedTo$lambda(this$addedTo) {
     return function () {
       this$addedTo.cancel();
@@ -2408,19 +2669,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     var remove = add_1(ks, addedTo$lambda($receiver));
     $receiver.invokeOnCompletion_f05bi3$(addedTo$lambda_0(remove));
     return $receiver;
-  }
-  function with$lambda(this$with, closure$trigger) {
-    return function () {
-      this$with();
-      closure$trigger();
-      return Unit;
-    };
-  }
-  function with_0($receiver, trigger) {
-    return with$lambda($receiver, trigger);
-  }
-  function plusAssign($receiver, trigger) {
-    $receiver(trigger);
   }
   function add_0($receiver, killable) {
     return $receiver(getCallableRef('kill', function ($receiver) {
@@ -2506,7 +2754,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     $receiver.onKill_8be2vx$.plusAssign_wii6vi$(this.add_wii6vi$($receiver));
     return $receiver;
   };
-  function toTrigger$lambda_0(this$toTrigger) {
+  function toTrigger$lambda_1(this$toTrigger) {
     return function () {
       this$toTrigger.kill();
       return Unit;
@@ -2514,7 +2762,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function Killables$killSet$lambda(this$Killables) {
     return function (k) {
-      return toTrigger$lambda_0(this$Killables.add_o14v8n$(k));
+      return toTrigger$lambda_1(this$Killables.add_o14v8n$(k));
     };
   }
   Killables.$metadata$ = {
@@ -3578,10 +3826,17 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.Counted = Counted;
   package$commonshr.reportd_za3rmp$ = reportd;
   package$commonshr.report_s8jyv4$ = report;
+  package$commonshr.remAssign_t3h96y$ = remAssign;
+  package$commonshr.remAssign_cslpg8$ = remAssign_0;
+  package$commonshr.once_yo2cq0$ = once;
+  package$commonshr.first_4s9a7f$ = first;
+  package$commonshr.with_qs7ci7$ = with_0;
+  package$commonshr.plusAssign_aeyq4w$ = plusAssign;
+  var package$killable = _.killable || (_.killable = {});
+  package$killable.asyncKills_9scqh$ = asyncKills;
   Object.defineProperty(Killable, 'Companion', {
     get: Killable$Companion_getInstance
   });
-  var package$killable = _.killable || (_.killable = {});
   package$killable.Killable = Killable;
   package$killable.toTrigger_di35i9$ = toTrigger;
   package$killable.addedTo_8nlz5n$ = addedTo;
@@ -3591,11 +3846,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$killable.add_8dof8l$ = add;
   package$killable.KillableValue_init_vsvlef$ = KillableValue_init;
   package$killable.KillableValue = KillableValue;
-  package$killable.remAssign_t3h96y$ = remAssign;
-  package$killable.once_yo2cq0$ = once;
   package$killable.addedTo_tjw9ba$ = addedTo_1;
-  package$killable.with_qs7ci7$ = with_0;
-  package$killable.plusAssign_aeyq4w$ = plusAssign;
   package$killable.add_ep5os3$ = add_0;
   package$killable.plusAssign_ep5os3$ = plusAssign_0;
   package$killable.add_1wvaoy$ = add_1;

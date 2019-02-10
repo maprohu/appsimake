@@ -1,6 +1,7 @@
 package killable
 
 import common.Listeners
+import commonshr.Trigger
 
 interface Killable {
     fun kill()

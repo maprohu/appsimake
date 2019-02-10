@@ -401,6 +401,8 @@ fun Node.rxDisplayed(rxv: RxVal<Boolean>): Killable {
     }
 }
 
+operator fun HTMLElement.remAssign(text: String) { innerText = text }
+
 fun Node.nav(fn: HTMLElement.() -> Unit = {}) : HTMLElement = tag("nav", fn)
 //fun Node.span(fn: HTMLSpanElement.() -> Unit = {}) : HTMLSpanElement = tag("span", fn)
 fun Node.styleTag(fn: HTMLStyleElement.() -> Unit = {}) : HTMLStyleElement = tag("style", fn)

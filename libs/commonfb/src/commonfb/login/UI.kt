@@ -2,22 +2,22 @@ package commonfb.login
 
 import bootstrap.*
 import commonfb.login.Bind
-import commonshr.invoke
-import commonui.*
+import commonshr.*
+import commonui.widget.*
 import domx.*
 import fontawesome.*
 import killable.KillSet
-import killable.remAssign
 import org.w3c.dom.HTMLElement
 import kotlin.browser.document
 
 fun UI(
     kills: KillSet,
-    panel: Slot,
+    top: Factory,
+    main: Factory,
     bind: Bind
-) = ui(panel, bind) {
-    with(bind) {
-        screen {
+) = with(bind) {
+    ui {
+        it += with(top) {
             topbar {
                 alignItemsCenter
                 left.button(Back) {
@@ -34,7 +34,9 @@ fun UI(
                     }
                 }
             }
-            main.div {
+        }
+        it += with(main) {
+            wraps.div {
                 cls {
                     p1
                     flexGrow1
@@ -43,12 +45,12 @@ fun UI(
                 }
                 column {
                     fun butt(faIcon: FaIcon, label: String, msg: Any): Button {
-                        return widget.factory.button(msg) {
+                        return widget.insert.button(msg) {
                             primary
                             cls {
                                 m1
                                 p1
-                                flexRow()
+                                row()
                                 alignItemsCenter
                             }
                             icon {

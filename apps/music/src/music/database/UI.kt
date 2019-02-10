@@ -1,11 +1,8 @@
 package music.database
 
 import bootstrap.m1
-import commonshr.invoke
-import commonui.NodeWrap
-import commonui.Slot
-import commonui.remAssign
-import commonui.ui
+import commonshr.*
+import commonui.widget.*
 import domx.div
 import domx.h5
 import domx.invoke

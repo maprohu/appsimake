@@ -1,11 +1,7 @@
 package music.player
 
-import commonui.assignProcAdd
-import commonui.procOrElse
-import commonui.process
-import commonui.rxProcIf
-import killable.plusAssign
-import musiclib.UserSongState
+import commonui.widget.*
+import commonshr.*
 
 class Paused(
     visible: Visible

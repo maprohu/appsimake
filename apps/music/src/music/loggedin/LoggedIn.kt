@@ -1,6 +1,6 @@
 package music.loggedin
 
-import commonui.*
+import commonui.widget.*
 import music.boot.Boot
 import music.boot.LoginBase
 
@@ -8,7 +8,7 @@ class LoggedIn(
     boot: Boot
 ): LoginBase(boot) {
     val bind = Bind(inbox)
-    private val ui = UI(kills, panel, bind)
+    private val ui = UI(kills, top, main, bind)
 
     val procs = proc.assignProcAdd()
 

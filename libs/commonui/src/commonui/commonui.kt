@@ -19,7 +19,9 @@ val webkitdirectorySupported by lazy {
 
 fun Node.nextButton(label: HTMLDivElement.() -> Unit, fn: () -> Unit): HTMLAnchorElement {
     return listButton(fn) {
-        flexRow()
+        cls {
+            row()
+        }
         div {
             cls.flexGrow1
             label()

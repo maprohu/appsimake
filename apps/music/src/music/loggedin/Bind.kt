@@ -1,7 +1,7 @@
 package music.loggedin
 
-import commonui.HasInbox
-import commonui.Inbox
+import commonui.widget.HasInbox
+import commonui.widget.Inbox
 
 class Bind(
     override val inbox: Inbox

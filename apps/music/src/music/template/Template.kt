@@ -1,8 +1,7 @@
 package music.template
 
-import commonui.Slot
-import commonui.remAssign
-import commonui.visible
+import commonui.widget.Slot
+import commonui.widget.visible
 import killable.KillSet
 import music.boot.Boot
 import music.boot.BootWrap

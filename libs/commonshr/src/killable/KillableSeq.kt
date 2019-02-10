@@ -1,5 +1,8 @@
 package killable
 
+import commonshr.Assign
+import commonshr.Trigger
+
 
 class KillableSeq private constructor(
     private var current: Killable = Killable.empty,

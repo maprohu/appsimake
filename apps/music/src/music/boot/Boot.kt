@@ -2,9 +2,9 @@ package music.boot
 
 import common.obj
 import commonfb.*
-import commonui.*
-import commonui.loop.Body
-import commonui.loop.BodyWrap
+import commonshr.*
+import commonui.widget.*
+import domx.remAssign
 import indexeddb.IDBDatabase
 import killable.*
 import kotlinx.coroutines.GlobalScope
@@ -38,24 +38,33 @@ class Boot(
 
     val mainSeq = kills.seq()
     val mainProc = procs.addProcAssign()
-    val mainPanel = bind.mainWidget.node
+
+    init {
+        UI(body.panel, bind).visible()
+    }
+
+    val topPanel = bind.top
+    val mainPanel = bind.main
 
     fun userUnknown() {
-        mainPanel.factory.hourglass
+        mainSeq.clear()
+        mainPanel.hourglass.visible()
         mainProc %= procOrElse()
     }
 
     private val songSourceInclude = Var(emptySet<String>())
-    private val includeSeq = kills.seq()
-    val userSongsDB = Var<UserSongsDB?>(null).also { usdb ->
-        usdb.forEach { udb ->
-            val uks = includeSeq.killables()
-            val src = if (udb == null) {
-                localSongs.rxv
-            } else {
-                loggedInSongSourceInclude(uks.killSet, localSongs, udb)
+    val userSongsDB = run {
+        val includeSeq = kills.seq()
+        Var<UserSongsDB?>(null).also { usdb ->
+            usdb.forEach { udb ->
+                val uks = includeSeq.killables()
+                val src = if (udb == null) {
+                    localSongs.rxv
+                } else {
+                    loggedInSongSourceInclude(uks.killSet, localSongs, udb)
+                }
+                uks += src.forEach { s -> songSourceInclude.now = s }
             }
-            uks += src.forEach { s -> songSourceInclude.now = s }
         }
     }
 
@@ -86,7 +95,10 @@ class Boot(
     }
 
     init {
-        UI(body.panel, bind).visible()
+        bind.toasts {
+            header.node %= "head"
+            this.body %= "body"
+        }
 
         Player(this)
 
@@ -148,7 +160,8 @@ open class LoginBase(
     boot: Boot
 ): BootWrap(boot) {
     protected val kills: KillSet = boot.mainSeq.killSet()
-    protected val panel = boot.bind.mainWidget.node
+    protected val main = boot.mainPanel
+    protected val top = boot.topPanel
     protected val proc = boot.mainProc
 }
 

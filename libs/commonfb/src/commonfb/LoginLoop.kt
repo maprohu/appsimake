@@ -1,7 +1,7 @@
 package commonfb
 
-import commonshr.report
-import commonui.*
+import commonshr.*
+import commonui.widget.*
 import firebase.User
 import firebase.app.App
 import killable.*
@@ -62,79 +62,19 @@ fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx {
 fun RxIface<User?>.toUid(ks: KillSet) = Rx { this()?.uid }.addedTo(ks)
 
 
-object NotLoggedIn
-class LoggedIn(val user: User)
-
-fun Inbox.runLoginEvents(
-    kills: KillSet,
-    app: App = FB.app
-) {
-    app.auth().onAuthStateChanged { user ->
-        this += if (user == null) {
-            NotLoggedIn
-        } else {
-            LoggedIn(user)
-        }
-    }.addedTo(kills)
-}
-
-//fun runLogin(
-//    loop: LoopControl = runLoop(),
-//    panel: SetPanel = runPanel(),
-//    app: App = FB.app,
-//    kills: KillSet = Killables().toKillSet(),
-//    loggedIn: (User) -> Page
+//object NotLoggedIn
+//class LoggedIn(val user: User)
+//
+//fun Inbox.runLoginEvents(
+//    kills: KillSet,
+//    app: App = FB.app
 //) {
-//    loop.runLoginEvents(kills)
-//
-//    val loops = loop.loops()
-//
-//    val procs = object {
-//        fun ProcOrElse.withCommon(): ProcOrElse = { e, els ->
-//            when (e) {
-//                NotLoggedIn -> {
-//                    showLoginPage(loops, panel) {
-//                        loops.handle %= initial()
-//                    }
-//                }
-//                is LoggedIn -> {
-//                    loops.handle %= SubHandle.from(kills) { ks ->
-//                        val subProc = loggedIn(e.user)(loop, panel, ks)
-//                        subProc.withCommon().withLoggedIn()
-//                    }
-//                }
-//                else -> els(e)
-//            }
+//    app.auth().onAuthStateChanged { user ->
+//        this += if (user == null) {
+//            NotLoggedIn
+//        } else {
+//            LoggedIn(user)
 //        }
-//
-//        fun initial(): ProcOrElse {
-//            panel.hourglass()
-//            return procOrElse().withCommon()
-//        }
-//
-//        fun ProcOrElse.withLoggedIn(): ProcOrElse = { e, els ->
-//            when (e) {
-//                SignOut -> {
-//                    app.auth().signOut()
-//                    loops.handle %= initial()
-//                }
-//                else -> els(e)
-//            }
-//        }
-//    }
-//
-//    loops.handle %= procs.initial()
-//
-//}
-//
-//fun showLoginPage(
-//    loops: LoopsControl,
-//    panel: SetPanel,
-//    back: Trigger
-//) {
-//
-//
-//
-//    }
+//    }.addedTo(kills)
 //}
 

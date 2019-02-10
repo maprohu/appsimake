@@ -1,12 +1,12 @@
 package music.boot
 
-import commonui.Inbox
-import commonui.InboxWrap
-import commonui.widget
+import commonui.widget.*
 
 class Bind(inbox: Inbox): InboxWrap(inbox) {
 
-    val mainWidget = widget()
-    val playerWidget = widget()
+    lateinit var top: Factory
+    lateinit var main: Factory
+    lateinit var toasts: (Toast.() -> Unit) -> Unit
+    lateinit var player: Factory
 
 }

@@ -1,8 +1,8 @@
 package music.database
 
-import commonui.Slot
-import commonui.visible
-import killable.Trigger
+import commonshr.Trigger
+import commonui.widget.Slot
+import commonui.widget.visible
 import music.boot.Boot
 import music.boot.BootWrap
 

@@ -1,12 +1,12 @@
 package music.player
 
-import commonui.*
+import commonshr.*
+import commonui.widget.*
 import killable.*
 import music.Playable
 import music.boot.Boot
 import music.boot.BootWrap
 
-const val SeekSeconds = 15.0
 
 open class PlayerWrap(
     val player: Player
@@ -16,14 +16,13 @@ class Player(
     boot: Boot
 ): BootWrap(boot) {
     val bind = Bind(inbox)
-    private val panel = boot.bind.playerWidget
+    private val panel = boot.bind.player
     val procs = boot.procs.addProcAssign().assignProcAdd()
     val visibleProc = procs.addProcAssign()
 
-
     val kills = boot.kills
     val kseq = kills.seq()
-    private val ui = UI(kills, bind)
+    private val ui = UI(kills, panel, bind)
 
     private suspend fun poll(fn: (Playable) -> Unit) {
         boot.songSource.now?.invoke()?.let { p ->
@@ -41,12 +40,12 @@ class Player(
     }
 
     private fun show(p: Playable, startPlaying: Boolean = false) {
-        panel %= ui
+        ui.visible()
         visible(p, startPlaying)
     }
 
     private fun hidden() {
-        panel %= null
+        ui.hidden()
         visibleProc %= procOrElse()
         kseq.clear()
     }
