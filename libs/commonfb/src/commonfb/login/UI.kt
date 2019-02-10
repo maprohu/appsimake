@@ -26,10 +26,8 @@ fun UI(
                     fa.chevronLeft
                 }
                 middle {
-                    cls {
-                        m1
-                    }
                     h5 {
+                        cls.m1
                         innerText = "Signing In"
                     }
                 }

@@ -68,6 +68,8 @@ class FaCssClassProvider(private val cls: String? = null) {
 fun facss(cls: String? = null) = FaCssClassProvider(cls)
 
 val Fa.fw by facss()
+val Fa.xs by facss()
+val Fa.sm by facss()
 val Fa.copy by facss()
 val Fa.ban by facss()
 val Fa.undo by facss()

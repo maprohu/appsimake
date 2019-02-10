@@ -95,11 +95,6 @@ class Boot(
     }
 
     init {
-        bind.toasts {
-            header.node %= "head"
-            this.body %= "body"
-        }
-
         Player(this)
 
         procs += inbox.rx(kills, userState) { u ->
@@ -108,6 +103,15 @@ class Boot(
                 is UserState.LoggedIn -> LoggedIn(this)
                 else -> userUnknown()
             }
+        }
+
+        procs += { e, els ->
+            when (e) {
+                is Bind.ShowToast -> {
+
+                }
+            }
+
         }
 
         userUnknown()

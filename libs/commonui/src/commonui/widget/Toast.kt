@@ -2,72 +2,156 @@ package commonui.widget
 
 import bootstrap.*
 import commonshr.*
+import commonui.faButtonSpan
 import domx.*
 import fontawesome.*
 import org.w3c.dom.*
-import styles.pointerEventsNone
+import styles.*
 import kotlin.browser.document
 
 class Toasts(sp: Parent): ScreenWrap(sp) {
     override val node = document.div {
         cls {
             dFlex
-            flexRow
-            justifyContentEnd
-            alignItemsStart
-            pointerEventsNone
-        }
-    }
-
-    private val toastsColumn = node.div {
-        cls {
-            dFlex
             flexColumn
+            alignItemsEnd
+            justifyContentStart
+            pointerEventsNone
+            p1
         }
     }
 
-    private fun callToast(node: Node) {
-        js("\$(node).toast()")
-    }
+    val toast get() = Toast(node.append.child).visible()
 
-    val toast get() = Toast(toastsColumn.append.child).visible().apply {
-        callToast(node)
-        callToasts()
-    }
-
-}
-private fun callToasts() {
-    js("\$('.toast').toast('show')").unsafeCast<Unit>()
-}
-
-private val initToasts by lazy {
-    callToasts()
 }
 
 
 class Toast(sp: Parent): ScreenWrap(sp) {
-    init { initToasts }
-    override val node = document.div {
-        cls.toast
+    override val node = document.a {
+        cls {
+            alert
+            pointerEventsAll
+            textDecorationNone
+            hoverColorInherit
+            m1
+            p1
+        }
+        href = "#"
+        clickEvent {
+            hide()
+        }
     }
+
 
     private val slots = object {
-        val header = slot
-        val body = slot
+        val text = slot
+        val close = slot
     }
 
-    val header by lazy {
-        ToastHeader(slots.header.child).visible()
+    val warning by lazy {
+        cls.alertWarning
     }
-    val body by lazy {
-        document.div {
-            cls.toastBody
-        }.setTo(slots.body)
+    val danger by lazy {
+        cls.alertDanger
     }
+
+    val text by lazy {
+        document.span {
+            cls {
+                m1
+            }
+        }.setTo(slots.text)
+    }
+    val close by lazy {
+        document.span {
+            cls {
+                m1
+                fa {
+                    sm
+                    times
+                }
+            }
+        }.setTo(slots.close)
+    }
+
+    fun warning(txt: String) {
+        warning
+        close
+        text %= txt
+    }
+
+    fun danger(txt: String) {
+        danger
+        close
+        text %= txt
+    }
+
+
 }
 class ToastHeader(sp: Parent): ScreenWrap(sp) {
     override val node = document.div {
-        cls.toastHeader
+        cls {
+            toastHeader
+        }
+    }
+
+
+    private val slots = object {
+        val icon = slot
+        val text = slot
+        val close = slot
+
+    }
+
+    val flex by lazy {
+        cls {
+            p1
+            dFlex
+            flexRow
+            alignItemsCenter
+        }
+    }
+
+    val text by lazy {
+        flex
+        document.div {
+            cls {
+                flexGrow1
+            }
+        }.setTo(slots.text)
+    }
+
+    val close by lazy {
+        text
+        document.button {
+            attr["data-dismiss"] = "toast"
+            cls {
+                btn
+                m1
+                p0
+            }
+            span {
+                cls {
+                    fa {
+                        sm
+                        times
+                    }
+                }
+            }
+        }.setTo(slots.close)
+    }
+
+    val strong by lazy {
+        text.strong {
+            cls {
+                m1
+            }
+        }
+    }
+
+    fun strongClose(label: String) {
+        strong %= label
+        close
     }
 
 }

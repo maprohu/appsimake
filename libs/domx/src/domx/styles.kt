@@ -17,20 +17,20 @@ private val styleSheet by lazy {
     styleElement.sheet.unsafeCast<CSSStyleSheet>()
 }
 
-fun addStyle(name: String, rules: String) {
+fun addStyle(name: String, action: String?, rules: String) {
     styleSheet.insertRule(
-        ".$name {$rules}",
+        ".$name${action?.let {":$action"}?:""} {$rules}",
         styleSheet.cssRules.length
     )
 }
 
-private fun def(s: String) = object : ReadOnlyProperty<Cls, String> {
+private fun def(s: String, action: String? = null) = object : ReadOnlyProperty<Cls, String> {
     var name : String? = null
     override fun getValue(thisRef: Cls, property: KProperty<*>): String {
         val n:String = if (name == null) {
             val n = property.name.toCss()
             name = n
-            addStyle(n, s)
+            addStyle(n, action, s)
             n
         } else {
             name!!
@@ -52,6 +52,11 @@ val Cls.lineHeightInherit by def(
 
 val Cls.cursorPointer by def(
     "cursor: pointer;"
+)
+
+val Cls.hoverColorInherit by def(
+    "color: inherit;",
+    "hover"
 )
 
 val Cls.overflowHidden by def(
@@ -76,6 +81,9 @@ val Cls.pointerEventsNone by def(
 )
 val Cls.pointerEventsAll by def(
     "pointer-events: all;"
+)
+val Cls.textDecorationNone by def(
+    "text-decoration: none;"
 )
 
 val Cls.fontSize100 by def(
