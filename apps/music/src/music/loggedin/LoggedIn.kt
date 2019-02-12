@@ -3,11 +3,13 @@ package music.loggedin
 import commonui.widget.*
 import music.boot.Boot
 import music.boot.LoginBase
+import rx.feedTo
 
 class LoggedIn(
     boot: Boot
 ): LoginBase(boot) {
-    val bind = Bind(inbox)
+    val bind = Bind(boot)
+
     private val ui = UI(kills, top, main, bind)
 
     val procs = proc.assignProcAdd()

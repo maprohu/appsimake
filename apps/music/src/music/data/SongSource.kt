@@ -1,126 +1,61 @@
 package music.data
 
-import common.None
-import common.Optional
 import common.CircularList
-import common.Some
-import commonshr.SetAdded
-import commonshr.SetMove
-import commonshr.SetRemoved
-import commonshr.Trigger
-import indexeddb.IDBDatabase
+import commonshr.*
 import killable.*
+import music.GetUserSongState
 import music.common.LocalSongs
 import music.Playable
-import music.UserSongsDB
-import musiclib.UserSong
 import musiclib.UserSongState
-import rx.Rx
-import rx.RxIface
-import rx.Var
+import rx.*
 
 typealias SongSource = RxIface<(suspend () -> Playable?)?>
-
-
-fun loggedInSongSourceInclude(
-    ks: KillSet,
-    localSongs: LocalSongs,
-    userSongsDB: UserSongsDB
-): RxIface<Set<String>> {
-    data class Songs(
-        val new: Set<String> = emptySet(),
-        val like: Set<String> = emptySet()
-    ) {
-        fun like(fn: (Set<String>) -> Set<String>) = copy(like = fn(like))
-        fun new(fn: (Set<String>) -> Set<String>) = copy(new = fn(new))
-        fun modify(state: Optional<UserSongState>, fn: (Set<String>) -> Set<String>) = when (state) {
-            None, Some(UserSongState.New) -> new(fn)
-            Some(UserSongState.Like) -> like(fn)
-            else -> this
-        }
-        fun add(state: Optional<UserSongState>, id: String) = modify(state) { it + id }
-        fun remove(state: Optional<UserSongState>, id: String) = modify(state) { it - id }
-    }
-    val songs = Var(Songs())
-    val kills = mutableMapOf<UserSong, Trigger>()
-
-    fun process(m: SetMove<UserSong>) {
-        val v = m.value
-        val id = v.props.idOrFail
-        when (m) {
-            is SetAdded -> {
-                val uks = ks.killables()
-                kills[v] = uks.toTrigger()
-                v.state.initial.now.let { st ->
-                    songs.transform { it.add(st, id) }
-                }
-                v.state.initial.onChange { old, new ->
-                    songs.transform {
-                        it.remove(old, id).add(new, id)
-                    }
-                }.addedTo(uks)
-            }
-            is SetRemoved -> {
-                kills.getValue(v)()
-                v.state.initial.now.let { st ->
-                    songs.transform { it.remove(st, id) }
-                }
-            }
-        }
-    }
-
-    userSongsDB.source.listen(ks) { process(it) }.forEach { process(SetAdded(it)) }
-
-
-    return Rx {
-        val s = songs()
-        val local = localSongs.rxv()
-
-        if (s.new.intersect(local).isNotEmpty()) {
-            s.new
-        } else {
-            s.like
-        }
-    }.addedTo(ks)
-}
+typealias SongIncludeRx = (String) -> RxIface<Boolean>
 
 fun songSource(
     ks: KillSet,
-    includeSongs: RxIface<Set<String>>,
-    localSongsDB: LocalSongs,
-    idb: IDBDatabase
+    includeSong: RxIface<SongIncludeRx>,
+    localSongsDB: LocalSongs
 ): SongSource {
     val songRing = CircularList<String>()
-    val localSongs = localSongsDB.rxv
-    fun process(m: SetMove<String>) {
-        val v = m.value
-        when (m) {
-            is SetAdded -> {
-                songRing.insertItem(v)
-            }
-            is SetRemoved -> {
-                songRing.remove(v)
-            }
+    val localSongs = localSongsDB.set
+
+    val included = Var(RxMutableSet<String>())
+
+    val incSeq = ks.seq()
+    Rx {
+        val inc = includeSong()
+        val incset = RxMutableSet<String>()
+        val iks = Killables()
+        localSongs.process(iks.killSet) { id, idks ->
+            inc(id).forEach { i ->
+                if (i) {
+                    incset += id
+                } else {
+                    incset -= id
+                }
+            }.addedTo(idks)
+            idks += { incset -= id }
         }
+        incset to iks.toTrigger()
+    }.addedTo(ks).forEach { (inc, kill) ->
+        included.now = inc
+        incSeq %= kill
     }
-    localSongsDB.emitter.listen(ks) { m ->
-        process(m)
-    }.forEach {
-        process(SetAdded(it))
+
+    localSongsDB.set.process(ks) { id, lks ->
+        songRing.insertItem(id)
+        lks += { songRing.remove(id) }
     }
 
     songRing.moveHead()
 
-    val available = Rx {
-        includeSongs() intersect localSongs()
-    }.addedTo(ks)
-
     suspend fun next(): Playable? {
-        while (available.now.isNotEmpty()) {
+        while (included.now.isNotEmpty()) {
             val id = songRing.next
 
-            if (id in includeSongs.now) {
-                val blob = localSongsDB.load(idb, id)
+            if (id in included.now) {
+                val blob = localSongsDB.load(id)
 
                 if (blob != null) {
                     return Playable(id, blob)
@@ -130,15 +65,60 @@ fun songSource(
         return null
     }
 
-    return Rx {
-        val av = available()
+    val nextFn: suspend () -> Playable? = {
+        next()
+    }
 
-        if (av.isEmpty()) {
+    return Rx {
+        if (included().isEmptyRx()) {
             null
         } else {
-            suspend { next() }
+            nextFn
         }
     }.addedTo(ks)
 
+}
+
+private fun getInclude(ks: KillSet, states: GetUserSongState, state: UserSongState): SongIncludeRx {
+    val map = mutableMapOf<String, RxIface<Boolean>>()
+
+    return { id ->
+        map.getOrPut(id) {
+            Rx {
+                states(id)() == state
+            }.addedTo(ks)
+        }
+    }
+}
+
+fun songInclude(
+    ks: KillSet,
+    localSongs: LocalSongs,
+    userSongs: RxIface<GetUserSongState?>
+): RxIface<SongIncludeRx> {
+
+    val kseq = ks.seq()
+    return Rx {
+        val uks = kseq.killSet()
+        val songState = userSongs()
+
+        if (songState == null) {
+            { Var(true) }
+        } else {
+            val hasNew = localSongs.set.any { id ->
+                songState(id)() == UserSongState.New
+            }
+
+            fun getIncludeState(state: UserSongState) =
+                getInclude(uks, songState, state)
+
+            if (hasNew) {
+                getIncludeState(UserSongState.New)
+            } else {
+                getIncludeState(UserSongState.Like)
+            }
+
+        }
+    }.addedTo(ks)
 }
 

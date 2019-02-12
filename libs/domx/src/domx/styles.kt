@@ -107,6 +107,12 @@ val Cls.leftRightTopBottom0 by def(
     """.trimIndent()
 )
 
-
-
-
+val Cls.objectFitCover by def(
+    "object-fit: cover;"
+)
+val Cls.objectFitContain by def(
+    "object-fit: contain;"
+)
+val Cls.objectFitScaleDown by def(
+    "object-fit: scale-down;"
+)

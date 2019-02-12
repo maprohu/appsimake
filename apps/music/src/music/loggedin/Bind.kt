@@ -1,10 +1,13 @@
 package music.loggedin
 
-import commonui.widget.HasInbox
 import commonui.widget.Inbox
+import commonui.widget.InboxWrap
+import music.boot.Boot
+import music.boot.BootSub
 
 class Bind(
-    override val inbox: Inbox
-): HasInbox {
+    boot: Boot
+): BootSub(boot) {
     val SignOut = object {}
+
 }

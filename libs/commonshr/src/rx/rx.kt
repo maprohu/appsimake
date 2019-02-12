@@ -190,6 +190,11 @@ interface RxIface<out T> {
         }
     }
 
+
+}
+
+fun <T> RxIface<T>.feedTo(ks: KillSet, target: Var<T>) {
+    forEach { target.now = it }.addedTo(ks)
 }
 
 fun RxIface<Int>.feedTo(rxv: Var<Int>): Killable {

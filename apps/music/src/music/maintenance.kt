@@ -13,24 +13,24 @@ import kotlinx.coroutines.launch
 import music.common.LocalSongs
 
 
-fun startMaintenance(
-    ks: KillSet,
-    idb: IDBDatabase,
-    localSongs: LocalSongs,
-    userSongsDB: UserSongsDB
-) {
-    val channel = combineAnd(
-        ks,
-        userSongsDB.dontLike.ids,
-        localSongs.emitter
-    ).toEmitter().toChannel(ks)
-
-    GlobalScope.launch {
-        for (m in channel) {
-            if (m is SetAdded) {
-                localSongs.removeMp3(m.value)
-            }
-        }
-    }.addedTo(ks)
-}
+//fun startMaintenance(
+//    ks: KillSet,
+//    idb: IDBDatabase,
+//    localSongs: LocalSongs,
+//    userSongsDB: UserSongsDB
+//) {
+//    val channel = combineAnd(
+//        ks,
+//        userSongsDB.dontLike.ids,
+//        localSongs.emitter
+//    ).toEmitter().toChannel(ks)
+//
+//    GlobalScope.launch {
+//        for (m in channel) {
+//            if (m is SetAdded) {
+//                localSongs.removeMp3(m.value)
+//            }
+//        }
+//    }.addedTo(ks)
+//}
 

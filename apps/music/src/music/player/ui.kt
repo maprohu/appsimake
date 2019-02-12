@@ -54,8 +54,7 @@ fun UI(
         val totalDurationTextLength = Rx { totalDurationText().length }
         val currentPositionText = Rx { formatSecs(currentPosition()).padStart(totalDurationTextLength(), ' ') }
         val likeButtonsDisabled = Rx { userSong() == null }
-        val state =
-            Rx { userSong()?.let { us -> us.state.initial().getOrDefault(UserSongState.New) } ?: UserSongState.New }
+        val state = userSong
 
         val artistTitle = Rx {
             val opt = tag()

@@ -499,6 +499,7 @@ fun Element.positionRelative() {
 
 
 val Cls.w100 by css()
+val Cls.mw100 by css()
 val Cls.h100 by css()
 val Cls.alignMiddle by css()
 val Cls.textDanger by css()

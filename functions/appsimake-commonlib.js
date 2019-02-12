@@ -24,7 +24,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
   var Channel = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.Channel_ww73n8$;
   var toList = Kotlin.kotlin.collections.toList_7wnvza$;
   var addedTo = $module$appsimake_commonshr.killable.addedTo_tjw9ba$;
-  var plusAssign = $module$appsimake_commonshr.killable.plusAssign_aeyq4w$;
+  var plusAssign = $module$appsimake_commonshr.commonshr.plusAssign_aeyq4w$;
   var Killables = $module$appsimake_commonshr.killable.Killables;
   var SetAdded = $module$appsimake_commonshr.commonshr.SetAdded;
   var CompletableDeferred = $module$kotlinx_coroutines_core.kotlinx.coroutines.CompletableDeferred_xptg6w$;

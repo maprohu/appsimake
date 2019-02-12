@@ -11,6 +11,8 @@ import killable.*
 import killable.Killable.Companion.once
 import kotlinx.coroutines.*
 import org.w3c.dom.Element
+import rx.RxMutableSet
+import rx.RxSet
 import rx.RxVal
 import rx.Var
 import kotlin.reflect.KProperty
@@ -504,3 +506,87 @@ suspend fun <T: HasFBProps<T>> CollectionWrap<T>.toSetSource(
     )
 }
 
+class RxSetWithLookup<T>(
+    val set: RxSet<T>,
+    val lookup: (String) -> T?
+)
+suspend fun <T> QueryWrap<T>.toRxSetWithLookup(
+    killables: KillSet,
+    create: (String, dynamic) -> T,
+    update: (T, dynamic) -> Unit
+): RxSetWithLookup<T> {
+    val set = RxMutableSet<T>()
+    val map = mutableMapOf<String, T>()
+
+    fun addOrUpdate(id: String, data: dynamic) {
+        val existing = map[id]
+        if (existing == null) {
+            val t = create(id, data)
+            map[id] = t
+            set.add(t)
+        } else {
+            update(existing, data)
+        }
+    }
+
+    killables += query.onSnapshotNext { qs ->
+        qs.docChanges().forEach { dc ->
+            when (dc.type) {
+                DocumentChangeType.added, DocumentChangeType.modified -> {
+                    addOrUpdate(dc.doc.id, dc.doc.data())
+                }
+                DocumentChangeType.removed -> {
+                    val id = dc.doc.id
+                    map.remove(id)?.let {
+                        set.remove(it)
+                    }
+                }
+            }
+        }
+    }
+
+    val qs = query.get().await()
+
+    qs.docs.forEach { qds ->
+        addOrUpdate(qds.id, qds.data())
+    }
+
+    return RxSetWithLookup(
+        set = set,
+        lookup = { map[it] }
+    )
+}
+suspend fun <T: HasFBProps<T>> QueryWrap<T>.toRxSetWithLookup(
+    killables: KillSet,
+    collectionWrap: CollectionWrap<T>,
+    create: () -> T
+): RxSetWithLookup<T> {
+    fun createPersisted(id: String) = create().apply {
+        props.persisted(
+            collectionWrap.doc(id)
+        )
+    }
+    return toRxSetWithLookup(
+        killables,
+        create = { id, data ->
+            createPersisted(id).apply {
+                initFrom(data)
+            }
+        },
+        update = { t, data ->
+            t.initFrom(data)
+        }
+    )
+
+}
+suspend fun <T: HasFBProps<T>> CollectionWrap<T>.toRxSetWithLookup(
+    killables: KillSet,
+    db: Firestore,
+    create: () -> T
+): RxSetWithLookup<T> {
+    return query(db).toRxSetWithLookup(
+        killables,
+        this,
+        create
+    )
+}

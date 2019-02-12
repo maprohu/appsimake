@@ -412,6 +412,7 @@ fun Node.ol(fn: HTMLOListElement.() -> Unit = {}) : HTMLOListElement = tag("ol",
 fun Node.li(fn: HTMLLIElement.() -> Unit = {}) : HTMLLIElement = tag("li", fn)
 fun Node.video(fn: HTMLVideoElement.() -> Unit = {})  = tag("video", fn)
 val Node.div by elem<HTMLDivElement>()
+val Node.img by elem<HTMLImageElement>()
 val Node.strong by elem<HTMLElement>()
 val Node.pre by elem<HTMLDivElement>()
 val Node.source by elem<HTMLSourceElement>()

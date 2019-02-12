@@ -11,7 +11,7 @@ import music.boot.LoginBase
 class NotLoggedIn(
     boot: Boot
 ): LoginBase(boot) {
-    val bind = Bind(inbox)
+    val bind = Bind(boot)
     private val ui = UI(kills, top, main, bind)
 
     init {
@@ -40,7 +40,7 @@ class NotLoggedIn(
                     },
                     loginFailed = {
                         reportd(it)
-                        boot.bind.toasts {
+                        inbox += bind.boot.ShowToast {
                             danger("Sign in failed: ${it.message}")
                         }
                         boot.userState.now = UserState.NotLoggedIn

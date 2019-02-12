@@ -1,14 +1,19 @@
 package music.boot
 
+import commonui.usericon.UnknownUserSrc
 import commonui.widget.*
+import rx.RxIface
+import rx.Var
 
 class Bind(inbox: Inbox): InboxWrap(inbox) {
 
-    inner class ShowToast(fn: Toast.() -> Unit)
+    val userIcon = Var(UnknownUserSrc)
+
 
     lateinit var top: Factory
     lateinit var main: Factory
-    lateinit var toasts: (Toast.() -> Unit) -> Unit
+    lateinit var toasts: (ToastFn) -> Unit
     lateinit var player: Factory
+
 
 }

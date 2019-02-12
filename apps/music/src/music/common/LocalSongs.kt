@@ -1,8 +1,6 @@
 package music.common
 
-import common.Emitter
 import common.obj
-import common.toSetSource
 import commonshr.SetAdded
 import commonshr.SetMove
 import commonshr.SetRemoved
@@ -10,8 +8,8 @@ import indexeddb.*
 import kotlinx.coroutines.CompletableDeferred
 import music.Mp3Store
 import org.w3c.files.Blob
-import rx.RxIface
-import rx.Var
+import rx.RxMutableSet
+import rx.RxSet
 
 private external interface LocalSongEvent {
     var id: String
@@ -35,28 +33,11 @@ class LocalSongs(val idb: IDBDatabase, initial: Set<String>) {
         }
     }
 
-    private var locals = Var(initial)
-    private val e = Emitter<SetMove<String>>()
-    val emitter = e.toSetSource { locals.now }
-
-    val rxv: RxIface<Set<String>> = locals
+    private val mutableSet = RxMutableSet(initial.toMutableSet())
+    val set : RxSet<String> = mutableSet
 
     private fun emit(m: SetMove<String>) {
-        val id = m.value
-        when (m) {
-            is SetAdded -> {
-                if (id !in locals.now) {
-                    locals.transform { it + id }
-                    e.emit(m)
-                }
-            }
-            is SetRemoved -> {
-                if (id in locals.now) {
-                    locals.transform { it - id }
-                    e.emit(m)
-                }
-            }
-        }
+        m.applyTo(mutableSet)
     }
 
     private val tabsChannel = org.w3c.dom.BroadcastChannel("appsimake-music-localSongs")
@@ -99,7 +80,7 @@ class LocalSongs(val idb: IDBDatabase, initial: Set<String>) {
         )
     }
 
-    suspend fun load(idb: IDBDatabase, id: String) : Blob? {
+    suspend fun load(id: String) : Blob? {
         val blob = idb.readMp3(id)
         if (blob == null) {
             emit(SetRemoved(id))

@@ -1,6 +1,11 @@
 package commonshr
 
+import common.Emitter
+import common.EmitterIface
 import common.Optional
+import killable.KillSet
+import killable.Killables
+import killable.toTrigger
 import rx.Var
 
 data class SetDiff<T>(
@@ -26,6 +31,10 @@ data class SetDiff<T>(
             removed = old - new,
             added = new - old
         )
+
+        fun <T> added(vararg e: T) = SetDiff(added = setOf(*e))
+        fun <T> removed(vararg e: T) = SetDiff(added = setOf(*e))
+
     }
 
 
@@ -57,3 +66,43 @@ data class SetRemoved<T>(override val value: T): SetMove<T>()
 
 interface InvokeApply
 operator fun <T: InvokeApply> T.invoke(fn: T.() -> Unit) = apply(fn)
+
+fun <T> EmitterIface<SetDiff<T>>.toMoves() : EmitterIface<SetMove<T>> = object: EmitterIface<SetMove<T>> {
+    override fun add(listener: (SetMove<T>) -> Unit): Trigger {
+        return this@toMoves.add { diff ->
+            diff.removed.forEach { listener(SetRemoved(it)) }
+            diff.added.forEach { listener(SetAdded(it)) }
+        }
+    }
+}
+
+fun <T> EmitterIface<SetMove<T>>.process(ks: KillSet, fn: (T, KillSet) -> Unit) {
+    toMap(ks, fn)
+}
+
+fun <T, S> EmitterIface<SetMove<T>>.toMap(ks: KillSet, fn: (T, KillSet) -> S): Map<T, S> {
+    val map = mutableMapOf<T, Pair<S, Trigger>>()
+
+    ks += {
+        map.values.forEach { it.second() }
+        map.clear()
+    }
+
+    add { m ->
+        val v = m.value
+        when (m) {
+            is SetAdded -> {
+                val vks = Killables()
+                map[v] = Pair(
+                    fn(v, vks.killSet),
+                    vks.toTrigger()
+                )
+            }
+            is SetRemoved -> {
+                map.remove(v)?.let { it.second() }
+            }
+        }
+    }
+
+    return map.mapValues { it.value.first }
+}

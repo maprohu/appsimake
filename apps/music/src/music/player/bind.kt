@@ -19,6 +19,6 @@ class Bind(
     val playing = Var(false)
     val totalDuration = Var(0)
     val currentPosition = Var(0)
-    val userSong = Var<UserSong?>(null)
+    val userSong = Var(UserSongState.New)
 
 }

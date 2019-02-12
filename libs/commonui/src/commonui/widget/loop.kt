@@ -33,6 +33,13 @@ fun SetProc.toSetProcOrElse(default: Proc = proc()): AssignProcOrElse = { p ->
 
 typealias AddProcOrElse = AddRemove<ProcOrElse>
 fun AddProcOrElse.process(msg: Any, fn: suspend () -> Unit) = this(procOrElse(msg, fn))
+fun <T> AddProcOrElse.envelope(marker: Msg<T>, fn: suspend (T) -> Unit) = this.invoke { e, els ->
+    if (e is Envelope<*> && e.marker == marker) {
+        fn(e.msg.unsafeCast<T>())
+    } else {
+        els(e)
+    }
+}
 
 class ProcOrElseList {
     private val procs = mutableListOf<ProcOrElse>()

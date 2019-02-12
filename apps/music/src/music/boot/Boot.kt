@@ -2,9 +2,9 @@ package music.boot
 
 import common.obj
 import commonfb.*
+import commonui.usericon.UnknownUserSrc
 import commonshr.*
 import commonui.widget.*
-import domx.remAssign
 import indexeddb.IDBDatabase
 import killable.*
 import kotlinx.coroutines.GlobalScope
@@ -17,8 +17,7 @@ import music.data.*
 import music.loggedin.LoggedIn
 import music.notloggedin.NotLoggedIn
 import music.player.Player
-import rx.Var
-import rx.mapAsync
+import rx.*
 
 open class BootWrap(
     val boot: Boot
@@ -52,28 +51,27 @@ class Boot(
         mainProc %= procOrElse()
     }
 
-    private val songSourceInclude = Var(emptySet<String>())
-    val userSongsDB = run {
-        val includeSeq = kills.seq()
-        Var<UserSongsDB?>(null).also { usdb ->
-            usdb.forEach { udb ->
-                val uks = includeSeq.killables()
-                val src = if (udb == null) {
-                    localSongs.rxv
-                } else {
-                    loggedInSongSourceInclude(uks.killSet, localSongs, udb)
-                }
-                uks += src.forEach { s -> songSourceInclude.now = s }
-            }
-        }
+    val userState = Var<UserState>(UserState.Unknown)
+
+    private val user = userState.toUser(kills)
+    val userIcon = Rx {
+        user()?.let { it.photoURL } ?: UnknownUserSrc
+    }.apply {
+        feedTo(kills, bind.userIcon)
     }
 
-    val userState = Var<UserState>(UserState.Unknown)
+    val userSongs = Var<UserSongs?>(null)
+
+    private val songInclude = songInclude(
+        kills,
+        localSongs,
+        Rx { userSongs()?.get }.addedTo(kills)
+    )
+
     val songSource = songSource(
         kills,
-        songSourceInclude,
-        localSongs,
-        idb
+        songInclude,
+        localSongs
     )
 
     private var currentSongInfoSource: SongInfoSource = localSongInfoSource()
@@ -94,6 +92,8 @@ class Boot(
         }
     }
 
+    val sub = Sub(userIcon)
+
     init {
         Player(this)
 
@@ -105,13 +105,8 @@ class Boot(
             }
         }
 
-        procs += { e, els ->
-            when (e) {
-                is Bind.ShowToast -> {
-
-                }
-            }
-
+        procs.envelope(sub.ShowToast) { fn ->
+            bind.toasts(fn)
         }
 
         userUnknown()
@@ -130,7 +125,6 @@ class Boot(
 
             runUserState(kills).forEach { userState.now = it }
 
-            val user = userState.toUser(kills)
 
             val latestUid = user.toLatestUid(kills, idb)
 
@@ -152,13 +146,15 @@ class Boot(
 
             latestUid.rxv.mapAsync(kills) { uid, ks ->
                 uid?.let { id ->
-                    UserSongsDB(ks, id, db)
+                    userSongs(ks, id, db)
                 }
-            }.forEach { userSongsDB.now = it }
+            }.forEach { userSongs.now = it }
         }
     }
 
+
 }
+
 
 open class LoginBase(
     boot: Boot

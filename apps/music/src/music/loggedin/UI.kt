@@ -1,7 +1,10 @@
 package music.loggedin
 
+import bootstrap.m1
+import commonui.usericon.userIcon
 import commonshr.*
 import commonui.widget.*
+import domx.invoke
 import fontawesome.bars
 import fontawesome.signOutAlt
 import killable.KillSet
@@ -22,10 +25,16 @@ fun UI(
                         fa.bars
                     }
                     menu {
+                        database
                         item(SignOut) {
                             fa.signOutAlt
                             text %= "Sign Out"
                         }
+                    }
+                }
+                right.userIcon(kills, boot.userIcon).apply {
+                    node {
+                        cls.m1
                     }
                 }
             }

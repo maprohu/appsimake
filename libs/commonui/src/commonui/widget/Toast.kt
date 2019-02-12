@@ -26,6 +26,7 @@ class Toasts(sp: Parent): ScreenWrap(sp) {
 }
 
 
+typealias ToastFn = Toast.() -> Unit
 class Toast(sp: Parent): ScreenWrap(sp) {
     override val node = document.a {
         cls {

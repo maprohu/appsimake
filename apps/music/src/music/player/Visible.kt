@@ -16,6 +16,7 @@ import music.Playable
 import musiclib.UserSong
 import musiclib.UserSongState
 import org.w3c.dom.url.URL
+import rx.Rx
 import rx.Var
 import rx.toChannel
 import kotlin.browser.document
@@ -57,7 +58,7 @@ class Visible(
 
     val stateSeq = kills.seq()
     val stateProc = procs.addProcAssign()
-    val userSong = Var<UserSong?>(null).also {
+    val userSong = Var(UserSongState.New).also {
         kills += it.forEach { us ->
             player.bind.userSong.now = us
         }
@@ -77,9 +78,9 @@ class Visible(
         }
         return with (playable) {
             procOrElses().apply {
-                add += rxProcIf(kills, userSong) { us ->
-                    procOrElse(DontLike) {
-                        us.dontLike()
+                add.process(DontLike) {
+                    boot.userSongs.now?.let { us ->
+                        us.dontLike(playable.id)
                         next()
                     }
                 }
@@ -117,16 +118,20 @@ class Visible(
         }
 
         with (player) {
-
-            procs += bind.inbox.channel(kills, boot.userSongsDB.toChannel(kills)) { udb ->
-                userSong.now = udb?.get(playable.id)
+            Rx {
+                boot.userSongs()?.let { us ->
+                    us.get(playable.id)()
+                } ?: UserSongState.New
+            }.addedTo(kills).forEach {
+                userSong.now = it
             }
+
             bind.playable.now = playable
 
             with (playable) {
-                procs += rxProcIf(kills, userSong) { us ->
-                    procOrElse(Like) {
-                        us.saveState(UserSongState.Like)
+                procs.process(Like) {
+                    boot.userSongs.now?.let { us ->
+                        us.like(playable.id)
                     }
                 }
 

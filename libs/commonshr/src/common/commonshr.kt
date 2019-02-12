@@ -263,6 +263,14 @@ interface EmitterIface<T> {
 
 }
 
+fun <T> EmitterIface<T>.withInitial(vararg initial: T) = withInitial { initial.toList() }
+fun <T> EmitterIface<T>.withInitial(initial: () -> Iterable<T>) = object: EmitterIface<T> {
+    override fun add(listener: (T) -> Unit): Trigger {
+        initial().forEach(listener)
+        return this@withInitial.add(listener)
+    }
+}
+
 interface AsyncEmitter<T>: Killable {
     fun poll(): T?
     suspend fun receive(): T
