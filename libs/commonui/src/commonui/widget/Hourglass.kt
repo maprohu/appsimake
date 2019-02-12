@@ -7,7 +7,7 @@ import fontawesome.*
 import org.w3c.dom.*
 import kotlin.browser.document
 
-class Hourglass(sp: Parent): ScreenWrap(sp) {
+class Hourglass(): ScreenWrap {
     override val node = document.div {
         cls {
             flexGrow1

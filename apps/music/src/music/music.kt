@@ -1,41 +1,52 @@
 package music
 
 import bootstrap.*
-import common.*
-import commonfb.*
-import commonfb.FB.app
-import commonfb.FB.db
-import commonlib.private
 import commonshr.*
 import commonui.*
 import commonui.widget.*
 import domx.*
-import firebase.User
-import firebase.firestore.collectionRef
-import firebase.firestore.toSetSource
 import fontawesome.*
-import indexeddb.IDBDatabase
-import killable.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.await
-import kotlinx.coroutines.launch
-import musiclib.*
+import kotlinx.coroutines.*
 import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.Uint8Array
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Node
-import rx.Var
-import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.js.Promise
-import music.boot.Boot
 
 fun main() {
 
-    GlobalScope.launch {
-        APP.registerServiceWorker()
-        Boot()
+    val j1 = Job()
+
+    GlobalScope.launch(j1) {
+
+        launch {
+            delay(1000)
+            j1.cancel()
+        }
+
+        val j2 = Job(j1)
+
+        launch(j2) {
+            while (true) {
+                println("x")
+                delay(100)
+            }
+
+        }
+
     }
+
+    j1.invokeOnCompletion {
+        console.error(it)
+    }
+
+
+
+//    GlobalScope.launch {
+//        APP.registerServiceWorker()
+//        Boot()
+//    }
 }
 
 

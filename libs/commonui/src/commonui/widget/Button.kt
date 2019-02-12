@@ -7,15 +7,10 @@ import fontawesome.*
 import org.w3c.dom.*
 import kotlin.browser.document
 
-class Button(sp: Parent, msg: (() -> Any)? = null): ScreenWrap(sp) {
+class Button(): ScreenWrap {
     override val node = document.button {
         cls {
             btn
-        }
-        msg?.let {
-            clickEvent {
-                inbox += msg()
-            }
         }
     }
 

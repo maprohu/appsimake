@@ -1,21 +1,24 @@
 package music.boot
 
+import commonshr.ActorFn
 import commonshr.invoke
 import commonui.widget.*
 
 fun UI(
-    panel: Slot,
+    exec: ActorFn<BootState>,
+    panel: Factory,
     bind: Bind
-) = ui(panel, bind) {
-
+) = with(panel) {
     with(bind) {
         screen {
-            top = slots.top.factory
-            player = slots.bottom.factory
+            top = slots.top
+            player = slots.bottom
             bind.main = toastSlots.content
             bind.toasts = toastSlots.toasts.let { tsts ->
                 { fn ->
-                    tsts.toast.apply(fn)
+                    exec {
+                        tsts.toast.apply(fn)
+                    }
                 }
             }
         }

@@ -465,3 +465,4 @@ suspend fun <T, S> RxIface<T>.mapAsync(
 }
 
 fun <T> KillSet.rx(fn: () -> T): RxIface<T> = Rx(fn).addedTo(this)
+fun <T> T.toVar() = Var(this)

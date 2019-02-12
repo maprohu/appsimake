@@ -419,7 +419,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
   });
   toSetSource$ObjectLiteral.prototype.listen_cp6tho$ = function (ks, fn) {
-    plusAssign(ks, this.this$toSetSource.add_qlkmfe$(fn));
+    plusAssign_0(ks, this.this$toSetSource.add_qlkmfe$(fn));
     return this.closure$sfn();
   };
   toSetSource$ObjectLiteral.$metadata$ = {
@@ -1066,7 +1066,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var addAll = Kotlin.kotlin.collections.addAll_ipc267$;
   function random_0($receiver, ks, globalExclude) {
     var channel = Channel(0);
-    plusAssign(ks, random$lambda(channel));
+    plusAssign_0(ks, random$lambda(channel));
     var total = LinkedHashSet_init();
     var exclude = LinkedHashSet_init();
     var cd = {v: null};
@@ -2318,7 +2318,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_bwtc7$;
   function toMap($receiver, ks, fn) {
     var map = LinkedHashMap_init();
-    plusAssign(ks, toMap$lambda(map));
+    plusAssign_0(ks, toMap$lambda(map));
     $receiver.add_qlkmfe$(toMap$lambda_0(fn, map));
     var destination = LinkedHashMap_init_0(mapCapacity(map.size));
     var tmp$;
@@ -2328,6 +2328,199 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       destination.put_xwzc9p$(element.key, element.value.first);
     }
     return destination;
+  }
+  function plusAssign($receiver, msg) {
+    $receiver.offer_11rb$(msg);
+  }
+  function HasExec() {
+  }
+  HasExec.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'HasExec',
+    interfaces: []
+  };
+  var Throwable = Error;
+  function Coroutine$exec$lambda(closure$channel_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 10;
+    this.local$closure$channel = closure$channel_0;
+    this.local$$receiver = void 0;
+    this.local$cause = void 0;
+    this.local$tmp$ = void 0;
+  }
+  Coroutine$exec$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$exec$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$exec$lambda.prototype.constructor = Coroutine$exec$lambda;
+  Coroutine$exec$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$$receiver = this.local$closure$channel;
+            this.local$cause = null;
+            this.exceptionState_0 = 7;
+            this.local$tmp$ = this.local$$receiver.iterator();
+            this.state_0 = 1;
+            continue;
+          case 1:
+            this.state_0 = 2;
+            this.result_0 = this.local$tmp$.hasNext(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 2:
+            if (!this.result_0) {
+              this.state_0 = 6;
+              continue;
+            }
+             else {
+              this.state_0 = 3;
+              continue;
+            }
+
+          case 3:
+            this.state_0 = 4;
+            this.result_0 = this.local$tmp$.next(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 4:
+            var e_0 = this.result_0;
+            this.state_0 = 5;
+            this.result_0 = e_0(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 5:
+            this.state_0 = 1;
+            continue;
+          case 6:
+            this.exceptionState_0 = 10;
+            this.finallyPath_0 = [9];
+            this.state_0 = 8;
+            continue;
+          case 7:
+            this.finallyPath_0 = [10];
+            this.exceptionState_0 = 8;
+            var e_2 = this.exception_0;
+            if (Kotlin.isType(e_2, Throwable)) {
+              this.local$cause = e_2;
+              throw e_2;
+            }
+             else
+              throw e_2;
+          case 8:
+            this.exceptionState_0 = 10;
+            this.local$$receiver.cancel_dbl4no$(this.local$cause);
+            this.state_0 = this.finallyPath_0.shift();
+            continue;
+          case 9:
+            this.result_0 = Unit;
+            return this.result_0;
+          case 10:
+            throw this.exception_0;
+          default:this.state_0 = 10;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 10) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function exec$lambda(closure$channel_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$exec$lambda(closure$channel_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function exec$lambda_0(closure$channel) {
+    return function (it) {
+      plusAssign(closure$channel, it);
+      return Unit;
+    };
+  }
+  function exec($receiver) {
+    var channel = Channel(2147483647);
+    launch($receiver, void 0, void 0, exec$lambda(channel));
+    return exec$lambda_0(channel);
+  }
+  function Coroutine$actor$lambda$lambda(closure$state_0, closure$fn_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$closure$state = closure$state_0;
+    this.local$closure$fn = closure$fn_0;
+  }
+  Coroutine$actor$lambda$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$actor$lambda$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$actor$lambda$lambda.prototype.constructor = Coroutine$actor$lambda$lambda;
+  Coroutine$actor$lambda$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.state_0 = 2;
+            this.result_0 = this.local$closure$fn(this.local$closure$state, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return this.result_0;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function actor$lambda$lambda(closure$state_0, closure$fn_0) {
+    return function (continuation_0, suspended) {
+      var instance = new Coroutine$actor$lambda$lambda(closure$state_0, closure$fn_0, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function actor$lambda(closure$exec, closure$state) {
+    return function (fn) {
+      closure$exec(actor$lambda$lambda(closure$state, fn));
+      return Unit;
+    };
+  }
+  function actor($receiver, state) {
+    var exec_0 = exec($receiver);
+    return actor$lambda(exec_0, state);
   }
   function Counted(create) {
     this.create_0 = create;
@@ -2435,6 +2628,37 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     else
       return instance.doResume(null);
   }
+  function Funs() {
+  }
+  function Funs$ignore1$lambda(this$Funs) {
+    return function (f) {
+      return this$Funs;
+    };
+  }
+  Funs.prototype.ignore1_287e2$ = function () {
+    return Funs$ignore1$lambda(this);
+  };
+  Funs.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'Funs',
+    interfaces: []
+  };
+  var get_funs = defineInlineFunction('appsimake-commonshr.commonshr.get_funs_vvk9$', function ($receiver) {
+    return $receiver;
+  });
+  var get_value = defineInlineFunction('appsimake-commonshr.commonshr.get_value_8dahcb$', function ($receiver) {
+    return $receiver;
+  });
+  var get_constant = defineInlineFunction('appsimake-commonshr.commonshr.get_constant_8dahcb$', wrapFunction(function () {
+    function get_constant$lambda(this$constant) {
+      return function () {
+        return this$constant;
+      };
+    }
+    return function ($receiver) {
+      return get_constant$lambda($receiver);
+    };
+  }));
   function once$lambda(closure$triggered, this$once) {
     return function () {
       if (!closure$triggered.v) {
@@ -2468,7 +2692,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function with_0($receiver, trigger) {
     return with$lambda($receiver, trigger);
   }
-  function plusAssign($receiver, trigger) {
+  function plusAssign_0($receiver, trigger) {
     $receiver(trigger);
   }
   function asyncKills$State(value, kill) {
@@ -2806,7 +3030,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return $receiver.kill(), Unit;
     }.bind(null, killable)));
   }
-  function plusAssign_0($receiver, killable) {
+  function plusAssign_1($receiver, killable) {
     add_0($receiver, killable);
   }
   function add_1($receiver, killable) {
@@ -2823,7 +3047,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     return $receiver_0;
   }
   function addedTo_2($receiver, ks) {
-    plusAssign(ks, $receiver);
+    plusAssign_0(ks, $receiver);
     return $receiver;
   }
   function Killables() {
@@ -3639,7 +3863,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function toChannel($receiver, ks) {
     var ch = Channel(2147483647);
-    plusAssign(ks, toChannel$lambda(ch));
+    plusAssign_0(ks, toChannel$lambda(ch));
     addedTo($receiver.forEach_qlkmfe$(toChannel$lambda_0(ch)), ks);
     return ch;
   }
@@ -3657,7 +3881,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function toChannelLater($receiver, ks) {
     var ch = Channel(2147483647);
-    plusAssign(ks, toChannelLater$lambda(ch));
+    plusAssign_0(ks, toChannelLater$lambda(ch));
     addedTo($receiver.forEachLater_qlkmfe$(toChannelLater$lambda_0(ch)), ks);
     return ch;
   }
@@ -3861,6 +4085,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function rx($receiver, fn) {
     return addedTo(Rx_init_0(fn), $receiver);
+  }
+  function toVar($receiver) {
+    return new Var($receiver);
   }
   function RxSet() {
   }
@@ -4419,15 +4646,24 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.toMoves_k2zy3$ = toMoves;
   package$commonshr.process_7c27tl$ = process;
   package$commonshr.toMap_wmk844$ = toMap;
+  package$commonshr.plusAssign_rmur43$ = plusAssign;
+  package$commonshr.HasExec = HasExec;
+  $$importsForInline$$['kotlinx-coroutines-core'] = $module$kotlinx_coroutines_core;
+  package$commonshr.exec_e9pf1l$ = exec;
+  package$commonshr.actor_w9ff4p$ = actor;
   package$commonshr.Counted = Counted;
   package$commonshr.reportd_za3rmp$ = reportd;
   package$commonshr.report_s8jyv4$ = report;
   package$commonshr.remAssign_t3h96y$ = remAssign;
   package$commonshr.remAssign_cslpg8$ = remAssign_0;
+  package$commonshr.Funs = Funs;
+  package$commonshr.get_funs_vvk9$ = get_funs;
+  package$commonshr.get_value_8dahcb$ = get_value;
+  package$commonshr.get_constant_8dahcb$ = get_constant;
   package$commonshr.once_yo2cq0$ = once;
   package$commonshr.first_4s9a7f$ = first;
   package$commonshr.with_qs7ci7$ = with_0;
-  package$commonshr.plusAssign_aeyq4w$ = plusAssign;
+  package$commonshr.plusAssign_aeyq4w$ = plusAssign_0;
   var package$killable = _.killable || (_.killable = {});
   package$killable.asyncKills_9scqh$ = asyncKills;
   Object.defineProperty(Killable, 'Companion', {
@@ -4444,7 +4680,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$killable.KillableValue = KillableValue;
   package$killable.addedTo_tjw9ba$ = addedTo_1;
   package$killable.add_ep5os3$ = add_0;
-  package$killable.plusAssign_ep5os3$ = plusAssign_0;
+  package$killable.plusAssign_ep5os3$ = plusAssign_1;
   package$killable.add_1wvaoy$ = add_1;
   package$killable.killables_yzxo1x$ = killables;
   package$killable.seq_yzxo1x$ = seq;
@@ -4493,6 +4729,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.toChannelLater_tgu8ha$ = toChannelLater;
   package$rx.mapAsync_wvb2ro$ = mapAsync;
   package$rx.rx_qoyk5l$ = rx;
+  package$rx.toVar_eoe559$ = toVar;
   package$rx.RxSet = RxSet;
   package$rx.RxMutableSet = RxMutableSet;
   package$rx.RxMutableIterator = RxMutableIterator;

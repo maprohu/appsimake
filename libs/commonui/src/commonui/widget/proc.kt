@@ -3,6 +3,7 @@ package commonui.widget
 import common.None
 import common.Optional
 import common.Some
+import commonshr.plusAssign
 import killable.KillSet
 import killable.addedTo
 import killable.killables

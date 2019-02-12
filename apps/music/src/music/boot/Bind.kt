@@ -5,15 +5,15 @@ import commonui.widget.*
 import rx.RxIface
 import rx.Var
 
-class Bind(inbox: Inbox): InboxWrap(inbox) {
+class Bind() {
 
     val userIcon = Var(UnknownUserSrc)
 
 
-    lateinit var top: Factory
-    lateinit var main: Factory
+    lateinit var top: Hole
+    lateinit var main: Hole
     lateinit var toasts: (ToastFn) -> Unit
-    lateinit var player: Factory
+    lateinit var player: Hole
 
 
 }

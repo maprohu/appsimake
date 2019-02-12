@@ -13,14 +13,13 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 
 typealias Inbox = SendChannel<Any>
-operator fun <T> SendChannel<T>.plusAssign(msg: T) { this.offer(msg) }
 
 interface HasInbox {
     val inbox: Inbox
-    val Node.child get() = Parent(widget, inbox)
-    val Slot.child get() = Parent(this, inbox)
-    val Slot.insert get() = child.insert
-    val Slot.factory get() = child.factory
+//    val Node.child get() = Parent(widget, inbox)
+//    val Slot.child get() = Parent(this, inbox)
+//    val Slot.insert get() = child.insert
+//    val Slot.factory get() = child.factory
 }
 open class InboxWrap(
     override val inbox: Inbox
@@ -36,6 +35,7 @@ typealias Slot = OptAssign<Node>
 val Node.slots : Slots
     get() = asDynamic()[SlotsAttribute].unsafeCast<Slots?>()
         ?: Slots(this).also { asDynamic()[SlotsAttribute] = it }
+
 
 val Node.append : Slot
     get() {
@@ -119,8 +119,8 @@ class Slots(
 
 }
 
-val Node.widget
-    get() = slots.slot
+val Node.widget get() = slots.slot
+val Node.hole get() = slots.slot.hole
 
 fun Node.widget(ps: Widget) { ps.slot %= widget }
 
@@ -158,6 +158,7 @@ fun widget(initial: Node? = null): Widget {
 interface HasNode {
     val node: Node
     val slot get() = node.widget
+    val hole get() = node.hole
 }
 open class NodeWrap(
     override val node: Node
@@ -178,3 +179,36 @@ fun <T: HasNode> T.setTo(parent: Slot) = apply {
 fun <T: Node> T.setTo(parent: Slot) = apply {
     parent %= this
 }
+
+class Hole(
+    val prepare: HTMLElement.() -> Unit,
+    val slot: Slot
+) {
+    fun with(pr: HTMLElement.() -> Unit) = Hole(
+        prepare = {
+            prepare()
+            pr()
+        },
+        slot = slot
+    )
+}
+val Slot.insert: Factory
+    get() {
+        return Factory() with {
+            this@insert %= this
+        }
+    }
+
+val Hole.factory get() = Factory() with prepare
+val Hole.insert: Factory
+    get() {
+        return factory with {
+            this@insert.slot %= this
+        }
+    }
+
+fun Slot.toHole(prepare: HTMLElement.() -> Unit = {}) = Hole(
+    prepare,
+    this
+)
+val Slot.hole get() = toHole()

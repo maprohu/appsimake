@@ -2,27 +2,34 @@ package commonui.widget
 
 import bootstrap.setupFullScreen
 import killable.Killables
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlin.browser.document
+import kotlin.coroutines.CoroutineContext
 
-open class BodyWrap(val body: Body = Body()): InboxWrap(body.inbox)
+open class BodyWrap(val body: Body)
 
-open class Body private constructor(panelFactory: InboxWrap.() -> Slot, inbox: Channel<Any>): InboxWrap(inbox) {
-    val panel = this.panelFactory()
-
-    constructor(
-        panel: InboxWrap.() -> Slot
-    ): this(panel, Channel(Channel.UNLIMITED))
-
-    constructor(): this({
+open class Body(
+    override val coroutineContext: CoroutineContext = Job(),
+    val panel: Slot = run {
         setupFullScreen()
         document.body!!.widget.apply { insert.hourglass }
-    })
+    }
+): CoroutineScope {
+    lateinit var job: Job
 
     val kills = Killables().also {
-        it += { inbox.close() }
+        job.invokeOnCompletion {  }
+
     }
 
-    val proc = runLoop(inbox).toSetProcOrElse()
+//    val proc = runLoop(inbox).toSetProcOrElse()
+
+//    val slot = singleSlot(
+//        kills.killSet,
+//        panel,
+//        proc
+//    )
 
 }

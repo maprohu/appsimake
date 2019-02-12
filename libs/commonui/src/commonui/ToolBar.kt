@@ -5,7 +5,6 @@ import common.insertAt
 import common.removeFromParent
 import commonshr.invoke
 import commonui.widget.Inbox
-import commonui.widget.plusAssign
 import domx.*
 import fontawesome.chevronLeft
 import fontawesome.*

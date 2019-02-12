@@ -7,7 +7,6 @@ import commonshr.*
 import commonui.faButtonSpan
 import commonui.widget.*
 import commonui.widget.Slot
-import commonui.widget.ui
 import domx.*
 import fontawesome.*
 import killable.KillSet

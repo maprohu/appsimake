@@ -6,19 +6,19 @@ import commonshr.invoke
 import domx.cls
 import kotlin.browser.document
 
-class Screen(sp: Parent): ScreenWrap(sp)  {
+class Screen(): ScreenWrap  {
     override val node = document.column {
         cls.flexGrow1
     }
 
     inner class Slots {
-        val top = slot
-        val main = slot
-        val bottom = slot
+        val top = hole
+        val main = hole
+        val bottom = hole
     }
     val slots = Slots()
 
-    val main = slots.main.insert
+    val main = slots.main
 
     val topbar by lazy { slots.top.insert.topbar }
 
@@ -26,8 +26,9 @@ class Screen(sp: Parent): ScreenWrap(sp)  {
         private val stack = slots.main.insert.stack {
             cls.flexGrow1
         }
+
         val content = stack.fill
-        val toasts = stack.fill.toasts.visible()
+        val toasts = stack.fill.insert.toasts
     }
     val toastSlots by lazy {
         ToastsSlots()

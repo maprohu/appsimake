@@ -73,7 +73,7 @@ fun <T> queryUi(
 
 data class OnSnapshot(
         val onNext: (QuerySnapshot) -> Unit,
-        val onError: (FirebaseError) -> Unit
+        val onError: (Throwable) -> Unit
 ) {
     constructor(
             onNext: (QuerySnapshot) -> Unit
@@ -83,7 +83,7 @@ data class OnSnapshot(
 fun <T> QueryWrap<T>.listen(
     killables: Killables,
     onFirst: () -> Unit = {},
-    onError: (FirebaseError) -> Unit = { console.dir(it) }
+    onError: (Throwable) -> Unit = { console.dir(it) }
 ): ListenableList<RxVal<T>> {
     var first = true
 
@@ -152,7 +152,7 @@ data class ListenConfig<T>(
     val update: T.(dynamic) -> Unit,
     val remove: (T) -> Unit,
     val onFirst: () -> Unit = {},
-    val onError: (FirebaseError) -> Unit = { console.dir(it) }
+    val onError: (Throwable) -> Unit = { console.dir(it) }
 ) {
     companion object {
 
@@ -260,13 +260,13 @@ fun <T> Try<T>.onRollback(fn: () -> T) : T = fold({ if (it is RollbackException)
 
 class RollbackException : Exception()
 fun rollback() : Nothing = throw RollbackException()
-fun launch(fn: suspend () -> Unit) {
-    GlobalScope.launch {
-        try {
-            fn()
-        } catch (e: RollbackException) {}
-    }
-}
+//fun launch(fn: suspend () -> Unit) {
+//    GlobalScope.launch {
+//        try {
+//            fn()
+//        } catch (e: RollbackException) {}
+//    }
+//}
 
 
 

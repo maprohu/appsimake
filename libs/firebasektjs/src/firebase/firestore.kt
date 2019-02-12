@@ -129,7 +129,7 @@ open external class Query {
 
     fun onSnapshot(
             onNext: (QuerySnapshot) -> Unit,
-            onError: (FirebaseError) -> Unit
+            onError: (Throwable) -> Unit
     ) : () -> Unit
 
     fun where(
