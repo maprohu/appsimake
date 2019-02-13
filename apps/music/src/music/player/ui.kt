@@ -32,265 +32,232 @@ data class AritstTitle(
     val title: String
 )
 
-fun UI(
-    kills: KillSet,
-    panel: Factory,
-    bind: Bind
-) = with (panel) {
-    with(bind) {
+fun Visible.ui() = Factory().run {
 
-        fun formatSecs(s: Int): String {
-            val mins = s / 60.0
-            val minPart = floor(mins)
-            val secPart = mins - minPart
-            val secString = ((secPart * 60).toInt() + 100).toString().substring(1)
-            val minString = minPart.toInt().toString()
+    fun formatSecs(s: Int): String {
+        val mins = s / 60.0
+        val minPart = floor(mins)
+        val secPart = mins - minPart
+        val secString = ((secPart * 60).toInt() + 100).toString().substring(1)
+        val minString = minPart.toInt().toString()
 
-            return "$minString:$secString"
-        }
+        return "$minString:$secString"
+    }
 
-        val totalDurationText = Rx { formatSecs(totalDuration()) }
-        val totalDurationTextLength = Rx { totalDurationText().length }
-        val currentPositionText = Rx { formatSecs(currentPosition()).padStart(totalDurationTextLength(), ' ') }
-        val likeButtonsDisabled = Rx { userSong() == null }
-        val state = userSong
+    val totalDurationText = rx { formatSecs(totalDuration()) }
+    val totalDurationTextLength = rx { totalDurationText().length }
+    val currentPositionText = rx { formatSecs(currentPosition()).padStart(totalDurationTextLength(), ' ') }
+    val likeButtonsDisabled = rx { userSong() == null }
+    val state = userSong
 
-        val artistTitle = Rx {
-            val opt = tag()
+    val artistTitle = rx {
+        AritstTitle(
+            tag.fixedArtist().getOrDefault("<unkown artist>"),
+            tag.fixedTitle().getOrDefault("<unkown title>")
+        )
+    }
 
-            AritstTitle(
-                opt.flatMap { t -> t.fixedArtist() }.getOrDefault("<unkown artist>"),
-                opt.flatMap { t -> t.fixedTitle() }.getOrDefault("<unkown title>")
-            )
-        }.addedTo(kills)
+    val artist = rx { artistTitle().artist }
+    val title = rx { artistTitle().title }
 
-        val artist = Rx { artistTitle().artist }
-        val title = Rx { artistTitle().title }
-
-        fun withPlayable(fn: Playable.() -> Unit) {
-            val p = playable.now
-            if (p != null) {
-                fn(p)
+    if (mediaSessionSupported) {
+        window.navigator.mediaSession.apply {
+            artistTitle.forEach { at ->
+                metadata = MediaMetadata(
+                    obj {
+                        this.artist = at.artist
+                        this.title = at.title
+                    }
+                )
             }
+
+            setActionHandler("play") {
+                play()
+            }
+            setActionHandler("pause") {
+                pause()
+            }
+            setActionHandler("seekbackward") {
+                backward()
+            }
+            setActionHandler("seekforward") {
+                forward()
+            }
+            setActionHandler("previoustrack") {
+                previousTrack()
+            }
+            setActionHandler("nexttrack") {
+                nextTrack()
+            }
+
         }
+    }
 
-        if (mediaSessionSupported) {
-            window.navigator.mediaSession.apply {
-                artistTitle.forEach { at ->
-                    metadata = MediaMetadata(
-                        obj {
-                            this.artist = at.artist
-                            this.title = at.title
-                        }
-                    )
+    wraps.div {
+        cls {
+            borderTop
+            bgLight
+            flexFixedSize()
+        }
+        fun Node.mediaButton(
+            faClass: String,
+            btnClass: String? = Cls.btnOutlinePrimary,
+            fn: HTMLButtonElement.() -> Unit
+        ) {
+            button {
+                cls {
+                    btn
                 }
+                btnClass?.let { classes += it }
+                faButtonSpan(faClass) {
+                    cls.fa.x2
+                }
+                fn()
+            }
 
-                playable.forEach { p ->
-                    if (p != null) {
-                        with(p) {
-                            setActionHandler("play") {
-                                inbox += PlayOrPause
-                            }
-                            setActionHandler("pause") {
-                                inbox += PlayOrPause
-                            }
-                            setActionHandler("seekbackward") {
-                                inbox += Backward
-                            }
-                            setActionHandler("seekforward") {
-                                inbox += Forward
-                            }
-                            setActionHandler("previoustrack") {
-                                inbox += Beginning
-                            }
-                            setActionHandler("nexttrack") {
-                                inbox += End
-                            }
-                        }
+        }
+        row {
+            cls {
+                justifyContentCenter
+            }
+            div {
+                cls {
+                    m1
+                    p1
+                    px2
+                    border
+                    borderPrimary
+                    rounded
+                    textPrimary
+                    scrollVertical
+                    dFlex
+                    alignItemsCenter
+                }
+                span {
+                    rxText { "${artist()} - ${title()}" }
+                }
+            }
+            div {
+                cls {
+                    border
+                    borderPrimary
+                    rounded
+                    m1
+                    p2
+                    flexCenter()
+                }
+                pre {
+                    cls {
+                        m0
+                        textPrimary
+                    }
+                    rxText {
+                        "${currentPositionText()} / ${totalDurationText()}"
                     }
                 }
-
             }
+
         }
-
-        wraps.div {
+        row {
             cls {
-                borderTop
-                bgLight
-                flexFixedSize()
+                flexWrap
+                justifyContentCenter
             }
-            fun Node.mediaButton(
-                faClass: String,
-                btnClass: String? = Cls.btnOutlinePrimary,
-                fn: HTMLButtonElement.() -> Unit
-            ) {
+            div {
+                cls {
+                    m1
+                    btnGroup
+                }
                 button {
                     cls {
                         btn
+                        btnOutlinePrimary
                     }
-                    btnClass?.let { classes += it }
-                    faButtonSpan(faClass) {
+                    faButtonSpan {
                         cls.fa.x2
+                        rxClass {
+                            if (playing()) {
+                                Fa.pause
+                            } else {
+                                Fa.play
+                            }
+                        }
                     }
-                    fn()
+                    clickEvent {
+                        exec {
+                            playOrPause()
+                        }
+                    }
+                }
+            }
+            div {
+                cls {
+                    m1
+                    btnGroup
+                }
+                mediaButton(Fa.stepBackward) {
+                    rxEnabled { currentPosition() != 0 || playing() }
+                    clickEvent {
+                        previousTrack()
+                    }
+                }
+                mediaButton(Fa.backward) {
+                    cls {
+                        btnOutlinePrimary
+                    }
+                    rxEnabled { currentPosition() != 0 || playing() }
+                    clickEvent {
+                        backward()
+                    }
+                }
+                mediaButton(Fa.forward) {
+                    cls {
+                        btnOutlinePrimary
+                    }
+                    clickEvent {
+                        forward()
+                    }
+                }
+                mediaButton(Fa.stepForward) {
+                    cls {
+                        btnOutlinePrimary
+                    }
+                    clickEvent {
+                        nextTrack()
+                    }
                 }
 
             }
-            row {
+            div {
                 cls {
-                    justifyContentCenter
+                    m1
+                    btnGroup
                 }
-                div {
-                    cls {
-                        m1
-                        p1
-                        px2
-                        border
-                        borderPrimary
-                        rounded
-                        textPrimary
-                        scrollVertical
-                        dFlex
-                        alignItemsCenter
+                mediaButton(Fa.thumbsUp, null) {
+                    likeButtonsDisabled.forEach { disabled = it }
+                    rxClass {
+                        if (state() == UserSongState.Like) Cls.btnPrimary
+                        else Cls.btnOutlinePrimary
                     }
-                    span {
-                        rxText { "${artist()} - ${title()}" }
+                    clickEvent {
+                        like()
                     }
                 }
-                div {
-                    cls {
-                        border
-                        borderPrimary
-                        rounded
-                        m1
-                        p2
-                        flexCenter()
+                mediaButton(Fa.thumbsDown, null) {
+                    likeButtonsDisabled.forEach { disabled = it }
+                    rxClass {
+                        if (state() == UserSongState.DontLike) Cls.btnPrimary
+                        else Cls.btnOutlinePrimary
                     }
-                    pre {
-                        cls {
-                            m0
-                            textPrimary
-                        }
-                        rxText {
-                            "${currentPositionText()} / ${totalDurationText()}"
-                        }
+                    clickEvent {
+                        dontLike()
                     }
                 }
-
-            }
-            row {
-                cls {
-                    flexWrap
-                    justifyContentCenter
-                }
-                div {
-                    cls {
-                        m1
-                        btnGroup
-                    }
-                    button {
-                        cls {
-                            btn
-                            btnOutlinePrimary
-                        }
-                        faButtonSpan {
-                            cls.fa.x2
-                            rxClass {
-                                if (playing()) {
-                                    Fa.pause
-                                } else {
-                                    Fa.play
-                                }
-                            }
-                        }
-                        clickEvent {
-                            withPlayable {
-                                inbox += (PlayOrPause)
-                            }
-                        }
-                    }
-                }
-                div {
-                    cls {
-                        m1
-                        btnGroup
-                    }
-                    mediaButton(Fa.stepBackward) {
-                        rxEnabled { currentPosition() != 0 || playing() }
-                        clickEvent {
-                            withPlayable {
-                                inbox += (Beginning)
-                            }
-                        }
-                    }
-                    mediaButton(Fa.backward) {
-                        cls {
-                            btnOutlinePrimary
-                        }
-                        rxEnabled { currentPosition() != 0 || playing() }
-                        clickEvent {
-                            withPlayable {
-                                inbox += (Backward)
-                            }
-                        }
-                    }
-                    mediaButton(Fa.forward) {
-                        cls {
-                            btnOutlinePrimary
-                        }
-                        clickEvent {
-                            withPlayable {
-                                inbox += (Forward)
-                            }
-                        }
-                    }
-                    mediaButton(Fa.stepForward) {
-                        cls {
-                            btnOutlinePrimary
-                        }
-                        clickEvent {
-                            withPlayable {
-                                inbox += (End)
-                            }
-                        }
-                    }
-
-                }
-                div {
-                    cls {
-                        m1
-                        btnGroup
-                    }
-                    mediaButton(Fa.thumbsUp, null) {
-                        likeButtonsDisabled.forEach { disabled = it }
-                        rxClass {
-                            if (state() == UserSongState.Like) Cls.btnPrimary
-                            else Cls.btnOutlinePrimary
-                        }
-                        clickEvent {
-                            withPlayable {
-                                inbox += (Like)
-                            }
-                        }
-                    }
-                    mediaButton(Fa.thumbsDown, null) {
-                        likeButtonsDisabled.forEach { disabled = it }
-                        rxClass {
-                            if (state() == UserSongState.DontLike) Cls.btnPrimary
-                            else Cls.btnOutlinePrimary
-                        }
-                        clickEvent {
-                            withPlayable {
-                                inbox += (DontLike)
-                            }
-                        }
-                    }
-                }
-
             }
 
         }
 
     }
 
-}
+
+}.node

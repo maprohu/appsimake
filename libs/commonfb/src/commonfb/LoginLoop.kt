@@ -51,13 +51,13 @@ fun runUserState(
     return rxv
 }
 
-fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx {
+fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx(ks) {
     val u = this()
     when (u) {
         is UserState.LoggedIn -> u.user
         else -> null
     }
-}.addedTo(ks)
+}
 
 fun RxIface<User?>.toUid(ks: KillSet) = Rx { this()?.uid }.addedTo(ks)
 

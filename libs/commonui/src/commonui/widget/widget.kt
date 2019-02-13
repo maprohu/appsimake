@@ -191,6 +191,7 @@ class Hole(
         },
         slot = slot
     )
+    operator fun remAssign(node: HTMLElement?) { slot %= node }
 }
 val Slot.insert: Factory
     get() {

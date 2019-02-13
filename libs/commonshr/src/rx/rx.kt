@@ -11,6 +11,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import org.w3c.dom.Element
 import org.w3c.dom.GlobalEventHandlers
+import org.w3c.dom.events.KeyboardEventInit
 import kotlin.dom.addClass
 import kotlin.dom.removeClass
 
@@ -67,12 +68,15 @@ fun connect(parent: RxParent, child: RxChild) {
 
 
 class Obs<T>(
-        private val parent: RxVal<T>,
-        private val fn: (T) -> Unit
-) : Killable {
+    ks: KillSet,
+    private val parent: RxVal<T>,
+    private val fn: (T) -> Unit
+) {
 
-    override fun kill() {
-        parent.observers.remove(this)
+    init {
+        ks += {
+            parent.observers.remove(this)
+        }
     }
 
     fun fire() {
@@ -87,105 +91,98 @@ interface RxIface<out T> {
 
     operator fun invoke(): T
 
-    fun forEach(fn: (T) -> Unit) : Killable {
+    fun forEach(ks: KillSet, fn: (T) -> Unit) {
         fn(now)
-        return forEachLater(fn)
+        return forEachLater(ks, fn)
     }
 
-    fun forEachLater(fn: (T) -> Unit) : Killable
+    fun forEachLater(ks: KillSet, fn: (T) -> Unit)
 
-    fun <F> fold(z0: F, fn: (F, T) -> F) : Killable {
+    fun <F> fold(ks: KillSet, z0: F, fn: (F, T) -> F) {
         var z = z0
 
-        return forEach {
+        return forEach(ks) {
             z = fn(z, it)
         }
     }
 
-    fun foldKillsTrigger(fn: (T) -> Trigger) : Trigger {
+    fun foldKillsTrigger(ks: KillSet, fn: (T) -> Trigger) {
         var z = {}
 
-        val fe = forEach {
+        forEach(ks) {
             z()
             z = fn(it)
         }
 
-        return {
-            fe()
-            z()
-        }
+        ks += { z() }
     }
 
-    fun foldKills(fn: (T) -> Killable) : Killable {
+    fun foldKills(ks: KillSet, fn: (T) -> Killable) {
         var z = Killable.empty
 
-        val fe = forEach {
+        forEach(ks) {
             z.kill()
             z = fn(it)
         }
 
-        return Killable.once {
-            fe.kill()
-            z.kill()
-        }
+        ks += { z.kill() }
     }
 
-    fun <F: Killable> foldKills(z0: F, fn: (F, T) -> F) : Killable {
+    fun <F: Killable> foldKills(ks: KillSet, z0: F, fn: (F, T) -> F) {
         var z = z0
 
-        val fe = forEach {
+        forEach(ks) {
             z = fn(z, it)
         }
 
-        return Killable.once {
-            fe.kill()
-            z.kill()
-        }
+        ks += { z.kill() }
     }
 
 
-    fun <F> folded(z0: F, fn: (F, T) -> F) : RxIfaceKillable<F> {
-        return object : Var<F>(z0), RxIfaceKillable<F> {
-            val killable = this@RxIface.forEach {
-                now = fn(now, it)
-            }
+//    fun <F> folded(z0: F, fn: (F, T) -> F) : RxIfaceKillable<F> {
+//        return object : Var<F>(z0), RxIfaceKillable<F> {
+//            val killable = this@RxIface.forEach {
+//                now = fn(now, it)
+//            }
+//
+//            override fun kill() {
+//                killable.kill()
+//            }
+//        }
+//    }
 
-            override fun kill() {
-                killable.kill()
-            }
-        }
-    }
-
-    fun <F> foldLater(z0: F, fn: (F, T) -> F) : Killable {
+    fun <F> foldLater(ks: KillSet, z0: F, fn: (F, T) -> F) {
         var z = z0
 
-        return forEachLater {
+        forEachLater(ks) {
             z = fn(z, it)
         }
     }
 
-    fun onChange(fn: (old: T /* old */, new: T /* new */) -> Unit) : Killable {
-        return foldLater(now) { old, new ->
+    fun onChange(ks: KillSet, fn: (old: T /* old */, new: T /* new */) -> Unit) {
+        return foldLater(ks, now) { old, new ->
             fn(old, new)
             new
         }
     }
 
     fun onOff(
+            ks: KillSet,
             on: (T) -> Unit,
             off: (T) -> Unit
-    ) : Killable {
+    ) {
         on(now)
-        return onChange { old, new ->
+        onChange(ks) { old, new ->
             off(old)
             on(new)
         }
     }
 
     fun off(
-            offFn: (T) -> Unit
-    ) : Killable {
-        return onChange { old, _ ->
+        ks: KillSet,
+        offFn: (T) -> Unit
+    )  {
+        onChange(ks) { old, _ ->
             offFn(old)
         }
     }
@@ -194,43 +191,47 @@ interface RxIface<out T> {
 }
 
 fun <T> RxIface<T>.feedTo(ks: KillSet, target: Var<T>) {
-    forEach { target.now = it }.addedTo(ks)
+    forEach(ks) { target.now = it }
 }
 
-fun RxIface<Int>.feedTo(rxv: Var<Int>): Killable {
-    return fold(0) { old, new ->
+fun RxIface<Int>.feedTo(ks: KillSet, rxv: Var<Int>) {
+    fold(ks, 0) { old, new ->
         rxv.transform { it + new - old }
         new
-    } + Killable.once {
+    }
+    ks += {
         rxv.transform { it - now }
     }
 }
-fun RxIface<Int>.feedTo(rxv: Var<Long>): Killable {
-    return fold(0) { old, new ->
+fun RxIface<Int>.feedTo(ks: KillSet, rxv: Var<Long>) {
+    fold(ks, 0) { old, new ->
         rxv.transform { it + new - old }
         new
-    } + Killable.once {
+    }
+    ks += {
         rxv.transform { it - now }
     }
 }
-fun RxIface<Long>.feedTo(rxv: Var<Long>): Killable {
-    return fold(0L) { old, new ->
+fun RxIface<Long>.feedTo(ks: KillSet, rxv: Var<Long>) {
+    fold(ks, 0L) { old, new ->
         rxv.transform { it + new - old }
         new
-    } + Killable.once {
+    }
+    ks += {
         rxv.transform { it - now }
     }
 }
-fun RxIface<Double>.feedTo(rxv: Var<Double>): Killable {
-    return fold(0.0) { old, new ->
+fun RxIface<Double>.feedTo(ks: KillSet, rxv: Var<Double>) {
+    fold(ks, 0.0) { old, new ->
         rxv.transform { it + new - old }
         new
-    } + Killable.once {
+    }
+    ks += {
         rxv.transform { it - now }
     }
 }
 
-fun <T> RxIface<Optional<T>>.orDefault(v: T) = Rx { this().getOrDefault(v) }
+fun <T> RxIface<Optional<T>>.orDefault(ks: KillSet, v: T) = Rx(ks) { this().getOrDefault(v) }
 
 fun Var<Int>.incremented(): Killable {
     transform { it + 1 }
@@ -275,10 +276,9 @@ abstract class RxVal<T>(
     }
 
 
-    override fun forEachLater(fn: (T) -> Unit) : Killable {
-        val obs = Obs(this, fn)
+    override fun forEachLater(ks: KillSet, fn: (T) -> Unit) {
+        val obs = Obs(ks, this, fn)
         observers += obs
-        return obs
     }
 
 
@@ -286,8 +286,8 @@ abstract class RxVal<T>(
 
 
 
-fun <T : Killable> RxVal<T>.killOld() : Killable {
-    return off { it.kill() }
+fun <T : Killable> RxVal<T>.killOld(ks: KillSet){
+    return off(ks) { it.kill() }
 }
 
 fun <T> Var<Optional<Set<T>>>.add(v: T) {
@@ -296,39 +296,39 @@ fun <T> Var<Optional<Set<T>>>.add(v: T) {
 fun <T> Var<Optional<Set<T>>>.remove(v: T) {
     transform { c -> c.map { it - v } }
 }
-fun <T> RxIface<Optional<Set<T>>>.diffs(fn: (SetDiff<T>) -> Unit): Killable {
+fun <T> RxIface<Optional<Set<T>>>.diffs(ks: KillSet, fn: (SetDiff<T>) -> Unit) {
     fn(SetDiff.of(None, now))
-    return onChange { old, new ->
+    return onChange(ks) { old, new ->
         fn(SetDiff.of(old, new))
     }
 }
 
-interface RxIfaceKillable<T> : RxIface<T>, Killable
-
 class Rx<T> private constructor(
-        currentValue: T,
-        private val calc: RxCalc<T>
-) : RxVal<T>(currentValue), RxIfaceKillable<T> {
+    ks: KillSet,
+    currentValue: T,
+    private val calc: RxCalc<T>
+) : RxVal<T>(currentValue), RxIface<T> {
     init {
         calc.rx = this
+        ks += {
+            calc.disconnectAll()
+        }
     }
 
     constructor(
-            calc: RxCalc<T>
-    ) : this(calc.recalcValue(), calc)
+        ks: KillSet,
+        calc: RxCalc<T>
+    ) : this(ks, calc.recalcValue(), calc)
 
     constructor(
-            fn: () -> T
-    ) : this(RxCalc(fn))
-
-    override fun kill() {
-        calc.disconnectAll()
-    }
+        ks: KillSet,
+        fn: () -> T
+    ) : this(ks, RxCalc(fn))
 
 }
 
 open class Var<T>(
-        v: T
+    v: T
 ) : RxVal<T>(v) {
 
     fun setValue(value: T) {
@@ -366,20 +366,22 @@ fun <T> Var<Optional<T>>.set(v: T) {
 }
 
 fun Element.rxClass(
+    ks: KillSet,
     style: () -> String
-) : Killable {
-    val rxv = Rx(style)
-    rxClass(rxv)
-    return rxv
+)  {
+    val rxv = Rx(ks, style)
+    rxClass(ks, rxv)
 }
 
 
 fun Element.rxClass(
-        style: RxVal<String>
-) : Killable {
+    ks: KillSet,
+    style: RxVal<String>
+) {
     return style.onOff(
-            { addClass(it) },
-            { removeClass(it) }
+        ks,
+        { addClass(it) },
+        { removeClass(it) }
     )
 }
 
@@ -389,58 +391,64 @@ fun GlobalEventHandlers.rxHover(rx: Var<Boolean>) {
 }
 
 fun Element.rxClass(
+    ks: KillSet,
     style: String,
     fn: RxIface<Boolean>
-) : Killable {
-    return fn.forEach {
+) {
+    fn.forEach(ks) {
         if (it) addClass(style)
         else removeClass(style)
     }
 }
 
 fun Element.rxClass(
+    ks: KillSet,
     style: String,
     fn: () -> Boolean
-) : Killable {
-    val rxv = Rx { fn() }
-    rxClass(style, rxv)
-    return rxv
+)  {
+    val rxv = Rx(ks) { fn() }
+    rxClass(ks, style, rxv)
 }
 
 fun Element.rxClassOpt(
-        style: RxVal<String?>
-) : Killable {
-    return style.onOff(
-            { it?.let { c -> addClass(c) } },
-            { it?.let { c -> removeClass(c) } }
+    ks: KillSet,
+    style: RxVal<String?>
+) {
+    style.onOff(
+        ks,
+        { it?.let { c -> addClass(c) } },
+        { it?.let { c -> removeClass(c) } }
     )
 }
 
-fun <T> (() -> T).toRx() = Rx(this)
+fun <T> (() -> T).toRx(ks: KillSet) = Rx(ks, this)
 
 fun Element.rxClasses(
+    ks: KillSet,
     style: () -> Collection<String>
-) : Killable  = rxClasses(style.toRx())
+) = rxClasses(ks, style.toRx(ks))
 
 fun Element.rxClasses(
-        style: RxIface<Collection<String>>
-) : Killable {
-    return style.onOff(
-            { addClass(*it.toTypedArray()) },
-            { removeClass(*it.toTypedArray()) }
+    ks: KillSet,
+    style: RxIface<Collection<String>>
+) {
+    style.onOff(
+        ks,
+        { addClass(*it.toTypedArray()) },
+        { removeClass(*it.toTypedArray()) }
     )
 }
 
 fun <T> RxIface<T>.toChannel(ks: KillSet): ReceiveChannel<T> {
     val ch = Channel<T>(Channel.UNLIMITED)
     ks += { ch.close() }
-    forEach { t -> ch.offer(t) }.addedTo(ks)
+    forEach(ks) { t -> ch.offer(t) }
     return ch
 }
 fun <T> RxIface<T>.toChannelLater(ks: KillSet): ReceiveChannel<T> {
     val ch = Channel<T>(Channel.UNLIMITED)
     ks += { ch.close() }
-    forEachLater { t -> ch.offer(t) }.addedTo(ks)
+    forEachLater(ks) { t -> ch.offer(t) }
     return ch
 }
 
@@ -464,5 +472,5 @@ suspend fun <T, S> RxIface<T>.mapAsync(
     return rxv
 }
 
-fun <T> KillSet.rx(fn: () -> T): RxIface<T> = Rx(fn).addedTo(this)
+fun <T> KillSet.rx(fn: () -> T): RxIface<T> = Rx(this, fn)
 fun <T> T.toVar() = Var(this)

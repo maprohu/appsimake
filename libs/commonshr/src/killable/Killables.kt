@@ -6,6 +6,10 @@ import commonshr.plusAssign
 import killable.Killable.Companion.empty
 import killable.Killable.Companion.once
 import kotlinx.coroutines.Job
+import org.w3c.dom.Element
+import rx.Rx
+import rx.RxIface
+import rx.rxClass
 
 typealias KillSet = AddRemove<Trigger>
 
@@ -78,5 +82,14 @@ class Killables : Killable {
 
     fun killables() = toKillSet().killables()
     fun seq() = KillableSeq().also { it.onKill += add(it) }
+
+}
+
+interface HasKillSet {
+    val kills: KillSet
+
+    fun <T> rx(fn: () -> T) = Rx(kills, fn)
+    fun <T> RxIface<T>.forEach(fn: (T) -> Unit) = forEach(kills, fn)
+    fun Element.rxClass(fn: () -> String) = rxClass(kills, fn)
 
 }

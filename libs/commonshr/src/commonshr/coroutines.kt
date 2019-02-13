@@ -15,7 +15,7 @@ interface HasExec {
     val exec: Exec
 }
 
-fun CoroutineScope.exec(): Exec {
+fun CoroutineScope.executor(): Exec {
     val channel = Channel<Action>(Channel.UNLIMITED)
 
     launch {
@@ -25,7 +25,9 @@ fun CoroutineScope.exec(): Exec {
     return { channel += it }
 }
 
-typealias ActorFn<T> = (suspend T.() -> Unit) -> Unit
+typealias ActorAction<T> = suspend T.() -> Unit
+typealias ActorFn<T> = (ActorAction<T>) -> Unit
+
 fun <T> CoroutineScope.actor(state: T): ActorFn<T> {
     val exec = exec()
     return { fn ->

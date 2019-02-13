@@ -26,13 +26,6 @@ class Playable(
     val blob: Blob
 ) {
 
-    val PlayOrPause = object {}
-    val Beginning = object{}
-    val End = object{}
-    val Forward = object{}
-    val Backward = object{}
-    val Like = object{}
-    val DontLike = object{}
 
 }
 
