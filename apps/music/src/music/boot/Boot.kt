@@ -71,7 +71,11 @@ class Boot(
         }
     }
 
-    fun userUnknown() = forward { UserUnknown() }
+    val content = stations(UserUnknown())
+    val player = stations(Player(this))
+
+
+    fun userUnknown() = content.switchTo { UserUnknown() }
 
     val userSongs = Var<UserSongs?>(null)
 
