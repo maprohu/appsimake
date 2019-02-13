@@ -33,6 +33,7 @@ import kotlin.browser.document
 //
 //}
 
+val factory  = Factory()
 class Factory(private val after: HTMLElement?.() -> Unit = {}) {
     infix fun with(fn: HTMLElement?.() -> Unit) = Factory {
         after()

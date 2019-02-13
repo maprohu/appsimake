@@ -1,26 +1,31 @@
 package commonui.widget
 
 import bootstrap.setupFullScreen
-import commonshr.Trigger
-import killable.Killables
-import kotlinx.coroutines.CoroutineScope
+import commonshr.constant
+import commonshr.funs
+import commonshr.remAssign
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
+import org.w3c.dom.Node
 import kotlin.browser.document
-import kotlin.coroutines.CoroutineContext
 
-abstract class BodyWrap(
-    val body: Body,
-    parent: Station
-): Station(parent)
+typealias BodyNode = ItemWithViewRx<JobScope, Node?>
+class Body: JobKillsImpl() {
 
+    val content = JobSwitch.jobWithView<BodyNode>(
+        ItemWithViewRx(
+            JobScopeImpl.childOf(this),
+            Factory().hourglass.node.funs.constant
+        )
+    )
 
-open class Body(
-    val slot: Slot = run {
+    init {
         setupFullScreen()
-        document.body!!.widget
-    },
-    parent: Station? = null
-): Station(parent) {
-    override val show: Trigger = { slot.insert.hourglass }
+        val slot = document.body!!.widget
+        content.runView(this, slot)
+    }
+
 }
+
+open class BodyPath(
+    val body: Body
+)

@@ -1,10 +1,10 @@
 package commonshr
 
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 operator fun <T> SendChannel<T>.plusAssign(msg: T) { this.offer(msg) }
@@ -18,21 +18,27 @@ interface HasExec {
 fun CoroutineScope.executor(): Exec {
     val channel = Channel<Action>(Channel.UNLIMITED)
 
-    launch {
-        channel.consumeEach { it() }
-    }
-
-    return { channel += it }
-}
-
-typealias ActorAction<T> = suspend T.() -> Unit
-typealias ActorFn<T> = (ActorAction<T>) -> Unit
-
-fun <T> CoroutineScope.actor(state: T): ActorFn<T> {
-    val exec = exec()
-    return { fn ->
-        exec {
-            state.fn()
+    val job = GlobalScope.launch {
+        for (action in channel) {
+            action()
         }
     }
+
+    launch {
+        try {
+            CompletableDeferred<Unit>().await()
+        } finally {
+            withContext(NonCancellable) {
+                channel.close()
+                job.join()
+            }
+        }
+    }
+
+    return { action ->
+        try {
+            channel += action
+        } catch (e: ClosedSendChannelException) {}
+    }
 }
+

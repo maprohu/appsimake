@@ -192,6 +192,9 @@ class Hole(
         slot = slot
     )
     operator fun remAssign(node: HTMLElement?) { slot %= node }
+    val prepareOrNull: HTMLElement?.() -> Unit = {
+        this?.apply(prepare)
+    }
 }
 val Slot.insert: Factory
     get() {

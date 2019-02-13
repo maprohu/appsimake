@@ -11,38 +11,51 @@ import kotlinx.coroutines.*
 import music.*
 import music.common.LocalSongs
 import music.common.toLatestUid
+import music.content.Content
+import music.content.ContentView
+import music.content.UserUnknown
 import music.data.*
 import music.loggedin.LoggedIn
 import music.notloggedin.NotLoggedIn
+import music.player.Hidden
 import music.player.Player
+import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import rx.*
 import kotlin.coroutines.CoroutineContext
 
-abstract class BootWrap(
-    val boot: Boot,
-    parent: Station
-): BodyWrap(boot.body, parent)
+open class BootPath(
+    val boot: Boot
+): BodyPath(boot.path.body)
 
 class Boot(
-    body: Body,
+    parent: JobScope,
+    val path: BodyPath,
     idb: IDBDatabase,
     localSongs: LocalSongs
-): BodyWrap(
-    body,
-    body
-) {
+): ViewImpl<Node>(parent) {
+
 
     companion object {
         suspend fun create(): Boot {
             val body = Body()
-            val idb = localDatabase()
-            val localSongs = LocalSongs(idb)
 
-            return Boot(body, idb, localSongs)
+            return body.withChild {
+                val idb = localDatabase()
+                val localSongs = LocalSongs(this, idb)
+
+                Boot(this, BodyPath(body), idb, localSongs).also {
+                    body.content.switchTo(
+                        ItemWithViewRx(
+                            this,
+                            it
+                        )
+                    )
+                }
+            }
+
         }
     }
-
 
     val userState = Var<UserState>(UserState.Unknown)
 
@@ -57,32 +70,29 @@ class Boot(
         lateinit var player: Hole
     }
     val slots = Slots()
-    val ui = ui()
-    override val show: Trigger = { body.slot %= ui }
+    override val rawView = ui()
 
-
-
-
-
-    inner class UserUnknown: BootWrap(this, this) {
-        override val show: Trigger = {
-            slots.top %= null
-            slots.main.insert.hourglass
-        }
+    val initializeContentView: ContentView.() -> Unit = {
+        topbar.apply(slots.top.prepareOrNull)
+        content.apply(slots.main.prepare)
     }
 
-    val content = stations(UserUnknown())
-    val player = stations(Player(this))
 
 
-    fun userUnknown() = content.switchTo { UserUnknown() }
 
-    val userSongs = Var<UserSongs?>(null)
+
+    val content = switch<Content>(UserUnknown(this))
+    val player = switch<Player>(Hidden(this))
+
+
+    fun userUnknown() = content.switchTo { UserUnknown(this) }
+
+    val userSongs = wrap<UserSongs?>(null)
 
     private val songInclude = songInclude(
         kills,
         localSongs,
-        rx { userSongs()?.get }
+        rx { userSongs.current().value?.get }
     )
 
     val songSource = songSource(

@@ -4,6 +4,9 @@ import common.obj
 import commonshr.SetAdded
 import commonshr.SetMove
 import commonshr.SetRemoved
+import commonshr.plusAssign
+import commonui.widget.JobKillsImpl
+import commonui.widget.JobScope
 import indexeddb.*
 import kotlinx.coroutines.CompletableDeferred
 import music.Mp3Store
@@ -22,11 +25,12 @@ private external interface LocalSongEventType {
 private inline val LocalSongEventType.Companion.added get() = "added".unsafeCast<LocalSongEventType>()
 private inline val LocalSongEventType.Companion.removed get() = "removed".unsafeCast<LocalSongEventType>()
 
-class LocalSongs(val idb: IDBDatabase, initial: Set<String>) {
+class LocalSongs(parent: JobScope, val idb: IDBDatabase, initial: Set<String>): JobKillsImpl(parent) {
 
     companion object {
-        suspend operator fun invoke(idb: IDBDatabase): LocalSongs {
+        suspend operator fun invoke(parent: JobScope, idb: IDBDatabase): LocalSongs {
             return LocalSongs(
+                parent,
                 idb,
                 idb.readMp3Store().getAllKeys().await().toSet()
             )
@@ -40,7 +44,9 @@ class LocalSongs(val idb: IDBDatabase, initial: Set<String>) {
         m.applyTo(mutableSet)
     }
 
-    private val tabsChannel = org.w3c.dom.BroadcastChannel("appsimake-music-localSongs")
+    private val tabsChannel = org.w3c.dom.BroadcastChannel("appsimake-music-localSongs").also {
+        kills += { it.close() }
+    }
 
     init {
         tabsChannel.onmessage = { e ->

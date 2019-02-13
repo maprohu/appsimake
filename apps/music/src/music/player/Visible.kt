@@ -13,9 +13,11 @@ import killable.seq
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import music.Playable
+import music.boot.Boot
 import musiclib.Mp3File
 import musiclib.UserSong
 import musiclib.UserSongState
+import org.w3c.dom.Node
 import org.w3c.dom.url.URL
 import rx.Rx
 import rx.Var
@@ -24,26 +26,22 @@ import kotlin.browser.document
 import kotlin.math.max
 
 
-private const val SeekSeconds = 15.0
-
-abstract class VisibleWrap(
-    val visible: Visible,
-    parent: Station
-): PlayerWrap(visible.player, parent)
+const val SeekSeconds = 15.0
 
 class Visible(
-    player: Player,
+    boot: Boot,
     val playable: Playable,
     startPlaying: Boolean
-): PlayerWrap(player, player) {
+): Player(boot) {
 
     val tag = Mp3File()
     val playing = Var(false)
     val totalDuration = Var(0)
     val currentPosition = Var(0)
 
-    val ui = ui()
-    override val show: Trigger = { }
+    override val view = ui()
+
+    val playState = switch<PlayState>(Paused(this))
 
 
     val audio = document.audio {
@@ -130,21 +128,12 @@ class Visible(
 
             with (playable) {
                 procs.process(Like) {
-                    boot.userSongs.now?.let { us ->
-                        us.like(playable.id)
-                    }
                 }
 
                 procs.process(Beginning) {
-                    audio.currentTime = 0.0
-                    readCounterNow()
                 }
 
                 procs.process(Backward) {
-                    audio {
-                        currentTime = max(0.0, currentTime - SeekSeconds)
-                    }
-                    readCounterNow()
                 }
 
 
@@ -154,14 +143,15 @@ class Visible(
 
     }
 
-    fun playOrPause() {}
-    fun play() {}
-    fun pause() {}
-    fun backward() {}
-    fun forward() {}
-    fun previousTrack() {}
-    fun nextTrack() {}
-    fun like() {}
-    fun dontLike() {}
+    fun plx(fn: suspend PlayState.() -> Unit) = playState.current.now.let { p -> p.exec { p.fn() } }
+    fun playOrPause() = plx { playOrPause() }
+    fun play() = playOrPause()
+    fun pause() = playOrPause()
+    fun backward() = plx { backward() }
+    fun forward() = plx { forward() }
+    fun previousTrack() = plx { previousTrack() }
+    fun nextTrack() = plx { nextTrack() }
+    fun like() = plx { like() }
+    fun dontLike() = plx { dontLike() }
 
 }
