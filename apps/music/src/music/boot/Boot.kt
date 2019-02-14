@@ -114,6 +114,12 @@ class Boot(
         userState.now = UserState.Unknown
     }
 
+    suspend fun loadNextSong(startPlaying: Boolean) {
+        player.switchTo(
+            songSource.now?.invoke()?.let { Visible(self, it, startPlaying) }
+        )
+    }
+
     init {
 
         GlobalScope.launch {

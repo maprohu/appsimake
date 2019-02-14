@@ -72,22 +72,22 @@ fun Visible.ui() = Factory().run {
             }
 
             setActionHandler("play") {
-                play()
+                uix { play() }
             }
             setActionHandler("pause") {
-                pause()
+                uix { pause() }
             }
             setActionHandler("seekbackward") {
-                backward()
+                uix { backward() }
             }
             setActionHandler("seekforward") {
-                forward()
+                uix { forward() }
             }
             setActionHandler("previoustrack") {
-                previousTrack()
+                uix { previousTrack() }
             }
             setActionHandler("nexttrack") {
-                nextTrack()
+                uix { nextTrack() }
             }
 
         }
@@ -183,10 +183,8 @@ fun Visible.ui() = Factory().run {
                             }
                         }
                     }
-                    clickEvent {
-                        exec {
-                            playOrPause()
-                        }
+                    click {
+                        playOrPause()
                     }
                 }
             }
@@ -197,7 +195,7 @@ fun Visible.ui() = Factory().run {
                 }
                 mediaButton(Fa.stepBackward) {
                     rxEnabled(kills) { currentPosition() != 0 || playing() }
-                    clickEvent {
+                    click {
                         previousTrack()
                     }
                 }
@@ -206,7 +204,7 @@ fun Visible.ui() = Factory().run {
                         btnOutlinePrimary
                     }
                     rxEnabled(kills) { currentPosition() != 0 || playing() }
-                    clickEvent {
+                    click {
                         backward()
                     }
                 }
@@ -214,7 +212,7 @@ fun Visible.ui() = Factory().run {
                     cls {
                         btnOutlinePrimary
                     }
-                    clickEvent {
+                    click {
                         forward()
                     }
                 }
@@ -222,7 +220,7 @@ fun Visible.ui() = Factory().run {
                     cls {
                         btnOutlinePrimary
                     }
-                    clickEvent {
+                    click {
                         nextTrack()
                     }
                 }
@@ -239,7 +237,7 @@ fun Visible.ui() = Factory().run {
                         if (state() == UserSongState.Like) Cls.btnPrimary
                         else Cls.btnOutlinePrimary
                     }
-                    clickEvent {
+                    click {
                         like()
                     }
                 }
@@ -249,7 +247,7 @@ fun Visible.ui() = Factory().run {
                         if (state() == UserSongState.DontLike) Cls.btnPrimary
                         else Cls.btnOutlinePrimary
                     }
-                    clickEvent {
+                    click {
                         dontLike()
                     }
                 }

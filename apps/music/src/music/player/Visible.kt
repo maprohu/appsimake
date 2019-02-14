@@ -49,12 +49,12 @@ class Visible(
         }
     }
 
-    val playing = Var(false)
     val totalDuration = Var(0)
     val currentPosition = Var(0)
 
 
     val playState = switch<PlayState>(Paused(this))
+    val playing = rx { playState.current().isPlaying }
 
 
     val audio = document.audio {
@@ -92,20 +92,10 @@ class Visible(
 //        return with (playable) {
 //            procOrElses().apply {
 //                add.process(DontLike) {
-//                    boot.userSongs.now?.let { us ->
-//                        us.dontLike(playable.id)
-//                        next()
-//                    }
+
 //                }
 //                add.process(Forward) {
-//                    val newPos = audio.currentTime + SeekSeconds
-//
-//                    if (newPos >= audio.duration) {
-//                        next()
-//                    } else {
-//                        audio.currentTime = newPos
-//                        readCounterNow()
-//                    }
+
 //
 //                }
 //                add.process(End) {
@@ -158,16 +148,56 @@ class Visible(
 
     }
 
+    suspend fun next() {
+        path.boot.loadNextSong(isPlaying)
+    }
 
-    fun plx(fn: suspend PlayState.() -> Unit) = playState.current.now.let { p -> p.exec { p.fn() } }
-    fun playOrPause() = plx { playOrPause() }
-    fun play() = playOrPause()
-    fun pause() = playOrPause()
-    fun backward() = plx { backward() }
-    fun forward() = plx { forward() }
-    fun previousTrack() = plx { previousTrack() }
-    fun nextTrack() = plx { nextTrack() }
-    fun like() = plx { like() }
-    fun dontLike() = plx { dontLike() }
+    suspend fun forward() {
+        val newPos = audio.currentTime + SeekSeconds
+
+        if (newPos >= audio.duration) {
+            next()
+        } else {
+            audio.currentTime = newPos
+            readCounterNow()
+        }
+    }
+
+    suspend fun dontLike() {
+        boot.userSongs.current.now.item?.let { us ->
+            us.dontLike(playable.id)
+            next()
+        }
+    }
+
+    suspend fun nextTrack() { next() }
+
+    fun backward() {
+        audio {
+            currentTime = max(0.0, currentTime - SeekSeconds)
+        }
+        readCounterNow()
+    }
+    fun previousTrack() {
+        audio.currentTime = 0.0
+        readCounterNow()
+    }
+    fun like() {
+        path.boot.userSongs.current.now.item?.let { us ->
+            us.like(playable.id)
+        }
+    }
+
+    val isPlaying get() = playState.current.now.isPlaying
+
+    suspend fun playOrPause() {
+        if (isPlaying) {
+            playState.switchTo(Paused(this))
+        } else {
+            playState.switchTo(Playing(this))
+        }
+    }
+    suspend fun play() = playOrPause()
+    suspend fun pause() = playOrPause()
 
 }
