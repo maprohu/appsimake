@@ -5,7 +5,8 @@ import commonlib.addedTo
 import commonlib.post
 import commonlib.toChannel
 import commonshr.SetMove
-import killable.Killable
+import commonshr.Trigger
+import commonshr.once
 import killable.Killables
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
@@ -23,9 +24,7 @@ class RandomChooser<I, O>(
 
     val ks = Killables()
 
-    override fun kill() {
-        ks.kill()
-    }
+    val kill = ks.kill
 
     open inner class Event
     inner class Input(
@@ -39,8 +38,8 @@ class RandomChooser<I, O>(
     inner class Cache(
         val input: I,
         val output: O,
-        val onEvict: Killable,
-        val onServe: Killable
+        val onEvict: Trigger,
+        val onServe: Trigger
     )
 
     val eventChannel = Channel<Event>()
@@ -88,21 +87,21 @@ class RandomChooser<I, O>(
                 when (outputOpt) {
                     is Some -> {
                         val onServe = Killables()
-                        onServe += ks.add(onEvict)
-                        onServe += Killable.once {
+                        onServe += ks.add(onEvict.kill)
+                        onServe += {
                             recent += nextInput
                             while (recent.size > recentSize) {
                                 recent.removeAt(0)
                             }
-                        }
+                        }.once()
 
                         val output = outputOpt.value
 
                         val c = Cache(
                             nextInput,
                             output,
-                            onEvict = onEvict,
-                            onServe = onServe
+                            onEvict = onEvict.kill,
+                            onServe = onServe.kill
                         )
 
                         cached += c
@@ -127,7 +126,7 @@ class RandomChooser<I, O>(
                 while (waiting.isNotEmpty() && cached.isNotEmpty()) {
                     val c = cached.removeAt(0)
                     val w = waiting.removeAt(0)
-                    c.onServe.kill()
+                    c.onServe()
                     w.complete(c.output)
                 }
             }
@@ -138,7 +137,7 @@ class RandomChooser<I, O>(
                     val next = iter.next()
                     if (next.input !in all) {
                         iter.remove()
-                        next.onEvict.kill()
+                        next.onEvict()
                     }
                 }
                 tryFillCache()
@@ -164,7 +163,7 @@ class RandomChooser<I, O>(
         return if (cached.isNotEmpty()) {
             val c = cached.removeAt(0)
             fillCache()
-            c.onServe.kill()
+            c.onServe()
             c.output
         } else {
             null

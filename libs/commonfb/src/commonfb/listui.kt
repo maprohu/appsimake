@@ -6,6 +6,7 @@ import common.ListenableMutableList
 import common.map
 import commonlib.CollectionWrap
 import commonshr.invoke
+import commonshr.plusAssign
 import commonui.RootPanel
 import commonui.showClosable
 import domx.*
@@ -13,8 +14,7 @@ import firebase.firestore.*
 import firebase.firestore.ListenConfig.Companion.hasProps
 import firebaseshr.HasFBProps
 import firebaseshr.HasProps
-import killable.Killable
-import killable.Killables
+import killable.*
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLUListElement
 import org.w3c.dom.Node
@@ -23,11 +23,12 @@ import styles.scrollVertical
 import kotlin.browser.document
 
 fun <T> stringListClick(
+    ks: KillSet,
     itemText: (T) -> String,
     onClick: (T) -> Unit
 ) : (T) -> Node = { item ->
     document.listAction {
-        rxText { itemText(item) }
+        rxText(ks) { itemText(item) }
         clickEvent {
             onClick(item)
         }
@@ -64,7 +65,7 @@ data class ListUIConfig<T: HasFBProps<*>>(
 }
 
 fun <T: HasFBProps<*>> listUI(
-    killables: Killables,
+    killables: KillSet,
     config: ListUIConfig<T>
 ) {
     with(config) {
@@ -72,8 +73,8 @@ fun <T: HasFBProps<*>> listUI(
             emptyDivDecor()
         }
 
-        query.fold(killables.killSet, Killable.empty) { old, q ->
-            old.kill()
+        query.fold(killables, Noop) { old, q ->
+            old()
 
             val queryRoot = root.sub()
             queryRoot.setHourglass().apply(hourglassDecor)
@@ -88,7 +89,7 @@ fun <T: HasFBProps<*>> listUI(
                 listDivDecor()
                 listGroup {
                     ulDecor()
-                    listenableList(filtered, itemFactory)
+                    listenableList(ks.killSet, filtered, itemFactory)
                 }
             }
 
@@ -109,16 +110,16 @@ fun <T: HasFBProps<*>> listUI(
                 )
             )
 
-            ks
+            ks.kill
         }
 
     }
 }
 
 fun <T: HasFBProps<*>> showClosableList(
-    killables: Killables,
+    killables: KillSet,
     redisplay: () -> Unit,
-    page: (Killables, T, close: () -> Unit) -> Unit,
+    page: (KillSet, T, close: () -> Unit) -> Unit,
     config: (show: (T) -> Unit) -> ListUIConfig<T>
 ) {
     val viewSeq = killables.seq()
@@ -133,7 +134,7 @@ fun <T: HasFBProps<*>> showClosableList(
         }
 
         showClosable(
-            viewKills,
+            viewKills.killSet,
             { ks, close -> page(ks, dit, close) },
             ::close
         )
@@ -146,11 +147,11 @@ fun <T: HasFBProps<*>> showClosableList(
 }
 
 fun <T: HasFBProps<*>> T.keepAlive(
-    killables: Killables,
+    killables: KillSet,
     db: Firestore
 ) {
     val killListen = Killables()
-    props.live.forEach(killables.killSet) { alive ->
+    props.live.forEach(killables) { alive ->
         if (!alive) {
             killListen += props.docWrapOrFail.docRef(db).listen(this)
         }
@@ -163,24 +164,20 @@ fun <T: HasFBProps<*>> T.keepAlive(
 }
 
 fun <T> Node.listNodes(
+    ks: KillSet,
     list: ListenableList<T>,
-    fn: (T, Killables) -> Node
-): Killable {
-    val ks = Killables()
-    class Holder(
-        val node: Node,
-        killable: Killable
-    ): Killable by killable
+    fn: (T, KillSet) -> Node
+) {
     val ns = list.map(ks) { t ->
         val nks = Killables()
-        Holder(
-            fn(t, nks),
-            nks
+        KillableValue(
+            fn(t, nks.killSet),
+            nks.kill
         )
     }
-    ks += listenableList(
+    listenableList(
+        ks,
         ns
-    ) { it.node }
-    return ks
+    ) { kv -> kv.value }
 }
 

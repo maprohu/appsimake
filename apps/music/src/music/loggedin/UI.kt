@@ -23,15 +23,18 @@ fun LoggedIn.ui() = ContentView(
                 item {
                     fa.signOutAlt
                     text %= "Sign Out"
+                    click {
+                        path.boot.signOut.now()
+                    }
                 }
             }
         }
         title %= "Music"
-//        right.userIcon(kills, boot.userIcon).apply {
-//            node {
-//                cls.m1
-//            }
-//        }
+        right.userIcon(kills, path.boot.userIcon).apply {
+            node {
+                cls.m1
+            }
+        }
     }.node,
     content = null
 )

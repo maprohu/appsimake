@@ -7,6 +7,7 @@ import commonui.widget.*
 import domx.*
 import fontawesome.*
 import kotlinx.coroutines.*
+import music.boot.Boot
 import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.Uint8Array
 import org.w3c.dom.HTMLDivElement
@@ -15,38 +16,10 @@ import kotlin.browser.window
 import kotlin.js.Promise
 
 fun main() {
-
-    val j1 = Job()
-
-    GlobalScope.launch(j1) {
-
-        launch {
-            delay(1000)
-            j1.cancel()
-        }
-
-        val j2 = Job(j1)
-
-        launch(j2) {
-            while (true) {
-                println("x")
-                delay(100)
-            }
-
-        }
-
+    GlobalScope.launch {
+        APP.registerServiceWorker()
+        Boot.create()
     }
-
-    j1.invokeOnCompletion {
-        console.error(it)
-    }
-
-
-
-//    GlobalScope.launch {
-//        APP.registerServiceWorker()
-//        Boot()
-//    }
 }
 
 

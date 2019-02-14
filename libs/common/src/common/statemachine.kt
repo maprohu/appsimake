@@ -1,6 +1,7 @@
 package common
 
-import killable.Killable
+import commonshr.Trigger
+import killable.Noop
 
 interface State1<in I, out O> {
     operator fun invoke(input: I) : Pair<State1<I, O>?, O>
@@ -83,7 +84,7 @@ class LazySM0<T>(fn: () -> T) {
 
 abstract class State<in I, S: State<I, S>> {
 
-    open fun enter() : Killable = Killable.empty
+    open fun enter() : Trigger = Noop
     abstract fun process(input: I) : S?
 
 }
@@ -91,13 +92,13 @@ abstract class State<in I, S: State<I, S>> {
 class StateMachine<I, S: State<I, S>>(
     private var state: S
 ) {
-    private var destroy : Killable = state.enter()
+    private var destroy : Trigger = state.enter()
 
     fun update(input: I) {
         val nextState = state.process(input)
 
         if (nextState != null) {
-            destroy.kill()
+            destroy()
             state = nextState
             destroy = state.enter()
         }
@@ -112,8 +113,8 @@ class StateMachine<I, S: State<I, S>>(
     }
 
     fun shutdown() {
-        destroy.kill()
-        destroy = Killable.of { alreadyShutdown() }
+        destroy()
+        destroy = { alreadyShutdown() }
         state = AlreadyShutdown().unsafeCast<S>()
     }
 

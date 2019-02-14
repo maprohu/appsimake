@@ -6,15 +6,16 @@ import common.Some
 import common.orEmpty
 import commonlib.CollectionWrap
 import commonshr.invoke
+import commonshr.plusAssign
 import commonui.*
 import domx.*
 import firebase.firestore.*
 import firebaseshr.*
 import fontawesome.*
-import killable.Killable
-import killable.Killable.Companion.empty
+import killable.KillSet
 import killable.Killables
 import killable.addedTo
+import killable.seq
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
@@ -24,11 +25,11 @@ import styles.scrollVertical
 
 data class TabConfig(
     val icon: String,
-    val node: (Killables) -> Node
+    val node: (KillSet) -> Node
 )
 
 fun tabsConfig(
-    ks: Killables,
+    ks: KillSet,
     ts: Collection<TabConfig>
 ): FormConfig {
     val active = Var(0)
@@ -41,8 +42,9 @@ fun tabsConfig(
         tabs = {
             ts.forEachIndexed { idx, tc ->
                 faTab(
+                    ks,
                     tc.icon,
-                    Rx(ks.killSet) { active() == idx }
+                    Rx(ks) { active() == idx }
                 ) {
                     clickEvent {
                         active.now = idx
@@ -53,7 +55,7 @@ fun tabsConfig(
         form = {
             val root = RootPanel(this)
 
-            active.forEach(ks.killSet) { idx ->
+            active.forEach(ks) { idx ->
                 root.setRoot(nodes[idx].value)
             }
         }
@@ -66,21 +68,20 @@ data class FormConfig(
 )
 data class EditScreenConfig<T: HasFBProps<*>>(
     val title: String,
-    val form: (T, Killables) -> FormConfig
+    val form: (T, KillSet) -> FormConfig
 )
 
 fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
-    killables: Killables,
+    ks: KillSet,
     panel: RootPanel,
     item: T,
     close: () -> Unit,
     db: Firestore
 ) {
-    val ks = killables.killSet
 
     item.props.rollback()
 
-    killables += item.props.onDeleted.add(close)
+    ks += item.props.onDeleted.add(close)
 
     val isSaving = Var(false)
     val canSave = Rx(ks) { item.props.dirty() && item.props.isValid() }
@@ -88,7 +89,7 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
     val showDropDown = Rx(ks) { showDelete() }
     val canDelete = Rx(ks) { item.props.isPersisted() && !isSaving() }
 
-    val idListenerSeq = killables.seq()
+    val idListenerSeq = ks.seq()
 
     val docRefOpt = Rx(ks) {
         item.props.id().let {
@@ -99,7 +100,7 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
 
     docRefOpt.forEach(ks) {  dr ->
         if (dr != null) {
-            idListenerSeq += dr.onSnapshot {
+            idListenerSeq %= dr.onSnapshot {
                 isSaving.now = false
             }
         } else {
@@ -122,7 +123,7 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
                 ref.set(
                     item.props.write()
                 )
-                killables += ref.listen(item)
+                ks += ref.listen(item)
             }
         }
     }
@@ -141,10 +142,10 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
     }
 
 
-    val fc = form(item, killables)
+    val fc = form(item, ks)
 
     panel.newRoot {
-        screenLayout(killables) {
+        screenLayout(ks) {
 
             top {
                 spinner.visibility.now = isSaving
@@ -157,9 +158,9 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
                         }
                         faButton(Fa.chevronLeft) {
                             cls.btnSecondary
-                            rxDisplayed {
+                            rxDisplayed(ks) {
                                 !item.props.dirty()
-                            }.addedTo(killables)
+                            }
                             clickEvent {
                                 back()
                             }
@@ -170,7 +171,7 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
                                 fa.save
                                 ml1
                             }
-                            rxDisplayed(canSave)
+                            rxDisplayed(ks, canSave)
                             clickEvent {
                                 item.props.save()
                                 back()
@@ -178,19 +179,19 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
                         }
                         faButton(Fa.backspace) {
                             cls.btnDanger
-                            rxDisplayed {
+                            rxDisplayed(ks) {
                                 item.props.dirty() && !canSave()
-                            }.addedTo(killables)
+                            }
                             clickEvent {
                                 back()
                             }
                         }
                         dropdownSplit {
                             cls.btnSuccess
-                            rxDisplayed(canSave)
+                            rxDisplayed(ks, canSave)
                         }
                         div {
-                            rxDisplayed(canSave)
+                            rxDisplayed(ks, canSave)
                             cls.dropdownMenu
                             dropdownItemAnchor {
                                 anchor {
@@ -238,11 +239,11 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
                             }
                             faButton(Fa.save) {
                                 cls.btnPrimary
-                                rxEnabled(canSave)
+                                rxEnabled(ks, canSave)
                                 clickEvent { save() }
                             }
                             dropdownGroup(Cls.btnPrimary) {
-                                element.rxDisplayed(showDropDown)
+                                element.rxDisplayed(ks, showDropDown)
                                 menu {
                                     cls.dropdownMenuRight
                                     dropdownItemAnchor {
@@ -250,8 +251,8 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
                                             cls {
                                                 textDanger
                                             }
-                                            rxDisplayed(showDelete)
-                                            rxAnchorClick(canDelete) {
+                                            rxDisplayed(ks, showDelete)
+                                            rxAnchorClick(ks, canDelete) {
                                                 delete()
                                             }
                                         }
@@ -294,23 +295,26 @@ fun Element.scrollForm(fn: HTMLFormElement.() -> Unit) {
 }
 
 fun HTMLInputElement.textProp(
+    ks: KillSet,
     prop: ScalarProp<*, String>
-): Killable {
+) {
     value = prop.current.now.getOrDefault("")
     listenInput { prop.current.set(it) }
-    return validProp(prop)
+    validProp(ks, prop)
 }
 fun HTMLTextAreaElement.textProp(
+    ks: KillSet,
     prop: ScalarProp<*, String>
-): Killable {
+) {
     value = prop.current.now.getOrDefault("")
     listenInput { prop.current.set(it) }
-    return validProp(prop)
+    return validProp(ks, prop)
 }
 
 inline fun <reified E: Enum<E>> HTMLSelectElement.enumProp(
+    noinline ks: KillSet,
     prop: ScalarProp<*, E>
-): Killable {
+) {
     option {
         value = ""
         innerText = "<please select>"
@@ -329,14 +333,11 @@ inline fun <reified E: Enum<E>> HTMLSelectElement.enumProp(
                 else Some(enumValueOf(value))
     }
 
-    return validProp(prop)
+    return validProp(ks, prop)
 }
 
-fun Element.validProp(prop: Prop<*>): Killable {
-    val killables = Killables()
-
-    rxClass(killables.killSet, Cls.isInvalid) { !prop.isValid() }
-    return killables
+fun Element.validProp(ks: KillSet, prop: Prop<*>) {
+    rxClass(ks, Cls.isInvalid) { !prop.isValid() }
 }
 
 fun Element.formGroup(lbl: String, fn: HTMLDivElement.(labelFor: Element.() -> Unit) -> Unit) {

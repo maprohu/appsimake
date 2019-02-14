@@ -134,7 +134,7 @@ fun Visible.ui() = Factory().run {
                     alignItemsCenter
                 }
                 span {
-                    rxText { "${artist()} - ${title()}" }
+                    rxText(kills) { "${artist()} - ${title()}" }
                 }
             }
             div {
@@ -151,7 +151,7 @@ fun Visible.ui() = Factory().run {
                         m0
                         textPrimary
                     }
-                    rxText {
+                    rxText(kills) {
                         "${currentPositionText()} / ${totalDurationText()}"
                     }
                 }
@@ -196,7 +196,7 @@ fun Visible.ui() = Factory().run {
                     btnGroup
                 }
                 mediaButton(Fa.stepBackward) {
-                    rxEnabled { currentPosition() != 0 || playing() }
+                    rxEnabled(kills) { currentPosition() != 0 || playing() }
                     clickEvent {
                         previousTrack()
                     }
@@ -205,7 +205,7 @@ fun Visible.ui() = Factory().run {
                     cls {
                         btnOutlinePrimary
                     }
-                    rxEnabled { currentPosition() != 0 || playing() }
+                    rxEnabled(kills) { currentPosition() != 0 || playing() }
                     clickEvent {
                         backward()
                     }

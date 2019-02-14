@@ -14,7 +14,7 @@ import rx.Rx
 import rx.RxIface
 
 fun rxProc(ks: KillSet, fn: () -> ProcOrElse): ProcOrElse {
-    val rxv = Rx { fn() }.addedTo(ks)
+    val rxv = Rx(ks) { fn() }
 
     return { e, els ->
         rxv.now(e, els)
@@ -71,12 +71,12 @@ fun <T> Inbox.channel(ks: KillSet, ch: ReceiveChannel<T>, fn: ProcT<T>): ProcOrE
     }
     return procs.proc
 }
-fun <T> Inbox.rx(ks: KillSet, fnx: () -> T, fn: ProcT<T>): ProcOrElse = rx(ks, Rx { fnx() }.addedTo(ks), fn)
+fun <T> Inbox.rx(ks: KillSet, fnx: () -> T, fn: ProcT<T>): ProcOrElse = rx(ks, Rx(ks) { fnx() }, fn)
 
 fun <T> Inbox.rx(ks: KillSet, ch: RxIface<T>, fn: ProcT<T>): ProcOrElse {
     val procs = ProcOrElseList()
-    ch.forEach { t ->
+    ch.forEach(ks) { t ->
         procs.add.processOnce(ks, t, this, fn)
-    }.addedTo(ks)
+    }
     return procs.proc
 }

@@ -5,43 +5,41 @@ import commonshr.Trigger
 
 
 class KillableSeq private constructor(
-    private var current: Killable = Killable.empty,
+    private var current: Trigger = Noop,
     internal val onKill: Killables
-) : Killable by onKill {
+) {
 
-    constructor(initial: Killable = Killable.empty): this(initial, Killables())
+    constructor(initial: Trigger = Noop): this(initial, Killables())
 
     private var killed = false
 
-    init {
-        onKill += {
+    val kill = {
+        if (!killed) {
             killed = true
             current()
-            current = Killable.empty
+            current = Noop
+            onKill.kill()
         }
     }
 
-    fun set(k: Killable) {
+    fun set(k: Trigger) {
         if (killed) {
-            k.kill()
+            k()
         } else {
             current()
             current = k
         }
     }
-    fun set(fn: () -> Unit) = set(Killable.once(fn))
 
     val assign: Assign<Trigger> = { t -> set(t) }
 
     operator fun remAssign(fn: Trigger) = set(fn)
-    operator fun remAssign(fn: Killable) = set(fn)
     operator fun plusAssign(fn: () -> Unit) = set(fn)
-    operator fun plusAssign(fn: Killable) = set(fn)
-    fun clear() = set(Killable.empty)
+    fun clear() = set(Noop)
 
-    fun killables() = Killables().also { set(it) }
-    fun seq() = KillableSeq().also { set(it) }
-    fun killSet() = Killables().also { set(it) }.killSet
+    fun killables() = Killables().also { set(it.kill) }
+    fun seq() = KillableSeq().also { set(it.kill) }
+    fun killSet() = killables().killSet
 
 }
 

@@ -117,18 +117,18 @@ interface RxIface<out T> {
         ks += { z() }
     }
 
-    fun foldKills(ks: KillSet, fn: (T) -> Killable) {
-        var z = Killable.empty
+    fun foldKills(ks: KillSet, fn: (T) -> Trigger) {
+        var z = Noop
 
         forEach(ks) {
-            z.kill()
+            z()
             z = fn(it)
         }
 
-        ks += { z.kill() }
+        ks += { z() }
     }
 
-    fun <F: Killable> foldKills(ks: KillSet, z0: F, fn: (F, T) -> F) {
+    fun <F> foldKills(ks: KillSet, z0: KillableValue<F>, fn: (KillableValue<F>, T) -> KillableValue<F>) {
         var z = z0
 
         forEach(ks) {
@@ -233,11 +233,11 @@ fun RxIface<Double>.feedTo(ks: KillSet, rxv: Var<Double>) {
 
 fun <T> RxIface<Optional<T>>.orDefault(ks: KillSet, v: T) = Rx(ks) { this().getOrDefault(v) }
 
-fun Var<Int>.incremented(): Killable {
+fun Var<Int>.incremented(): Trigger {
     transform { it + 1 }
-    return Killable.once {
+    return {
         transform { it - 1 }
-    }
+    }.once()
 }
 
 
@@ -286,7 +286,7 @@ abstract class RxVal<T>(
 
 
 
-fun <T : Killable> RxVal<T>.killOld(ks: KillSet){
+fun <T> RxVal<KillableValue<T>>.killOld(ks: KillSet){
     return off(ks) { it.kill() }
 }
 

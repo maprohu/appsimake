@@ -8,16 +8,16 @@ import commonui.widget.Inbox
 import domx.*
 import fontawesome.chevronLeft
 import fontawesome.*
-import killable.Killable
+import killable.KillSet
 import killable.Killables
 import killable.NoKill
 import org.w3c.dom.*
 import rx.*
 import kotlin.browser.document
 
-class ToolBar private constructor(val element: HTMLDivElement, killables: Killables): NodesFactory(element, killables) {
+class ToolBar private constructor(val element: HTMLDivElement, killables: KillSet): NodesFactory(element, killables) {
 
-    constructor(node: Node, killables: Killables): this(
+    constructor(node: Node, killables: KillSet): this(
         node.row {
             cls {
                 navTabs
@@ -112,7 +112,7 @@ class ToolBar private constructor(val element: HTMLDivElement, killables: Killab
 
 open class NodesFactory(
     private val parent: Node,
-    private val killables: Killables
+    private val killables: KillSet
 ) {
     private var latest: NodeHolder<*>? = null
 
@@ -127,7 +127,7 @@ open class NodesFactory(
         ).also { latest = it }
     }
     fun <T: Node> T.vis(fn: () -> Boolean = { true }): NodeHolder<T> {
-        return vis(Rx(killables.killSet) { fn() })
+        return vis(Rx(killables) { fn() })
     }
     fun <T: Node> T.opt(first: () -> Unit = {}): NodeHolder<T> {
         val rxv = Var(false)
@@ -154,14 +154,14 @@ class NodeHolder<T: Node>(
     private val previous: NodeHolder<*>?,
     val visibility: Var<RxIface<Boolean>>,
     first: () -> Unit,
-    killables: Killables
+    killables: KillSet
 ) {
     val node by lazy {
         first()
         wrapped
     }
 
-    val visible = Rx(killables.killSet) { visibility()() }
+    val visible = Rx(killables) { visibility()() }
 
     operator fun invoke(fn: T.() -> Unit) = node.apply(fn)
 
@@ -204,7 +204,7 @@ class NodeHolder<T: Node>(
 }
 
 fun Node.nodes(
-    killables: Killables,
+    killables: KillSet,
     fn: NodesFactory.() -> Unit
 ) {
     NodesFactory(this, killables).apply(fn)
@@ -237,11 +237,11 @@ val Node.topbar get() = row {
 //    }
 //}
 
-fun Node.toolbar(killables: Killables, fn: ToolBar.() -> Unit = {}) = ToolBar(this, killables).apply(fn)
-fun Node.topbar(killables: Killables, fn: ToolBar.() -> Unit = {}) = toolbar(killables, fn).also { it.element.borderBottom() }
+fun Node.toolbar(killables: KillSet, fn: ToolBar.() -> Unit = {}) = ToolBar(this, killables).apply(fn)
+fun Node.topbar(killables: KillSet, fn: ToolBar.() -> Unit = {}) = toolbar(killables, fn).also { it.element.borderBottom() }
 //fun Node.bottombar(fn: ToolBar.() -> Unit = {}) = toolbar(fn).also { it.element.borderTop() }
 
-class ScreenLayout(val element: Element, killables: Killables) {
+class ScreenLayout(val element: Element, killables: KillSet) {
     init {
         element {
             cls {
@@ -276,10 +276,9 @@ class ScreenLayout(val element: Element, killables: Killables) {
 
 
 }
-fun Element.screenLayout(killables: Killables, fn: ScreenLayout.() -> Unit = {}) = ScreenLayout(this, killables).apply(fn)
+fun Element.screenLayout(killables: KillSet, fn: ScreenLayout.() -> Unit = {}) = ScreenLayout(this, killables).apply(fn)
 
-fun Node.faTab(faIcon: String, act: RxIface<Boolean>, fn: HTMLAnchorElement.() -> Unit): Killable {
-    val killables = Killables()
+fun Node.faTab(ks: KillSet, faIcon: String, act: RxIface<Boolean>, fn: HTMLAnchorElement.() -> Unit) {
     div {
         cls {
             mt1
@@ -290,7 +289,7 @@ fun Node.faTab(faIcon: String, act: RxIface<Boolean>, fn: HTMLAnchorElement.() -
             cls {
                 navLink
                 px2
-                rxClass(killables.killSet, active, act)
+                rxClass(ks, active, act)
             }
             span {
                 cls {
@@ -302,7 +301,6 @@ fun Node.faTab(faIcon: String, act: RxIface<Boolean>, fn: HTMLAnchorElement.() -
             fn()
         }
     }
-    return killables
 
 }
 

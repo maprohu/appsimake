@@ -2,10 +2,13 @@ package domx
 
 import common.*
 import commonshr.InvokeApply
+import commonshr.Trigger
+import commonshr.plusAssign
 import killable.*
 import org.w3c.dom.*
 import org.w3c.dom.css.ElementCSSInlineStyle
 import org.w3c.dom.events.Event
+import org.w3c.dom.events.EventTarget
 import org.w3c.dom.events.InputEvent
 import org.w3c.dom.events.MouseEvent
 import rx.Rx
@@ -69,11 +72,14 @@ operator fun NamedNodeMap.set(key: String, value: String) {
         }
 }
 
-fun GlobalEventHandlers.clickEvent(fn: (MouseEvent) -> Unit) {
-    onclick = {
-        it.preventDefault()
-        fn(it)
-    }
+fun EventTarget.clickEvent(fn: (MouseEvent) -> Unit) {
+    addEventListener(
+        "click",
+        {
+            it.preventDefault()
+            fn(it as MouseEvent)
+        }
+    )
 }
 
 fun GlobalEventHandlers.longClick(fn: () -> Unit) {
@@ -110,13 +116,12 @@ fun GlobalEventHandlers.longClick(fn: () -> Unit) {
     }
 }
 
-fun GlobalEventHandlers.clickEventSeq(fn: (Killables, MouseEvent) -> Unit): KillableSeq {
-    val seq = KillableSeq()
+fun GlobalEventHandlers.clickEventSeq(ks: KillSet, fn: (KillSet, MouseEvent) -> Unit)  {
+    val seq = ks.seq()
     onclick = {
         it.preventDefault()
-        fn(seq.killables(), it)
+        fn(seq.killSet(), it)
     }
-    return seq
 }
 
 fun GlobalEventHandlers.inputEvent(fn: (InputEvent) -> Unit) {
@@ -157,27 +162,28 @@ fun HTMLInputElement.listenInput(fn: (String) -> Unit) {
     }
 }
 
-fun HTMLButtonElement.rxEnabled(rx: RxVal<Boolean>): Killable {
-    return rx.forEach { disabled = !it }
+fun HTMLButtonElement.rxEnabled(ks: KillSet, rx: RxVal<Boolean>) {
+    rx.forEach(ks) { disabled = !it }
 }
-fun HTMLButtonElement.rxEnabled(fn: () -> Boolean): Killable {
-    return Rx { fn() }.also { rxEnabled(it) }
-}
-
-fun ElementCSSInlineStyle.rxVisible(rxv: RxVal<Boolean>): Killable {
-    return rxv.forEach { style.visibility = if (it) "visible" else "collapse" }
+fun HTMLButtonElement.rxEnabled(ks: KillSet, fn: () -> Boolean) {
+    Rx(ks) { fn() }.also { rxEnabled(ks, it) }
 }
 
-fun ElementCSSInlineStyle.rxVisible(fn: () -> Boolean): Rx<Boolean> {
-    return Rx(fn).also { rxVisible(it) }
+fun ElementCSSInlineStyle.rxVisible(ks: KillSet, rxv: RxVal<Boolean>) {
+    rxv.forEach(ks) { style.visibility = if (it) "visible" else "collapse" }
+}
+
+fun ElementCSSInlineStyle.rxVisible(ks: KillSet, fn: () -> Boolean): Rx<Boolean> {
+    return Rx(ks, fn).also { rxVisible(ks, it) }
 }
 
 
 fun <T> Node.listenableList(
+    ks: KillSet,
     list: ListenableList<T>,
     create: (T) -> Node
-): Killable {
-    return list.addListener(
+) {
+    ks += list.addListener(
         ListenableList.Listener(
             added = { index, element ->
                 insertAt(index, create(element))
@@ -189,23 +195,23 @@ fun <T> Node.listenableList(
 }
 
 fun <T> Node.listenableList(
+    ks: KillSet,
     list: ListenableList<T>,
-    killables: Killables,
-    create: (T, Killables) -> Node
+    create: (T, KillSet) -> Node
 ) {
-    val kills = mutableListOf<Killable>()
-    killables += list.addListener(
+    val kills = mutableListOf<Trigger>()
+    ks += list.addListener(
         ListenableList.Listener(
             added = { index, element ->
-                val ks = killables.killables()
-                val node = create(element, ks)
+                val iks = ks.killables()
+                val node = create(element, iks.killSet)
                 insertAt(index, node)
-                kills.add(index, ks)
+                kills.add(index, iks.kill)
             },
             removed = { index, _ ->
                 removeAt(index)
                 val ks = kills.removeAt(index)
-                ks.kill()
+                ks()
             },
             moved = { from, to ->
                 insertAt (to, removeAt(from))
@@ -368,19 +374,18 @@ internal val Node.nodeExt
             .also { this.asDynamic()[domxNodesAttributeName] = it }
 
 
-fun Node.rxDisplayed(fn: () -> Boolean): Killable {
-    val rxv = Rx { fn() }
-    rxDisplayed(rxv)
-    return rxv
+fun Node.rxDisplayed(ks: KillSet, fn: () -> Boolean) {
+    val rxv = Rx(ks) { fn() }
+    rxDisplayed(ks, rxv)
 }
 
-fun Node.rxDisplayed(rxv: RxVal<Boolean>): Killable {
+fun Node.rxDisplayed(ks: KillSet, rxv: RxVal<Boolean>) {
     val parent = parentNode!!
     val parentNodeExt = parent.nodeExt
     parentNodeExt.updateChildren()
     val childRole = nodeExt.asChild()
     require(childRole.parent.owner == parent)
-    return rxv.forEach {  v ->
+    rxv.forEach(ks) {  v ->
         if (v) {
             if (!isDisplayed) {
                 val previousDisplayed = childRole.previousChain().drop(1).find { it.isDisplayed }

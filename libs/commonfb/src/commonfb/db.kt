@@ -5,6 +5,7 @@ import common.Optional
 import common.Some
 import commonlib.CollectionWrap
 import commonlib.DocWrap
+import commonshr.plusAssign
 import firebase.firestore.Firestore
 import firebase.firestore.docRef
 import firebase.firestore.listen
@@ -12,7 +13,6 @@ import firebaseshr.Base
 import firebaseshr.HasFBProps
 import firebaseshr.initFrom
 import killable.KillSet
-import killable.plusAssign
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await

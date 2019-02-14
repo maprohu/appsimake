@@ -10,7 +10,6 @@ import commonshr.SetAdded
 import firebaseshr.ids
 import indexeddb.IDBDatabase
 import indexeddb.getAllKeys
-import killable.Killable
 import killable.Killables
 import killable.addedTo
 import kotlinx.coroutines.CompletableDeferred

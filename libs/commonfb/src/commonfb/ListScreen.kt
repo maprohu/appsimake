@@ -4,6 +4,7 @@ import bootstrap.*
 import commonfb.ListUIConfig.Companion.standardEmptyDiv
 import commonlib.CollectionWrap
 import commonshr.invoke
+import commonshr.plusAssign
 import commonui.RootPanel
 import commonui.faButton
 import commonui.faTab
@@ -18,7 +19,7 @@ import firebaseshr.HasProps
 import fontawesome.Fa
 import fontawesome.filter
 import fontawesome.plus
-import killable.Killable
+import killable.KillSet
 import killable.Killables
 import org.w3c.dom.HTMLDivElement
 import rx.RxIface
@@ -48,14 +49,14 @@ data class ListScreenConfig<T: HasFBProps<*>>(
     val title: String,
     val collectionWrap: CollectionWrap<T>,
     val create: () -> T,
-    val view: (Killables, RootPanel, T, () -> Unit) -> Unit,
-    val edit: (Killables, RootPanel, T, () -> Unit) -> Unit,
+    val view: (KillSet, RootPanel, T, () -> Unit) -> Unit,
+    val edit: (KillSet, RootPanel, T, () -> Unit) -> Unit,
     val itemText: (T) -> String,
-    val filter: (Killables, redisplay: () -> Unit) -> FilterConfig<T>
+    val filter: (KillSet, redisplay: () -> Unit) -> FilterConfig<T>
 )
 
 fun <T: HasFBProps<*>> ListScreenConfig<T>.build(
-    killables: Killables,
+    killables: KillSet,
     panel: RootPanel,
     db: Firestore,
     close: () -> Unit
@@ -96,6 +97,7 @@ fun <T: HasFBProps<*>> ListScreenConfig<T>.build(
                 if (filterConfig.filter) {
                     tabs {
                         faTab(
+                            killables,
                             Fa.filter,
                             filterOpen
                         ) {
@@ -113,7 +115,7 @@ fun <T: HasFBProps<*>> ListScreenConfig<T>.build(
                             m1
                             btnPrimary
                         }
-                        killables += clickEventSeq { ks, _ ->
+                        clickEventSeq(killables) { ks, _ ->
                             edit(ks, panel.sub(), create(), ::displayList)
                         }
                     }
@@ -132,7 +134,7 @@ fun <T: HasFBProps<*>> ListScreenConfig<T>.build(
                             borderBottom
                         }
 
-                        rxDisplayed(filterOpen)
+                        rxDisplayed(killables, filterOpen)
 
                         div {
                             cls {
@@ -153,6 +155,7 @@ fun <T: HasFBProps<*>> ListScreenConfig<T>.build(
                     }
 
                     val listRoot = RootPanel(this)
+
                     showClosableList<T>(
                         killables,
                         redisplay = { displayList() },
@@ -178,6 +181,7 @@ fun <T: HasFBProps<*>> ListScreenConfig<T>.build(
                                     }
                                 },
                                 itemFactory = stringListClick(
+                                    killables,
                                     itemText = itemText,
                                     onClick = show
                                 )

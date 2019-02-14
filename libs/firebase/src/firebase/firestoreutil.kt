@@ -8,7 +8,6 @@ import firebase.FirebaseError
 import firebase.firestore
 import firebaseshr.*
 import killable.*
-import killable.Killable.Companion.once
 import kotlinx.coroutines.*
 import org.w3c.dom.Element
 import rx.RxMutableSet
@@ -311,7 +310,7 @@ fun <T: HasFBProps<*>> T.onSnapshot(d: DocumentSnapshot) {
 fun <T: HasFBProps<*>> DocumentReference.listen(
     target: T,
     onFirst: Trigger = {}
-) : Killable {
+) : Trigger {
     require(!target.props.live.now)
     target.props.live.now = true
 
@@ -322,10 +321,10 @@ fun <T: HasFBProps<*>> DocumentReference.listen(
         firstOnce()
     }
 
-    return Killable.once {
+    return {
         killSnapshot()
         target.props.live.now = false
-    }
+    }.once()
 }
 
 fun DocWrap<*>.docRef(db: Firestore = firestore()) = db.doc(path)

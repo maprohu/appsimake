@@ -2,14 +2,17 @@ package music.loggedin
 
 import commonui.widget.*
 import music.boot.Boot
+import music.boot.BootPath
 import music.content.Content
 import music.content.ContentView
 import rx.feedTo
 
 class LoggedIn(
-    boot: Boot
-): Content(boot) {
+    path: BootPath
+): Content(path), HasUIX {
     override val rawView: ContentView = ui()
+
+    override val uix = exec
 
 //    init {
 //

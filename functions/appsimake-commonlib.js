@@ -25,15 +25,16 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
   var toList = Kotlin.kotlin.collections.toList_7wnvza$;
   var addedTo = $module$appsimake_commonshr.killable.addedTo_tjw9ba$;
   var plusAssign = $module$appsimake_commonshr.commonshr.plusAssign_aeyq4w$;
-  var Killables = $module$appsimake_commonshr.killable.Killables;
   var SetAdded = $module$appsimake_commonshr.commonshr.SetAdded;
   var CompletableDeferred = $module$kotlinx_coroutines_core.kotlinx.coroutines.CompletableDeferred_xptg6w$;
+  var add = $module$appsimake_commonshr.killable.add_1wvaoy$;
   var AsyncEmitter = $module$appsimake_commonshr.common.AsyncEmitter;
-  var Killable = $module$appsimake_commonshr.killable.Killable;
   var common = $module$appsimake_commonshr.common;
   var Var = $module$appsimake_commonshr.rx.Var;
   var Some = $module$appsimake_commonshr.common.Some;
   var minus = Kotlin.kotlin.collections.minus_khz7k3$;
+  var Killables = $module$appsimake_commonshr.killable.Killables;
+  var once = $module$appsimake_commonshr.commonshr.once_yo2cq0$;
   var Emitter = $module$appsimake_commonshr.common.Emitter;
   var getCallableRef = Kotlin.getCallableRef;
   var map = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.map_610k8f$;
@@ -410,11 +411,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
       return Unit;
     };
   }
-  function toAsync$ObjectLiteral(closure$currents, closure$waiting, closure$killables) {
+  function toAsync$ObjectLiteral(closure$currents, closure$waiting, closure$ks) {
     this.closure$currents = closure$currents;
     this.closure$waiting = closure$waiting;
-    this.closure$killables = closure$killables;
-    this.$delegate_xqpl3q$_0 = closure$killables;
+    this.closure$ks = closure$ks;
   }
   toAsync$ObjectLiteral.prototype.poll = function () {
     var tmp$;
@@ -472,7 +472,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
              else {
               var cd = CompletableDeferred();
               this.$this.closure$waiting.add_11rb$(cd);
-              this.local$rk = this.$this.closure$killables.add_o14v8n$(toAsync$ObjectLiteral$receive$lambda(this.$this.closure$waiting, cd));
+              this.local$rk = add(this.$this.closure$ks, toAsync$ObjectLiteral$receive$lambda(this.$this.closure$waiting, cd));
               this.state_0 = 2;
               this.result_0 = cd.await(this);
               if (this.result_0 === COROUTINE_SUSPENDED)
@@ -484,7 +484,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
             throw this.exception_0;
           case 2:
             var res = this.result_0;
-            this.local$rk.kill();
+            this.local$rk();
             this.local$tmp$ = res;
             this.state_0 = 3;
             continue;
@@ -513,19 +513,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
     else
       return instance.doResume(null);
   };
-  toAsync$ObjectLiteral.prototype.kill = function () {
-    return this.$delegate_xqpl3q$_0.kill();
-  };
-  toAsync$ObjectLiteral.prototype.plus_wii6vi$ = function (k) {
-    return this.$delegate_xqpl3q$_0.plus_wii6vi$(k);
-  };
   toAsync$ObjectLiteral.$metadata$ = {
     kind: Kind_CLASS,
-    interfaces: [AsyncEmitter, Killable]
+    interfaces: [AsyncEmitter]
   };
   var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
-  function toAsync(emitters) {
-    var killables = new Killables();
+  function toAsync(ks, emitters) {
     var waiting = ArrayList_init();
     var destination = ArrayList_init_0(emitters.length);
     var tmp$;
@@ -533,14 +526,14 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
       var item = emitters[tmp$];
       var tmp$_0 = destination.add_11rb$;
       var current = ArrayList_init();
-      killables.plusAssign_o14v8n$(item.add_qlkmfe$(toAsync$lambda$lambda(waiting, current)));
+      plusAssign(ks, item.add_qlkmfe$(toAsync$lambda$lambda(waiting, current)));
       tmp$_0.call(destination, current);
     }
     var currents = destination;
-    return new toAsync$ObjectLiteral(currents, waiting, killables);
+    return new toAsync$ObjectLiteral(currents, waiting, ks);
   }
-  function toAsync_0($receiver) {
-    return toAsync([$receiver]);
+  function toAsync_0($receiver, ks) {
+    return toAsync(ks, [$receiver]);
   }
   function Coroutine$toRx$lambda(this$toRx_0, closure$rxv_0, $receiver_0, controller, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
@@ -612,6 +605,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
     this.cacheSize = cacheSize;
     this.fn = fn;
     this.ks = new Killables();
+    this.kill = this.ks.kill;
     this.FillCache = new RandomChooser$Event(this);
     this.waiting = ArrayList_init();
     this.eventChannel = Channel();
@@ -630,9 +624,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
     this.sources = destination;
     addedTo_0(launch(coroutines.GlobalScope, void 0, void 0, RandomChooser_init$lambda(this)), this.ks);
   }
-  RandomChooser.prototype.kill = function () {
-    this.ks.kill();
-  };
   function RandomChooser$Event($outer) {
     this.$outer = $outer;
   }
@@ -824,10 +815,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
             var outputOpt = this.result_0;
             if (Kotlin.isType(outputOpt, Some)) {
               var onServe = new Killables();
-              onServe.plusAssign_wii6vi$(this.$this.$outer.ks.add_wii6vi$(this.local$onEvict));
-              onServe.plusAssign_wii6vi$(Killable.Companion.once_o14v8n$(RandomChooser$Source$attemptFillCache$lambda(this.$this.$outer, this.local$nextInput)));
+              onServe.plusAssign_o14v8n$(this.$this.$outer.ks.add_o14v8n$(this.local$onEvict.kill));
+              onServe.plusAssign_o14v8n$(once(RandomChooser$Source$attemptFillCache$lambda(this.$this.$outer, this.local$nextInput)));
               var output = outputOpt.value;
-              var c = new RandomChooser$Cache(this.$this.$outer, this.local$nextInput, output, this.local$onEvict, onServe);
+              var c = new RandomChooser$Cache(this.$this.$outer, this.local$nextInput, output, this.local$onEvict.kill, onServe.kill);
               this.$this.$outer.cached.add_11rb$(c);
               this.state_0 = 5;
               continue;
@@ -976,7 +967,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
     if (!this.cached.isEmpty()) {
       var c = this.cached.removeAt_za3lpa$(0);
       this.fillCache();
-      c.onServe.kill();
+      c.onServe();
       tmp$ = c.output;
     }
      else {
@@ -1163,7 +1154,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
           break;
         var c = this$RandomChooser.cached.removeAt_za3lpa$(0);
         var w = this$RandomChooser.waiting.removeAt_za3lpa$(0);
-        c.onServe.kill();
+        c.onServe();
         w.complete_11rb$(c.output);
       }
     };
@@ -1202,7 +1193,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
               var next = iter.next();
               if (!all.contains_11rb$(next.input)) {
                 iter.remove();
-                next.onEvict.kill();
+                next.onEvict();
               }
             }
 
@@ -1434,8 +1425,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
   package$commonlib.post_rmur43$ = post;
   package$commonlib.toChannel_10flag$ = toChannel_0;
   package$commonlib.addedTo_cflf3n$ = addedTo_0;
-  package$commonlib.toAsync_nmg1i6$ = toAsync;
-  package$commonlib.toAsync_jr4bl4$ = toAsync_0;
+  package$commonlib.toAsync_2ojuee$ = toAsync;
+  package$commonlib.toAsync_ss8b8w$ = toAsync_0;
   package$commonlib.toRx_ge6odz$ = toRx;
   RandomChooser.Event = RandomChooser$Event;
   RandomChooser.Input = RandomChooser$Input;
@@ -1453,7 +1444,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'appsimake-commonshr', '
   Object.defineProperty(package$commonlib_0, 'customToken', {
     get: get_customToken
   });
-  RandomChooser.prototype.plus_wii6vi$ = AsyncEmitter.prototype.plus_wii6vi$;
   Ignore = new Ignore$ObjectLiteral();
   shared = named(shared$lambda).provideDelegate_n5byny$(this, shared_metadata);
   users = doc();

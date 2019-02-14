@@ -2,8 +2,8 @@ package music.boot
 
 import common.obj
 import commonfb.*
+import commonshr.Action
 import commonui.usericon.UnknownUserSrc
-import commonshr.*
 import commonui.widget.*
 import indexeddb.IDBDatabase
 import killable.*
@@ -17,12 +17,9 @@ import music.content.UserUnknown
 import music.data.*
 import music.loggedin.LoggedIn
 import music.notloggedin.NotLoggedIn
-import music.player.Hidden
 import music.player.Player
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.Node
 import rx.*
-import kotlin.coroutines.CoroutineContext
 
 open class BootPath(
     val boot: Boot
@@ -34,7 +31,7 @@ class Boot(
     idb: IDBDatabase,
     localSongs: LocalSongs
 ): ViewImpl<HTMLElement>(parent) {
-
+    private val self = BootPath(this)
 
     companion object {
         suspend fun create(): Boot {
@@ -85,11 +82,11 @@ class Boot(
         }
     )
 
-    val content = views<Content>().of(UserUnknown(this), contentHole).viewFromRx(userState) { u ->
+    val content = views<Content>().of(UserUnknown(self), contentHole).viewFromRx(userState) { u ->
         when (u) {
-            UserState.NotLoggedIn -> NotLoggedIn(this)
-            is UserState.LoggedIn -> LoggedIn(this)
-            else -> UserUnknown(this)
+            UserState.NotLoggedIn -> NotLoggedIn(self)
+            is UserState.LoggedIn -> LoggedIn(self)
+            else -> UserUnknown(self)
         }
 
     }
@@ -105,7 +102,6 @@ class Boot(
     )
 
     val songSource = songSource(
-        kills,
         songInclude,
         localSongs
     )
@@ -116,7 +112,9 @@ class Boot(
         currentSongInfoSource(id, blob)
     }
 
-    val signOut = Var({})
+    val signOut = Var<Action> {
+        userState.now = UserState.Unknown
+    }
 
     init {
 
@@ -147,6 +145,7 @@ class Boot(
                 }
 
                 signOut.now =  {
+                    userState.now = UserState.Unknown
                     clear()
                     app.auth().signOut()
                 }

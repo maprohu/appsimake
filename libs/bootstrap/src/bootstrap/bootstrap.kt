@@ -1,6 +1,5 @@
 package bootstrap
 
-import killable.Killable
 import killable.Killables
 import org.w3c.dom.*
 import rx.*
@@ -8,6 +7,7 @@ import kotlin.browser.document
 import common.*
 import commonshr.invoke
 import domx.*
+import killable.KillSet
 import org.w3c.dom.events.MouseEvent
 import styles.*
 
@@ -258,47 +258,43 @@ fun Element.flexAlignItemsCenter() {
 //    flexAlignItemsCenter()
 //}
 
-fun HTMLElement.rxDisplay(rxVal: () ->Boolean): Killable {
-    val rxv = Rx { rxVal() }
-    rxDisplay(rxv)
-    return rxv
+fun HTMLElement.rxDisplay(ks: KillSet, rxVal: () ->Boolean) {
+    val rxv = Rx(ks) { rxVal() }
+    rxDisplay(ks, rxv)
 }
-fun HTMLElement.rxDisplay(rxVal: RxVal<Boolean>): Killable {
-    return rxVal.forEach {
+fun HTMLElement.rxDisplay(ks: KillSet, rxVal: RxVal<Boolean>) {
+    rxVal.forEach(ks) {
         this.style.cssText = if (it) "" else "display: none !important;"
     }
 }
 
-fun Element.rxAnchorEnabled(rxVal: RxVal<Boolean>): Killable {
-    val stl = Rx { if (rxVal()) null else "disabled" }
-    rxClassOpt(stl)
-    return stl
+fun Element.rxAnchorEnabled(ks: KillSet, rxVal: RxVal<Boolean>) {
+    val stl = Rx(ks) { if (rxVal()) null else "disabled" }
+    rxClassOpt(ks, stl)
 }
 
-fun HTMLElement.rxAnchorClick(rxVal: RxVal<Boolean>, fn: (MouseEvent) -> Unit): Killable {
-    val rx = rxAnchorEnabled(rxVal)
+fun HTMLElement.rxAnchorClick(ks: KillSet, rxVal: RxVal<Boolean>, fn: (MouseEvent) -> Unit) {
+    rxAnchorEnabled(ks, rxVal)
     clickEvent {
         if (rxVal.now) {
             fn(it)
         }
     }
-    return rx
 }
 
-fun HTMLElement.rxText(rxVal: RxVal<String>): Killable {
-    return rxVal.forEach {
+fun HTMLElement.rxText(ks: KillSet, rxVal: RxVal<String>) {
+    rxVal.forEach(ks) {
         this.innerText = it
     }
 }
 
-fun HTMLElement.rxText(fn: () -> String): Killable {
-    val rx = Rx(fn)
-    rxText(rx)
-    return rx
+fun HTMLElement.rxText(ks: KillSet, fn: () -> String) {
+    val rx = Rx(ks, fn)
+    rxText(ks, rx)
 }
 
-fun HTMLElement.rxTextOrEmpty(fn: () -> Optional<String>): Killable {
-    return rxText { fn().orEmpty() }
+fun HTMLElement.rxTextOrEmpty(ks: KillSet, fn: () -> Optional<String>) {
+    rxText(ks) { fn().orEmpty() }
 }
 
 fun setupFullScreen() {

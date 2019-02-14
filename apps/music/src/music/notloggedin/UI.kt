@@ -28,11 +28,11 @@ fun NotLoggedIn.ui() = ContentView(
             }
         }
         title %= "Music"
-//        right.userIcon(kills, boot.userIcon).apply {
-//            node {
-//                cls.m1
-//            }
-//        }
+        right.userIcon(kills, path.boot.userIcon).apply {
+            node {
+                cls.m1
+            }
+        }
     }.node,
     content = null
 

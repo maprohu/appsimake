@@ -164,6 +164,5 @@ class SlotVar(
 //}
 
 interface ScreenWrap: HasHTMLElement, InvokeApply {
-    val <T: HasHTMLElement> T.append: T get() = apply { node.widget %= this.node }
-
+    val <T: HasHTMLElement> T.append: T get() = apply { this@ScreenWrap.node.widget %= this@apply.node }
 }

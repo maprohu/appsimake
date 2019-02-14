@@ -3,7 +3,6 @@ package commonshr
 import common.None
 import common.Optional
 import common.Some
-import killable.Killable
 import killable.Killables
 
 class Counted<T>(
@@ -13,7 +12,7 @@ class Counted<T>(
 
     private inner class Holder(
         val value: T,
-        val killable: Killable
+        val killable: Trigger
     ) {
         var count = 0
 
@@ -22,7 +21,7 @@ class Counted<T>(
 
             if (count <= 0) {
                 current = None
-                killable.kill()
+                killable()
             }
         }
     }
@@ -32,16 +31,16 @@ class Counted<T>(
             val k = Killables()
             Holder(
                 create(k),
-                k
+                k.kill
             ).also {
                 current = Some(it)
             }
         }.let { holder ->
             holder.count++
 
-            ks += Killable.once {
+            ks += {
                 holder.release()
-            }
+            }.once()
 
             holder.value
         }

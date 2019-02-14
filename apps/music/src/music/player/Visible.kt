@@ -8,7 +8,6 @@ import domx.invoke
 import firebaseshr.saveIfDirty
 import killable.KillSet
 import killable.addedTo
-import killable.plusAssign
 import killable.seq
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

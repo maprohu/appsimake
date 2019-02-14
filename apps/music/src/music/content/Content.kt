@@ -3,6 +3,7 @@ package music.content
 import commonui.widget.ViewImpl
 import commonui.widget.factory
 import music.boot.Boot
+import music.boot.BootPath
 import org.w3c.dom.HTMLElement
 
 
@@ -16,9 +17,9 @@ class ContentView(
 }
 
 abstract class Content(
-    boot: Boot
-): ViewImpl<ContentView>(boot)
+    val path: BootPath
+): ViewImpl<ContentView>(path.boot)
 
-class UserUnknown(boot: Boot): Content(boot) {
+class UserUnknown(path: BootPath): Content(path) {
     override val rawView: ContentView = ContentView.hourglass
 }

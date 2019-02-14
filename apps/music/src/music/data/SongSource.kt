@@ -36,7 +36,7 @@ fun HasKillSet.songSource(
             }
             idks += { incset -= id }
         }
-        incset to iks.toTrigger()
+        incset to iks.kill
     }.forEach { (inc, kill) ->
         included.now = inc
         incSeq %= kill

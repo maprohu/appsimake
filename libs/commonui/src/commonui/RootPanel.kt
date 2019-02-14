@@ -2,10 +2,10 @@ package commonui
 
 import bootstrap.*
 import common.removeFromParent
+import commonshr.Trigger
 import domx.cls
 import domx.div
 import domx.invoke
-import killable.Killable
 import killable.KillableSeq
 import killable.Killables
 import killable.NoKill
@@ -18,20 +18,20 @@ import kotlin.browser.document
 class RootPanel(
     internal val container: Node,
     private val currentRoot : KillableSeq = KillableSeq()
-) : Killable {
+) {
 
-    private var subs = listOf<Killable>()
+    private var subs = listOf<Trigger>()
 
     private fun killSubs() {
         val s = subs
         subs = listOf()
-        s.forEach { it.kill() }
+        s.forEach { it() }
     }
 
 
     private var killed = false
 
-    override fun kill() {
+    val kill = {
         if (!killed) {
             killed = true
             killSubs()
@@ -63,7 +63,7 @@ class RootPanel(
         if (killed) {
             s.kill()
         } else {
-            subs += s
+            subs += s.kill
         }
         return s
     }

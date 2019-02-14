@@ -4,6 +4,7 @@ import bootstrap.*
 import common.Optional
 import commonlib.DocWrap
 import commonshr.invoke
+import commonshr.plusAssign
 import commonui.RootPanel
 import commonui.ToolBar
 import commonui.faButton
@@ -13,7 +14,7 @@ import firebaseshr.HasFBProps
 import firebaseshr.HasProps
 import fontawesome.Fa
 import fontawesome.pen
-import killable.Killable
+import killable.KillSet
 import killable.KillableSeq
 import killable.Killables
 import org.w3c.dom.Element
@@ -24,21 +25,21 @@ import styles.scrollVertical
 
 data class ViewScreenConfig<T: HasFBProps<*>>(
     val title: String,
-    val edit: (Killables, RootPanel, T, () -> Unit) -> Unit,
+    val edit: (KillSet, RootPanel, T, () -> Unit) -> Unit,
     val top: ToolBar.(ToolbarConfig) -> Unit = standardToolbar,
     val view: HTMLDivElement.(ViewScreenState, T) -> Unit
 ) {
     companion object {
 
         fun Node.editButton(
-            killables: Killables,
-            edit: (Killables) -> Unit
+            killables: KillSet,
+            edit: (KillSet) -> Unit
         ): HTMLButtonElement {
             return faButton(Fa.pen) {
                 cls {
                     btnPrimary
                 }
-                killables += clickEventSeq { ks, _ ->
+                clickEventSeq(killables) { ks, _ ->
                     edit(ks)
                 }
             }
@@ -56,7 +57,7 @@ data class ViewScreenConfig<T: HasFBProps<*>>(
         data class ToolbarConfig(
             val state: ViewScreenState,
             val title: String,
-            val edit: (Killables) -> Unit
+            val edit: (KillSet) -> Unit
         )
         val standardToolbar: ToolBar.(
             config: ToolbarConfig
@@ -77,14 +78,14 @@ data class ViewScreenConfig<T: HasFBProps<*>>(
 }
 
 data class ViewScreenState(
-    val killables: Killables,
+    val killables: KillSet,
     val panel: RootPanel,
     val redisplay: () -> Unit,
     val close: () -> Unit
 )
 
 fun <T: HasFBProps<*>> ViewScreenConfig<T>.build(
-    killables: Killables,
+    killables: KillSet,
     panel: RootPanel,
     item: T,
     close: () -> Unit
@@ -144,9 +145,9 @@ fun Node.viewFieldLabel(title: String) {
     }
 }
 
-fun Node.viewTextField(label: String, fn: () -> Optional<String>): Killable {
+fun Node.viewTextField(ks: KillSet, label: String, fn: () -> Optional<String>) {
     viewFieldLabel(label)
-    return span {
+    span {
         cls.m1
-    }.rxTextOrEmpty(fn)
+    }.rxTextOrEmpty(ks, fn)
 }

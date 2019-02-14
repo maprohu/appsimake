@@ -5,7 +5,6 @@ import common.EmitterIface
 import common.Optional
 import killable.KillSet
 import killable.Killables
-import killable.toTrigger
 import rx.Var
 
 data class SetDiff<T>(
@@ -95,7 +94,7 @@ fun <T, S> EmitterIface<SetMove<T>>.toMap(ks: KillSet, fn: (T, KillSet) -> S): M
                 val vks = Killables()
                 map[v] = Pair(
                     fn(v, vks.killSet),
-                    vks.toTrigger()
+                    vks.kill
                 )
             }
             is SetRemoved -> {

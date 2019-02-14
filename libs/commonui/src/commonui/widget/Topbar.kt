@@ -40,6 +40,7 @@ class Topbar(): ScreenWrap {
     }.setTo(slots.middle)
 
     val title by lazy {
+        alignItemsCenter
         middle.h5 {
             cls {
                 m1

@@ -12,8 +12,8 @@ typealias AddRemove<T> = (T) -> Trigger
 typealias AsyncSetter<T> = suspend (T) -> Unit
 suspend operator fun <T> AsyncSetter<T>.remAssign(v: T) { this(v) }
 
-interface Funs<T> {
-    fun <P1> ignore1() = { _:P1 -> value }
+class Funs<T> {
+    inline fun <P1> ignore1() = { _:P1 -> value }
 }
 inline val <T> T.funs get() = this.unsafeCast<Funs<T>>()
 inline val <T> Funs<T>.value get() = this.unsafeCast<T>()

@@ -76,16 +76,16 @@ fun Job.addedTo(ks: Killables): Job {
 
 
 fun <T> toAsync(
+    ks: KillSet,
     vararg emitters: EmitterIface<SetMove<T>>
 ): AsyncEmitter<T> {
-    val killables = Killables()
 
     val waiting = mutableListOf<CompletableDeferred<T>>()
 
     val currents = emitters.map { emitter ->
         val current = mutableListOf<T>()
 
-        killables += emitter.add { m ->
+        ks += emitter.add { m ->
             when {
                 m is SetAdded && waiting.isNotEmpty()  -> {
                     waiting.removeAt(0).complete(m.value)
@@ -97,7 +97,7 @@ fun <T> toAsync(
         current
     }
 
-    return object : AsyncEmitter<T>, Killable by killables {
+    return object : AsyncEmitter<T> {
         override fun poll(): T? {
             return currents.find { it.isNotEmpty() }?.removeAt(0)
         }
@@ -110,12 +110,12 @@ fun <T> toAsync(
             } else {
                 val cd = CompletableDeferred<T>()
                 waiting += cd
-                val rk = killables.add {
+                val rk = ks.add {
                     waiting -= cd
                     cd.cancel()
                 }
                 val res = cd.await()
-                rk.kill()
+                rk()
                 res
             }
         }
@@ -123,7 +123,7 @@ fun <T> toAsync(
 
 }
 
-fun <T> EmitterIface<SetMove<T>>.toAsync(): AsyncEmitter<T> = toAsync(this)
+fun <T> EmitterIface<SetMove<T>>.toAsync(ks: KillSet): AsyncEmitter<T> = toAsync(ks, this)
 
 
 fun <T> Deferred<T>.toRx(): RxIface<Optional<T>> {

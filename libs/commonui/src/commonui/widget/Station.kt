@@ -9,6 +9,7 @@ import killable.Killables
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
+import org.w3c.dom.events.EventTarget
 import rx.RxIface
 import rx.Var
 
@@ -83,6 +84,7 @@ open class ExecImpl(coroutineContext: Job) : JobKillsImpl(coroutineContext), Has
         fromRx(this@ExecImpl, this@ExecImpl, exec, source, fn)
     }
 }
+
 
 interface HasView<V> {
     fun view(prepare: V?.() -> Unit): V?
@@ -190,12 +192,19 @@ fun <S, V> JobSwitch<JobScopeWithItem<V>>.fromRx(
         }
     }
 }
-fun <S, V: Any, I: JobScopeWithView<V>?> JobSwitch<ItemWithViewRx<I, V>?>.fromRx(kills: HasKillSet, exec: Exec, source: RxIface<S>, fn: suspend (S) -> I) = apply {
+suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.switchTo(item: I?) = switchTo(
+    item?.let { v -> ItemWithViewRx.hasView(v) }
+)
+suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.switchTo(item: suspend () -> I?) = switchTo {
+    item()?.let { v -> ItemWithViewRx.hasView(v) }
+}
+
+fun <S, V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.fromRx(kills: HasKillSet, exec: Exec, source: RxIface<S>, fn: suspend (S) -> I?) = apply {
     with(kills) {
         source.forEach { s ->
             exec {
                 switchTo {
-                    ItemWithViewRx(fn(s))
+                    fn(s)?.let { v -> ItemWithViewRx.hasView(v) }
                 }
             }
         }
@@ -226,22 +235,24 @@ class ItemWithViewRx<out I, out V: Any>(
 ) {
     companion object {
         fun <I, V: Any> hasView(item: I, view: HasView<V>): ItemWithViewRx<I, V> = ItemWithViewRx(item) { view.view(it) }
-        operator fun <V: Any, I: HasView<V>> invoke(item: I): ItemWithViewRx<I, V> = ItemWithViewRx(item) { item.view(it) }
+        fun <V: Any, I: HasView<V>> hasView(item: I): ItemWithViewRx<I, V> = ItemWithViewRx(item) { item.view(it) }
     }
 }
 
 
 class ViewWithForward<V>(
-    base: V,
-    forward: () -> Optional<V>
-) {
-    val view = { forward().getOrDefault(base) }
+    val base: HasView<V>,
+    val forward: () -> Optional<HasView<V>>
+): HasView<V> {
+    override fun view(prepare: V?.() -> Unit): V? {
+        return forward().map { it.view(prepare) }.getOrElse { base.view(prepare) }
+    }
 
     companion object {
         operator fun <V, S> invoke(
-            base: V,
+            base: HasView<V>,
             current: RxIface<S?>,
-            view: S.() -> V
+            view: S.() -> HasView<V>
         ): ViewWithForward<V> = ViewWithForward(
             base,
             forward = { current()?.let { Some(it.view()) } ?: None }

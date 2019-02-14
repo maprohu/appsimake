@@ -12,7 +12,7 @@ suspend fun <T> asyncKills(ks: KillSet, initial: T, fn: suspend (T) -> Trigger):
     suspend fun state(v: T): State {
         val vks = ks.killables()
         vks += fn(v)
-        return State(v, vks.toTrigger())
+        return State(v, vks.kill)
     }
     var current = state(initial)
 

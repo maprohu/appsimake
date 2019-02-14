@@ -271,7 +271,7 @@ fun <T> EmitterIface<T>.withInitial(initial: () -> Iterable<T>) = object: Emitte
     }
 }
 
-interface AsyncEmitter<T>: Killable {
+interface AsyncEmitter<T> {
     fun poll(): T?
     suspend fun receive(): T
 }
@@ -279,11 +279,10 @@ fun <T> emptyAsyncEmitter() = object : AsyncEmitter<T> {
     override fun poll(): T? = null
 
     override suspend fun receive(): T = CompletableDeferred<T>().await()
-
-    override fun kill() {}
 }
 
 class DynamicAsyncEmitter<T>(
+    ks: KillSet,
     initial: AsyncEmitter<T>
 ): AsyncEmitter<T> {
     override fun poll(): T? {
@@ -310,19 +309,21 @@ class DynamicAsyncEmitter<T>(
         return cd.await()
     }
 
-    override fun kill() {
-        current.kill()
-        current = emptyAsyncEmitter()
-    }
 
+    val kseq = ks.seq()
     private var current = initial
 
-    fun setCurrent(c: AsyncEmitter<T>) {
-        current.kill()
+    fun setCurrent(c: AsyncEmitter<T>, kill: Trigger) {
+        kseq %= kill
         current = c
         cds.forEach { it.listen() }
     }
 
+    init {
+        ks += {
+            current = emptyAsyncEmitter()
+        }
+    }
 
 }
 
@@ -380,7 +381,7 @@ fun <T> EmitterIface<SetMove<T>>.feedTo(set: MutableSet<T>): Trigger {
 fun <T> EmitterIface<SetMove<T>>.filtered(ks: Killables, rxfn: (T) -> Boolean): Emitter<SetMove<T>> {
 
     val current = mutableSetOf<T>()
-    val kills = mutableMapOf<T, Killable>()
+    val kills = mutableMapOf<T, Trigger>()
 
     val f = Emitter<SetMove<T>> {
         current.map(::SetAdded)
@@ -401,14 +402,14 @@ fun <T> EmitterIface<SetMove<T>>.filtered(ks: Killables, rxfn: (T) -> Boolean): 
             is SetAdded -> {
                 val vks = ks.killables()
                 val rxv = Rx(vks.killSet) { rxfn(v) }
-                kills[v] = vks
+                kills[v] = vks.kill
                 rxv.forEach(vks.killSet) { fv ->
                     if (fv) add(v)
                     else remove(v)
                 }
             }
             is SetRemoved -> {
-                kills.remove(v)?.kill()
+                kills.remove(v)?.invoke()
 
                 if (v in current) {
                     remove(v)
@@ -834,7 +835,7 @@ fun <T, S> SetSource<T>.map(mfn: (T) -> S) = object : SetSource<S> {
 fun <T> SetSource<T>.filtered(ks: KillSet, rxfn: (T) -> Boolean): SetSource<T> {
 
     var curr = setOf<T>()
-    val kills = mutableMapOf<T, Killable>()
+    val kills = mutableMapOf<T, Trigger>()
 
     val f = Emitter<SetMove<T>>()
 
@@ -853,14 +854,14 @@ fun <T> SetSource<T>.filtered(ks: KillSet, rxfn: (T) -> Boolean): SetSource<T> {
             is SetAdded -> {
                 val vks = ks.killables()
                 val rxv = Rx(vks.killSet) { rxfn(v) }
-                kills[v] = vks
+                kills[v] = vks.kill
                 rxv.forEach(vks.killSet) { fv ->
                     if (fv) add(v)
                     else remove(v)
                 }
             }
             is SetRemoved -> {
-                kills.remove(v)?.kill()
+                kills.remove(v)?.invoke()
 
                 if (v in curr) {
                     remove(v)
@@ -974,7 +975,7 @@ fun <T> SetSource<T>.toEmitter(): EmitterIface<SetMove<T>> = object : EmitterIfa
         listen(ks.killSet, listener).also {
             it.map(::SetAdded).forEach(listener)
         }
-        return ks.toTrigger()
+        return ks.kill
     }
 }
 

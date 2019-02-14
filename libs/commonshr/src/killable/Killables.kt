@@ -2,9 +2,8 @@ package killable
 
 import commonshr.AddRemove
 import commonshr.Trigger
+import commonshr.once
 import commonshr.plusAssign
-import killable.Killable.Companion.empty
-import killable.Killable.Companion.once
 import kotlinx.coroutines.Job
 import org.w3c.dom.Element
 import rx.Rx
@@ -24,67 +23,53 @@ fun Job.addedTo(ks: KillSet): Job {
     return this
 }
 
-fun KillSet.add(killable: Killable): Trigger = this(killable::kill)
-operator fun KillSet.plusAssign(killable: Killable) { add(killable) }
 fun KillSet.add(killable: Trigger): Trigger = this(killable)
-
-fun KillSet.killables() = Killables().also { it += add(it) }
-fun KillSet.seq() = KillableSeq().also { it.onKill += add(it) }
+fun KillSet.killables() = Killables().also { it += add(it.kill) }
+fun KillSet.seq() = KillableSeq().also { it.onKill += add(it.kill) }
 
 fun Trigger.addedTo(ks: KillSet) = apply { ks += this }
 
-class Killables : Killable {
+class Killables {
 
-    val killSet: KillSet = { k ->
-        add(k).toTrigger()
-    }
+    val killSet: KillSet = ::add
 
     @Suppress("NOTHING_TO_INLINE")
     inline fun toKillSet() = killSet
 
-    protected var list = listOf<Killable>()
+    protected var list = listOf<Trigger>()
 
-    operator fun plusAssign(listener: () -> Unit) {
-        add(listener)
-    }
+    operator fun plusAssign(listener: Trigger) { add(listener) }
 
-    fun add(fn: () -> Unit) = add(once(fn))
-    fun add(listener: Killable) : Killable {
-        if (listener == empty) {
-            return empty
+    fun add(listener: Trigger): Trigger {
+        if (listener == Noop) {
+            return Noop
         }
 
         return if (!killed) {
             list += listener
 
-            once {
-                list -= listener
-            }
+            { list -= listener }.once()
         } else {
-            listener.kill()
+            listener()
 
-            empty
+            Noop
         }
     }
 
     private var killed = false
 
-    override fun kill() {
+    val kill: Trigger = {
         if (!killed) {
             killed = true
             val l = list
             list = listOf()
-            l.forEach { it.kill() }
+            l.forEach { it() }
         }
-    }
-
-    operator fun plusAssign(killable: Killable) {
-        add(killable)
     }
 
 
     fun killables() = toKillSet().killables()
-    fun seq() = KillableSeq().also { it.onKill += add(it) }
+    fun seq() = KillableSeq().also { it.onKill += add(it.kill) }
 
 }
 

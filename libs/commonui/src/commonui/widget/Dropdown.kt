@@ -1,6 +1,7 @@
 package commonui.widget
 
 import bootstrap.*
+import commonshr.Trigger
 import commonshr.invoke
 import commonshr.plusAssign
 import commonshr.remAssign
@@ -24,6 +25,7 @@ class DropdownMenuItem(): ScreenWrap {
     val text = Text(node).apply {
         node.cls.m1
     }
+
 }
 class DropdownMenu(): ScreenWrap {
     override val node = document.div {
@@ -32,6 +34,7 @@ class DropdownMenu(): ScreenWrap {
 
     val item get() = DropdownMenuItem().append
     val divider get() = node.div { cls.dropdownDivider }
+
 }
 class Dropdown(): ScreenWrap {
     override val node = document.div {

@@ -1,12 +1,7 @@
 package common
 
-import commonshr.SetAdded
-import commonshr.SetMove
-import commonshr.SetRemoved
-import killable.KillSet
-import killable.Killable
-import killable.Killables
-import killable.NoKill
+import commonshr.*
+import killable.*
 import org.w3c.dom.*
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.EventTarget
@@ -128,7 +123,7 @@ fun <T> linkedIterable(first: T?, next: (T) -> T?) : Iterable<T> {
 
 interface ListenableList<out T> : List<T> {
 
-    fun addListener(listener: Listener<T>) : Killable
+    fun addListener(listener: Listener<T>) : Trigger
 
     data class Listener<in T>(
         val added: (Int, T) -> Unit = { _, _ -> },
@@ -183,14 +178,14 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
 
     override val isEmptyRx = Rx(NoKill) { sizeVar() == 0 }
 
-    override fun addListener(listener: ListenableList.Listener<T>): Killable {
+    override fun addListener(listener: ListenableList.Listener<T>): Trigger {
         listeners += listener
 
         forEachIndexed(listener.added)
 
-        return Killable.once {
+        return {
             listeners -= listener
-        }
+        }.once()
     }
 
     private val delegate = mutableListOf<T>()
@@ -371,10 +366,10 @@ data class SortedListenableListConfig<T, C: Comparable<C>>(
     }
 }
 
-fun <T, U: Killable> ListenableList<T>.map(
-    killables: Killables,
-    create: (T) -> U
-): ListenableList<U> {
+fun <T, U> ListenableList<T>.map(
+    killables: KillSet,
+    create: (T) -> KillableValue<U>
+): ListenableList<KillableValue<U>> {
     return map(
         killables,
         create,
@@ -383,7 +378,7 @@ fun <T, U: Killable> ListenableList<T>.map(
 }
 
 fun <T, U> ListenableList<T>.map(
-    killables: Killables,
+    killables: KillSet,
     create: (T) -> U,
     destroy: (U) -> Unit
 ): ListenableList<U> {
@@ -411,12 +406,12 @@ fun <T, U> ListenableList<T>.map(
 
 }
 fun <T, U> ListenableList<T>.map(
-    killables: Killables,
-    mapper: (T, Killables) -> U
+    killables: KillSet,
+    mapper: (T, KillSet) -> U
 ): ListenableList<U> {
     val result = ListenableMutableList<U>()
     class Holder(
-        val killable: Killable
+        val kill: Trigger
     )
     val holders = mutableListOf<Holder>()
 
@@ -424,14 +419,14 @@ fun <T, U> ListenableList<T>.map(
         ListenableList.Listener(
             added = { index, element ->
                 val ks = killables.killables()
-                val node = mapper(element, ks)
+                val node = mapper(element, ks.killSet)
                 result.add(index, node)
-                holders.add(index, Holder(ks))
+                holders.add(index, Holder(ks.kill))
             },
             removed = { index, _ ->
                 result.removeAt(index)
                 val holder = holders.removeAt(index)
-                holder.killable.kill()
+                holder.kill()
             },
             moved = { from, to ->
                 result.move(from, to)
@@ -446,8 +441,8 @@ fun <T, U> ListenableList<T>.map(
 
 data class MappedListenableListConfig<T, U>(
     val list: ListenableList<T>,
-    val killables: Killables,
-    val mapper: (T, Killables) -> U
+    val killables: KillSet,
+    val mapper: (T, KillSet) -> U
 ) {
     fun build(): ListenableList<U> {
         return list.map(killables, mapper)
@@ -457,8 +452,8 @@ data class MappedListenableListConfig<T, U>(
 
 data class FilteredListenableListConfig<T, K, I>(
     val list: ListenableList<T>,
-    val killables: Killables,
-    val filterKey: (T, Killables) -> RxIface<K>,
+    val killables: KillSet,
+    val filterKey: (T, KillSet) -> RxIface<K>,
     val input: RxIface<I>,
     val filter: (K, I) -> Boolean
 ) {
@@ -477,7 +472,7 @@ data class FilteredListenableListConfig<T, K, I>(
             fun resultsIndexAfter() = resultIndex.map { it + 1 }.getOrDefault(resultsBefore)
 
             val ks = killables.killables()
-            val key = filterKey(item, ks)
+            val key = filterKey(item, ks.killSet)
 
 
             fun recalcResultsBefore() {
@@ -586,7 +581,7 @@ data class FilteredListenableListConfig<T, K, I>(
 
         val holders = mutableListOf<Holder>()
 
-        input.forEachLater(killables.killSet) { i ->
+        input.forEachLater(killables) { i ->
             holders.forEach { holder ->
                 holder.updateInput(i)
             }
@@ -617,24 +612,24 @@ data class FilteredListenableListConfig<T, K, I>(
 
 }
 
-fun EventTarget.listen(type: String, fn: (Event) -> Unit): Killable {
+fun EventTarget.listen(type: String, fn: (Event) -> Unit): Trigger {
     this.addEventListener(type, fn)
-    return Killable.once {
+    return {
         this.removeEventListener(type, fn)
-    }
+    }.once()
 }
 
-fun <T: Event> EventTarget.listenAs(type: String, fn: (T) -> Unit): Killable {
+fun <T: Event> EventTarget.listenAs(type: String, fn: (T) -> Unit): Trigger {
     return listen(type) { e ->
         fn(e.unsafeCast<T>())
     }
 }
 
-fun WindowOrWorkerGlobalScope.onInterval(timeout: Int, fn: () -> Unit): Killable {
+fun WindowOrWorkerGlobalScope.onInterval(timeout: Int, fn: () -> Unit): Trigger {
     val handle = setInterval(fn, timeout)
-    return Killable.once {
+    return {
         clearInterval(handle)
-    }
+    }.once()
 }
 
 

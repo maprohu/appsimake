@@ -5,12 +5,13 @@ import commonui.widget.*
 import commonshr.*
 import killable.killables
 import music.boot.Boot
+import music.boot.BootPath
 import music.content.Content
 import music.content.ContentView
 
 class NotLoggedIn(
-    boot: Boot
-): Content(boot) {
+    path: BootPath
+): Content(path) {
     override val rawView = ui()
 
     init {

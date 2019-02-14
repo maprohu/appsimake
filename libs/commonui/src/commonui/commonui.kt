@@ -4,8 +4,9 @@ import bootstrap.*
 import commonshr.invoke
 import domx.*
 import fontawesome.*
-import killable.Killable
+import killable.KillSet
 import killable.Killables
+import killable.killables
 import org.w3c.dom.*
 import kotlin.browser.document
 
@@ -40,12 +41,12 @@ val Node.hourglass: HTMLDivElement
     }
 
 fun showClosable(
-    killables: Killables,
-    page: (Killables, close: () -> Unit) -> Unit,
+    killables: KillSet,
+    page: (KillSet, close: () -> Unit) -> Unit,
     back: () -> Unit
 ) {
     val ks = killables.killables()
-    page(ks) {
+    page(ks.killSet) {
         back()
         ks.kill()
     }
