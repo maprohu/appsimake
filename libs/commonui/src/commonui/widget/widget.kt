@@ -180,22 +180,39 @@ fun <T: Node> T.setTo(parent: Slot) = apply {
     parent %= this
 }
 
-class Hole(
-    val prepare: HTMLElement.() -> Unit,
-    val slot: Slot
+class HoleT<T>(
+    val prepare: T.() -> Unit,
+    val assign: OptAssign<T>
 ) {
-    fun with(pr: HTMLElement.() -> Unit) = Hole(
+    fun with(pr: T.() -> Unit) = HoleT<T>(
         prepare = {
             prepare()
             pr()
         },
-        slot = slot
+        assign = assign
     )
-    operator fun remAssign(node: HTMLElement?) { slot %= node }
-    val prepareOrNull: HTMLElement?.() -> Unit = {
+    operator fun remAssign(node: T?) { assign %= node }
+    val prepareOrNull: T?.() -> Unit = {
         this?.apply(prepare)
     }
 }
+typealias Hole = HoleT<HTMLElement>
+//class Hole(
+//    val prepare: HTMLElement.() -> Unit,
+//    val slot: Slot
+//) {
+//    fun with(pr: HTMLElement.() -> Unit) = Hole(
+//        prepare = {
+//            prepare()
+//            pr()
+//        },
+//        slot = slot
+//    )
+//    operator fun remAssign(node: HTMLElement?) { slot %= node }
+//    val prepareOrNull: HTMLElement?.() -> Unit = {
+//        this?.apply(prepare)
+//    }
+//}
 val Slot.insert: Factory
     get() {
         return Factory() with {
@@ -207,7 +224,7 @@ val Hole.factory get() = Factory() with prepare
 val Hole.insert: Factory
     get() {
         return factory with {
-            this@insert.slot %= this
+            this@insert.assign %= this
         }
     }
 

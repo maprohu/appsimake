@@ -4,16 +4,13 @@ import commonshr.*
 import commonui.widget.*
 import music.Playable
 import music.boot.Boot
-import music.boot.BootWrap
+import music.boot.BootPath
+import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 
 
-abstract class PlayerWrap(
-    val player: Player,
-    parent: Station
-): BootWrap(player.boot, parent)
+abstract class Player(boot: Boot): ViewImpl<HTMLElement>(boot)
 
-abstract class Player(val boot: Boot): BaseUIStation<Node?>(boot)
 //class Player(
 //    boot: Boot
 //): BootWrap(boot, boot) {

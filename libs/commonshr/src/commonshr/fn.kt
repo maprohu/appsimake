@@ -40,5 +40,6 @@ infix fun Trigger.with(trigger: Trigger): Trigger = {
     trigger()
 }
 
+
 operator fun <T> AddRemove<T>.plusAssign(trigger: T) { this(trigger) }
 

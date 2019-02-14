@@ -47,9 +47,9 @@ suspend fun userSongs(
 
     source.set.process(uks) { item, ks ->
         val rxv = rxv(item.props.idOrFail)
-        item.state.initial.forEach { st ->
+        item.state.initial.forEach(ks) { st ->
             rxv.now = st.getOrDefault(UserSongState.New)
-        }.addedTo(ks)
+        }
     }
 
     return UserSongs(

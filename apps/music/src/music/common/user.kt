@@ -39,15 +39,16 @@ suspend fun RxIface<User?>.toLatestUid(
         }
     }.addedTo(ks)
 
-    uid.forEach { id ->
+    uid.forEach(ks) { id ->
         ch.offer(id)
         latestUid.now = id
-    }.addedTo(ks)
+    }
 
     return LatestUid(
-        Rx { uid()  ?: latestUid()  }
+        Rx(ks) { uid()  ?: latestUid()  }
     ) {
         ch.offer(null)
     }
 
 }
+

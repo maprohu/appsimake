@@ -42,7 +42,7 @@ fun tabsConfig(
             ts.forEachIndexed { idx, tc ->
                 faTab(
                     tc.icon,
-                    Rx { active() == idx }
+                    Rx(ks.killSet) { active() == idx }
                 ) {
                     clickEvent {
                         active.now = idx
@@ -53,7 +53,7 @@ fun tabsConfig(
         form = {
             val root = RootPanel(this)
 
-            active.forEach { idx ->
+            active.forEach(ks.killSet) { idx ->
                 root.setRoot(nodes[idx].value)
             }
         }
@@ -76,27 +76,28 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
     close: () -> Unit,
     db: Firestore
 ) {
+    val ks = killables.killSet
 
     item.props.rollback()
 
     killables += item.props.onDeleted.add(close)
 
     val isSaving = Var(false)
-    val canSave = Rx { item.props.dirty() && item.props.isValid() }
-    val showDelete = Rx { item.props.isPersisted() }
-    val showDropDown = Rx { showDelete() }
-    val canDelete = Rx { item.props.isPersisted() && !isSaving() }
+    val canSave = Rx(ks) { item.props.dirty() && item.props.isValid() }
+    val showDelete = Rx(ks) { item.props.isPersisted() }
+    val showDropDown = Rx(ks) { showDelete() }
+    val canDelete = Rx(ks) { item.props.isPersisted() && !isSaving() }
 
     val idListenerSeq = killables.seq()
 
-    val docRefOpt = Rx {
+    val docRefOpt = Rx(ks) {
         item.props.id().let {
             if (it is IdState.Persisted) it.id.docRef(db)
             else null
         }
-    }.addedTo(killables)
+    }
 
-    docRefOpt.forEach {  dr ->
+    docRefOpt.forEach(ks) {  dr ->
         if (dr != null) {
             idListenerSeq += dr.onSnapshot {
                 isSaving.now = false
@@ -334,7 +335,7 @@ inline fun <reified E: Enum<E>> HTMLSelectElement.enumProp(
 fun Element.validProp(prop: Prop<*>): Killable {
     val killables = Killables()
 
-    rxClass(Cls.isInvalid) { !prop.isValid() }
+    rxClass(killables.killSet, Cls.isInvalid) { !prop.isValid() }
     return killables
 }
 

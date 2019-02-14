@@ -60,7 +60,7 @@ fun <T: HasFBProps<T>> CollectionWrap<T>.lazy(
             kills += dw.docRef(db).listen(t) {
                 cd.complete(rxv)
             }
-            kills += t.props.isDeleted.forEach { d ->
+            t.props.isDeleted.forEach(kills) { d ->
                 rxv.now = if (d) None else Some(t)
             }
 

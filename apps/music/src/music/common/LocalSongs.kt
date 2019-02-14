@@ -25,6 +25,7 @@ private external interface LocalSongEventType {
 private inline val LocalSongEventType.Companion.added get() = "added".unsafeCast<LocalSongEventType>()
 private inline val LocalSongEventType.Companion.removed get() = "removed".unsafeCast<LocalSongEventType>()
 
+
 class LocalSongs(parent: JobScope, val idb: IDBDatabase, initial: Set<String>): JobKillsImpl(parent) {
 
     companion object {

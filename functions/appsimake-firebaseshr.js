@@ -34,7 +34,8 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   var set_0 = $module$appsimake_commonshr.rx.set_atqor6$;
   var PropertyMetadata = Kotlin.PropertyMetadata;
   var Var = $module$appsimake_commonshr.rx.Var;
-  var Rx_init = $module$appsimake_commonshr.rx.Rx_init_klfg04$;
+  var killable = $module$appsimake_commonshr.killable;
+  var Rx_init = $module$appsimake_commonshr.rx.Rx_init_3deojw$;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
   var lazyOf = Kotlin.kotlin.lazyOf_mh5how$;
   var Error_init = Kotlin.kotlin.Error_init_pdl1vj$;
@@ -398,7 +399,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     this.ops.registry.register_anotdv$(this);
     this.initial = new Var(this.ops.defaultValue());
     this.current = new Var(this.initial.now);
-    this.dirty_ertkci$_0 = this.calculated ? Rx_init(ScalarPropBase$dirty$lambda) : Rx_init(ScalarPropBase$dirty$lambda_0(this));
+    this.dirty_ertkci$_0 = this.calculated ? Rx_init(killable.NoKill, ScalarPropBase$dirty$lambda) : Rx_init(killable.NoKill, ScalarPropBase$dirty$lambda_0(this));
     this.validationErrors_2t0eqo$_0 = lazy(ScalarPropBase$validationErrors$lambda(this));
     this.isValid_2q115q$_0 = lazy(ScalarPropBase$isValid$lambda(this));
     this.calculationActive = this.ops.calculate != null;
@@ -406,7 +407,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     var tmp$, tmp$_0;
     var tmp$_1;
     if ((tmp$ = this.ops.calculate) != null) {
-      Rx_init(ScalarPropBase$beforeWrite$lambda$lambda(tmp$)).forEach_qlkmfe$(ScalarPropBase$beforeWrite$lambda$lambda_0(this));
+      Rx_init(killable.NoKill, ScalarPropBase$beforeWrite$lambda$lambda(tmp$)).forEach_sysl1e$(killable.NoKill, ScalarPropBase$beforeWrite$lambda$lambda_0(this));
       tmp$_1 = ScalarPropBase$beforeWrite$lambda$lambda_1(this);
     }
      else
@@ -696,7 +697,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   }
   function ScalarPropBase$validationErrors$lambda(this$ScalarPropBase) {
     return function () {
-      return Rx_init(ScalarPropBase$validationErrors$lambda$lambda(this$ScalarPropBase));
+      return Rx_init(killable.NoKill, ScalarPropBase$validationErrors$lambda$lambda(this$ScalarPropBase));
     };
   }
   function ScalarPropBase$isValid$lambda$lambda(this$ScalarPropBase) {
@@ -706,7 +707,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   }
   function ScalarPropBase$isValid$lambda(this$ScalarPropBase) {
     return function () {
-      return Rx_init(ScalarPropBase$isValid$lambda$lambda(this$ScalarPropBase));
+      return Rx_init(killable.NoKill, ScalarPropBase$isValid$lambda$lambda(this$ScalarPropBase));
     };
   }
   function ScalarPropBase$beforeWrite$lambda$lambda(closure$c) {
@@ -1140,7 +1141,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   }
   function Props$isPersisted$lambda(this$Props) {
     return function () {
-      return Rx_init(Props$isPersisted$lambda$lambda(this$Props));
+      return Rx_init(killable.NoKill, Props$isPersisted$lambda$lambda(this$Props));
     };
   }
   function Props$isDeleted$lambda$lambda(this$Props) {
@@ -1150,7 +1151,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   }
   function Props$isDeleted$lambda(this$Props) {
     return function () {
-      return Rx_init(Props$isDeleted$lambda$lambda(this$Props));
+      return Rx_init(killable.NoKill, Props$isDeleted$lambda$lambda(this$Props));
     };
   }
   var Collection = Kotlin.kotlin.collections.Collection;
@@ -1180,7 +1181,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   }
   function Props$isValid$lambda(this$Props) {
     return function () {
-      return Rx_init(Props$isValid$lambda$lambda(this$Props));
+      return Rx_init(killable.NoKill, Props$isValid$lambda$lambda(this$Props));
     };
   }
   function Props$onDeleted$lambda$lambda(closure$l) {
@@ -1193,7 +1194,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   function Props$onDeleted$lambda(this$Props) {
     return function () {
       var l = new Listeners();
-      this$Props.isDeleted.forEach_qlkmfe$(Props$onDeleted$lambda$lambda(l));
+      this$Props.isDeleted.forEach_sysl1e$(killable.NoKill, Props$onDeleted$lambda$lambda(l));
       return l;
     };
   }
@@ -1223,7 +1224,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   }
   function Props$dirty$lambda(this$Props) {
     return function () {
-      return Rx_init(Props$dirty$lambda$lambda(this$Props));
+      return Rx_init(killable.NoKill, Props$dirty$lambda$lambda(this$Props));
     };
   }
   Props.$metadata$ = {

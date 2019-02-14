@@ -43,7 +43,7 @@ fun Factory.userIcon(kills: KillSet, imageUrl: RxIface<String>) = wraps.div {
                 h100
                 objectFitCover
             }
-            imageUrl.forEach { src = it }.addedTo(kills)
+            imageUrl.forEach(kills) { src = it }
         }
     }
 }

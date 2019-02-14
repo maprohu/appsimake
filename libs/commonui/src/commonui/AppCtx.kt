@@ -8,6 +8,7 @@ import domx.source
 import domx.video
 import killable.KillableValue
 import killable.Killables
+import killable.NoKill
 import kotlinx.coroutines.*
 import org.w3c.dom.events.Event
 import org.w3c.notifications.Notification
@@ -103,8 +104,9 @@ class AppCtx(
     }
 
     val windowActive by lazy {
-        Rx { visible() && hasFocus() }
+        Rx(NoKill) { visible() && hasFocus() }
     }
+
 
     val root by lazy {
         RootPanel(document.body!!).also { it.setHourglass() }

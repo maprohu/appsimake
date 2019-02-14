@@ -1,27 +1,19 @@
 package music.notloggedin
-//
-//import commonfb.UserState
-//import commonfb.login.Login
-//import commonui.widget.*
-//import commonshr.*
-//import killable.killables
-//import music.boot.Boot
-//import music.boot.LoginBase
-//
-//class NotLoggedIn(
-//    boot: Boot
-//): LoginBase(boot) {
-//    val bind = Bind(boot)
-//    private val ui = UI(kills, top, main, bind)
-//
-//    init {
-//        val procs = procOrElses()
-//        fun display() {
-//            ui.visible()
-//            proc %= procs.proc
-//        }
-//        display()
-//
+
+import commonfb.UserState
+import commonui.widget.*
+import commonshr.*
+import killable.killables
+import music.boot.Boot
+import music.content.Content
+import music.content.ContentView
+
+class NotLoggedIn(
+    boot: Boot
+): Content(boot) {
+    override val rawView = ui()
+
+    init {
 //        with(bind) {
 //            procs.add.process(SignIn) {
 //                val ks = kills.killables()
@@ -48,5 +40,5 @@ package music.notloggedin
 //                )
 //            }
 //        }
-//    }
-//}
+    }
+}

@@ -1,12 +1,13 @@
 package music.player
 
-import commonui.widget.BaseSubStation
+import commonui.widget.ExecImpl
+import commonui.widget.JobKillsImpl
 import domx.invoke
 import kotlin.math.max
 
 abstract class PlayState(
     val visible: Visible
-): BaseSubStation(visible) {
+): ExecImpl(visible) {
     abstract fun playOrPause()
     fun backward() = with(visible) {
         audio {
@@ -21,7 +22,7 @@ abstract class PlayState(
     }
     abstract fun nextTrack()
     fun like() = with(visible) {
-        boot.userSongs.now?.let { us ->
+        path.boot.userSongs.current.now.item?.let { us ->
             us.like(playable.id)
         }
     }

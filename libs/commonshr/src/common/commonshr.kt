@@ -400,9 +400,9 @@ fun <T> EmitterIface<SetMove<T>>.filtered(ks: Killables, rxfn: (T) -> Boolean): 
         when (m) {
             is SetAdded -> {
                 val vks = ks.killables()
-                val rxv = Rx { rxfn(v) }.addedTo(vks)
-                kills[v] = rxv
-                rxv.forEach { fv ->
+                val rxv = Rx(vks.killSet) { rxfn(v) }
+                kills[v] = vks
+                rxv.forEach(vks.killSet) { fv ->
                     if (fv) add(v)
                     else remove(v)
                 }
@@ -695,7 +695,7 @@ class RandomSource<T>(
                 updateTotal()
             }.forEach { insert(it) }
 
-            val available = Rx {
+            val available = Rx(ks) {
                 val tot = total()
                 val ex = exclude()
 
@@ -706,10 +706,10 @@ class RandomSource<T>(
                 } else {
                     av
                 }
-            }.addedTo(ks)
+            }
 
             return RandomSource(
-                Rx { available().isNotEmpty() }.addedTo(ks)
+                Rx(ks) { available().isNotEmpty() }
             ) {
                 var h = head!!
                 do {
@@ -852,9 +852,9 @@ fun <T> SetSource<T>.filtered(ks: KillSet, rxfn: (T) -> Boolean): SetSource<T> {
         when (m) {
             is SetAdded -> {
                 val vks = ks.killables()
-                val rxv = Rx { rxfn(v) }.addedTo(vks)
-                kills[v] = rxv
-                rxv.forEach { fv ->
+                val rxv = Rx(vks.killSet) { rxfn(v) }
+                kills[v] = vks
+                rxv.forEach(vks.killSet) { fv ->
                     if (fv) add(v)
                     else remove(v)
                 }

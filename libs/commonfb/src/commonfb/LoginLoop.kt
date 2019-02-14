@@ -59,7 +59,7 @@ fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx(ks) {
     }
 }
 
-fun RxIface<User?>.toUid(ks: KillSet) = Rx { this()?.uid }.addedTo(ks)
+fun RxIface<User?>.toUid(ks: KillSet) = Rx(ks) { this()?.uid }
 
 
 //object NotLoggedIn

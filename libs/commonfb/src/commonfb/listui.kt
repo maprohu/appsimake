@@ -72,7 +72,7 @@ fun <T: HasFBProps<*>> listUI(
             emptyDivDecor()
         }
 
-        killables += query.fold(Killable.empty) { old, q ->
+        query.fold(killables.killSet, Killable.empty) { old, q ->
             old.kill()
 
             val queryRoot = root.sub()
@@ -100,7 +100,7 @@ fun <T: HasFBProps<*>> listUI(
                     create = create
                 ).copy(
                     onFirst = {
-                        ks += filtered.isEmptyRx.forEach { empty ->
+                        filtered.isEmptyRx.forEach(ks.killSet) { empty ->
                             queryRoot.setRoot(
                                 if (empty) emptyDiv else listDiv
                             )
@@ -150,7 +150,7 @@ fun <T: HasFBProps<*>> T.keepAlive(
     db: Firestore
 ) {
     val killListen = Killables()
-    val killForeach = props.live.forEach { alive ->
+    props.live.forEach(killables.killSet) { alive ->
         if (!alive) {
             killListen += props.docWrapOrFail.docRef(db).listen(this)
         }
@@ -158,7 +158,6 @@ fun <T: HasFBProps<*>> T.keepAlive(
 
     // Kill order may be important
     killables += {
-        killForeach.kill()
         killListen.kill()
     }
 }

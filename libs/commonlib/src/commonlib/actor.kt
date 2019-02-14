@@ -7,7 +7,6 @@ import killable.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
 import rx.RxIface
-import rx.RxIfaceKillable
 import rx.Var
 
 interface LoopT<in T> {

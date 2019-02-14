@@ -14,6 +14,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import music.Playable
 import music.boot.Boot
+import music.boot.BootPath
 import musiclib.Mp3File
 import musiclib.UserSong
 import musiclib.UserSongState
@@ -28,18 +29,24 @@ import kotlin.math.max
 
 const val SeekSeconds = 15.0
 
+
+class VisiblePath(
+    val visible: Visible
+): BootPath(visible.path.boot)
+
 class Visible(
-    boot: Boot,
+    val path: BootPath,
     val playable: Playable,
     startPlaying: Boolean
-): Player(boot) {
+): Player(path.boot) {
+    val boot = path.boot
 
     val tag = Mp3File()
     val playing = Var(false)
     val totalDuration = Var(0)
     val currentPosition = Var(0)
 
-    override val view = ui()
+    override val rawView = ui()
 
     val playState = switch<PlayState>(Paused(this))
 
@@ -57,7 +64,7 @@ class Visible(
     }
 
     fun readCounterNow() {
-        player.bind.currentPosition.now = audio.currentTime.toInt()
+        currentPosition.now = audio.currentTime.toInt()
     }
 
     val userSong = Var<UserSongState?>(UserSongState.New)
@@ -70,78 +77,79 @@ class Visible(
         saveState(UserSongState.DontLike)
     }
 
-    fun nextProc(kills: KillSet, startPlaying: Boolean): ProcOrElse {
-        suspend fun next() {
-            player.next(startPlaying)
-        }
-        return with (playable) {
-            procOrElses().apply {
-                add.process(DontLike) {
-                    boot.userSongs.now?.let { us ->
-                        us.dontLike(playable.id)
-                        next()
-                    }
-                }
-                add.process(Forward) {
-                    val newPos = audio.currentTime + SeekSeconds
-
-                    if (newPos >= audio.duration) {
-                        next()
-                    } else {
-                        audio.currentTime = newPos
-                        readCounterNow()
-                    }
-
-                }
-                add.process(End) {
-                    next()
-                }
-            }.proc
-        }
-
-    }
+//    fun nextProc(kills: KillSet, startPlaying: Boolean): ProcOrElse {
+//        suspend fun next() {
+//            player.next(startPlaying)
+//        }
+//        return with (playable) {
+//            procOrElses().apply {
+//                add.process(DontLike) {
+//                    boot.userSongs.now?.let { us ->
+//                        us.dontLike(playable.id)
+//                        next()
+//                    }
+//                }
+//                add.process(Forward) {
+//                    val newPos = audio.currentTime + SeekSeconds
+//
+//                    if (newPos >= audio.duration) {
+//                        next()
+//                    } else {
+//                        audio.currentTime = newPos
+//                        readCounterNow()
+//                    }
+//
+//                }
+//                add.process(End) {
+//                    next()
+//                }
+//            }.proc
+//        }
+//
+//    }
 
 
     init {
-        GlobalScope.launch {
-            kills += boot.songInfoSource(playable.id, playable.blob).forEach {
-                player.bind.tag.now = it
-            }
-        }.addedTo(kills)
-
-        if (startPlaying) {
-            Playing(this)
-        } else {
-            Paused(this)
-        }
-
-        with (player) {
-            Rx {
-                boot.userSongs()?.let { us ->
-                    us.get(playable.id)()
-                } ?: UserSongState.New
-            }.addedTo(kills).forEach {
-                userSong.now = it
-            }
-
-            bind.playable.now = playable
-
-            with (playable) {
-                procs.process(Like) {
-                }
-
-                procs.process(Beginning) {
-                }
-
-                procs.process(Backward) {
-                }
-
-
-            }
-        }
+//        GlobalScope.launch {
+//            kills += boot.songInfoSource(playable.id, playable.blob).forEach {
+//                player.bind.tag.now = it
+//            }
+//        }.addedTo(kills)
+//
+//        if (startPlaying) {
+//            Playing(this)
+//        } else {
+//            Paused(this)
+//        }
+//
+//        with (player) {
+//            Rx {
+//                boot.userSongs()?.let { us ->
+//                    us.get(playable.id)()
+//                } ?: UserSongState.New
+//            }.addedTo(kills).forEach {
+//                userSong.now = it
+//            }
+//
+//            bind.playable.now = playable
+//
+//            with (playable) {
+//                procs.process(Like) {
+//                }
+//
+//                procs.process(Beginning) {
+//                }
+//
+//                procs.process(Backward) {
+//                }
+//
+//
+//            }
+//        }
 
 
     }
+
 
     fun plx(fn: suspend PlayState.() -> Unit) = playState.current.now.let { p -> p.exec { p.fn() } }
     fun playOrPause() = plx { playOrPause() }

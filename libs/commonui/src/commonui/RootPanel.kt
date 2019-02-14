@@ -7,6 +7,8 @@ import domx.div
 import domx.invoke
 import killable.Killable
 import killable.KillableSeq
+import killable.Killables
+import killable.NoKill
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Node
 import rx.Rx
@@ -71,10 +73,12 @@ class RootPanel(
 
 fun <T> Node.rxPanel(rxv: RxVal<T>, fn: (T) -> Node): () -> Unit {
     val map = mutableMapOf<T, Node>()
-    val node = Rx { rxv().let { v -> map.getOrPut(v) { fn(v) } } }
+    val ks = Killables()
+    val node = Rx(ks.killSet) { rxv().let { v -> map.getOrPut(v) { fn(v) } } }
     val root = RootPanel(this)
-    node.forEach { root.setRoot(it) }
-    return { node.kill() }
+    node.forEach(NoKill) { root.setRoot(it) }
+    return { ks.kill() }
+
 }
 
 

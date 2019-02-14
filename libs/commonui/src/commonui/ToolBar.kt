@@ -10,6 +10,7 @@ import fontawesome.chevronLeft
 import fontawesome.*
 import killable.Killable
 import killable.Killables
+import killable.NoKill
 import org.w3c.dom.*
 import rx.*
 import kotlin.browser.document
@@ -126,7 +127,7 @@ open class NodesFactory(
         ).also { latest = it }
     }
     fun <T: Node> T.vis(fn: () -> Boolean = { true }): NodeHolder<T> {
-        return vis(Rx { fn() }.also { killables += it })
+        return vis(Rx(killables.killSet) { fn() })
     }
     fun <T: Node> T.opt(first: () -> Unit = {}): NodeHolder<T> {
         val rxv = Var(false)
@@ -160,7 +161,7 @@ class NodeHolder<T: Node>(
         wrapped
     }
 
-    val visible = Rx { visibility()() }.also { killables += it }
+    val visible = Rx(killables.killSet) { visibility()() }
 
     operator fun invoke(fn: T.() -> Unit) = node.apply(fn)
 
@@ -189,7 +190,7 @@ class NodeHolder<T: Node>(
         }
 
     init {
-        visible.forEach { v ->
+        visible.forEach(NoKill) { v ->
             lastVisible = if (v) {
                 insert()
                 visibleInsertBefore
@@ -289,7 +290,7 @@ fun Node.faTab(faIcon: String, act: RxIface<Boolean>, fn: HTMLAnchorElement.() -
             cls {
                 navLink
                 px2
-                killables += rxClass(active, act)
+                rxClass(killables.killSet, active, act)
             }
             span {
                 cls {

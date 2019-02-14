@@ -13,6 +13,9 @@ import rx.rxClass
 
 typealias KillSet = AddRemove<Trigger>
 
+val Noop: Trigger = {}
+val NoKill : KillSet = { Noop }
+
 fun Job.addedTo(ks: KillSet): Job {
     val remove = ks.add { cancel() }
     invokeOnCompletion {

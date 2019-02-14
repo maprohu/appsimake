@@ -33,7 +33,7 @@ class Boot(
     val path: BodyPath,
     idb: IDBDatabase,
     localSongs: LocalSongs
-): ViewImpl<Node>(parent) {
+): ViewImpl<HTMLElement>(parent) {
 
 
     companion object {
@@ -46,7 +46,7 @@ class Boot(
 
                 Boot(this, BodyPath(body), idb, localSongs).also {
                     body.content.switchTo(
-                        ItemWithViewRx(
+                        ItemWithViewRx.hasView<JobScope, HTMLElement>(
                             this,
                             it
                         )
@@ -60,9 +60,11 @@ class Boot(
     val userState = Var<UserState>(UserState.Unknown)
 
     private val user = userState.toUser(kills)
+
     val userIcon = rx {
-        user()?.let { it.photoURL } ?: UnknownUserSrc
+        user()?.photoURL ?: UnknownUserSrc
     }
+
     class Slots {
         lateinit var top: Hole
         lateinit var main: Hole
@@ -72,27 +74,34 @@ class Boot(
     val slots = Slots()
     override val rawView = ui()
 
-    val initializeContentView: ContentView.() -> Unit = {
-        topbar.apply(slots.top.prepareOrNull)
-        content.apply(slots.main.prepare)
+    val contentHole = HoleT<ContentView>(
+        prepare = {
+            topbar.apply(slots.top.prepareOrNull)
+            content.apply(slots.main.prepareOrNull)
+        },
+        assign = {cv ->
+            slots.top %= cv?.topbar
+            slots.main %= cv?.content
+        }
+    )
+
+    val content = views<Content>().of(UserUnknown(this), contentHole).viewFromRx(userState) { u ->
+        when (u) {
+            UserState.NotLoggedIn -> NotLoggedIn(this)
+            is UserState.LoggedIn -> LoggedIn(this)
+            else -> UserUnknown(this)
+        }
+
     }
-
-
-
-
-
-    val content = switch<Content>(UserUnknown(this))
-    val player = switch<Player>(Hidden(this))
-
-
-    fun userUnknown() = content.switchTo { UserUnknown(this) }
+    val player = views<Player>().opt(slots.player)
 
     val userSongs = wrap<UserSongs?>(null)
+
 
     private val songInclude = songInclude(
         kills,
         localSongs,
-        rx { userSongs.current().value?.get }
+        rx { userSongs.current().item?.get }
     )
 
     val songSource = songSource(
@@ -110,22 +119,6 @@ class Boot(
     val signOut = Var({})
 
     init {
-        UserUnknown()
-        Player(this)
-
-//        procs += inbox.rx(kills, userState) { u ->
-//            when (u) {
-//                UserState.NotLoggedIn -> NotLoggedIn(this)
-//                is UserState.LoggedIn -> LoggedIn(this)
-//                else -> userUnknown()
-//            }
-//        }
-
-//        procs.envelope(sub.ShowToast) { fn ->
-//            bind.toasts(fn)
-//        }
-
-        userUnknown()
 
         GlobalScope.launch {
             val app = FB.app
@@ -142,11 +135,21 @@ class Boot(
             runUserState(kills).forEach { userState.now = it }
 
 
-            val latestUid = user.toLatestUid(kills, idb)
+            user.toLatestUid(kills, idb).apply {
+                rxv.forEach { uid ->
+                    exec {
+                        userSongs.switchToWrap {
+                            uid?.let { id ->
+                                userSongs(kills, id, db)
+                            }
+                        }
+                    }
+                }
 
-            signOut.now =  {
-                latestUid.clear()
-                app.auth().signOut()
+                signOut.now =  {
+                    clear()
+                    app.auth().signOut()
+                }
             }
 
             val infoSeq = kills.seq()
@@ -160,28 +163,10 @@ class Boot(
                 }
             }
 
-            latestUid.rxv.forEach { uid ->
-                userSongs.now = uid?.let { id ->
-                    userSongs(ks, id, db)
-                }
-
-            }
-            mapAsync(kills) { uid, ks ->
-            }.forEach {
-            }
         }
     }
 
 
 }
 
-
-open class LoginBase(
-    boot: Boot
-): BootWrap(boot) {
-    protected val kills: KillSet = boot.mainSeq.killSet()
-    protected val main = boot.mainPanel
-    protected val top = boot.topPanel
-    protected val proc = boot.mainProc
-}
 

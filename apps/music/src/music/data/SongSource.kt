@@ -12,8 +12,7 @@ import rx.*
 typealias SongSource = RxIface<(suspend () -> Playable?)?>
 typealias SongIncludeRx = (String) -> RxIface<Boolean>
 
-fun songSource(
-    ks: KillSet,
+fun HasKillSet.songSource(
     includeSong: RxIface<SongIncludeRx>,
     localSongsDB: LocalSongs
 ): SongSource {
@@ -22,28 +21,28 @@ fun songSource(
 
     val included = Var(RxMutableSet<String>())
 
-    val incSeq = ks.seq()
-    Rx {
+    val incSeq = kills.seq()
+    rx {
         val inc = includeSong()
         val incset = RxMutableSet<String>()
         val iks = Killables()
         localSongs.process(iks.killSet) { id, idks ->
-            inc(id).forEach { i ->
+            inc(id).forEach(idks) { i ->
                 if (i) {
                     incset += id
                 } else {
                     incset -= id
                 }
-            }.addedTo(idks)
+            }
             idks += { incset -= id }
         }
         incset to iks.toTrigger()
-    }.addedTo(ks).forEach { (inc, kill) ->
+    }.forEach { (inc, kill) ->
         included.now = inc
         incSeq %= kill
     }
 
-    localSongsDB.set.process(ks) { id, lks ->
+    localSongsDB.set.process(kills) { id, lks ->
         songRing.insertItem(id)
         lks += { songRing.remove(id) }
     }
@@ -69,13 +68,13 @@ fun songSource(
         next()
     }
 
-    return Rx {
+    return rx {
         if (included().isEmptyRx()) {
             null
         } else {
             nextFn
         }
-    }.addedTo(ks)
+    }
 
 }
 
@@ -84,9 +83,9 @@ private fun getInclude(ks: KillSet, states: GetUserSongState, state: UserSongSta
 
     return { id ->
         map.getOrPut(id) {
-            Rx {
+            Rx(ks) {
                 states(id)() == state
-            }.addedTo(ks)
+            }
         }
     }
 }
@@ -98,7 +97,7 @@ fun songInclude(
 ): RxIface<SongIncludeRx> {
 
     val kseq = ks.seq()
-    return Rx {
+    return Rx(ks) {
         val uks = kseq.killSet()
         val songState = userSongs()
 
@@ -119,6 +118,6 @@ fun songInclude(
             }
 
         }
-    }.addedTo(ks)
+    }
 }
 

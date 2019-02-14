@@ -3,8 +3,10 @@ package common
 import commonshr.SetAdded
 import commonshr.SetMove
 import commonshr.SetRemoved
+import killable.KillSet
 import killable.Killable
 import killable.Killables
+import killable.NoKill
 import org.w3c.dom.*
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.EventTarget
@@ -86,8 +88,8 @@ fun Node.replaceWith(node: Node) {
 
 
 
-fun HTMLAnchorElement.attachEnabler(enabled: Rx<Boolean>) : Killable {
-    return enabled.forEach { en ->
+fun HTMLAnchorElement.attachEnabler(ks: KillSet, enabled: Rx<Boolean>) {
+    enabled.forEach(ks) { en ->
         if (en) {
             this.removeClass("disabled")
             this.style.cursor = "pointer"
@@ -179,7 +181,7 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
     val sizeRx : RxVal<Int>
         get() = sizeVar
 
-    override val isEmptyRx = Rx { sizeVar() == 0 }
+    override val isEmptyRx = Rx(NoKill) { sizeVar() == 0 }
 
     override fun addListener(listener: ListenableList.Listener<T>): Killable {
         listeners += listener
@@ -312,7 +314,7 @@ data class SortedListenableListConfig<T, C: Comparable<C>>(
                 }
                 result.add(sortedIndex, item)
 
-                ks += krx.forEachLater { k ->
+                krx.forEachLater(ks.killSet) { k ->
                     val from = sortedIndex
                     sorted.removeAt(sortedIndex)
                     val to = find(k)
@@ -492,7 +494,7 @@ data class FilteredListenableListConfig<T, K, I>(
                 }
                 recalcResultsBefore()
 
-                ks += key.forEach { k ->
+                key.forEach(ks.killSet) { k ->
                     updateKey(k)
                 }
             }
@@ -584,7 +586,7 @@ data class FilteredListenableListConfig<T, K, I>(
 
         val holders = mutableListOf<Holder>()
 
-        killables += input.forEachLater { i ->
+        input.forEachLater(killables.killSet) { i ->
             holders.forEach { holder ->
                 holder.updateInput(i)
             }

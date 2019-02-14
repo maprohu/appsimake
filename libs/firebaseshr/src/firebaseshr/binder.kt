@@ -6,6 +6,7 @@ import commonlib.DocWrap
 import commonshr.SetDiff
 import firebaseshr.firestore.Timestamp
 import killable.Killables
+import killable.NoKill
 import kotlinx.coroutines.Deferred
 import rx.*
 
@@ -203,14 +204,14 @@ abstract class ScalarPropBase<in O, T>(
 
     abstract fun calculateDirty(): Boolean
 
-    override val dirty: RxVal<Boolean> = if (calculated) Rx { false } else Rx {
+    override val dirty: RxVal<Boolean> = if (calculated) Rx(NoKill) { false } else Rx(NoKill) {
         if (ignoreDirty) false else {
             calculateDirty()
         }
     }
 
     override val validationErrors by lazy {
-        Rx { ops.validate(current()) }
+        Rx(NoKill) { ops.validate(current()) }
     }
 
     open fun calculateIsValid(): Boolean {
@@ -218,7 +219,7 @@ abstract class ScalarPropBase<in O, T>(
     }
 
     override val isValid by lazy {
-        Rx {
+        Rx(NoKill) {
             calculateIsValid()
         }
     }
@@ -234,7 +235,7 @@ abstract class ScalarPropBase<in O, T>(
 
     val beforeWrite: () -> Unit =
         ops.calculate?.let { c ->
-            Rx { c() }.forEach { calced.now = it };
+            Rx(NoKill) { c() }.forEach(NoKill) { calced.now = it };
 
             {
                 if (calculationActive) {
@@ -412,15 +413,15 @@ open class Props<in O, out N, out P>(initial: N) : PropTasks<O> {
     val id = Var<IdState<@kotlin.UnsafeVariance N, @kotlin.UnsafeVariance P>>(IdState.New(initial))
     internal var list : List<Prop<@UnsafeVariance O>> = listOf()
 
-    val isPersisted by lazy { Rx { id() is IdState.Persisted } }
-    val isDeleted by lazy { Rx { id().deleted } }
+    val isPersisted by lazy { Rx(NoKill) { id() is IdState.Persisted } }
+    val isDeleted by lazy { Rx(NoKill) { id().deleted } }
     val isValid: RxVal<Boolean> by lazy {
-        Rx { list.all { it.isValid() } }
+        Rx(NoKill) { list.all { it.isValid() } }
     }
 
     val onDeleted by lazy {
         val l = Listeners()
-        isDeleted.forEach { if (it) l.fire() }
+        isDeleted.forEach(NoKill) { if (it) l.fire() }
         l
     }
 
@@ -473,7 +474,7 @@ open class Props<in O, out N, out P>(initial: N) : PropTasks<O> {
     }
 
     override val dirty: RxVal<Boolean> by lazy {
-        Rx {
+        Rx(NoKill) {
             list.any {
                 it.dirty()
             }
