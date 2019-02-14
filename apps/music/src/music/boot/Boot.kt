@@ -11,13 +11,11 @@ import kotlinx.coroutines.*
 import music.*
 import music.common.LocalSongs
 import music.common.toLatestUid
-import music.content.Content
-import music.content.ContentView
 import music.content.UserUnknown
 import music.data.*
 import music.loggedin.LoggedIn
 import music.notloggedin.NotLoggedIn
-import music.player.Player
+import music.player.Visible
 import org.w3c.dom.HTMLElement
 import rx.*
 
@@ -71,7 +69,7 @@ class Boot(
     val slots = Slots()
     override val rawView = ui()
 
-    val contentHole = HoleT<ContentView>(
+    val contentHole = HoleT<TopAndContent>(
         prepare = {
             topbar.apply(slots.top.prepareOrNull)
             content.apply(slots.main.prepareOrNull)
@@ -82,15 +80,14 @@ class Boot(
         }
     )
 
-    val content = views<Content>().of(UserUnknown(self), contentHole).viewFromRx(userState) { u ->
+    val content = viewsAny(UserUnknown(this), contentHole).viewFromRx(userState) { u ->
         when (u) {
-            UserState.NotLoggedIn -> NotLoggedIn(self)
-            is UserState.LoggedIn -> LoggedIn(self)
-            else -> UserUnknown(self)
+            is UserState.NotLoggedIn -> fwd { NotLoggedIn(this, u.app, self) }
+            is UserState.LoggedIn -> fwd { LoggedIn(this, self) }
+            else -> UserUnknown(this)
         }
 
     }
-    val player = views<Player>().opt(slots.player)
 
     val userSongs = wrap<UserSongs?>(null)
 
@@ -106,11 +103,12 @@ class Boot(
         localSongs
     )
 
-    private var currentSongInfoSource: SongInfoSource = localSongInfoSource()
-
-    val songInfoSource : SongInfoSource = { id, blob ->
-        currentSongInfoSource(id, blob)
+    val player = slots.player.viewsAny().viewFromRx(songSource) { s ->
+        s?.invoke()?.let { Visible(self, it, false) }
     }
+
+
+    val songInfoSource = wrap(localSongInfoSource())
 
     val signOut = Var<Action> {
         userState.now = UserState.Unknown
@@ -130,7 +128,7 @@ class Boot(
 
             db.disableNetwork().await()
 
-            runUserState(kills).forEach { userState.now = it }
+            runUserState().forEach { userState.now = it }
 
 
             user.toLatestUid(kills, idb).apply {
@@ -151,15 +149,13 @@ class Boot(
                 }
             }
 
-            val infoSeq = kills.seq()
-            user.forEach {
-                currentSongInfoSource = if (it == null) {
-                    infoSeq.clear()
+            songInfoSource.wrapFromRx(user) {
+                if (it == null) {
                     localSongInfoSource()
                 } else {
-                    val iks = infoSeq.killSet()
-                    cloudSongInfoSource(iks, db)
+                    cloudSongInfoSource(db)
                 }
+
             }
 
         }

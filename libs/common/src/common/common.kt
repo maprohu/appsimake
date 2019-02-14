@@ -86,11 +86,11 @@ fun Node.replaceWith(node: Node) {
 fun HTMLAnchorElement.attachEnabler(ks: KillSet, enabled: Rx<Boolean>) {
     enabled.forEach(ks) { en ->
         if (en) {
-            this.removeClass("disabled")
-            this.style.cursor = "pointer"
+            removeClass("disabled")
+            style.cursor = "pointer"
         } else {
-            this.addClass("disabled")
-            this.style.cursor = "default"
+            addClass("disabled")
+            style.cursor = "default"
         }
     }
 }

@@ -91,9 +91,13 @@ interface RxIface<out T> {
 
     operator fun invoke(): T
 
-    fun forEach(ks: KillSet, fn: (T) -> Unit) {
-        fn(now)
-        return forEachLater(ks, fn)
+    fun forEach(ks: KillSet, fn: HasKillSet.(T) -> Unit) {
+        val kseq = ks.seq()
+
+        kseq.killSet().wrap.fn(now)
+        return forEachLater(ks) {
+            kseq.killSet().wrap.fn(it)
+        }
     }
 
     fun forEachLater(ks: KillSet, fn: (T) -> Unit)

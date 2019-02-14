@@ -407,7 +407,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     var tmp$, tmp$_0;
     var tmp$_1;
     if ((tmp$ = this.ops.calculate) != null) {
-      Rx_init(killable.NoKill, ScalarPropBase$beforeWrite$lambda$lambda(tmp$)).forEach_sysl1e$(killable.NoKill, ScalarPropBase$beforeWrite$lambda$lambda_0(this));
+      Rx_init(killable.NoKill, ScalarPropBase$beforeWrite$lambda$lambda(tmp$)).forEach_yk5nc8$(killable.NoKill, ScalarPropBase$beforeWrite$lambda$lambda_0(this));
       tmp$_1 = ScalarPropBase$beforeWrite$lambda$lambda_1(this);
     }
      else
@@ -716,7 +716,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     };
   }
   function ScalarPropBase$beforeWrite$lambda$lambda_0(this$ScalarPropBase) {
-    return function (it) {
+    return function ($receiver, it) {
       this$ScalarPropBase.calced.now = it;
       return Unit;
     };
@@ -1185,7 +1185,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     };
   }
   function Props$onDeleted$lambda$lambda(closure$l) {
-    return function (it) {
+    return function ($receiver, it) {
       if (it)
         closure$l.fire();
       return Unit;
@@ -1194,7 +1194,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   function Props$onDeleted$lambda(this$Props) {
     return function () {
       var l = new Listeners();
-      this$Props.isDeleted.forEach_sysl1e$(killable.NoKill, Props$onDeleted$lambda$lambda(l));
+      this$Props.isDeleted.forEach_yk5nc8$(killable.NoKill, Props$onDeleted$lambda$lambda(l));
       return l;
     };
   }

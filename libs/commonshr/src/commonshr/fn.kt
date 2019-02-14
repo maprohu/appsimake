@@ -19,6 +19,8 @@ inline val <T> T.funs get() = this.unsafeCast<Funs<T>>()
 inline val <T> Funs<T>.value get() = this.unsafeCast<T>()
 inline val <T> Funs<T>.constant get() = { value }
 
+inline val <I, O> ((I) -> O).ignoreThis: Any?.(I) -> O get() = { i -> this@ignoreThis(i) }
+
 fun Trigger.once(): Trigger {
     var triggered = false
 

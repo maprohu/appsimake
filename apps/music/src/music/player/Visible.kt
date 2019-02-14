@@ -1,5 +1,6 @@
 package music.player
 
+import common.None
 import common.listen
 import commonshr.*
 import commonui.widget.*
@@ -17,10 +18,12 @@ import music.boot.BootPath
 import musiclib.Mp3File
 import musiclib.UserSong
 import musiclib.UserSongState
+import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import org.w3c.dom.url.URL
 import rx.Rx
 import rx.Var
+import rx.mapAsync
 import rx.toChannel
 import kotlin.browser.document
 import kotlin.math.max
@@ -37,15 +40,19 @@ class Visible(
     val path: BootPath,
     val playable: Playable,
     startPlaying: Boolean
-): Player(path.boot) {
+): UIBase<HTMLElement>(path.boot) {
     val boot = path.boot
 
-    val tag = Mp3File()
+    val tag = Var(Mp3File()).apply {
+        path.boot.songInfoSource.current.mapAsync(Var(None)) { t -> t.item.invoke(playable) }.forEach { t ->
+            rx { t().getOrElse { Mp3File() } }.forEach { now = it }
+        }
+    }
+
     val playing = Var(false)
     val totalDuration = Var(0)
     val currentPosition = Var(0)
 
-    override val rawView = ui()
 
     val playState = switch<PlayState>(Paused(this))
 
@@ -75,6 +82,8 @@ class Visible(
     fun UserSong.dontLike() {
         saveState(UserSongState.DontLike)
     }
+
+    override val rawView = ui()
 
 //    fun nextProc(kills: KillSet, startPlaying: Boolean): ProcOrElse {
 //        suspend fun next() {

@@ -20,7 +20,7 @@ import org.w3c.dom.url.URL
 import org.w3c.files.Blob
 import org.w3c.files.File
 
-class Playable(
+data class Playable(
     val id: String,
     val blob: Blob
 ) {

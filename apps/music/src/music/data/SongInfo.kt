@@ -11,8 +11,10 @@ import domx.audio
 import domx.invoke
 import firebase.firestore.Firestore
 import firebaseshr.saveIfDirty
+import killable.HasKillSet
 import killable.KillSet
 import kotlinx.coroutines.CompletableDeferred
+import music.Playable
 import music.extractMp3Tag
 import music.readAsArrayBuffer
 import musiclib.Mp3File
@@ -25,11 +27,11 @@ import rx.RxIface
 import rx.Var
 import kotlin.browser.document
 
-typealias SongInfoSource = suspend (String, Blob) -> RxIface<Optional<Mp3File>>
+typealias SongInfoSource = suspend (Playable) -> RxIface<Optional<Mp3File>>
 
 fun localSongInfoSource(): SongInfoSource {
     val map = mutableMapOf<String, Mp3File>()
-    return { id, blob ->
+    return { (id, blob) ->
         map.getOrPut(id) {
             Mp3File().apply {
                 initFrom(blob)
@@ -39,12 +41,11 @@ fun localSongInfoSource(): SongInfoSource {
     }
 }
 
-fun cloudSongInfoSource(
-    ks: KillSet,
+fun HasKillSet.cloudSongInfoSource(
     db: Firestore = FB.db
 ): SongInfoSource {
-    val cache = musicLib.app.songs.lazy(ks, db) { Mp3File() }
-    return { id, blob ->
+    val cache = musicLib.app.songs.lazy(kills, db) { Mp3File() }
+    return { (id, blob) ->
         val tag = cache(id)
 
         if (tag.now.isEmpty()) {

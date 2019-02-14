@@ -2,52 +2,47 @@ package commonfb.login
 
 import commonshr.*
 import commonui.widget.*
+import firebase.app.App
 import firebase.auth.GoogleAuthProvider
 import killable.KillSet
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
 
 
 class Login(
-    kills: KillSet,
-    inbox: Inbox,
-    proc: AssignProcOrElse,
-    top: Factory,
-    main: Factory,
-    back: Trigger,
-    loggingIn: Trigger,
-    loginFailed: suspend (dynamic) -> Unit
-) {
-    val bind = Bind(inbox)
-    private val ui = UI(kills, top, main, bind)
-    val procs = proc.assignProcAdd()
+    parent: JobScope,
+    val app: App,
+    val back: Action,
+    val loggingIn: Action,
+    val loginFailed: suspend (dynamic) -> Unit
+): UIBase<TopAndContent>(parent) {
+    override val rawView = ui()
 
-    init {
-        ui.visible()
+    suspend fun tryLogin(fn: suspend () -> Unit) {
+        loggingIn()
+        try {
+            fn()
+        } catch (e: dynamic) {
+            loginFailed(e)
+        }
+    }
 
-        with(bind) {
-            suspend fun tryLogin(fn: suspend () -> Unit) {
-                loggingIn()
-                try {
-                    fn()
-                } catch (e: dynamic) {
-                    loginFailed(e)
-                }
-            }
-            procs.process(Google) {
-                val provider = GoogleAuthProvider()
-                tryLogin {
-                    firebase.auth().signInWithPopup(provider).await()
-                }
-            }
-            procs.process(Guest) {
-                loggingIn()
-                tryLogin {
-                    firebase.auth().signInAnonymously().await()
-                }
-            }
-            procs.process(Back) {
-                back()
+    suspend fun google() {
+        GlobalScope.launch {
+            val provider = GoogleAuthProvider()
+            tryLogin {
+                app.auth().signInWithPopup(provider).await()
             }
         }
     }
+
+    suspend fun guest() {
+        GlobalScope.launch {
+            tryLogin {
+                app.auth().signInAnonymously().await()
+            }
+        }
+    }
+
 }

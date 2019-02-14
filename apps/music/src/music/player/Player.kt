@@ -9,7 +9,7 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 
 
-abstract class Player(boot: Boot): ViewImpl<HTMLElement>(boot)
+//abstract class Player(boot: Boot): ViewImpl<HTMLElement>(boot)
 
 //class Player(
 //    boot: Boot

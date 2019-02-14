@@ -50,8 +50,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var PropertyMetadata = Kotlin.PropertyMetadata;
   var setOf_0 = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var lazyOf = Kotlin.kotlin.lazyOf_mh5how$;
-  var withContext = $module$kotlinx_coroutines_core.kotlinx.coroutines.withContext_i5cbzn$;
   var ClosedSendChannelException = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.ClosedSendChannelException;
+  var withContext = $module$kotlinx_coroutines_core.kotlinx.coroutines.withContext_i5cbzn$;
   var throwUPAE = Kotlin.throwUPAE;
   var L0 = Kotlin.Long.ZERO;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
@@ -494,7 +494,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }
   function filtered$lambda$lambda_0(closure$v, closure$add, closure$remove) {
-    return function (fv) {
+    return function ($receiver, fv) {
       if (fv)
         closure$add(closure$v);
       else
@@ -512,7 +512,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
         var $receiver = closure$kills;
         var value = vks.kill;
         $receiver.put_xwzc9p$(v, value);
-        rxv.forEach_sysl1e$(vks.killSet, filtered$lambda$lambda_0(v, closure$add, closure$remove));
+        rxv.forEach_yk5nc8$(vks.killSet, filtered$lambda$lambda_0(v, closure$add, closure$remove));
       }
        else if (Kotlin.isType(m, SetRemoved)) {
         (tmp$ = closure$kills.remove_11rb$(v)) != null ? tmp$() : null;
@@ -1144,7 +1144,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }
   function filtered$process$lambda_0(closure$v, closure$add, closure$remove) {
-    return function (fv) {
+    return function ($receiver, fv) {
       if (fv)
         closure$add(closure$v);
       else
@@ -1162,7 +1162,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
         var $receiver = closure$kills;
         var value = vks.kill;
         $receiver.put_xwzc9p$(v, value);
-        rxv.forEach_sysl1e$(vks.killSet, filtered$process$lambda_0(v, closure$add, closure$remove));
+        rxv.forEach_yk5nc8$(vks.killSet, filtered$process$lambda_0(v, closure$add, closure$remove));
       }
        else if (Kotlin.isType(m, SetRemoved)) {
         (tmp$ = closure$kills.remove_11rb$(v)) != null ? tmp$() : null;
@@ -2329,6 +2329,106 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'HasExec',
     interfaces: []
   };
+  function Coroutine$discardExecutor$lambda(closure$channel_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$channel = closure$channel_0;
+    this.local$tmp$ = void 0;
+  }
+  Coroutine$discardExecutor$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$discardExecutor$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$discardExecutor$lambda.prototype.constructor = Coroutine$discardExecutor$lambda;
+  Coroutine$discardExecutor$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$tmp$ = this.local$closure$channel.iterator();
+            this.state_0 = 2;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.state_0 = 3;
+            this.result_0 = this.local$tmp$.hasNext(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 3:
+            if (!this.result_0) {
+              this.state_0 = 7;
+              continue;
+            }
+             else {
+              this.state_0 = 4;
+              continue;
+            }
+
+          case 4:
+            this.state_0 = 5;
+            this.result_0 = this.local$tmp$.next(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 5:
+            var action = this.result_0;
+            this.state_0 = 6;
+            this.result_0 = action(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 6:
+            this.state_0 = 2;
+            continue;
+          case 7:
+            return Unit;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function discardExecutor$lambda(closure$channel_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$discardExecutor$lambda(closure$channel_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function discardExecutor$lambda_0(closure$channel) {
+    return function (action) {
+      try {
+        plusAssign(closure$channel, action);
+      }
+       catch (e) {
+        if (!Kotlin.isType(e, ClosedSendChannelException))
+          throw e;
+      }
+      return Unit;
+    };
+  }
+  function discardExecutor($receiver) {
+    var channel = Channel(2147483647);
+    launch($receiver, void 0, void 0, discardExecutor$lambda(channel));
+    return discardExecutor$lambda_0(channel);
+  }
   function Coroutine$executor$lambda(closure$channel_0, $receiver_0, controller, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
     this.$controller = controller;
@@ -2699,6 +2799,16 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return get_constant$lambda($receiver);
     };
   }));
+  var get_ignoreThis = defineInlineFunction('appsimake-commonshr.commonshr.get_ignoreThis_dwii1c$', wrapFunction(function () {
+    function get_ignoreThis$lambda(this$ignoreThis) {
+      return function ($receiver, i) {
+        return this$ignoreThis(i);
+      };
+    }
+    return function ($receiver) {
+      return get_ignoreThis$lambda($receiver);
+    };
+  }));
   function once$lambda(closure$triggered, this$once) {
     return function () {
       if (!closure$triggered.v) {
@@ -3037,8 +3147,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   HasKillSet.prototype.rx_klfg04$ = function (fn) {
     return Rx_init_0(this.kills, fn);
   };
-  HasKillSet.prototype.forEach_8ipnip$ = function ($receiver, fn) {
-    $receiver.forEach_sysl1e$(this.kills, fn);
+  HasKillSet.prototype.forEach_5mel8p$ = function ($receiver, fn) {
+    $receiver.forEach_yk5nc8$(this.kills, fn);
   };
   HasKillSet.prototype.rxClass_z8puye$ = function ($receiver, fn) {
     rxClass($receiver, this.kills, fn);
@@ -3048,6 +3158,22 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'HasKillSet',
     interfaces: []
   };
+  function WrapKillSet(kills) {
+    this.kills_poin75$_0 = kills;
+  }
+  Object.defineProperty(WrapKillSet.prototype, 'kills', {
+    get: function () {
+      return this.kills_poin75$_0;
+    }
+  });
+  WrapKillSet.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'WrapKillSet',
+    interfaces: [HasKillSet]
+  };
+  function get_wrap($receiver) {
+    return new WrapKillSet($receiver);
+  }
   function KillableSeq(current, onKill) {
     if (current === void 0)
       current = Noop;
@@ -3213,25 +3339,32 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function RxIface() {
   }
-  RxIface.prototype.forEach_sysl1e$ = function (ks, fn) {
-    fn(this.now);
-    return this.forEachLater_sysl1e$(ks, fn);
+  function RxIface$forEach$lambda(closure$kseq, closure$fn) {
+    return function (it) {
+      closure$fn(get_wrap(closure$kseq.killSet()), it);
+      return Unit;
+    };
+  }
+  RxIface.prototype.forEach_yk5nc8$ = function (ks, fn) {
+    var kseq = seq(ks);
+    fn(get_wrap(kseq.killSet()), this.now);
+    return this.forEachLater_sysl1e$(ks, RxIface$forEach$lambda(kseq, fn));
   };
   function RxIface$fold$lambda(closure$fn, closure$z) {
-    return function (it) {
+    return function ($receiver, it) {
       closure$z.v = closure$fn(closure$z.v, it);
       return Unit;
     };
   }
   RxIface.prototype.fold_h2yxzx$ = function (ks, z0, fn) {
     var z = {v: z0};
-    return this.forEach_sysl1e$(ks, RxIface$fold$lambda(fn, z));
+    return this.forEach_yk5nc8$(ks, RxIface$fold$lambda(fn, z));
   };
   function RxIface$foldKillsTrigger$lambda() {
     return Unit;
   }
   function RxIface$foldKillsTrigger$lambda_0(closure$z, closure$fn) {
-    return function (it) {
+    return function ($receiver, it) {
       closure$z.v();
       closure$z.v = closure$fn(it);
       return Unit;
@@ -3245,11 +3378,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   RxIface.prototype.foldKillsTrigger_ooixq2$ = function (ks, fn) {
     var z = {v: RxIface$foldKillsTrigger$lambda};
-    this.forEach_sysl1e$(ks, RxIface$foldKillsTrigger$lambda_0(z, fn));
+    this.forEach_yk5nc8$(ks, RxIface$foldKillsTrigger$lambda_0(z, fn));
     plusAssign_0(ks, RxIface$foldKillsTrigger$lambda_1(z));
   };
   function RxIface$foldKills$lambda(closure$z, closure$fn) {
-    return function (it) {
+    return function ($receiver, it) {
       closure$z.v();
       closure$z.v = closure$fn(it);
       return Unit;
@@ -3263,11 +3396,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   RxIface.prototype.foldKills_ooixq2$ = function (ks, fn) {
     var z = {v: Noop};
-    this.forEach_sysl1e$(ks, RxIface$foldKills$lambda(z, fn));
+    this.forEach_yk5nc8$(ks, RxIface$foldKills$lambda(z, fn));
     plusAssign_0(ks, RxIface$foldKills$lambda_0(z));
   };
   function RxIface$foldKills$lambda_1(closure$fn, closure$z) {
-    return function (it) {
+    return function ($receiver, it) {
       closure$z.v = closure$fn(closure$z.v, it);
       return Unit;
     };
@@ -3280,7 +3413,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   RxIface.prototype.foldKills_h4yiec$ = function (ks, z0, fn) {
     var z = {v: z0};
-    this.forEach_sysl1e$(ks, RxIface$foldKills$lambda_1(fn, z));
+    this.forEach_yk5nc8$(ks, RxIface$foldKills$lambda_1(fn, z));
     plusAssign_0(ks, RxIface$foldKills$lambda_2(z));
   };
   function RxIface$foldLater$lambda(closure$fn, closure$z) {
@@ -3328,13 +3461,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     interfaces: []
   };
   function feedTo$lambda_1(closure$target) {
-    return function (it) {
+    return function ($receiver, it) {
       closure$target.now = it;
       return Unit;
     };
   }
   function feedTo_1($receiver, ks, target) {
-    $receiver.forEach_sysl1e$(ks, feedTo$lambda_1(target));
+    $receiver.forEach_yk5nc8$(ks, feedTo$lambda_1(target));
   }
   function feedTo$lambda$lambda(closure$new, closure$old) {
     return function (it) {
@@ -3676,7 +3809,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     $receiver.onmouseleave = rxHover$lambda_0(rx);
   }
   function rxClass$lambda_1(closure$style, this$rxClass) {
-    return function (it) {
+    return function ($receiver, it) {
       if (it)
         addClass(this$rxClass, [closure$style]);
       else
@@ -3685,7 +3818,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }
   function rxClass_1($receiver, ks, style, fn) {
-    fn.forEach_sysl1e$(ks, rxClass$lambda_1(style, $receiver));
+    fn.forEach_yk5nc8$(ks, rxClass$lambda_1(style, $receiver));
   }
   function rxClass$lambda_2(closure$fn) {
     return function () {
@@ -3744,7 +3877,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }
   function toChannel$lambda_0(closure$ch) {
-    return function (t) {
+    return function ($receiver, t) {
       closure$ch.offer_11rb$(t);
       return Unit;
     };
@@ -3752,7 +3885,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function toChannel($receiver, ks) {
     var ch = Channel(2147483647);
     plusAssign_0(ks, toChannel$lambda(ch));
-    $receiver.forEach_sysl1e$(ks, toChannel$lambda_0(ch));
+    $receiver.forEach_yk5nc8$(ks, toChannel$lambda_0(ch));
     return ch;
   }
   function toChannelLater$lambda(closure$ch) {
@@ -4536,6 +4669,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.toMap_wmk844$ = toMap;
   package$commonshr.plusAssign_rmur43$ = plusAssign;
   package$commonshr.HasExec = HasExec;
+  package$commonshr.discardExecutor_e9pf1l$ = discardExecutor;
   package$commonshr.executor_e9pf1l$ = executor;
   package$commonshr.Counted = Counted;
   package$commonshr.reportd_za3rmp$ = reportd;
@@ -4546,6 +4680,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.Funs = Funs;
   package$commonshr.get_funs_vvk9$ = get_funs;
   package$commonshr.get_constant_8dahcb$ = get_constant;
+  package$commonshr.get_ignoreThis_dwii1c$ = get_ignoreThis;
   package$commonshr.once_yo2cq0$ = once;
   package$commonshr.first_4s9a7f$ = first;
   package$commonshr.with_qs7ci7$ = with_0;
@@ -4570,6 +4705,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$killable.addedTo_wvpfik$ = addedTo_0;
   package$killable.Killables = Killables;
   package$killable.HasKillSet = HasKillSet;
+  package$killable.WrapKillSet = WrapKillSet;
+  package$killable.get_wrap_yzxo1x$ = get_wrap;
   package$killable.KillableSeq_init_o14v8n$ = KillableSeq_init;
   package$killable.KillableSeq = KillableSeq;
   var package$rx = _.rx || (_.rx = {});
@@ -4627,7 +4764,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   MappedEmitter.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
   toEmitter$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
   toMoves$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
-  RxVal.prototype.forEach_sysl1e$ = RxIface.prototype.forEach_sysl1e$;
+  WrapKillSet.prototype.rx_klfg04$ = HasKillSet.prototype.rx_klfg04$;
+  WrapKillSet.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;
+  WrapKillSet.prototype.rxClass_z8puye$ = HasKillSet.prototype.rxClass_z8puye$;
+  RxVal.prototype.forEach_yk5nc8$ = RxIface.prototype.forEach_yk5nc8$;
   RxVal.prototype.fold_h2yxzx$ = RxIface.prototype.fold_h2yxzx$;
   RxVal.prototype.foldKillsTrigger_ooixq2$ = RxIface.prototype.foldKillsTrigger_ooixq2$;
   RxVal.prototype.foldKills_ooixq2$ = RxIface.prototype.foldKills_ooixq2$;

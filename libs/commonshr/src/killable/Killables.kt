@@ -77,7 +77,12 @@ interface HasKillSet {
     val kills: KillSet
 
     fun <T> rx(fn: () -> T) = Rx(kills, fn)
-    fun <T> RxIface<T>.forEach(fn: (T) -> Unit) = forEach(kills, fn)
+    fun <T> RxIface<T>.forEach(fn: HasKillSet.(T) -> Unit) = forEach(kills, fn)
     fun Element.rxClass(fn: () -> String) = rxClass(kills, fn)
 
 }
+
+class WrapKillSet(
+    override val kills: KillSet
+): HasKillSet
+val KillSet.wrap get() = WrapKillSet(this)

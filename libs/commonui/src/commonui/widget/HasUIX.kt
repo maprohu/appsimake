@@ -15,5 +15,6 @@ interface HasUIX {
     }
 
     fun DropdownMenuItem.click(action: Action) = node.click(action)
+    fun Button.click(action: Action) = node.click(action)
 
 }

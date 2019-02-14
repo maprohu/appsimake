@@ -15,18 +15,17 @@ import rx.Var
 
 sealed class UserState {
     object Unknown: UserState()
-    object NotLoggedIn: UserState()
-    class LoggedIn(val user: User): UserState()
+    data class NotLoggedIn(val app: App): UserState()
+    data class LoggedIn(val app: App, val user: User): UserState()
 }
-fun runUserState(
-    ks: KillSet,
+fun HasKillSet.runUserState(
     app: App = FB.app,
     fn: suspend (UserState) -> UserState = { it }
 ): RxIface<UserState> {
     val rxv = Var<UserState>(UserState.Unknown)
 
     val ch = Channel<UserState>()
-    ks += { ch.close() }
+    kills += { ch.close() }
 
     GlobalScope.launch {
         for (u in ch) {
@@ -34,17 +33,17 @@ fun runUserState(
         }
     }
 
-    ks += app.auth().onAuthStateChanged(
+    kills += app.auth().onAuthStateChanged(
         { u ->
             ch += if (u == null) {
-                UserState.NotLoggedIn
+                UserState.NotLoggedIn(app)
             } else {
-                UserState.LoggedIn(u)
+                UserState.LoggedIn(app, u)
             }
         },
         { e ->
             report(e)
-            ch += UserState.NotLoggedIn
+            ch += UserState.NotLoggedIn(app)
         }
     )
 

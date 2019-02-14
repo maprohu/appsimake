@@ -5,15 +5,16 @@ import commonui.usericon.userIcon
 import commonshr.invoke
 import commonshr.plusAssign
 import commonui.widget.Factory
+import commonui.widget.TopAndContent
+import commonui.widget.factory
 import domx.invoke
 import domx.remAssign
 import fontawesome.bars
 import fontawesome.signInAlt
 import killable.KillSet
-import music.content.ContentView
 
-fun NotLoggedIn.ui() = ContentView(
-    topbar = Factory().topbar {
+fun NotLoggedIn.ui() = TopAndContent(
+    topbar = factory.topbar {
         left.dropdown {
             button {
                 m1p2
@@ -24,6 +25,9 @@ fun NotLoggedIn.ui() = ContentView(
                 item {
                     fa.signInAlt
                     text %= "Sign In"
+                    click {
+                        signIn()
+                    }
                 }
             }
         }

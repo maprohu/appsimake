@@ -76,7 +76,7 @@ fun <T> Inbox.rx(ks: KillSet, fnx: () -> T, fn: ProcT<T>): ProcOrElse = rx(ks, R
 fun <T> Inbox.rx(ks: KillSet, ch: RxIface<T>, fn: ProcT<T>): ProcOrElse {
     val procs = ProcOrElseList()
     ch.forEach(ks) { t ->
-        procs.add.processOnce(ks, t, this, fn)
+        procs.add.processOnce(ks, t, this@rx, fn)
     }
     return procs.proc
 }

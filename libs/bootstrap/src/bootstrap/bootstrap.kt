@@ -264,7 +264,7 @@ fun HTMLElement.rxDisplay(ks: KillSet, rxVal: () ->Boolean) {
 }
 fun HTMLElement.rxDisplay(ks: KillSet, rxVal: RxVal<Boolean>) {
     rxVal.forEach(ks) {
-        this.style.cssText = if (it) "" else "display: none !important;"
+        style.cssText = if (it) "" else "display: none !important;"
     }
 }
 
@@ -284,7 +284,7 @@ fun HTMLElement.rxAnchorClick(ks: KillSet, rxVal: RxVal<Boolean>, fn: (MouseEven
 
 fun HTMLElement.rxText(ks: KillSet, rxVal: RxVal<String>) {
     rxVal.forEach(ks) {
-        this.innerText = it
+        innerText = it
     }
 }
 

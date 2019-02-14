@@ -54,6 +54,9 @@ open class JobKillsImpl(
     }
 
 
+    fun <V: Any> HoleT<V>.viewsAny() = viewsAny(this)
+    fun <V: Any> viewsAny(fn: HoleT<V>) = JobSwitch.viewsOpt<V, JobScopeWithView<V>>(this, null, fn)
+    fun <V: Any> viewsAny(initial: JobScopeWithView<V>, fn: HoleT<V>) = JobSwitch.viewsOpt(this, initial, fn)
     fun <V: Any, I: JobScopeWithView<V>> views(initial: I, fn: HoleT<V>) = JobSwitch.viewsOpt(this, initial, fn)
     fun <V: Any, I: JobScopeWithView<V>> viewsOpt(initial: I?, fn: HoleT<V>) = JobSwitch.viewsOpt(this, initial, fn)
     fun <V: Any, I: JobScopeWithView<V>> viewsOpt(fn: HoleT<V>) = viewsOpt<V, I>(null, fn)
@@ -77,12 +80,30 @@ open class ExecImpl(coroutineContext: Job) : JobKillsImpl(coroutineContext), Has
     fun <S, T> JobSwitch<T>.fromRx(source: RxIface<S>, fn: suspend (S) -> T) = apply {
         fromRx(this@ExecImpl, exec, source, fn)
     }
-    fun <S, V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.viewFromRx(source: RxIface<S>, fn: suspend (S) -> I) = apply {
+    fun <S, V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.viewFromRx(source: RxIface<S>, fn: suspend (S) -> I?) = apply {
         fromRx(this@ExecImpl, exec, source, fn)
     }
-    fun <S, V: Any> JobSwitch<JobScopeWithItem<V?>>.wrapFromRx(source: RxIface<S>, fn: suspend JobKillsImpl.(S) -> V?) = apply {
+    fun <S, V> JobSwitch<JobScopeWithItem<V>>.wrapFromRx(source: RxIface<S>, fn: suspend JobKillsImpl.(S) -> V) = apply {
         fromRx(this@ExecImpl, this@ExecImpl, exec, source, fn)
     }
+
+    fun <T, S> RxIface<T>.mapAsync(
+        initial: S,
+        fn: suspend JobKillsImpl.(T) -> S
+    ): RxIface<S> {
+        val switch = wrap(initial)
+
+        forEach { t ->
+            exec {
+                switch.switchToWrap {
+                    fn(t)
+                }
+            }
+        }
+
+        return rx { switch.current().item }
+    }
+
 }
 
 
@@ -90,6 +111,7 @@ interface HasView<V> {
     fun view(prepare: V?.() -> Unit): V?
 }
 interface JobScopeWithView<V: Any>: JobScope, HasView<V>
+
 abstract class ViewImpl<V: Any>(
     coroutineContext: Job
 ): ExecImpl(coroutineContext), JobScopeWithView<V> {
@@ -109,6 +131,16 @@ abstract class ViewImpl<V: Any>(
 
     abstract val rawView: V
 
+}
+
+abstract class UIBase<V: Any>(
+    coroutineContext: Job
+): ViewImpl<V>(coroutineContext), HasUIX {
+    constructor(
+        parent: JobScope
+    ): this(Job(parent.coroutineContext))
+
+    override val uix = discardExecutor()
 }
 
 
@@ -223,10 +255,10 @@ suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.sw
 }
 
 fun <V, T: ItemWithViewRx<*, V?>> JobSwitch<T?>.runViewOpt(kills: HasKillSet, fn: HoleT<V>) = with(kills) {
-    rx { current()?.view?.invoke(fn.prepareOrNull) }.forEach(fn.assign)
+    rx { current()?.view?.invoke(fn.prepareOrNull) }.forEach(fn.assign.ignoreThis)
 }
 fun <V: Any, T: ItemWithViewRx<*, V>> JobSwitch<T>.runView(kills: HasKillSet, hole: HoleT<V>) = with(kills) {
-    rx { current().view(hole.prepareOrNull) }.forEach(hole.assign)
+    rx { current().view(hole.prepareOrNull) }.forEach(hole.assign.ignoreThis)
 }
 
 class ItemWithViewRx<out I, out V: Any>(
@@ -239,24 +271,4 @@ class ItemWithViewRx<out I, out V: Any>(
     }
 }
 
-
-class ViewWithForward<V>(
-    val base: HasView<V>,
-    val forward: () -> Optional<HasView<V>>
-): HasView<V> {
-    override fun view(prepare: V?.() -> Unit): V? {
-        return forward().map { it.view(prepare) }.getOrElse { base.view(prepare) }
-    }
-
-    companion object {
-        operator fun <V, S> invoke(
-            base: HasView<V>,
-            current: RxIface<S?>,
-            view: S.() -> HasView<V>
-        ): ViewWithForward<V> = ViewWithForward(
-            base,
-            forward = { current()?.let { Some(it.view()) } ?: None }
-        )
-    }
-}
 

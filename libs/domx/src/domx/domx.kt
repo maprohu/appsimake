@@ -395,7 +395,7 @@ fun Node.rxDisplayed(ks: KillSet, rxv: RxVal<Boolean>) {
                     previousDisplayed.owner.nextSibling
                 }
                 parent.insertBefore(
-                    this,
+                    this@rxDisplayed,
                     nextDisplayed
                 )
 

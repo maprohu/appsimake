@@ -15,6 +15,21 @@ interface HasExec {
     val exec: Exec
 }
 
+fun CoroutineScope.discardExecutor(): Exec {
+    val channel = Channel<Action>(Channel.UNLIMITED)
+
+    launch {
+        for (action in channel) {
+            action()
+        }
+    }
+
+    return { action ->
+        try {
+            channel += action
+        } catch (e: ClosedSendChannelException) {}
+    }
+}
 fun CoroutineScope.executor(): Exec {
     val channel = Channel<Action>(Channel.UNLIMITED)
 

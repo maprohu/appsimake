@@ -52,8 +52,8 @@ fun Visible.ui() = Factory().run {
 
     val artistTitle = rx {
         AritstTitle(
-            tag.fixedArtist().getOrDefault("<unkown artist>"),
-            tag.fixedTitle().getOrDefault("<unkown title>")
+            tag().fixedArtist().getOrDefault("<unkown artist>"),
+            tag().fixedTitle().getOrDefault("<unkown title>")
         )
     }
 

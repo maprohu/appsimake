@@ -8,10 +8,8 @@ import domx.invoke
 import domx.remAssign
 import fontawesome.bars
 import fontawesome.signOutAlt
-import killable.KillSet
-import music.content.ContentView
 
-fun LoggedIn.ui() = ContentView(
+fun LoggedIn.ui() = TopAndContent(
     topbar = Factory().topbar {
         left.dropdown {
             button {

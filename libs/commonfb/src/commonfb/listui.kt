@@ -153,7 +153,7 @@ fun <T: HasFBProps<*>> T.keepAlive(
     val killListen = Killables()
     props.live.forEach(killables) { alive ->
         if (!alive) {
-            killListen += props.docWrapOrFail.docRef(db).listen(this)
+            killListen += props.docWrapOrFail.docRef(db).listen(this@keepAlive)
         }
     }
 
