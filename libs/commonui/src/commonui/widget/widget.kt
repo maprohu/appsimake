@@ -159,6 +159,7 @@ interface HasNode {
     val node: Node
     val slot get() = node.widget
     val hole get() = node.hole
+    val insert get() = slot.insert
 }
 open class NodeWrap(
     override val node: Node

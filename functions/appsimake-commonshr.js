@@ -52,6 +52,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var lazyOf = Kotlin.kotlin.lazyOf_mh5how$;
   var ClosedSendChannelException = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.ClosedSendChannelException;
   var withContext = $module$kotlinx_coroutines_core.kotlinx.coroutines.withContext_i5cbzn$;
+  var toList_0 = Kotlin.kotlin.text.toList_gw00vp$;
+  var reversed = Kotlin.kotlin.collections.reversed_7wnvza$;
+  var toCharArray = Kotlin.kotlin.collections.toCharArray_rr68x$;
+  var String_0 = Kotlin.kotlin.text.String_4hbowm$;
+  var chunked = Kotlin.kotlin.collections.chunked_oqjilr$;
+  var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
+  var numberToInt = Kotlin.numberToInt;
   var throwUPAE = Kotlin.throwUPAE;
   var L0 = Kotlin.Long.ZERO;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
@@ -2855,6 +2862,28 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function plusAssign_0($receiver, trigger) {
     $receiver(trigger);
   }
+  function groups$lambda(it) {
+    return String_0(toCharArray(reversed(it)));
+  }
+  function groups($receiver, size, separator) {
+    if (size === void 0)
+      size = 3;
+    if (separator === void 0)
+      separator = ',';
+    return joinToString(reversed(chunked(reversed(toList_0($receiver)), size, groups$lambda)), separator);
+  }
+  function get_groupThousands($receiver) {
+    return groups($receiver.toString(), 3);
+  }
+  var Math_0 = Math;
+  function get_formatSecs($receiver) {
+    var mins = $receiver / 60.0;
+    var minPart = Math_0.floor(mins);
+    var secPart = mins - minPart;
+    var secString = (numberToInt(secPart * 60) + 100 | 0).toString().substring(1);
+    var minString = numberToInt(minPart).toString();
+    return minString + ':' + secString;
+  }
   function asyncKills$State(value, kill) {
     this.value = value;
     this.kill = kill;
@@ -3165,6 +3194,20 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   HasKillSet.prototype.rxClass_wqb4ha$ = function ($receiver, fn) {
     rxClass($receiver, this.kills, fn);
+  };
+  function HasKillSet$remAssign$lambda(closure$fn) {
+    return function ($receiver) {
+      return closure$fn();
+    };
+  }
+  function HasKillSet$remAssign$lambda_0(this$remAssign) {
+    return function ($receiver, it) {
+      this$remAssign.innerText = it;
+      return Unit;
+    };
+  }
+  HasKillSet.prototype.remAssign_7fncnf$ = function ($receiver, fn) {
+    this.forEach_5mel8p$(this.rx_pn7ch0$(HasKillSet$remAssign$lambda(fn)), HasKillSet$remAssign$lambda_0($receiver));
   };
   HasKillSet.$metadata$ = {
     kind: Kind_INTERFACE,
@@ -4708,6 +4751,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.first_4s9a7f$ = first;
   package$commonshr.with_qs7ci7$ = with_0;
   package$commonshr.plusAssign_aeyq4w$ = plusAssign_0;
+  package$commonshr.groups_eu8zx7$ = groups;
+  package$commonshr.get_groupThousands_s8ev3n$ = get_groupThousands;
+  package$commonshr.get_formatSecs_s8ev3n$ = get_formatSecs;
   var package$killable = _.killable || (_.killable = {});
   package$killable.asyncKills_9scqh$ = asyncKills;
   package$killable.KillableValue = KillableValue;
@@ -4791,6 +4837,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   WrapKillSet.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;
   WrapKillSet.prototype.map_i8ud5a$ = HasKillSet.prototype.map_i8ud5a$;
   WrapKillSet.prototype.rxClass_wqb4ha$ = HasKillSet.prototype.rxClass_wqb4ha$;
+  WrapKillSet.prototype.remAssign_7fncnf$ = HasKillSet.prototype.remAssign_7fncnf$;
   RxVal.prototype.map_tx8wzh$ = RxIface.prototype.map_tx8wzh$;
   RxVal.prototype.forEach_yk5nc8$ = RxIface.prototype.forEach_yk5nc8$;
   RxVal.prototype.fold_h2yxzx$ = RxIface.prototype.fold_h2yxzx$;

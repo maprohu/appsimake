@@ -1,5 +1,5 @@
 // http://id3.org/id3v2.4.0-structure
-package music
+package music.data
 
 import kotlinx.coroutines.CompletableDeferred
 import org.khronos.webgl.ArrayBuffer
@@ -7,7 +7,6 @@ import org.khronos.webgl.DataView
 import org.khronos.webgl.Uint8Array
 import org.khronos.webgl.get
 import org.w3c.files.Blob
-import org.w3c.files.File
 import org.w3c.files.FileReader
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty

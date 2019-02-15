@@ -35,19 +35,10 @@ data class AritstTitle(
 fun Visible.ui() = Factory().run {
 
 
-    fun formatSecs(s: Int): String {
-        val mins = s / 60.0
-        val minPart = floor(mins)
-        val secPart = mins - minPart
-        val secString = ((secPart * 60).toInt() + 100).toString().substring(1)
-        val minString = minPart.toInt().toString()
 
-        return "$minString:$secString"
-    }
-
-    val totalDurationText = rx { formatSecs(totalDuration()) }
+    val totalDurationText = rx { totalDuration().formatSecs }
     val totalDurationTextLength = rx { totalDurationText().length }
-    val currentPositionText = rx { formatSecs(currentPosition()).padStart(totalDurationTextLength(), ' ') }
+    val currentPositionText = rx { currentPosition().formatSecs.padStart(totalDurationTextLength(), ' ') }
     val likeButtonsDisabled = rx { userSong() == null }
     val state = userSong
 

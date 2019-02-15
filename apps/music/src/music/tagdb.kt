@@ -7,6 +7,10 @@ import domx.invoke
 import firebase.firestore.*
 import killable.KillSet
 import kotlinx.coroutines.CompletableDeferred
+import music.data.Frames
+import music.data.id3v1
+import music.data.id3v2_3
+import music.data.readAsArrayBuffer
 import musiclib.Mp3File
 import musiclib.musicLib
 import musiclib.songs

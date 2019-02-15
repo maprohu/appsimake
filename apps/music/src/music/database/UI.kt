@@ -28,6 +28,7 @@ fun Database.ui() = TopAndContent(
                 item {
                     fa.fileImport
                     text %= "Import MP3s"
+                    click { import() }
                 }
             }
         }

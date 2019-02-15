@@ -77,7 +77,7 @@ object fontAwesomeDist : JsDownload(
     )
 )
 
-val bootstrapVersion = "4.2.1"
+val bootstrapVersion = "4.3.1"
 val bootstrapBaseName = "bootstrap-$bootstrapVersion-dist"
 object bootstrapDist : JsDownload(
     "https://github.com/twbs/bootstrap/releases/download/v$bootstrapVersion/$bootstrapBaseName.zip",

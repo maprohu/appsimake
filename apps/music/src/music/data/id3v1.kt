@@ -1,4 +1,4 @@
-package music
+package music.data
 
 import org.khronos.webgl.ArrayBuffer
 

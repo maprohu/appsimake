@@ -95,6 +95,8 @@ interface RxIface<out T> {
 
     fun <S> map(ks: KillSet, fn: HasKillSet.(T) -> S) = Rx(ks) { fn(invoke()) }
 
+//    fun <S> flatMap(ks: KillSet, fn: HasKillSet.(T) -> RxIface<S>) = Rx(ks) { fn(invoke()) }
+
     fun forEach(ks: KillSet, fn: HasKillSet.(T) -> Unit) {
         val kseq = ks.seq()
 
