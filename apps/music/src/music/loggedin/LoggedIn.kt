@@ -3,14 +3,25 @@ package music.loggedin
 import commonui.widget.*
 import music.boot.Boot
 import music.boot.BootPath
+import music.database.Database
 import rx.feedTo
+
+open class LoggedInPath(
+    val loggedIn: LoggedIn
+): BootPath(loggedIn.boot)
 
 class LoggedIn(
     factory: JobScope,
-    val path: BootPath
+    from: BootPath
 ): ForwardBase<TopAndContent>(factory) {
+    val boot = from.boot
+    val path = LoggedInPath(this)
+
     override val rawView = ui()
 
+    suspend fun database() {
+        forward %= fwdc(::Database)
+    }
 
 //    init {
 //

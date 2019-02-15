@@ -35,7 +35,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   var PropertyMetadata = Kotlin.PropertyMetadata;
   var Var = $module$appsimake_commonshr.rx.Var;
   var killable = $module$appsimake_commonshr.killable;
-  var Rx_init = $module$appsimake_commonshr.rx.Rx_init_3deojw$;
+  var Rx_init = $module$appsimake_commonshr.rx.Rx_init_3k3t3o$;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
   var lazyOf = Kotlin.kotlin.lazyOf_mh5how$;
   var Error_init = Kotlin.kotlin.Error_init_pdl1vj$;
@@ -678,11 +678,11 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   ScalarPropBase.prototype.rollback = function () {
     this.current.now = this.initial.now;
   };
-  function ScalarPropBase$dirty$lambda() {
+  function ScalarPropBase$dirty$lambda($receiver) {
     return false;
   }
   function ScalarPropBase$dirty$lambda_0(this$ScalarPropBase) {
-    return function () {
+    return function ($receiver) {
       if (this$ScalarPropBase.ignoreDirty)
         return false;
       else {
@@ -691,7 +691,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     };
   }
   function ScalarPropBase$validationErrors$lambda$lambda(this$ScalarPropBase) {
-    return function () {
+    return function ($receiver) {
       return this$ScalarPropBase.ops.validate(this$ScalarPropBase.current.invoke());
     };
   }
@@ -701,7 +701,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     };
   }
   function ScalarPropBase$isValid$lambda$lambda(this$ScalarPropBase) {
-    return function () {
+    return function ($receiver) {
       return this$ScalarPropBase.calculateIsValid();
     };
   }
@@ -711,7 +711,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     };
   }
   function ScalarPropBase$beforeWrite$lambda$lambda(closure$c) {
-    return function () {
+    return function ($receiver) {
       return closure$c();
     };
   }
@@ -1135,7 +1135,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     }
   };
   function Props$isPersisted$lambda$lambda(this$Props) {
-    return function () {
+    return function ($receiver) {
       return Kotlin.isType(this$Props.id.invoke(), IdState$Persisted);
     };
   }
@@ -1145,7 +1145,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     };
   }
   function Props$isDeleted$lambda$lambda(this$Props) {
-    return function () {
+    return function ($receiver) {
       return this$Props.id.invoke().deleted;
     };
   }
@@ -1156,16 +1156,16 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   }
   var Collection = Kotlin.kotlin.collections.Collection;
   function Props$isValid$lambda$lambda(this$Props) {
-    return function () {
-      var $receiver = this$Props.list_8be2vx$;
+    return function ($receiver) {
+      var $receiver_0 = this$Props.list_8be2vx$;
       var all$result;
       all$break: do {
         var tmp$;
-        if (Kotlin.isType($receiver, Collection) && $receiver.isEmpty()) {
+        if (Kotlin.isType($receiver_0, Collection) && $receiver_0.isEmpty()) {
           all$result = true;
           break all$break;
         }
-        tmp$ = $receiver.iterator();
+        tmp$ = $receiver_0.iterator();
         while (tmp$.hasNext()) {
           var element = tmp$.next();
           if (!element.isValid.invoke()) {
@@ -1199,16 +1199,16 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     };
   }
   function Props$dirty$lambda$lambda(this$Props) {
-    return function () {
-      var $receiver = this$Props.list_8be2vx$;
+    return function ($receiver) {
+      var $receiver_0 = this$Props.list_8be2vx$;
       var any$result;
       any$break: do {
         var tmp$;
-        if (Kotlin.isType($receiver, Collection) && $receiver.isEmpty()) {
+        if (Kotlin.isType($receiver_0, Collection) && $receiver_0.isEmpty()) {
           any$result = false;
           break any$break;
         }
-        tmp$ = $receiver.iterator();
+        tmp$ = $receiver_0.iterator();
         while (tmp$.hasNext()) {
           var element = tmp$.next();
           if (element.dirty.invoke()) {

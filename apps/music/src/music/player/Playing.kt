@@ -8,11 +8,11 @@ import commonui.widget.*
 import kotlin.browser.window
 
 class Playing(
-    visible: Visible
-): PlayState(visible, true) {
+    player: Player
+): PlayState(player, true) {
 
     init {
-        with(visible) {
+        with(player) {
             audio.play()
             kills += {
                 audio.pause()

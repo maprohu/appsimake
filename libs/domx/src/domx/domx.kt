@@ -173,7 +173,7 @@ fun ElementCSSInlineStyle.rxVisible(ks: KillSet, rxv: RxVal<Boolean>) {
     rxv.forEach(ks) { style.visibility = if (it) "visible" else "collapse" }
 }
 
-fun ElementCSSInlineStyle.rxVisible(ks: KillSet, fn: () -> Boolean): Rx<Boolean> {
+fun ElementCSSInlineStyle.rxVisible(ks: KillSet, fn: HasKillSet.() -> Boolean): Rx<Boolean> {
     return Rx(ks, fn).also { rxVisible(ks, it) }
 }
 

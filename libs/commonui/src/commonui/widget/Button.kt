@@ -50,5 +50,11 @@ class Button(): ScreenWrap {
         document.span.setTo(slots.text)
     }
 
+    val back by lazy {
+        m1p2
+        fa.chevronLeft
+        secondary
+    }
+
 }
 

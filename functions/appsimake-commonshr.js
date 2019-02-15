@@ -489,7 +489,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }
   function filtered$lambda$lambda(closure$rxfn, closure$v) {
-    return function () {
+    return function ($receiver) {
       return closure$rxfn(closure$v);
     };
   }
@@ -827,7 +827,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }
   function RandomSource$Companion$invoke$lambda_0(closure$total, closure$exclude) {
-    return function () {
+    return function ($receiver) {
       var tot = closure$total.invoke();
       var ex = closure$exclude.invoke();
       var av = minus_0(tot, ex);
@@ -840,7 +840,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }
   function RandomSource$Companion$invoke$lambda_1(closure$available) {
-    return function () {
+    return function ($receiver) {
       return !closure$available.invoke().isEmpty();
     };
   }
@@ -1139,7 +1139,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }
   function filtered$process$lambda(closure$rxfn, closure$v) {
-    return function () {
+    return function ($receiver) {
       return closure$rxfn(closure$v);
     };
   }
@@ -2799,7 +2799,17 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return get_constant$lambda($receiver);
     };
   }));
-  var get_ignoreThis = defineInlineFunction('appsimake-commonshr.commonshr.get_ignoreThis_dwii1c$', wrapFunction(function () {
+  var get_ignoreThis = defineInlineFunction('appsimake-commonshr.commonshr.get_ignoreThis_xoe8il$', wrapFunction(function () {
+    function get_ignoreThis$lambda(this$ignoreThis) {
+      return function ($receiver) {
+        return this$ignoreThis();
+      };
+    }
+    return function ($receiver) {
+      return get_ignoreThis$lambda($receiver);
+    };
+  }));
+  var get_ignoreThis_0 = defineInlineFunction('appsimake-commonshr.commonshr.get_ignoreThis_dwii1c$', wrapFunction(function () {
     function get_ignoreThis$lambda(this$ignoreThis) {
       return function ($receiver, i) {
         return this$ignoreThis(i);
@@ -3144,13 +3154,16 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function HasKillSet() {
   }
-  HasKillSet.prototype.rx_klfg04$ = function (fn) {
+  HasKillSet.prototype.rx_pn7ch0$ = function (fn) {
     return Rx_init_0(this.kills, fn);
   };
   HasKillSet.prototype.forEach_5mel8p$ = function ($receiver, fn) {
     $receiver.forEach_yk5nc8$(this.kills, fn);
   };
-  HasKillSet.prototype.rxClass_z8puye$ = function ($receiver, fn) {
+  HasKillSet.prototype.map_i8ud5a$ = function ($receiver, fn) {
+    return $receiver.map_tx8wzh$(this.kills, fn);
+  };
+  HasKillSet.prototype.rxClass_wqb4ha$ = function ($receiver, fn) {
     rxClass($receiver, this.kills, fn);
   };
   HasKillSet.$metadata$ = {
@@ -3262,10 +3275,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'RxChild',
     interfaces: []
   };
-  function RxCalc(fn) {
+  function RxCalc(ks, fn) {
     RxChild.call(this);
     this.fn_0 = fn;
     this.rx_kwbhe1$_0 = this.rx_kwbhe1$_0;
+    this.kseq_0 = seq(ks);
   }
   Object.defineProperty(RxCalc.prototype, 'rx', {
     get: function () {
@@ -3285,7 +3299,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     var savedCurrent = currentChild;
     currentChild = this;
     try {
-      return this.fn_0();
+      return this.fn_0(get_wrap(this.kseq_0.killSet()));
     }
     finally {
       currentChild = savedCurrent;
@@ -3339,6 +3353,14 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function RxIface() {
   }
+  function RxIface$map$lambda(closure$fn, this$RxIface) {
+    return function ($receiver) {
+      return closure$fn($receiver, this$RxIface.invoke());
+    };
+  }
+  RxIface.prototype.map_tx8wzh$ = function (ks, fn) {
+    return Rx_init_0(ks, RxIface$map$lambda(fn, this));
+  };
   function RxIface$forEach$lambda(closure$kseq, closure$fn) {
     return function (it) {
       closure$fn(get_wrap(closure$kseq.killSet()), it);
@@ -3574,7 +3596,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     plusAssign_0(ks, feedTo$lambda_9(rxv, $receiver));
   }
   function orDefault$lambda(this$orDefault, closure$v) {
-    return function () {
+    return function ($receiver) {
       return this$orDefault.invoke().getOrDefault_11rb$(closure$v);
     };
   }
@@ -3708,7 +3730,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function Rx_init_0(ks, fn, $this) {
     $this = $this || Object.create(Rx.prototype);
-    Rx_init(ks, new RxCalc(fn), $this);
+    Rx_init(ks, new RxCalc(ks, fn), $this);
     return $this;
   }
   function Var(v) {
@@ -3821,7 +3843,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     fn.forEach_yk5nc8$(ks, rxClass$lambda_1(style, $receiver));
   }
   function rxClass$lambda_2(closure$fn) {
-    return function () {
+    return function ($receiver) {
       return closure$fn();
     };
   }
@@ -4680,7 +4702,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.Funs = Funs;
   package$commonshr.get_funs_vvk9$ = get_funs;
   package$commonshr.get_constant_8dahcb$ = get_constant;
-  package$commonshr.get_ignoreThis_dwii1c$ = get_ignoreThis;
+  package$commonshr.get_ignoreThis_xoe8il$ = get_ignoreThis;
+  package$commonshr.get_ignoreThis_dwii1c$ = get_ignoreThis_0;
   package$commonshr.once_yo2cq0$ = once;
   package$commonshr.first_4s9a7f$ = first;
   package$commonshr.with_qs7ci7$ = with_0;
@@ -4729,26 +4752,26 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.remove_gcz0w7$ = remove;
   package$rx.diffs_x22hzp$ = diffs;
   package$rx.Rx_init_y3u4fh$ = Rx_init;
-  package$rx.Rx_init_3deojw$ = Rx_init_0;
+  package$rx.Rx_init_3k3t3o$ = Rx_init_0;
   package$rx.Rx = Rx;
   package$rx.Var = Var;
   package$rx.increase_eoy9qo$ = increase;
   package$rx.decrease_eoy9qo$ = decrease;
   package$rx.get_kw0pia$ = get_0;
   package$rx.set_atqor6$ = set;
-  package$rx.rxClass_44mvb6$ = rxClass;
+  package$rx.rxClass_qqij52$ = rxClass;
   package$rx.rxClass_xqwy5d$ = rxClass_0;
   package$rx.rxHover_st2z1u$ = rxHover;
   package$rx.rxClass_4zvhqy$ = rxClass_1;
   package$rx.rxClass_f3mx65$ = rxClass_2;
   package$rx.rxClassOpt_jabexw$ = rxClassOpt;
-  package$rx.toRx_yx5cbl$ = toRx_0;
-  package$rx.rxClasses_preb83$ = rxClasses;
+  package$rx.toRx_hxpdmx$ = toRx_0;
+  package$rx.rxClasses_g0rwsb$ = rxClasses;
   package$rx.rxClasses_pxolx6$ = rxClasses_0;
   package$rx.toChannel_tgu8ha$ = toChannel;
   package$rx.toChannelLater_tgu8ha$ = toChannelLater;
   package$rx.mapAsync_wvb2ro$ = mapAsync;
-  package$rx.rx_qoyk5l$ = rx;
+  package$rx.rx_qhfek7$ = rx;
   package$rx.toVar_eoe559$ = toVar;
   package$rx.RxSet = RxSet;
   package$rx.RxMutableSet = RxMutableSet;
@@ -4764,9 +4787,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   MappedEmitter.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
   toEmitter$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
   toMoves$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
-  WrapKillSet.prototype.rx_klfg04$ = HasKillSet.prototype.rx_klfg04$;
+  WrapKillSet.prototype.rx_pn7ch0$ = HasKillSet.prototype.rx_pn7ch0$;
   WrapKillSet.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;
-  WrapKillSet.prototype.rxClass_z8puye$ = HasKillSet.prototype.rxClass_z8puye$;
+  WrapKillSet.prototype.map_i8ud5a$ = HasKillSet.prototype.map_i8ud5a$;
+  WrapKillSet.prototype.rxClass_wqb4ha$ = HasKillSet.prototype.rxClass_wqb4ha$;
+  RxVal.prototype.map_tx8wzh$ = RxIface.prototype.map_tx8wzh$;
   RxVal.prototype.forEach_yk5nc8$ = RxIface.prototype.forEach_yk5nc8$;
   RxVal.prototype.fold_h2yxzx$ = RxIface.prototype.fold_h2yxzx$;
   RxVal.prototype.foldKillsTrigger_ooixq2$ = RxIface.prototype.foldKillsTrigger_ooixq2$;

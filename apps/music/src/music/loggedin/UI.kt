@@ -7,6 +7,7 @@ import commonui.widget.*
 import domx.invoke
 import domx.remAssign
 import fontawesome.bars
+import fontawesome.database
 import fontawesome.signOutAlt
 
 fun LoggedIn.ui() = TopAndContent(
@@ -18,6 +19,15 @@ fun LoggedIn.ui() = TopAndContent(
                 fa.bars
             }
             menu {
+                item {
+                    fa.database
+                    text %= "Database"
+                    click {
+                        database()
+                    }
+
+                }
+                divider
                 item {
                     fa.signOutAlt
                     text %= "Sign Out"

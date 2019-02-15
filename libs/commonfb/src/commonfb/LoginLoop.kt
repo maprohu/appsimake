@@ -51,14 +51,14 @@ fun HasKillSet.runUserState(
 }
 
 fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx(ks) {
-    val u = this()
+    val u = this@toUser()
     when (u) {
         is UserState.LoggedIn -> u.user
         else -> null
     }
 }
 
-fun RxIface<User?>.toUid(ks: KillSet) = Rx(ks) { this()?.uid }
+fun RxIface<User?>.toUid(ks: KillSet) = Rx(ks) { this@toUid()?.uid }
 
 
 //object NotLoggedIn

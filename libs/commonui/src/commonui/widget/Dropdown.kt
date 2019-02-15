@@ -32,6 +32,10 @@ class DropdownMenu(): ScreenWrap {
         cls.dropdownMenu
     }
 
+    val right by lazy {
+        cls.dropdownMenuRight
+    }
+
     val item get() = DropdownMenuItem().append
     val divider get() = node.div { cls.dropdownDivider }
 
@@ -43,6 +47,18 @@ class Dropdown(): ScreenWrap {
 
     val button = hole.insert.button {
         node.dataToggleDropdown()
+    }
+
+    val bars by lazy {
+        button {
+            m1p2
+            secondary
+            fa.bars
+        }
+    }
+
+    val right by lazy {
+        menu.right
     }
 
     val menu = DropdownMenu().append

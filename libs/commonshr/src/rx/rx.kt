@@ -29,7 +29,8 @@ abstract class RxChild {
 }
 
 class RxCalc<T>(
-        private val fn: () -> T
+    ks: KillSet,
+    private val fn: HasKillSet.() -> T
 ) : RxChild() {
     lateinit var rx: Rx<T>
 
@@ -37,13 +38,14 @@ class RxCalc<T>(
         rx.setCurrentValue(recalcValue())
     }
 
+    private val kseq = ks.seq()
     fun recalcValue() : T {
         disconnectAll()
 
         val savedCurrent = currentChild
         currentChild = this
         try {
-            return fn()
+            return kseq.killSet().wrap.fn()
         } finally {
             currentChild = savedCurrent
         }
@@ -90,6 +92,8 @@ interface RxIface<out T> {
     val now : T
 
     operator fun invoke(): T
+
+    fun <S> map(ks: KillSet, fn: HasKillSet.(T) -> S) = Rx(ks) { fn(invoke()) }
 
     fun forEach(ks: KillSet, fn: HasKillSet.(T) -> Unit) {
         val kseq = ks.seq()
@@ -235,7 +239,7 @@ fun RxIface<Double>.feedTo(ks: KillSet, rxv: Var<Double>) {
     }
 }
 
-fun <T> RxIface<Optional<T>>.orDefault(ks: KillSet, v: T) = Rx(ks) { this().getOrDefault(v) }
+fun <T> RxIface<Optional<T>>.orDefault(ks: KillSet, v: T) = Rx(ks) { this@orDefault().getOrDefault(v) }
 
 fun Var<Int>.incremented(): Trigger {
     transform { it + 1 }
@@ -326,8 +330,8 @@ class Rx<T> private constructor(
 
     constructor(
         ks: KillSet,
-        fn: () -> T
-    ) : this(ks, RxCalc(fn))
+        fn: HasKillSet.() -> T
+    ) : this(ks, RxCalc(ks, fn))
 
 }
 
@@ -371,7 +375,7 @@ fun <T> Var<Optional<T>>.set(v: T) {
 
 fun Element.rxClass(
     ks: KillSet,
-    style: () -> String
+    style: HasKillSet.() -> String
 )  {
     val rxv = Rx(ks, style)
     rxClass(ks, rxv)
@@ -425,11 +429,11 @@ fun Element.rxClassOpt(
     )
 }
 
-fun <T> (() -> T).toRx(ks: KillSet) = Rx(ks, this)
+fun <T> (HasKillSet.() -> T).toRx(ks: KillSet) = Rx(ks, this)
 
 fun Element.rxClasses(
     ks: KillSet,
-    style: () -> Collection<String>
+    style: HasKillSet.() -> Collection<String>
 ) = rxClasses(ks, style.toRx(ks))
 
 fun Element.rxClasses(
@@ -476,5 +480,5 @@ suspend fun <T, S> RxIface<T>.mapAsync(
     return rxv
 }
 
-fun <T> KillSet.rx(fn: () -> T): RxIface<T> = Rx(this, fn)
+fun <T> KillSet.rx(fn: HasKillSet.() -> T): RxIface<T> = Rx(this, fn)
 fun <T> T.toVar() = Var(this)

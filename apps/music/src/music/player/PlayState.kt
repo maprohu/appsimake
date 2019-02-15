@@ -6,7 +6,7 @@ import domx.invoke
 import kotlin.math.max
 
 abstract class PlayState(
-    val visible: Visible,
+    val player: Player,
     val isPlaying: Boolean
-): ExecImpl(visible) {
+): ExecImpl(player) {
 }

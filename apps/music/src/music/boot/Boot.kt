@@ -21,15 +21,16 @@ import rx.*
 
 open class BootPath(
     val boot: Boot
-): BodyPath(boot.path.body)
+): BodyPath(boot.body)
 
 class Boot(
     parent: JobScope,
-    val path: BodyPath,
+    from: BodyPath,
     idb: IDBDatabase,
     localSongs: LocalSongs
 ): ViewImpl<HTMLElement>(parent) {
-    private val self = BootPath(this)
+    val body = from.body
+    val path = BootPath(this)
 
     companion object {
         suspend fun create(): Boot {
@@ -82,8 +83,8 @@ class Boot(
 
     val content = viewsAny(UserUnknown(this), contentHole).viewFromRx(userState) { u ->
         when (u) {
-            is UserState.NotLoggedIn -> fwd { NotLoggedIn(this, u.app, self) }
-            is UserState.LoggedIn -> fwd { LoggedIn(this, self) }
+            is UserState.NotLoggedIn -> fwd { NotLoggedIn(this, u.app, path) }
+            is UserState.LoggedIn -> fwd { LoggedIn(this, path) }
             else -> UserUnknown(this)
         }
 
@@ -95,7 +96,7 @@ class Boot(
     private val songInclude = songInclude(
         kills,
         localSongs,
-        rx { userSongs.current().item?.get }
+        rx { userSongs().item?.get }
     )
 
     val songSource = songSource(
@@ -104,20 +105,13 @@ class Boot(
     )
 
     val player = slots.player.viewsAny().viewFromRx(songSource) { s ->
-        s?.invoke()?.let { Visible(self, it, false) }
+        s?.invoke()?.let { Visible(path) }
     }
-
 
     val songInfoSource = wrap(localSongInfoSource())
 
     val signOut = Var<Action> {
         userState.now = UserState.Unknown
-    }
-
-    suspend fun loadNextSong(startPlaying: Boolean) {
-        player.switchTo(
-            songSource.now?.invoke()?.let { Visible(self, it, startPlaying) }
-        )
     }
 
     init {

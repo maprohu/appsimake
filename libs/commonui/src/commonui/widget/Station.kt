@@ -62,6 +62,7 @@ open class JobKillsImpl(
     fun <V: Any, I: JobScopeWithView<V>> viewsOpt(fn: HoleT<V>) = viewsOpt<V, I>(null, fn)
 
     fun <T: JobScope> switch(initial: T) = JobSwitch.of(initial)
+    fun <T: JobScope> switchOpt() = JobSwitch.optional<T>()
     inline fun <T: JobScopeWithView<*>> views() = this.unsafeCast<Views<T>>()
     fun <T> wrap(initial: T) = JobSwitch.wrap(initial)
     fun <T: Any> wrap() = JobSwitch.wrap<T>()
@@ -101,7 +102,7 @@ open class ExecImpl(coroutineContext: Job) : JobKillsImpl(coroutineContext), Has
             }
         }
 
-        return rx { switch.current().item }
+        return rx { switch().item }
     }
 
 }
@@ -144,11 +145,17 @@ abstract class UIBase<V: Any>(
 }
 
 
-class JobSwitch<T>(
-    initial: T,
-    val job: T.() -> Job?
-) {
-    val current = Var(initial)
+class JobSwitch<T> private constructor(
+    private val current: Var<T>,
+    private val job: T.() -> Job?
+): RxIface<T> by current {
+    constructor(
+        initial: T,
+        job: T.() -> Job?
+    ): this(
+        Var(initial),
+        job
+    )
 
     suspend fun switchTo(item: T) {
         current.now.job().let {
@@ -172,6 +179,8 @@ class JobSwitch<T>(
         }
     }
 
+    suspend operator fun remAssign(item: T) { switchTo(item) }
+    suspend operator fun remAssign(item: suspend () -> T) { switchTo(item) }
 
     companion object {
         fun <T: JobScope> of(initial: T) = JobSwitch(initial) { this.coroutineContext }
@@ -255,10 +264,10 @@ suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.sw
 }
 
 fun <V, T: ItemWithViewRx<*, V?>> JobSwitch<T?>.runViewOpt(kills: HasKillSet, fn: HoleT<V>) = with(kills) {
-    rx { current()?.view?.invoke(fn.prepareOrNull) }.forEach(fn.assign.ignoreThis)
+    rx { invoke()?.view?.invoke(fn.prepareOrNull) }.forEach(fn.assign.ignoreThis)
 }
 fun <V: Any, T: ItemWithViewRx<*, V>> JobSwitch<T>.runView(kills: HasKillSet, hole: HoleT<V>) = with(kills) {
-    rx { current().view(hole.prepareOrNull) }.forEach(hole.assign.ignoreThis)
+    rx { invoke().view(hole.prepareOrNull) }.forEach(hole.assign.ignoreThis)
 }
 
 class ItemWithViewRx<out I, out V: Any>(

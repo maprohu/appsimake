@@ -33,7 +33,7 @@ class ViewWithForward<V>(
             switch: JobSwitch<T?>
         ) = invoke(
             base,
-            switch.current
+            switch
         ) { this }
     }
 }
@@ -52,7 +52,7 @@ abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
 
         { action ->
             ex {
-                if (forward.current.now == null) {
+                if (forward.now == null) {
                     action()
                 }
             }
@@ -80,9 +80,14 @@ class ViewWithForwardImpl<V: Any, F: JobScopeWithView<V>, B: HasView<V>>(
     override fun view(prepare: V?.() -> Unit): V? = forwardView.view(prepare)
 }
 
-suspend fun <V: Any, F: JobScopeWithView<V>, O: ForwardImpl<V, F>> JobScope.fwd(fn: suspend JobKillsImpl.() -> O): ViewWithForwardImpl<V, F, O> {
+suspend fun <J: JobScope, V: Any, F: JobScopeWithView<V>, O: ForwardImpl<V, F>> J.fwd(fn: suspend JobKillsImpl.(J) -> O): ViewWithForwardImpl<V, F, O> {
     return withChild {
-        ViewWithForwardImpl.of(this, fn())
+        ViewWithForwardImpl.of(this, fn(this@fwd))
+    }
+}
+suspend fun <J: JobScope, V: Any, F: JobScopeWithView<V>, O: ForwardImpl<V, F>> J.fwdc(fn: (JobScope, J) -> O): ViewWithForwardImpl<V, F, O> {
+    return withChild {
+        ViewWithForwardImpl.of(this, fn(this, this@fwdc))
     }
 }
 

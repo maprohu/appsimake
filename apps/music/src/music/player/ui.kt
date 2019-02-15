@@ -34,6 +34,7 @@ data class AritstTitle(
 
 fun Visible.ui() = Factory().run {
 
+
     fun formatSecs(s: Int): String {
         val mins = s / 60.0
         val minPart = floor(mins)
@@ -72,22 +73,22 @@ fun Visible.ui() = Factory().run {
             }
 
             setActionHandler("play") {
-                uix { play() }
+                uix { p?.play() }
             }
             setActionHandler("pause") {
-                uix { pause() }
+                uix { p?.pause() }
             }
             setActionHandler("seekbackward") {
-                uix { backward() }
+                uix { p?.backward() }
             }
             setActionHandler("seekforward") {
-                uix { forward() }
+                uix { p?.forward() }
             }
             setActionHandler("previoustrack") {
-                uix { previousTrack() }
+                uix { p?.previousTrack() }
             }
             setActionHandler("nexttrack") {
-                uix { nextTrack() }
+                uix { p?.nextTrack() }
             }
 
         }
@@ -184,7 +185,7 @@ fun Visible.ui() = Factory().run {
                         }
                     }
                     click {
-                        playOrPause()
+                        p?.playOrPause()
                     }
                 }
             }
@@ -196,7 +197,7 @@ fun Visible.ui() = Factory().run {
                 mediaButton(Fa.stepBackward) {
                     rxEnabled(kills) { currentPosition() != 0 || playing() }
                     click {
-                        previousTrack()
+                        p?.previousTrack()
                     }
                 }
                 mediaButton(Fa.backward) {
@@ -205,7 +206,7 @@ fun Visible.ui() = Factory().run {
                     }
                     rxEnabled(kills) { currentPosition() != 0 || playing() }
                     click {
-                        backward()
+                        p?.backward()
                     }
                 }
                 mediaButton(Fa.forward) {
@@ -213,7 +214,7 @@ fun Visible.ui() = Factory().run {
                         btnOutlinePrimary
                     }
                     click {
-                        forward()
+                        p?.forward()
                     }
                 }
                 mediaButton(Fa.stepForward) {
@@ -221,7 +222,7 @@ fun Visible.ui() = Factory().run {
                         btnOutlinePrimary
                     }
                     click {
-                        nextTrack()
+                        p?.nextTrack()
                     }
                 }
 
@@ -238,7 +239,7 @@ fun Visible.ui() = Factory().run {
                         else Cls.btnOutlinePrimary
                     }
                     click {
-                        like()
+                        p?.like()
                     }
                 }
                 mediaButton(Fa.thumbsDown, null) {
@@ -248,7 +249,7 @@ fun Visible.ui() = Factory().run {
                         else Cls.btnOutlinePrimary
                     }
                     click {
-                        dontLike()
+                        p?.dontLike()
                     }
                 }
             }

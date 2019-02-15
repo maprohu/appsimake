@@ -76,9 +76,10 @@ class Killables {
 interface HasKillSet {
     val kills: KillSet
 
-    fun <T> rx(fn: () -> T) = Rx(kills, fn)
+    fun <T> rx(fn: HasKillSet.() -> T) = Rx(kills, fn)
     fun <T> RxIface<T>.forEach(fn: HasKillSet.(T) -> Unit) = forEach(kills, fn)
-    fun Element.rxClass(fn: () -> String) = rxClass(kills, fn)
+    fun <T, S> RxIface<T>.map(fn: HasKillSet.(T) -> S) = map(kills, fn)
+    fun Element.rxClass(fn: HasKillSet.() -> String) = rxClass(kills, fn)
 
 }
 
