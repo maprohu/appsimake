@@ -27,11 +27,12 @@ class Topbar(): ScreenWrap {
     }
 
 
-    private val slots = object {
+    inner class Slots {
         val left = slot
         val middle = slot
         val right = slot
     }
+    val slots = Slots()
 
     val left = slots.left.insert
 

@@ -1,14 +1,12 @@
 package killable
 
-import commonshr.AddRemove
-import commonshr.Trigger
-import commonshr.once
-import commonshr.plusAssign
+import commonshr.*
 import kotlinx.coroutines.Job
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import rx.Rx
 import rx.RxIface
+import rx.RxSet
 import rx.rxClass
 
 typealias KillSet = AddRemove<Trigger>
@@ -86,9 +84,11 @@ interface HasKillSet {
         rx { fn() }.forEach { this@remAssign.innerText = it }
     }
 
+    fun <E> RxSet<E>.containsRx(value: E) = containsRx(kills, value)
+
 }
 
 class WrapKillSet(
     override val kills: KillSet
-): HasKillSet
+): HasKillSet, InvokeApply
 val KillSet.wrap get() = WrapKillSet(this)

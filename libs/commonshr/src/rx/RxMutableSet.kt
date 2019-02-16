@@ -1,10 +1,7 @@
 package rx
 
 import common.*
-import commonshr.SetDiff
-import commonshr.process
-import commonshr.toMap
-import commonshr.toMoves
+import commonshr.*
 import killable.KillSet
 
 interface RxSet<out E>: Set<E> {
@@ -12,6 +9,7 @@ interface RxSet<out E>: Set<E> {
     val isEmptyRx: RxIface<Boolean>
     val isNotEmptyRx: RxIface<Boolean>
     val diffs: EmitterIface<SetDiff<@UnsafeVariance E>>
+    fun containsRx(ks: KillSet, value: @UnsafeVariance E): RxIface<Boolean>
 }
 
 class RxMutableSet<E>(
@@ -121,6 +119,21 @@ class RxMutableSet<E>(
 
     override val isNotEmptyRx by lazy { rxProperty { isNotEmpty() } }
 
+
+    private val containsRxs by lazy {
+        RefCountMap<E, Var<Boolean>> {
+            Var(contains(it))
+        }.apply {
+            diffs += { d ->
+                d.removed.forEach { id -> apply(id) { now = false } }
+                d.added.forEach { id -> apply(id) { now = true } }
+            }
+        }
+    }
+
+    override fun containsRx(ks: KillSet, value: @UnsafeVariance E): RxIface<Boolean> {
+        return containsRxs.get(ks, value)
+    }
 }
 
 class RxMutableIterator<T>(

@@ -1,6 +1,5 @@
 package commonshr
 
-import common.Emitter
 import common.EmitterIface
 import common.Optional
 import killable.KillSet
@@ -64,7 +63,10 @@ data class SetAdded<T>(override val value: T): SetMove<T>()
 data class SetRemoved<T>(override val value: T): SetMove<T>()
 
 interface InvokeApply
-operator fun <T: InvokeApply> T.invoke(fn: T.() -> Unit) = apply(fn)
+inline operator fun <T: InvokeApply> T.invoke(fn: T.() -> Unit) = apply(fn)
+
+interface InvokeWith
+inline operator fun <T: InvokeWith, O> T.invoke(fn: T.() -> O) = with(this, fn)
 
 fun <T> EmitterIface<SetDiff<T>>.toMoves() : EmitterIface<SetMove<T>> = object: EmitterIface<SetMove<T>> {
     override fun add(listener: (SetMove<T>) -> Unit): Trigger {

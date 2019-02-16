@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 class Login(
     parent: JobScope,
     val app: App,
-    val back: Action,
+    val back: Trigger,
     val loggingIn: Action,
     val loginFailed: suspend (dynamic) -> Unit
 ): UIBase<TopAndContent>(parent) {
@@ -46,3 +46,4 @@ class Login(
     }
 
 }
+

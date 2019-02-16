@@ -4,13 +4,17 @@ import common.removeFromParent
 import common.replaceWith
 import commonshr.Assign
 import commonshr.OptAssign
+import commonshr.invoke
 import commonshr.remAssign
 import commonui.insertAfter
 import domx.cls
+import killable.KillSet
+import killable.wrap
 import kotlinx.coroutines.channels.SendChannel
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
+import rx.Rx
 
 typealias Inbox = SendChannel<Any>
 
@@ -234,3 +238,11 @@ fun Slot.toHole(prepare: HTMLElement.() -> Unit = {}) = Hole(
     this
 )
 val Slot.hole get() = toHole()
+
+
+fun Slot.rx(ks: KillSet, fn: () -> Boolean) = Factory {
+    Rx(ks) { fn() }.forEach(ks) { v ->
+        this@rx %= if (v) this@Factory else null
+    }
+}
+

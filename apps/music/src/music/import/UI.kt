@@ -24,6 +24,11 @@ fun Import.ui() = TopAndContent(
         }
         title %= "Import MP3s"
         val inputContainer = node
+        slots.right.rx { pending() != 0 }.badge {
+            pill
+            warning
+            node %= "x"
+        }
         right.buttonGroup {
             m1
             if (webkitdirectorySupported) {
@@ -92,6 +97,15 @@ fun Import.ui() = TopAndContent(
                 }
             }
         }
+        right.dropdown {
+            bars
+            right
+            menu {
+
+            }
+
+
+        }
 
 
     }.node,
@@ -103,7 +117,7 @@ fun Import.ui() = TopAndContent(
 
         node.listenableList(
             kills,
-            importing
+            loadList
         ) { i -> i.rawView }
 
     }.node

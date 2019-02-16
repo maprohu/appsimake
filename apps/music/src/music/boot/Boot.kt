@@ -27,7 +27,7 @@ class Boot(
     parent: JobScope,
     from: BodyPath,
     idb: IDBDatabase,
-    localSongs: LocalSongs
+    val localSongs: LocalSongs
 ): ViewImpl<HTMLElement>(parent) {
     val body = from.body
     val path = BootPath(this)

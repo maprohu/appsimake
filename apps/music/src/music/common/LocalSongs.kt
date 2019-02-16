@@ -10,6 +10,7 @@ import commonui.widget.JobScope
 import indexeddb.*
 import kotlinx.coroutines.CompletableDeferred
 import music.Mp3Store
+import music.Playable
 import org.w3c.files.Blob
 import rx.RxMutableSet
 import rx.RxSet
@@ -96,6 +97,9 @@ class LocalSongs(parent: JobScope, val idb: IDBDatabase, initial: Set<String>): 
 
     }
 
+    suspend fun addMp3(playable: Playable) {
+        addMp3(playable.id, playable.blob)
+    }
     suspend fun addMp3(id: String, blob: Blob) {
         idb.writeMp3Store().put(blob, id).await()
         added(id)

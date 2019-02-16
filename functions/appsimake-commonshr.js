@@ -2240,10 +2240,20 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'InvokeApply',
     interfaces: []
   };
-  function invoke($receiver, fn) {
+  var invoke = defineInlineFunction('appsimake-commonshr.commonshr.invoke_fiuc92$', function ($receiver, fn) {
     fn($receiver);
     return $receiver;
+  });
+  function InvokeWith() {
   }
+  InvokeWith.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'InvokeWith',
+    interfaces: []
+  };
+  var invoke_0 = defineInlineFunction('appsimake-commonshr.commonshr.invoke_3lzs1f$', function ($receiver, fn) {
+    return fn($receiver);
+  });
   function toMoves$ObjectLiteral(this$toMoves) {
     this.this$toMoves = this$toMoves;
   }
@@ -2692,7 +2702,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function Counted$get$lambda(this$Counted) {
     return function () {
       var k = new Killables();
-      var $receiver = new Counted$Holder(this$Counted, this$Counted.create_0(k), k.kill);
+      var $receiver = new Counted$Holder(this$Counted, this$Counted.create_0(k.killSet), k.kill);
       this$Counted.current_0 = new Some($receiver);
       return $receiver;
     };
@@ -2703,15 +2713,77 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return Unit;
     };
   }
-  Counted.prototype.get_di35k5$ = function (ks) {
+  Counted.prototype.get_evkg98$ = function (ks) {
     var holder = this.current_0.getOrElse_skz6lt$(Counted$get$lambda(this));
     holder.count = holder.count + 1 | 0;
-    ks.plusAssign_o14v8n$(once(Counted$get$lambda$lambda(holder)));
+    plusAssign_0(ks, once(Counted$get$lambda$lambda(holder)));
     return holder.value;
   };
   Counted.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Counted',
+    interfaces: []
+  };
+  function RefCountMap(create) {
+    this.create = create;
+    this.map_0 = LinkedHashMap_init();
+  }
+  function RefCountMap$get$lambda$lambda(this$RefCountMap, closure$key) {
+    return function () {
+      var $receiver = this$RefCountMap.map_0;
+      var key = closure$key;
+      $receiver.remove_11rb$(key);
+      return Unit;
+    };
+  }
+  function RefCountMap$get$lambda$lambda_0(this$) {
+    return function () {
+      this$.count = this$.count - 1 | 0;
+      if (this$.count === 0) {
+        this$.kill();
+      }
+      return Unit;
+    };
+  }
+  RefCountMap.prototype.get_va0u9b$ = function (gks, key) {
+    var $receiver = this.map_0;
+    var tmp$;
+    var value = $receiver.get_11rb$(key);
+    if (value == null) {
+      var iks = new Killables();
+      iks.plusAssign_o14v8n$(RefCountMap$get$lambda$lambda(this, key));
+      var item = this.create(get_wrap(iks.killSet), key);
+      var answer = new RefCount(item, iks.kill);
+      $receiver.put_xwzc9p$(key, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    var $receiver_0 = tmp$;
+    $receiver_0.count = $receiver_0.count + 1 | 0;
+    plusAssign_0(gks, RefCountMap$get$lambda$lambda_0($receiver_0));
+    return $receiver_0.value;
+  };
+  RefCountMap.prototype.apply_bpsgc2$ = function (key, fn) {
+    var tmp$;
+    if ((tmp$ = this.map_0.get_11rb$(key)) != null) {
+      fn(tmp$.value);
+    }
+  };
+  RefCountMap.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RefCountMap',
+    interfaces: []
+  };
+  function RefCount(value, kill) {
+    this.value = value;
+    this.kill = kill;
+    this.count = 0;
+  }
+  RefCount.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RefCount',
     interfaces: []
   };
   function reportd(error) {
@@ -3209,6 +3281,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   HasKillSet.prototype.remAssign_7fncnf$ = function ($receiver, fn) {
     this.forEach_5mel8p$(this.rx_pn7ch0$(HasKillSet$remAssign$lambda(fn)), HasKillSet$remAssign$lambda_0($receiver));
   };
+  HasKillSet.prototype.containsRx_t3ffic$ = function ($receiver, value) {
+    return $receiver.containsRx_va0u9b$(this.kills, value);
+  };
   HasKillSet.$metadata$ = {
     kind: Kind_INTERFACE,
     simpleName: 'HasKillSet',
@@ -3225,7 +3300,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   WrapKillSet.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'WrapKillSet',
-    interfaces: [HasKillSet]
+    interfaces: [InvokeApply, HasKillSet]
   };
   function get_wrap($receiver) {
     return new WrapKillSet($receiver);
@@ -4212,6 +4287,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     this.sizeRx_n1qyhb$_0 = lazy(RxMutableSet$sizeRx$lambda(this));
     this.isEmptyRx_qqgpud$_0 = lazy(RxMutableSet$isEmptyRx$lambda(this));
     this.isNotEmptyRx_44lz1o$_0 = lazy(RxMutableSet$isNotEmptyRx$lambda(this));
+    this.containsRxs_3baepc$_0 = lazy(RxMutableSet$containsRxs$lambda(this));
   }
   RxMutableSet.prototype.contains_11rb$ = function (element) {
     return this.delegate_0.contains_11rb$(element);
@@ -4286,6 +4362,14 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return this.isNotEmptyRx_44lz1o$_0.value;
     }
   });
+  Object.defineProperty(RxMutableSet.prototype, 'containsRxs_0', {
+    get: function () {
+      return this.containsRxs_3baepc$_0.value;
+    }
+  });
+  RxMutableSet.prototype.containsRx_va0u9b$ = function (ks, value) {
+    return this.containsRxs_0.get_va0u9b$(ks, value);
+  };
   Object.defineProperty(RxMutableSet.prototype, 'size', {
     get: function () {
       return this.delegate_0.size;
@@ -4475,6 +4559,45 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function RxMutableSet$isNotEmptyRx$lambda(this$RxMutableSet) {
     return function () {
       return this$RxMutableSet.rxProperty_0(RxMutableSet$isNotEmptyRx$lambda$lambda(this$RxMutableSet));
+    };
+  }
+  function RxMutableSet$containsRxs$lambda$lambda(this$RxMutableSet) {
+    return function ($receiver, it) {
+      return new Var(this$RxMutableSet.contains_11rb$(it));
+    };
+  }
+  function RxMutableSet$containsRxs$lambda$lambda$lambda$lambda$lambda($receiver) {
+    $receiver.now = false;
+    return Unit;
+  }
+  function RxMutableSet$containsRxs$lambda$lambda$lambda$lambda$lambda_0($receiver) {
+    $receiver.now = true;
+    return Unit;
+  }
+  function RxMutableSet$containsRxs$lambda$lambda$lambda(this$) {
+    return function (d) {
+      var $receiver = d.removed;
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        this$.apply_bpsgc2$(element, RxMutableSet$containsRxs$lambda$lambda$lambda$lambda$lambda);
+      }
+      var $receiver_0 = d.added;
+      var tmp$_0;
+      tmp$_0 = $receiver_0.iterator();
+      while (tmp$_0.hasNext()) {
+        var element_0 = tmp$_0.next();
+        this$.apply_bpsgc2$(element_0, RxMutableSet$containsRxs$lambda$lambda$lambda$lambda$lambda_0);
+      }
+      return Unit;
+    };
+  }
+  function RxMutableSet$containsRxs$lambda(this$RxMutableSet) {
+    return function () {
+      var $receiver = new RefCountMap(RxMutableSet$containsRxs$lambda$lambda(this$RxMutableSet));
+      this$RxMutableSet.diffs.plusAssign_qlkmfe$(RxMutableSet$containsRxs$lambda$lambda$lambda($receiver));
+      return $receiver;
     };
   }
   RxMutableSet.$metadata$ = {
@@ -4729,6 +4852,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.SetRemoved = SetRemoved;
   package$commonshr.InvokeApply = InvokeApply;
   package$commonshr.invoke_fiuc92$ = invoke;
+  package$commonshr.InvokeWith = InvokeWith;
+  package$commonshr.invoke_3lzs1f$ = invoke_0;
   package$commonshr.toMoves_k2zy3$ = toMoves;
   package$commonshr.process_7c27tl$ = process;
   package$commonshr.toMap_wmk844$ = toMap;
@@ -4737,6 +4862,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.discardExecutor_e9pf1l$ = discardExecutor;
   package$commonshr.executor_e9pf1l$ = executor;
   package$commonshr.Counted = Counted;
+  package$commonshr.RefCountMap = RefCountMap;
+  package$commonshr.RefCount = RefCount;
   package$commonshr.reportd_za3rmp$ = reportd;
   package$commonshr.report_s8jyv4$ = report;
   package$commonshr.remAssign_t3h96y$ = remAssign;
@@ -4838,6 +4965,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   WrapKillSet.prototype.map_i8ud5a$ = HasKillSet.prototype.map_i8ud5a$;
   WrapKillSet.prototype.rxClass_wqb4ha$ = HasKillSet.prototype.rxClass_wqb4ha$;
   WrapKillSet.prototype.remAssign_7fncnf$ = HasKillSet.prototype.remAssign_7fncnf$;
+  WrapKillSet.prototype.containsRx_t3ffic$ = HasKillSet.prototype.containsRx_t3ffic$;
   RxVal.prototype.map_tx8wzh$ = RxIface.prototype.map_tx8wzh$;
   RxVal.prototype.forEach_yk5nc8$ = RxIface.prototype.forEach_yk5nc8$;
   RxVal.prototype.fold_h2yxzx$ = RxIface.prototype.fold_h2yxzx$;

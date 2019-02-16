@@ -4,6 +4,7 @@ import common.*
 import commonlib.CollectionWrap
 import commonshr.Counted
 import commonshr.SetDiff
+import commonshr.plusAssign
 import firebase.firestore.*
 import firebaseshr.withCollection
 import killable.Killable

@@ -16,7 +16,9 @@ fun Login.ui() = TopAndContent(
             m1p2
             secondary
             fa.chevronLeft
-            click(this@ui.back)
+            click {
+                this@ui.back()
+            }
         }
         middle {
             h5 {

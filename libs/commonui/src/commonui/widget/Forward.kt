@@ -60,7 +60,7 @@ abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
         }
     }
 
-    val back: Action = { forward.switchTo(null) }
+    val back = { exec { forward.switchTo(null) } }
 }
 
 class ViewWithForwardImpl<V: Any, F: JobScopeWithView<V>, B: HasView<V>>(

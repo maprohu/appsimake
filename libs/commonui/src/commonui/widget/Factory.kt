@@ -73,6 +73,7 @@ class Factory(private val after: HTMLElement?.() -> Unit = {}) {
     val stack get() = Stack().applied
     val empty get() = null.apply(after)
     val toasts get() = Toasts().applied
+    val badge get() = Badge().applied
 
 
 }

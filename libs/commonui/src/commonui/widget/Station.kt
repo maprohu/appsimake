@@ -4,6 +4,7 @@ import common.None
 import common.Optional
 import common.Some
 import commonshr.*
+import commonui.UiApi
 import killable.HasKillSet
 import killable.Killables
 import kotlinx.coroutines.CoroutineScope
@@ -44,7 +45,7 @@ val JobScope.createKills get() = Killables().apply {
 }.killSet
 open class JobKillsImpl(
     coroutineContext: Job = Job()
-): JobScopeImpl(coroutineContext), HasKillSet {
+): JobScopeImpl(coroutineContext), HasKillSet, UiApi {
     constructor(parent: JobScope): this(Job(parent.coroutineContext))
 
     override val kills = createKills
