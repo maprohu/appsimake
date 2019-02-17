@@ -2,9 +2,12 @@ package music.boot
 
 import common.obj
 import commonfb.*
+import commonlib.private
 import commonshr.Action
 import commonui.usericon.UnknownUserSrc
 import commonui.widget.*
+import firebase.firestore.collectionRef
+import firebase.firestore.flushQueries
 import indexeddb.IDBDatabase
 import killable.*
 import kotlinx.coroutines.*
@@ -15,7 +18,11 @@ import music.content.UserUnknown
 import music.data.*
 import music.loggedin.LoggedIn
 import music.notloggedin.NotLoggedIn
+import music.player.Player
 import music.player.Visible
+import musiclib.musicLib
+import musiclib.songs
+import musiclib.usersongs
 import org.w3c.dom.HTMLElement
 import rx.*
 
@@ -81,14 +88,7 @@ class Boot(
         }
     )
 
-    val content = viewsAny(UserUnknown(this), contentHole).viewFromRx(userState) { u ->
-        when (u) {
-            is UserState.NotLoggedIn -> fwd { NotLoggedIn(this, u.app, path) }
-            is UserState.LoggedIn -> fwd { LoggedIn(this, path) }
-            else -> UserUnknown(this)
-        }
-
-    }
+    val content = viewsAny(UserUnknown(this), contentHole)
 
     val userSongs = wrap<UserSongs?>(null)
 
@@ -104,8 +104,10 @@ class Boot(
         localSongs
     )
 
+
+
     val player = slots.player.viewsAny().viewFromRx(songSource) { s ->
-        s?.invoke()?.let { Visible(path) }
+        s?.invoke()?.let { Visible(this).apply { loadNextSong(false) } }
     }
 
     val songInfoSource = wrap(localSongInfoSource())
@@ -119,6 +121,7 @@ class Boot(
         GlobalScope.launch {
             val app = FB.app
             val db = FB.db
+            val functions = FB.functions()
 
             db.enablePersistence(
                 obj {
@@ -128,8 +131,18 @@ class Boot(
 
             db.disableNetwork().await()
 
-            runUserState().forEach { userState.now = it }
 
+            runUserState(app).forEach { st ->
+                userState.now = st
+            }
+
+            content.viewFromRx(userState) { u ->
+                when (u) {
+                    is UserState.NotLoggedIn -> fwd { NotLoggedIn(this, app, path) }
+                    is UserState.LoggedIn -> fwd { LoggedIn(this, path, u.user, app, db, functions) }
+                    else -> UserUnknown(this@Boot)
+                }
+            }
 
             user.toLatestUid(kills, idb).apply {
                 rxv.forEach { uid ->
@@ -161,6 +174,30 @@ class Boot(
         }
     }
 
+
+    fun like(id: String) {
+        userSongs.now.item?.let { us ->
+            us.like(id)
+        }
+    }
+    fun dontLike(id: String) {
+        userSongs.now.item?.let { us ->
+            us.dontLike(id)
+        }
+    }
+    fun play(playable: Playable) {
+        exec {
+            player.switchToView {
+                Visible(this).apply {
+                    exec {
+                        player.switchTo(
+                            Player(this, playable, true)
+                        )
+                    }
+                }
+            }
+        }
+    }
 
 }
 

@@ -7,7 +7,7 @@ import commonshr.*
 import domx.*
 import kotlin.browser.document
 
-class ButtonGroup: ScreenWrap {
+class ButtonGroup: ScreenWrap() {
     override val node = document.div {
         cls {
             btnGroup

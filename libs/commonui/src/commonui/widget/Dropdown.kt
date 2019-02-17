@@ -9,7 +9,7 @@ import domx.*
 import fontawesome.*
 import kotlin.browser.document
 
-class DropdownMenuItem(): ScreenWrap {
+class DropdownMenuItem(): ScreenWrap() {
     override val node = document.a {
         href = "#"
         cls {
@@ -27,7 +27,7 @@ class DropdownMenuItem(): ScreenWrap {
     }
 
 }
-class DropdownMenu(): ScreenWrap {
+class DropdownMenu(): ScreenWrap() {
     override val node = document.div {
         cls.dropdownMenu
     }
@@ -40,7 +40,7 @@ class DropdownMenu(): ScreenWrap {
     val divider get() = node.div { cls.dropdownDivider }
 
 }
-class Dropdown(): ScreenWrap {
+class Dropdown(): ScreenWrap() {
     override val node = document.div {
         cls.dropdown
     }

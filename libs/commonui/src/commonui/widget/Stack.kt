@@ -7,7 +7,7 @@ import styles.leftRightTopBottom0
 import styles.pointerEventsNone
 import kotlin.browser.document
 
-class Stack(): ScreenWrap {
+class Stack(): ScreenWrap() {
     override val node = document.div {
         cls.positionRelative
     }

@@ -589,3 +589,43 @@ suspend fun <T: HasFBProps<T>> CollectionWrap<T>.toRxSetWithLookup(
         create
     )
 }
+
+suspend fun CoroutineScope.flushDocs(
+    vararg docs: DocumentReference
+) {
+    coroutineScope {
+        docs.forEach { doc ->
+            launch {
+                val cd = CompletableDeferred<Unit>()
+                doc.onSnapshot(
+                    obj {
+                        this.includeMetadataChanges = true
+                    },
+                    { ds2 ->
+                        if (!ds2.metadata.hasPendingWrites) {
+                            cd.complete(Unit)
+                        }
+                    },
+                    { cd.completeExceptionally(it) }
+                )
+                cd.await()
+            }
+        }
+    }
+}
+suspend fun CoroutineScope.flushQueries(
+    vararg queries: Query
+) {
+    coroutineScope {
+        queries.forEach { q ->
+            launch {
+                val qs = q.get().await()
+                flushDocs(
+                    *qs.docs.filter {
+                        it.metadata.hasPendingWrites
+                    }.map { it.ref }.toTypedArray()
+                )
+            }
+        }
+    }
+}

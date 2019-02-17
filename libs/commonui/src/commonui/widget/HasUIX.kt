@@ -3,6 +3,7 @@ package commonui.widget
 import commonshr.Action
 import commonshr.Exec
 import domx.clickEvent
+import domx.rxEnabled
 import org.w3c.dom.events.EventTarget
 
 interface HasUIX {

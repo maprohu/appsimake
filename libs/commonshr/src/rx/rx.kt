@@ -414,7 +414,7 @@ fun Element.rxClass(
 fun Element.rxClass(
     ks: KillSet,
     style: String,
-    fn: () -> Boolean
+    fn: HasKillSet.() -> Boolean
 )  {
     val rxv = Rx(ks) { fn() }
     rxClass(ks, style, rxv)

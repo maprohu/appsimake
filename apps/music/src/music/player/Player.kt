@@ -5,6 +5,7 @@ import commonshr.*
 import commonui.widget.*
 import domx.*
 import music.Playable
+import musiclib.UserSongState
 import org.w3c.dom.url.URL
 import kotlin.browser.document
 import kotlin.math.max
@@ -15,11 +16,10 @@ open class PlayerPath(
 ): VisiblePath(player.visible)
 
 class Player(
-    path: VisiblePath,
+    val visible: Visible,
     val playable: Playable,
     startPlaying: Boolean
-): ExecImpl(path.visible) {
-    val visible = path.visible
+): ExecImpl(visible) {
     val path = PlayerPath(this)
 
     val audio = document.audio {
@@ -34,6 +34,10 @@ class Player(
         load()
     }
 
+    val state = path.boot.userSongs.map { usi ->
+        usi.item?.let { us -> us.get(playable.id)() } ?: UserSongState.New
+    }
+
 
     suspend fun nextTrack() { next() }
 
@@ -42,10 +46,8 @@ class Player(
     }
 
     suspend fun dontLike() {
-        path.boot.userSongs.now.item?.let { us ->
-            us.dontLike(playable.id)
-            next()
-        }
+        path.boot.dontLike(playable.id)
+        next()
     }
 
     fun readCounterNow() {

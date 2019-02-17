@@ -8,6 +8,8 @@ import commonui.widget.*
 import domx.*
 import fontawesome.*
 import fontawesome.folderOpen
+import kotlinx.coroutines.cancel
+import musiclib.UserSongState
 import musiclib.fixedArtist
 import musiclib.fixedTitle
 import org.w3c.dom.asList
@@ -24,10 +26,12 @@ fun Import.ui() = TopAndContent(
         }
         title %= "Import MP3s"
         val inputContainer = node
-        slots.right.rx { pending() != 0 }.badge {
+        right.badge {
+            visible { work.pending() != 0 }
+            cls.p1
             pill
             warning
-            node %= "x"
+            node %= { work.pending().toString() }
         }
         right.buttonGroup {
             m1
@@ -43,7 +47,7 @@ fun Import.ui() = TopAndContent(
                     onchange = {
                         this@input.files?.let { fl ->
                             val list = fl.asList().toList()
-                            exec {
+                            uix {
                                 load(list)
                             }
                         }
@@ -62,7 +66,6 @@ fun Import.ui() = TopAndContent(
                             m0
                         }
                     }
-
                 }
             }
             inputContainer.input {
@@ -75,8 +78,7 @@ fun Import.ui() = TopAndContent(
                 onchange = {
                     this@input.files?.let { fl ->
                         val list = fl.asList().toList()
-                        console.dir(list)
-                        exec {
+                        uix {
                             load(list)
                         }
                     }
@@ -101,13 +103,24 @@ fun Import.ui() = TopAndContent(
             bars
             right
             menu {
-
+                item {
+                    node.rxClass(Cls.disabled) { loadable.isEmptyRx() }
+                    fa.fileImport
+                    text %= "Start Importing"
+                    click {
+                        startImporting()
+                    }
+                }
+                item {
+                    node.rxClass(Cls.disabled) { loadList.isEmptyRx() }
+                    fa.trashAlt
+                    text %= "Clear List"
+                    click {
+                        clear()
+                    }
+                }
             }
-
-
         }
-
-
     }.node,
     content = factory.scrollPane {
         cls {
@@ -115,13 +128,11 @@ fun Import.ui() = TopAndContent(
             flexColumn
         }
 
-        node.listenableList(
+        pane.listenableList(
             kills,
             loadList
         ) { i -> i.rawView }
-
     }.node
-
 )
 
 
@@ -131,6 +142,8 @@ fun ImportFile.ui() = document.div {
         p1
         border
         rounded
+        dFlex
+        flexColumn
     }
     dl {
         cls.m1
@@ -149,6 +162,61 @@ fun ImportFile.ui() = document.div {
 
         dt %= "Duration"
         dd %= { tag().secs.initial().map { it.roundToInt().formatSecs }.getOrDefault("<unknown>") }
+    }
+    div {
+        cls {
+            dFlex
+            flexRow
+            justifyContentEnd
+        }
+        widget.insert.buttonGroup {
+            m1
+            button {
+                p2
+                secondary
+                fa.play
+                click {
+                    path.boot.play(playable)
+                }
+            }
+            button {
+                p2
+                fa.thumbsUp
+                node.rxClass {
+                    if (state() == UserSongState.Like) Cls.btnPrimary
+                    else Cls.btnSecondary
+                }
+                click {
+                    path.boot.like(playable.id)
+                }
+            }
+            button {
+                p2
+                secondary
+                fa.thumbsDown
+                click {
+                    path.boot.dontLike(playable.id)
+                }
+            }
+            button {
+                p2
+                secondary
+                fa.fileImport
+                rxEnabled { !importing() }
+                click {
+                    startImporting()
+                }
+            }
+            button {
+                p2
+                secondary
+                fa.ban
+                click {
+                    cancel()
+                }
+            }
+
+        }
     }
 
 

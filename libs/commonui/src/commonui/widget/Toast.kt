@@ -10,7 +10,7 @@ import org.w3c.dom.*
 import styles.*
 import kotlin.browser.document
 
-class Toasts(): ScreenWrap {
+class Toasts(): ScreenWrap() {
     override val node = document.div {
         cls {
             dFlex
@@ -28,7 +28,7 @@ class Toasts(): ScreenWrap {
 
 
 typealias ToastFn = Toast.() -> Unit
-class Toast(): ScreenWrap {
+class Toast(): ScreenWrap() {
     override val node = document.a {
         cls {
             alert

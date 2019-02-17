@@ -1,12 +1,15 @@
 package commonui.widget
 
-import commonshr.AddRemove
 import commonshr.InvokeApply
+import commonshr.invoke
 import commonshr.remAssign
+import commonui.uiapi
 import domx.*
+import killable.HasKillSet
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
+import rx.Var
 import kotlin.browser.document
 
 //data class FactoryAfter(
@@ -33,33 +36,54 @@ import kotlin.browser.document
 //
 //}
 
+data class FactoryAfter(
+    val element: HTMLElement?.() -> Unit = {},
+    val wrap: ScreenWrap.() -> Unit = {}
+) {
+    fun withElement(fn: HTMLElement?.() -> Unit) = copy(
+        element = {
+            element()
+            fn()
+        }
+    )
+    fun withWrap(fn: ScreenWrap.() -> Unit) = copy(
+        wrap = {
+            wrap()
+            fn()
+        }
+    )
+}
+
 val factory  = Factory()
-class Factory(private val after: HTMLElement?.() -> Unit = {}) {
-    infix fun with(fn: HTMLElement?.() -> Unit) = Factory {
-        after()
-        fn()
-    }
-    infix fun with(fn: HTMLElement.() -> Unit) = Factory {
-        after()
-        if (this != null) fn()
-    }
-//    val visible get() = with { visible() }
-//    fun withElement(fn: HTMLElement.() -> Unit) = with { element(fn) }
-//    fun withSlot(slot: Slot) = Factory(
-//        Parent(slot, parent.inbox),
-//        after
-//    )
+class Factory(
+    private val after: FactoryAfter = FactoryAfter()
+): InvokeApply {
+    infix fun with(fn: HTMLElement?.() -> Unit) = Factory(
+        after.withElement(fn)
+    )
+    infix fun with(fn: HTMLElement.() -> Unit) = Factory(
+        after.withElement {
+            after.element(this)
+            if (this != null) fn()
+        }
+    )
+    infix fun withWrap(fn: ScreenWrap.() -> Unit) = Factory(
+        after.withWrap(fn)
+    )
 
     val <T: HTMLElement> T.wrapped get() = HTMLElementWrap(this)
 
-//    private val <T: HasVisibility> T.applied get() = apply(after.hasVisibility)
-//    private val <T: ScreenWrap> T.applied get() = apply(after.screenFn)
-    val <T: HasHTMLElement> T.applied get() = apply{ node.apply(after) }
+    val <T: ScreenWrap> T.applied get() = apply {
+        node.apply(after.element)
+        apply(after.wrap)
+    }
+
     val <T: HTMLElement> T.applied get() = apply { wrapped.applied }
 
     inner class Wraps {
         val div get() = document.div.applied
         fun div(fn: HTMLDivElement.() -> Unit) = document.div.apply(fn).wrapped.applied
+        val span get() = document.span.wrapped.applied
     }
     val wraps = Wraps()
 
@@ -71,7 +95,6 @@ class Factory(private val after: HTMLElement?.() -> Unit = {}) {
     val scrollPane get() = ScrollPane().applied
     val hourglass get() = Hourglass().applied
     val stack get() = Stack().applied
-    val empty get() = null.apply(after)
     val toasts get() = Toasts().applied
     val badge get() = Badge().applied
 
@@ -145,7 +168,7 @@ class Factory(private val after: HTMLElement?.() -> Unit = {}) {
 //fun <T: ScreenWrap> T.visible() = apply { parent %= node }
 //fun <T: ScreenWrap> T.hidden() = apply { parent %= null }
 
-class HTMLElementWrap<T: HTMLElement>(override val node: T) : HasHTMLElement
+class HTMLElementWrap<T: HTMLElement>(override val node: T) : ScreenWrap()
 
 //open class Parent(val parent: Slot, inbox: Inbox): InboxWrap(inbox) {
 //    val factory get() = Factory(this)
@@ -166,6 +189,18 @@ class SlotVar(
 //    return sv.node
 //}
 
-interface ScreenWrap: HasHTMLElement, InvokeApply {
+abstract class ScreenWrap: HasHTMLElement, InvokeApply {
+    val target = Var<Slot?>(null)
+
+    fun HasKillSet.visible(fn: () -> Boolean) {
+        rx {
+            target()?.let { t ->
+                uiapi {
+                    t %= { if (fn()) node else null }
+                }
+            }
+        }
+    }
+
     val <T: HasHTMLElement> T.append: T get() = apply { this@ScreenWrap.node.widget %= this@apply.node }
 }

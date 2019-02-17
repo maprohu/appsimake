@@ -6,7 +6,7 @@ import commonshr.invoke
 import domx.cls
 import kotlin.browser.document
 
-class Screen(): ScreenWrap  {
+class Screen(): ScreenWrap()  {
     override val node = document.column {
         cls.flexGrow1
     }

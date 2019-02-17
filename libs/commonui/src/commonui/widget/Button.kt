@@ -7,7 +7,7 @@ import fontawesome.*
 import org.w3c.dom.*
 import kotlin.browser.document
 
-class Button(): ScreenWrap {
+class Button(): ScreenWrap() {
     override val node = document.button {
         cls {
             btn

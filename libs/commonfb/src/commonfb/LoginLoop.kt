@@ -4,6 +4,7 @@ import commonshr.*
 import commonui.widget.*
 import firebase.User
 import firebase.app.App
+import firebase.firestore.Firestore
 import killable.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
@@ -15,8 +16,10 @@ import rx.Var
 
 sealed class UserState {
     object Unknown: UserState()
-    data class NotLoggedIn(val app: App): UserState()
-    data class LoggedIn(val app: App, val user: User): UserState()
+    object NotLoggedIn: UserState()
+    data class LoggedIn(
+        val user: User
+    ): UserState()
 }
 fun HasKillSet.runUserState(
     app: App = FB.app,
@@ -36,14 +39,14 @@ fun HasKillSet.runUserState(
     kills += app.auth().onAuthStateChanged(
         { u ->
             ch += if (u == null) {
-                UserState.NotLoggedIn(app)
+                UserState.NotLoggedIn
             } else {
-                UserState.LoggedIn(app, u)
+                UserState.LoggedIn(u)
             }
         },
         { e ->
             report(e)
-            ch += UserState.NotLoggedIn(app)
+            ch += UserState.NotLoggedIn
         }
     )
 

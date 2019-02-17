@@ -8,6 +8,7 @@ import music.boot.BootPath
 import music.import.Import
 import music.loggedin.LoggedIn
 import music.loggedin.LoggedInPath
+import rx.Var
 
 open class DatabasePath(
     val database: Database
@@ -19,9 +20,11 @@ class Database(
 ): ForwardBase<TopAndContent>(factory) {
     val path = DatabasePath(this)
 
+
     override val rawView = ui()
 
     suspend fun import() {
         forward %= Import(this)
     }
+
 }

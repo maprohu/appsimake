@@ -11,7 +11,7 @@ import org.w3c.dom.Element
 import org.w3c.dom.Node
 import kotlin.browser.document
 
-class Topbar(): ScreenWrap {
+class Topbar(): ScreenWrap() {
     override val node = document.row {
         cls {
             navTabs
@@ -30,7 +30,7 @@ class Topbar(): ScreenWrap {
     inner class Slots {
         val left = slot
         val middle = slot
-        val right = slot
+        val right = node.slots
     }
     val slots = Slots()
 
@@ -49,7 +49,7 @@ class Topbar(): ScreenWrap {
         }
     }
 
-    val right = slots.right.insert
+    val right get() = slots.right.slot.insert
 
 //    fun backTitle(msg: Any, label: String) {
 //        left.button(msg) {

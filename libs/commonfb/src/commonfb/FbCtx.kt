@@ -15,6 +15,7 @@ import firebase.messaging.Messaging
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
 import kotlin.js.Promise
 
 object FB {
@@ -39,8 +40,7 @@ object FB {
     }
 
     suspend fun functions(): Functions {
-        setupMessaging()
-        return app.functions()
+        return functionDeferred.await()
     }
 
     private val messagingDeferred by lazy {
@@ -54,8 +54,15 @@ object FB {
         }
     }
 
-    suspend fun setupMessaging(): Messaging {
+    suspend fun messaging(): Messaging {
         return messagingDeferred.await()
+    }
+
+    val functionDeferred by lazy {
+        GlobalScope.async {
+            messagingDeferred.await()
+            app.functions()
+        }
     }
 
 

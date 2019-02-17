@@ -6,7 +6,7 @@ import domx.*
 import styles.scrollVertical
 import kotlin.browser.document
 
-class Badge: ScreenWrap {
+class Badge: ScreenWrap() {
 
     override val node = document.span {
         cls {

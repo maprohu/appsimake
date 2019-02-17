@@ -16,10 +16,12 @@ import kotlin.browser.window
 import kotlin.js.Promise
 
 fun main() {
+
     GlobalScope.launch {
         APP.registerServiceWorker()
         Boot.create()
     }
+
 }
 
 

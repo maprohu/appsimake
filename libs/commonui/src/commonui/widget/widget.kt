@@ -2,10 +2,7 @@ package commonui.widget
 
 import common.removeFromParent
 import common.replaceWith
-import commonshr.Assign
-import commonshr.OptAssign
-import commonshr.invoke
-import commonshr.remAssign
+import commonshr.*
 import commonui.insertAfter
 import domx.cls
 import killable.KillSet
@@ -36,9 +33,12 @@ operator fun <T> Msg<T>.invoke(msg: T) = wrap(msg)
 
 private const val SlotsAttribute = "appsimakeSlots"
 typealias Slot = OptAssign<Node>
-val Node.slots : Slots
+val Node.slots : SlotHoles
     get() = asDynamic()[SlotsAttribute].unsafeCast<Slots?>()
-        ?: Slots(this).also { asDynamic()[SlotsAttribute] = it }
+        ?: Slots(
+            SlotsOwner.NodeRef(this),
+            PrevRef.of(lastChild)
+        ).also { asDynamic()[SlotsAttribute] = it }
 
 
 val Node.append : Slot
@@ -56,23 +56,67 @@ val Node.append : Slot
         }
     }
 
-class Slots(
-    private val node: Node
-) {
-    operator fun invoke(fn: Slots.() -> Unit) = apply(fn)
+internal sealed class SlotsOwner(val node: Node) {
+    abstract fun lastRef(slots: Slots): PrevRef
+    class NodeRef(node: Node): SlotsOwner(node) {
+        override fun lastRef(slots: Slots): PrevRef {
+            val lc = node.lastChild
+            return when (lc) {
+                null, slots.lastNode -> slots.list.lastOrNull()
+                else -> null
+            } ?: PrevRef.of(lc)
+        }
+    }
 
-    private val list = mutableListOf<SlotItem>()
+    class SlotsRef(val slots: Slots): SlotsOwner(slots.owner.node) {
+        override fun lastRef(slots: Slots): PrevRef = slots.list.lastOrNull() ?: slots.prev
+    }
+}
 
-    private inner class SlotItem(
-        prev: Ref
-    ) {
+interface SlotHoles: InvokeApply {
+    val slot: Slot
+    val slots: SlotHoles
+}
+internal abstract class PrevRef {
+    abstract val lastNode: Node?
+
+    object First: PrevRef() {
+        override val lastNode = null
+    }
+    class NodeRef(override val lastNode: Node): PrevRef()
+
+    companion object {
+        fun of(node: Node?) = node?.let(::NodeRef) ?: First
+    }
+}
+
+internal abstract class SlotsElement: PrevRef() {
+    abstract val prev: PrevRef
+    val prevNode get() = prev.lastNode
+}
+internal class Slots(
+    internal val owner: SlotsOwner,
+    override val prev: PrevRef
+): SlotsElement(), SlotHoles {
+
+    val lastRef get() = owner.lastRef(this)
+
+    internal val list = mutableListOf<SlotsElement>()
+
+    override val lastNode: Node?
+        get() = (list.lastOrNull() ?: prev).lastNode
+
+    internal class SlotItem(
+        val slots: Slots,
+        override val prev: PrevRef
+    ): SlotsElement() {
         var current: Node? = null
         val setter: Slot = { n ->
             val curr = current
             when {
                 curr == n -> {}
                 curr == null && n != null -> {
-                    node.insertAfter(n, prevNode())
+                    slots.owner.node.insertAfter(n, prevNode)
                 }
                 curr != null && n == null -> {
                     curr.removeFromParent()
@@ -85,46 +129,24 @@ class Slots(
             current = n
         }
 
-        val prevNode: () -> Node? = when (prev) {
-            Ref.First -> ({ null })
-            is Ref.NodeRef -> ({ prev.node })
-            is Ref.SlotRef -> ({ prev.item.current ?: prev.item.prevNode() })
-        }
+        override val lastNode: Node? get() = current ?: prev.lastNode
 
-        fun ref(): Ref {
-            val lc = node.lastChild
-            return when (lc) {
-                null, prevNode() -> Ref.SlotRef(this)
-                else -> Ref.NodeRef(lc)
-            }
-        }
     }
 
-    private fun ref(): Ref {
-        return if (list.isNotEmpty()) {
-            list.last().ref()
-        } else {
-            Ref.of(node.lastChild)
-        }
-    }
+    override val slot: Slot
+        get() = SlotItem(this, lastRef).also { list += it }.setter
 
-    private sealed class Ref {
-        object First: Ref()
-        class NodeRef(val node: Node): Ref()
-        class SlotRef(val item: SlotItem): Ref()
-
-        companion object {
-            fun of(node: Node?) = node?.let(::NodeRef) ?: First
-        }
-    }
-
-    val slot: Slot
-        get() = SlotItem(ref()).also { list += it }.setter
+    override val slots: SlotHoles
+        get() = Slots(SlotsOwner.SlotsRef(this), lastRef).also { list += it }
 
 }
 
 val Node.widget get() = slots.slot
 val Node.hole get() = slots.slot.hole
+
+val Node.insert get() = Factory() with {
+    this?.let { appendChild(this) }
+}
 
 fun Node.widget(ps: Widget) { ps.slot %= widget }
 
@@ -222,6 +244,8 @@ val Slot.insert: Factory
     get() {
         return Factory() with {
             this@insert %= this
+        } withWrap {
+            target.now = this@insert
         }
     }
 
@@ -240,9 +264,10 @@ fun Slot.toHole(prepare: HTMLElement.() -> Unit = {}) = Hole(
 val Slot.hole get() = toHole()
 
 
-fun Slot.rx(ks: KillSet, fn: () -> Boolean) = Factory {
+fun Slot.visibility(ks: KillSet, fn: () -> Boolean) = Factory() with {
+    val element = this
     Rx(ks) { fn() }.forEach(ks) { v ->
-        this@rx %= if (v) this@Factory else null
+        this@visibility %= if (v) element else null
     }
 }
 

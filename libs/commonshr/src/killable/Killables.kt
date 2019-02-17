@@ -79,6 +79,7 @@ interface HasKillSet {
     fun <T> RxIface<T>.forEach(fn: HasKillSet.(T) -> Unit) = forEach(kills, fn)
     fun <T, S> RxIface<T>.map(fn: HasKillSet.(T) -> S) = map(kills, fn)
     fun Element.rxClass(fn: HasKillSet.() -> String) = rxClass(kills, fn)
+    fun Element.rxClass(stl: String, fn: HasKillSet.() -> Boolean) = rxClass(kills, stl, fn)
 
     operator fun HTMLElement.remAssign(fn: () -> String) {
         rx { fn() }.forEach { this@remAssign.innerText = it }

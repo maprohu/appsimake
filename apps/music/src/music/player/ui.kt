@@ -4,6 +4,7 @@ import bootstrap.*
 import common.obj
 import common.toOptional
 import commonshr.*
+import commonui.faButton
 import commonui.faButtonSpan
 import commonui.widget.*
 import commonui.widget.Slot
@@ -223,21 +224,33 @@ fun Visible.ui() = Factory().run {
                     m1
                     btnGroup
                 }
-                mediaButton(Fa.thumbsUp, null) {
+                button {
+                    cls {
+                        btn
+                    }
                     likeButtonsDisabled.forEach { disabled = it }
                     rxClass {
                         if (state() == UserSongState.Like) Cls.btnPrimary
-                        else Cls.btnOutlinePrimary
+                        else Cls.btnSecondary
+                    }
+                    faButtonSpan(Fa.thumbsUp) {
+                        cls.fa.x2
                     }
                     click {
                         p?.like()
                     }
                 }
-                mediaButton(Fa.thumbsDown, null) {
+                button {
+                    cls {
+                        btn
+                    }
                     likeButtonsDisabled.forEach { disabled = it }
                     rxClass {
                         if (state() == UserSongState.DontLike) Cls.btnPrimary
-                        else Cls.btnOutlinePrimary
+                        else Cls.btnSecondary
+                    }
+                    faButtonSpan(Fa.thumbsDown) {
+                        cls.fa.x2
                     }
                     click {
                         p?.dontLike()

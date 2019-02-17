@@ -1,7 +1,9 @@
 package music.import
 
 import common.*
+import commonshr.executor
 import commonshr.plusAssign
+import commonshr.withCounter
 import commonui.widget.TopAndContent
 import commonui.widget.UIBase
 import music.Playable
@@ -24,7 +26,7 @@ class Import(
 ): UIBase<TopAndContent>(from) {
     val path = ImportPath(this)
 
-    val pending = Var(0)
+    val work = executor().withCounter
 
     val loadable = RxMutableSet<ImportFile>()
     val loadList = ListenableMutableList<ImportFile>()
@@ -36,24 +38,23 @@ class Import(
     }
 
     suspend fun load(list: List<File>) {
-        pending.transform { it + list.size }
-        list.forEach { file ->
-            val id = file.readAsArrayBuffer().hash()
+        list.filter { it.name.endsWith(".mp3") }.forEach { file ->
+            work.exec {
+                val id = file.readAsArrayBuffer().hash()
 
-            if (id !in loadIds) {
-                ImportFile(
-                    this,
-                    file,
-                    Playable(id, file)
-                ).apply {
-                    loadList += this
-                    kills += {
-                        loadList -= this
+                if (id !in loadIds) {
+                    ImportFile(
+                        this,
+                        file,
+                        Playable(id, file)
+                    ).apply {
+                        loadList += this
+                        kills += {
+                            loadList -= this
+                        }
                     }
                 }
             }
-
-            pending.transform { it - 1 }
         }
     }
 
@@ -63,7 +64,11 @@ class Import(
         }
     }
 
-
+    fun clear() {
+        loadList.forEach {
+            it.coroutineContext.cancel()
+        }
+    }
 }
 
 class ImportFile(
@@ -78,15 +83,16 @@ class ImportFile(
             path.import.loadable.apply {
                 if (i) {
                     remove(this@ImportFile)
-                    path.import.pending.transform { it + 1 }
-                    kills += {
-                        import.pending.transform { it - 1 }
-                    }
-                    exec {
+                    path.import.work.exec {
                         path.boot.localSongs.addMp3(playable)
                     }
                 }
-                else add(this@ImportFile)
+                else {
+                    add(this@ImportFile)
+                    kills += {
+                        remove(this@ImportFile)
+                    }
+                }
             }
         }
     }

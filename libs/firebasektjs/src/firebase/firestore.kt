@@ -116,7 +116,20 @@ external interface DocumentReference {
     fun onSnapshot(
             onNext: (DocumentSnapshot) -> Unit
     ) : () -> Unit
+    fun onSnapshot(
+        options: SnapshotListenOptions,
+        onNext: (DocumentSnapshot) -> Unit,
+        onError: (Throwable) -> Unit
+    ) : () -> Unit
 
+
+}
+
+// https://firebase.google.com/docs/reference/js/firebase.firestore.SnapshotListenOptions?authuser=0
+external interface SnapshotListenOptions {
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.SnapshotListenOptions?authuser=0#~includeMetadataChanges
+    var includeMetadataChanges: Boolean
 
 }
 

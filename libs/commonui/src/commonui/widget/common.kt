@@ -11,6 +11,7 @@ class Text(parent: Node): InvokeApply {
     val cls = node.cls
     operator fun remAssign(v: String) { node %= v }
 }
+
 class Icon(parent: Node): InvokeApply {
     val node = parent.span
     val fa by lazy { node.cls.fa }

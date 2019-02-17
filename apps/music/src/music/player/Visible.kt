@@ -38,9 +38,8 @@ open class VisiblePath(
 ): BootPath(visible.boot)
 
 class Visible(
-    path: BootPath
-): UIBase<HTMLElement>(path.boot) {
-    val boot = path.boot
+    val boot: Boot
+): UIBase<HTMLElement>(boot) {
     val path = VisiblePath(this)
 
     val player = switchOpt<Player>()
@@ -68,12 +67,12 @@ class Visible(
 
     suspend fun loadNextSong(startPlaying: Boolean) {
         player.switchTo(
-            path.boot.songSource.now?.invoke()?.let { Player(path, it, startPlaying) }
+            path.boot.songSource.now?.invoke()?.let { Player(this, it, startPlaying) }
         )
     }
 
 
-    val userSong = Var<UserSongState?>(UserSongState.New)
+    val userSong = rx { player()?.run { state() } }
 
     fun UserSong.saveState(st: UserSongState) {
         state.cv = st
@@ -86,11 +85,6 @@ class Visible(
     val p: Player? get() = player.now
     override val rawView = ui()
 
-    init {
-        exec {
-            loadNextSong(false)
-        }
-    }
 
 
 }
