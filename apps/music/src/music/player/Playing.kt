@@ -12,24 +12,22 @@ class Playing(
 ): PlayState(player, true) {
 
     init {
-        with(player) {
-            audio.play()
-            kills += {
-                audio.pause()
-            }
-
-            readCounterNow()
-            kills += window.onInterval(250) {
-                readCounterNow()
-            }
-
-            kills += audio.listen("ended") {
-                exec {
-                    next()
-                }
-            }
-
+        player.audio.play()
+        kills += {
+            player.audio.pause()
         }
+
+        player.readCounterNow()
+        kills += window.onInterval(250) {
+            player.readCounterNow()
+        }
+
+        kills += player.audio.listen("ended") {
+            exec {
+                player.next()
+            }
+        }
+
 
     }
 }
