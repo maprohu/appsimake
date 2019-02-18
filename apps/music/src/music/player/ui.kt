@@ -230,7 +230,7 @@ fun Visible.ui() = Factory().run {
                     }
                     likeButtonsDisabled.forEach { disabled = it }
                     rxClass {
-                        if (state() == UserSongState.Like) Cls.btnPrimary
+                        if (state() == UserSongState.Like) Cls.btnSuccess
                         else Cls.btnSecondary
                     }
                     faButtonSpan(Fa.thumbsUp) {
@@ -246,7 +246,7 @@ fun Visible.ui() = Factory().run {
                     }
                     likeButtonsDisabled.forEach { disabled = it }
                     rxClass {
-                        if (state() == UserSongState.DontLike) Cls.btnPrimary
+                        if (state() == UserSongState.DontLike) Cls.btnSuccess
                         else Cls.btnSecondary
                     }
                     faButtonSpan(Fa.thumbsDown) {

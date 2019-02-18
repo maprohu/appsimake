@@ -2,13 +2,17 @@ package music.data
 
 import common.Optional
 import common.Some
-import commonfb.FB
-import commonfb.lazy
+import commonfb.*
 import domx.audio
 import domx.invoke
 import firebase.firestore.Firestore
+import firebase.firestore.docRef
+import firebaseshr.asExtracted
 import killable.HasKillSet
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
 import music.Playable
 import music.extractMp3Tag
 import musiclib.Mp3File
@@ -20,42 +24,47 @@ import rx.RxIface
 import rx.Var
 import kotlin.browser.document
 
-typealias SongInfoSource = suspend (Playable) -> RxIface<Optional<Mp3File>>
+typealias SongInfoSource = (String, suspend () -> Blob?) -> Mp3File
 
 fun localSongInfoSource(): SongInfoSource {
     val map = mutableMapOf<String, Mp3File>()
-    return { (id, blob) ->
+    return { id, blob ->
         map.getOrPut(id) {
             Mp3File().apply {
-                initFrom(blob)
-                props.clearDirty()
+                GlobalScope.launch {
+                    blob()?.let { b ->
+                        initFrom(b)
+                        props.clearDirty()
+                    }
+                }
             }
-        }.let { Var(Some(it)) }
+        }
     }
 }
 
 fun HasKillSet.cloudSongInfoSource(
     db: Firestore = FB.db
 ): SongInfoSource {
-    val cache = musicLib.app.songs.lazy(kills, db) { Mp3File() }
-    return { (id, blob) ->
-        val tag = cache(id)
-
-        if (tag.now.isEmpty()) {
+    val map = mutableMapOf<String, Mp3File>()
+    return { id, blob ->
+        map.getOrPut(id) {
             Mp3File().apply {
-                initFrom(blob)
-                props.apply {
-                    persisted(
-                        musicLib.app.songs.doc(id)
-                    )
-
-                    @Suppress("DeferredResultUnused")
-                    save()
+                val ref = musicLib.app.songs.doc(id)
+                props.persisted(ref)
+                listenToSnapshots(kills, db)
+                props.isDeleted.forEach { d ->
+                    if (d) {
+                        GlobalScope.launch {
+                            blob()?.let { b ->
+                                initFrom(b)
+                                save(db)
+                                props.clearDirty()
+                            }
+                        }
+                    }
                 }
             }
         }
-
-        tag
     }
 }
 
@@ -88,6 +97,8 @@ suspend fun Mp3File.initFrom(blob: Blob) {
     this.title.cv = tag.title.join()
     this.bytes.cv = blob.size
     this.secs.cv = duration
+    this.props.markAsExtracted()
+
 }
 
 

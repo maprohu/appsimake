@@ -32,7 +32,7 @@ fun LoggedIn.ui() = TopAndContent(
                     fa.signOutAlt
                     text %= "Sign Out"
                     click {
-                        path.boot.signOut.now()
+                        signOut()
                     }
                 }
             }

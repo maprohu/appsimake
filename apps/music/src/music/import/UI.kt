@@ -152,16 +152,16 @@ fun ImportFile.ui() = document.div {
         dd %= file.name
 
         dt %= "Artist"
-        dd %= { tag().fixedArtist().getOrDefault("<unknown>") }
+        dd %= { tag.fixedArtist().getOrDefault("<unknown>") }
 
         dt %= "Title"
-        dd %= { tag().fixedTitle().getOrDefault("<unknown>") }
+        dd %= { tag.fixedTitle().getOrDefault("<unknown>") }
 
         dt %= "Size"
         dd %= "${file.size.groupThousands} bytes"
 
         dt %= "Duration"
-        dd %= { tag().secs.initial().map { it.roundToInt().formatSecs }.getOrDefault("<unknown>") }
+        dd %= { tag.secs.initial().map { it.roundToInt().formatSecs }.getOrDefault("<unknown>") }
     }
     div {
         cls {

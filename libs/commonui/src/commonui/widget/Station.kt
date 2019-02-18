@@ -58,7 +58,7 @@ open class JobKillsImpl(
     fun <V: Any> HoleT<V>.viewsAny() = viewsAny(this)
     fun <V: Any> viewsAny(fn: HoleT<V>) = JobSwitch.viewsOpt<V, JobScopeWithView<V>>(this, null, fn)
     fun <V: Any> viewsAny(initial: JobScopeWithView<V>, fn: HoleT<V>) = JobSwitch.viewsOpt(this, initial, fn)
-    fun <V: Any, I: JobScopeWithView<V>> views(initial: I, fn: HoleT<V>) = JobSwitch.viewsOpt(this, initial, fn)
+    fun <V: Any, I: JobScopeWithView<V>> views(initial: I, fn: HoleT<V>) = JobSwitch.views(this, initial, fn)
     fun <V: Any, I: JobScopeWithView<V>> viewsOpt(initial: I?, fn: HoleT<V>) = JobSwitch.viewsOpt(this, initial, fn)
     fun <V: Any, I: JobScopeWithView<V>> viewsOpt(fn: HoleT<V>) = viewsOpt<V, I>(null, fn)
 
@@ -71,7 +71,7 @@ open class JobKillsImpl(
 
 interface Views<T: JobScopeWithView<*>>
 inline fun <V: Any, T: JobScopeWithView<V>> Views<T>.opt(fn: HoleT<V>) = this.unsafeCast<JobKillsImpl>().viewsOpt<V, T>(fn)
-inline fun <V: Any, T: JobScopeWithView<V>> Views<T>.of(initial: T, fn: HoleT<V>) = this.unsafeCast<JobKillsImpl>().viewsOpt(initial, fn)
+inline fun <V: Any, T: JobScopeWithView<V>> Views<T>.of(initial: T, fn: HoleT<V>) = this.unsafeCast<JobKillsImpl>().views(initial, fn)
 
 
 open class ExecImpl(coroutineContext: Job) : JobKillsImpl(coroutineContext), HasExec {
@@ -114,7 +114,7 @@ interface HasView<V> {
 }
 interface JobScopeWithView<V: Any>: JobScope, HasView<V>
 
-abstract class ViewImpl<V: Any>(
+abstract class ViewImplBase<V: Any>(
     coroutineContext: Job
 ): ExecImpl(coroutineContext), JobScopeWithView<V> {
     constructor(
@@ -122,7 +122,7 @@ abstract class ViewImpl<V: Any>(
     ): this(Job(parent.coroutineContext))
 
     private var prepared = false
-    override fun view(prepare: V?.() -> Unit): V? {
+    fun preparedView(prepare: V?.() -> Unit): V? {
         val v = rawView
         if (!prepared) {
             prepared = true
@@ -132,6 +132,17 @@ abstract class ViewImpl<V: Any>(
     }
 
     abstract val rawView: V
+
+}
+
+abstract class ViewImpl<V: Any>(
+    coroutineContext: Job
+): ViewImplBase<V>(coroutineContext) {
+    constructor(
+        parent: JobScope
+    ): this(Job(parent.coroutineContext))
+
+    override fun view(prepare: V?.() -> Unit): V? = preparedView(prepare)
 
 }
 
@@ -261,6 +272,9 @@ suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>>.swi
     switchTo(ItemWithViewRx(item) { item.view(it) })
 }
 suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.switchToView(item: suspend () -> I) {
+    switchTo { item().let { i -> ItemWithViewRx(i) { i.view(it) } } }
+}
+suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>>.switchToView(item: suspend () -> I) {
     switchTo { item().let { i -> ItemWithViewRx(i) { i.view(it) } } }
 }
 

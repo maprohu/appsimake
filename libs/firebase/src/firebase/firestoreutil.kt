@@ -270,6 +270,7 @@ fun rollback() : Nothing = throw RollbackException()
 
 
 class QueryBuilder<T>(
+    val collectionWrap: CollectionWrap<T>,
     var query : Query
 ) {
     infix fun <P> ScalarProp<T, Set<P>>.arrayContains(v: P) {
@@ -287,13 +288,14 @@ class QueryBuilder<T>(
     }
 }
 fun <T> CollectionWrap<T>.query(db: Firestore, fn:  QueryBuilder<T>.() -> Unit = {}): QueryWrap<T> {
-    return QueryBuilder<T>(db.collection(path)).apply(fn).wrap()
+    return QueryBuilder<T>(this, db.collection(path)).apply(fn).wrap()
 }
 
-fun <T> QueryBuilder<T>.wrap() = query.wrap<T>()
-fun <T> Query.wrap() = QueryWrap<T>(this)
+fun <T> QueryBuilder<T>.wrap() = query.wrap<T>(collectionWrap)
+fun <T> Query.wrap(collectionWrap: CollectionWrap<T>) = QueryWrap<T>(collectionWrap, this)
 
 class QueryWrap<in T>(
+    val collectionWrap: CollectionWrap<T>,
     val query: Query
 )
 
@@ -507,9 +509,10 @@ suspend fun <T: HasFBProps<T>> CollectionWrap<T>.toSetSource(
 
 class RxSetWithLookup<T>(
     val set: RxSet<T>,
-    val lookup: (String) -> T?
+    val lookup: (String) -> T?,
+    val loadAll: suspend () -> Unit
 )
-suspend fun <T> QueryWrap<T>.toRxSetWithLookup(
+fun <T> QueryWrap<T>.toRxSetWithLookup(
     killables: KillSet,
     create: (String, dynamic) -> T,
     update: (T, dynamic) -> Unit
@@ -544,20 +547,21 @@ suspend fun <T> QueryWrap<T>.toRxSetWithLookup(
         }
     }
 
-    val qs = query.get().await()
-
-    qs.docs.forEach { qds ->
-        addOrUpdate(qds.id, qds.data())
-    }
 
     return RxSetWithLookup(
         set = set,
-        lookup = { map[it] }
+        lookup = { map[it] },
+        loadAll = {
+            val qs = query.get().await()
+
+            qs.docs.forEach { qds ->
+                addOrUpdate(qds.id, qds.data())
+            }
+        }
     )
 }
-suspend fun <T: HasFBProps<T>> QueryWrap<T>.toRxSetWithLookup(
+fun <T: HasFBProps<T>> QueryWrap<T>.toRxSetWithLookup(
     killables: KillSet,
-    collectionWrap: CollectionWrap<T>,
     create: () -> T
 ): RxSetWithLookup<T> {
     fun createPersisted(id: String) = create().apply {
@@ -578,14 +582,13 @@ suspend fun <T: HasFBProps<T>> QueryWrap<T>.toRxSetWithLookup(
     )
 
 }
-suspend fun <T: HasFBProps<T>> CollectionWrap<T>.toRxSetWithLookup(
+fun <T: HasFBProps<T>> CollectionWrap<T>.toRxSetWithLookup(
     killables: KillSet,
     db: Firestore,
     create: () -> T
 ): RxSetWithLookup<T> {
     return query(db).toRxSetWithLookup(
         killables,
-        this,
         create
     )
 }

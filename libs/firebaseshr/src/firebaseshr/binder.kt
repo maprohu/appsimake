@@ -7,6 +7,7 @@ import commonshr.SetDiff
 import firebaseshr.firestore.Timestamp
 import killable.Killables
 import killable.NoKill
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import rx.*
 
@@ -449,8 +450,16 @@ open class Props<in O, out N, out P>(initial: N) : PropTasks<O> {
 //        }
 //    }
 
+    internal val extracted = CompletableDeferred<Unit>()
+    suspend fun waitExtracted() = extracted.await()
+
+    fun markAsExtracted() {
+        extracted.complete(Unit)
+    }
+
     override fun extractInitial(o: dynamic) {
         list.forEach { it.extractInitial(o) }
+        markAsExtracted()
     }
 
     override fun resetInitial() {
@@ -493,6 +502,13 @@ open class Props<in O, out N, out P>(initial: N) : PropTasks<O> {
         list.forEach { it.deleteTo(o) }
     }
 
+}
+
+suspend fun <T: HasFBProps<*>> T.waitExtracted() = apply {
+    props.waitExtracted()
+}
+fun <T: HasFBProps<*>> T.asExtracted() = apply {
+    props.markAsExtracted()
 }
 interface HasProps<in O, out N, out P> {
     val props: Props<O, N, P>

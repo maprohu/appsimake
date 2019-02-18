@@ -251,6 +251,17 @@ open class Listeners {
         listeners.forEach { it() }
     }
 
+    val first: Deferred<Unit>
+        get() {
+            val cd = CompletableDeferred<Unit>()
+            val ks = Killables()
+            ks += add {
+                cd.complete(Unit)
+                ks.kill()
+            }
+            return cd
+        }
+
 }
 
 interface EmitterIface<T> {

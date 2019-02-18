@@ -97,9 +97,7 @@ class ImportFile(
         }
     }
 
-    val state = path.boot.userSongs.map { usi ->
-        usi.item?.let { us -> us.get(playable.id)() } ?: UserSongState.New
-    }.apply {
+    val state = path.loggedIn.userSongs.get(playable.id).apply {
         forEach { s ->
             if (s == UserSongState.DontLike) {
                 coroutineContext.cancel()
@@ -107,11 +105,7 @@ class ImportFile(
         }
     }
 
-    val tag = path.boot.songInfoSource.mapAsync(Var(None)) {
-        it.item(playable)
-    }.map {
-        it().getOrElse { Mp3File() }
-    }
+    val tag = path.loggedIn.songInfoSource(playable.id) { playable.blob }
 
     override val rawView = ui()
 

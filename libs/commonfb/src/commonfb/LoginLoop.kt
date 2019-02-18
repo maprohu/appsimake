@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import rx.Rx
 import rx.RxIface
 import rx.Var
+import rx.mapAsync
 
 
 sealed class UserState {
@@ -21,24 +22,15 @@ sealed class UserState {
         val user: User
     ): UserState()
 }
-fun HasKillSet.runUserState(
+suspend fun HasKillSet.runUserState(
     app: App = FB.app,
-    fn: suspend (UserState) -> UserState = { it }
+    fn: suspend HasKillSet.(UserState) -> UserState = { it }
 ): RxIface<UserState> {
     val rxv = Var<UserState>(UserState.Unknown)
 
-    val ch = Channel<UserState>()
-    kills += { ch.close() }
-
-    GlobalScope.launch {
-        for (u in ch) {
-            rxv.now = fn(u)
-        }
-    }
-
     kills += app.auth().onAuthStateChanged(
         { u ->
-            ch += if (u == null) {
+            rxv.now = if (u == null) {
                 UserState.NotLoggedIn
             } else {
                 UserState.LoggedIn(u)
@@ -46,11 +38,11 @@ fun HasKillSet.runUserState(
         },
         { e ->
             report(e)
-            ch += UserState.NotLoggedIn
+            rxv.now = UserState.NotLoggedIn
         }
     )
 
-    return rxv
+    return rxv.mapAsync(kills, fn)
 }
 
 fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx(ks) {

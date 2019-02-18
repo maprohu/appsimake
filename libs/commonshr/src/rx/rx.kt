@@ -11,7 +11,8 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import org.w3c.dom.Element
 import org.w3c.dom.GlobalEventHandlers
-import org.w3c.dom.events.KeyboardEventInit
+import rx.RxCalc.Companion.KillFirst
+import rx.RxCalc.Companion.KillLast
 import kotlin.dom.addClass
 import kotlin.dom.removeClass
 
@@ -28,24 +29,54 @@ abstract class RxChild {
     }
 }
 
+typealias KillOrder = (process: Trigger, kill: Trigger) -> Unit
+
 class RxCalc<T>(
     ks: KillSet,
-    private val fn: HasKillSet.() -> T
+    private val fn: HasKillSet.() -> T,
+    val killOrder: KillOrder = KillFirst
 ) : RxChild() {
+
+    companion object {
+        val KillFirst: KillOrder = { process, kill ->
+            kill()
+            process()
+        }
+        val KillLast: KillOrder = { process, kill ->
+            process()
+            kill()
+        }
+
+    }
     lateinit var rx: Rx<T>
 
     override fun recalc() {
-        rx.setCurrentValue(recalcValue())
+//        rx.setCurrentValue(recalcValue())
+
+        val kv = recalcValue()
+
+        killOrder(
+            {
+                rx.setCurrentValue(kv.value)
+            },
+            kv.kill
+        )
     }
 
     private val kseq = ks.seq()
-    fun recalcValue() : T {
+    fun recalcValue() : KillableValue<T> {
+//    fun recalcValue() : T {
         disconnectAll()
 
         val savedCurrent = currentChild
         currentChild = this
         try {
-            return kseq.killSet().wrap.fn()
+//            return kseq.killables().fn()
+            return Killables().let { cks ->
+                KillableValue(cks.fn()) {
+                    kseq %= cks.kill
+                }
+            }
         } finally {
             currentChild = savedCurrent
         }
@@ -72,7 +103,9 @@ fun connect(parent: RxParent, child: RxChild) {
 class Obs<T>(
     ks: KillSet,
     private val parent: RxVal<T>,
-    private val fn: (T) -> Unit
+    killStart: Trigger = {},
+    val killOrder: KillOrder = KillFirst,
+    private val fn: HasKillSet.(T) -> Unit
 ) {
 
     init {
@@ -81,8 +114,14 @@ class Obs<T>(
         }
     }
 
+    val kseq = ks.seq().apply { this %= killStart }
     fun fire() {
-        fn(parent.now)
+        Killables().apply {
+            killOrder(
+                { fn(parent.now) },
+                { kseq %= this.kill }
+            )
+        }
     }
 
 }
@@ -97,16 +136,30 @@ interface RxIface<out T> {
 
 //    fun <S> flatMap(ks: KillSet, fn: HasKillSet.(T) -> RxIface<S>) = Rx(ks) { fn(invoke()) }
 
-    fun forEach(ks: KillSet, fn: HasKillSet.(T) -> Unit) {
-        val kseq = ks.seq()
-
-        kseq.killSet().wrap.fn(now)
-        return forEachLater(ks) {
-            kseq.killSet().wrap.fn(it)
+    fun forEach(ks: KillSet, fn: HasKillSet.(T) -> Unit) = forEach(ks, KillFirst, fn)
+    fun forEach(ks: KillSet, killOrder: KillOrder, fn: HasKillSet.(T) -> Unit) {
+        val ks0 = ks.killables()
+        ks0.fn(now)
+        return forEachLater(ks, ks0.kill, killOrder) {
+            killOrder(
+                {
+                    fn(it)
+                },
+                {
+                    ks0.kill()
+                }
+            )
         }
     }
 
-    fun forEachLater(ks: KillSet, fn: (T) -> Unit)
+    fun forEachLater(
+        ks: KillSet,
+        killStart: Trigger = {},
+        killOrder: KillOrder = KillFirst,
+        fn: HasKillSet.(T) -> Unit
+    )
+
+//    fun forEachLater(ks: KillSet, fn: HasKillSet.(T) -> Unit)
 
     fun <F> fold(ks: KillSet, z0: F, fn: (F, T) -> F) {
         var z = z0
@@ -161,7 +214,7 @@ interface RxIface<out T> {
 //        }
 //    }
 
-    fun <F> foldLater(ks: KillSet, z0: F, fn: (F, T) -> F) {
+    fun <F> foldLater(ks: KillSet, z0: F, fn: HasKillSet.(F, T) -> F) {
         var z = z0
 
         forEachLater(ks) {
@@ -169,7 +222,7 @@ interface RxIface<out T> {
         }
     }
 
-    fun onChange(ks: KillSet, fn: (old: T /* old */, new: T /* new */) -> Unit) {
+    fun onChange(ks: KillSet, fn: HasKillSet.(old: T /* old */, new: T /* new */) -> Unit) {
         return foldLater(ks, now) { old, new ->
             fn(old, new)
             new
@@ -286,8 +339,13 @@ abstract class RxVal<T>(
     }
 
 
-    override fun forEachLater(ks: KillSet, fn: (T) -> Unit) {
-        val obs = Obs(ks, this, fn)
+    override fun forEachLater(
+        ks: KillSet,
+        killStart: Trigger,
+        killOrder: KillOrder,
+        fn: HasKillSet.(T) -> Unit
+    ) {
+        val obs = Obs(ks, this, killStart, killOrder, fn)
         observers += obs
     }
 
@@ -328,13 +386,26 @@ class Rx<T> private constructor(
     constructor(
         ks: KillSet,
         calc: RxCalc<T>
-    ) : this(ks, calc.recalcValue(), calc)
+    ) : this(
+        ks,
+//        calc.recalcValue(),
+        calc.recalcValue().let { kv ->
+            kv.kill()
+            kv.value
+        },
+        calc
+    )
 
     constructor(
         ks: KillSet,
         fn: HasKillSet.() -> T
     ) : this(ks, RxCalc(ks, fn))
 
+    constructor(
+        ks: KillSet,
+        killFirst: Boolean,
+        fn: HasKillSet.() -> T
+    ) : this(ks, RxCalc(ks, fn, if (killFirst) KillFirst else KillLast))
 }
 
 open class Var<T>(
@@ -464,11 +535,11 @@ fun <T> RxIface<T>.toChannelLater(ks: KillSet): ReceiveChannel<T> {
 
 suspend fun <T, S> RxIface<T>.mapAsync(
     ks: KillSet,
-    fn: suspend (T, KillSet) -> S
+    fn: suspend HasKillSet.(T) -> S
 ): RxIface<S> {
     val kseq = ks.seq()
 
-    suspend fun calc(t: T): S = fn(t, kseq.killSet())
+    suspend fun calc(t: T): S = kseq.killables().fn(t)
 
     val rxv = Var(calc(now))
     val ch = toChannelLater(ks)

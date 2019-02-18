@@ -8,6 +8,7 @@ import music.common.LocalSongs
 import music.Playable
 import musiclib.UserSongState
 import rx.*
+import rx.RxCalc.Companion.KillLast
 
 typealias SongSource = RxIface<(suspend () -> Playable?)?>
 typealias SongIncludeRx = (String) -> RxIface<Boolean>
@@ -19,41 +20,46 @@ fun HasKillSet.songSource(
     val songRing = CircularList<String>()
     val localSongs = localSongsDB.set
 
-    val included = Var(RxMutableSet<String>())
+    class Wrap(
+        val set: RxMutableSet<String>
+    )
+    val included = Var(Wrap(RxMutableSet()))
 
-    val incSeq = kills.seq()
-    rx {
-        val inc = includeSong()
+
+//    val kseq = kills.seq()
+    includeSong.forEach(KillLast) { inc ->
         val incset = RxMutableSet<String>()
-        val iks = Killables()
-        localSongs.process(iks.killSet) { id, idks ->
-            inc(id).forEach(idks) { i ->
+
+        localSongs.process { id ->
+            inc(id).forEach { i ->
                 if (i) {
                     incset += id
                 } else {
                     incset -= id
                 }
             }
-            idks += { incset -= id }
+            kills += { incset -= id }
         }
-        incset to iks.kill
-    }.forEach { (inc, kill) ->
-        included.now = inc
-        incSeq %= kill
+
+//        console.dir(incset)
+        included.now = Wrap(incset)
+
+//        kseq %= this.kill
+
     }
 
-    localSongsDB.set.process(kills) { id, lks ->
+    localSongsDB.set.process { id ->
         songRing.insertItem(id)
-        lks += { songRing.remove(id) }
+        kills += { songRing.remove(id) }
     }
 
     songRing.moveHead()
 
     suspend fun next(): Playable? {
-        while (included.now.isNotEmpty()) {
+        while (included.now.set.isNotEmpty()) {
             val id = songRing.next
 
-            if (id in included.now) {
+            if (id in included.now.set) {
                 val blob = localSongsDB.load(id)
 
                 if (blob != null) {
@@ -69,7 +75,7 @@ fun HasKillSet.songSource(
     }
 
     return rx {
-        if (included().isEmptyRx()) {
+        if (included().set.isEmptyRx()) {
             null
         } else {
             nextFn
@@ -78,46 +84,58 @@ fun HasKillSet.songSource(
 
 }
 
-private fun getInclude(ks: KillSet, states: GetUserSongState, state: UserSongState): SongIncludeRx {
+private fun HasKillSet.getInclude(states: GetUserSongState, state: UserSongState): SongIncludeRx {
     val map = mutableMapOf<String, RxIface<Boolean>>()
 
     return { id ->
         map.getOrPut(id) {
-            Rx(ks) {
+            rx {
                 states(id)() == state
             }
         }
     }
 }
 
-fun songInclude(
-    ks: KillSet,
+private sealed class IncludeState {
+    object NoSongs: IncludeState()
+    data class WithSongs(
+        val songState: GetUserSongState,
+        val new: SongIncludeRx,
+        val like: SongIncludeRx
+    ): IncludeState()
+}
+fun HasKillSet.songInclude(
     localSongs: LocalSongs,
     userSongs: RxIface<GetUserSongState?>
 ): RxIface<SongIncludeRx> {
 
-    val kseq = ks.seq()
-    return Rx(ks) {
-        val uks = kseq.killSet()
+    return rx {
         val songState = userSongs()
 
         if (songState == null) {
-            { Var(true) }
+            IncludeState.NoSongs
         } else {
-            val hasNew = localSongs.set.any { id ->
-                songState(id)() == UserSongState.New
-            }
-
             fun getIncludeState(state: UserSongState) =
-                getInclude(uks, songState, state)
+                getInclude(songState, state)
 
-            if (hasNew) {
-                getIncludeState(UserSongState.New)
-            } else {
-                getIncludeState(UserSongState.Like)
+            val new = getIncludeState(UserSongState.New)
+            val like = getIncludeState(UserSongState.Like)
+            IncludeState.WithSongs(songState, new, like)
+        }
+    }.map { st ->
+        when (st) {
+            IncludeState.NoSongs -> {
+                { Var(true) }
             }
+            is IncludeState.WithSongs -> with(st) {
+                val hasNew = localSongs.set.iterableRx().any { id ->
+                    songState(id)() == UserSongState.New
+                }
 
+                if (hasNew) new else like
+            }
         }
     }
+
 }
 

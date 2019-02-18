@@ -16,7 +16,7 @@ class ViewWithForward<V>(
     val forward: () -> HasView<V>?
 ): HasView<V> {
     override fun view(prepare: V?.() -> Unit): V? {
-        return forward()?.view(prepare) ?: base.view(prepare)
+        return (forward() ?: base).view(prepare)
     }
 
     companion object {
@@ -39,14 +39,22 @@ class ViewWithForward<V>(
 }
 
 abstract class ForwardBase<V: Any>(
-    factory: JobScope
-): ForwardImpl<V, JobScopeWithView<V>>(factory)
+    coroutineContext: Job
+): ForwardImpl<V, JobScopeWithView<V>>(coroutineContext) {
+    constructor(
+        parent: JobScope
+    ): this(Job(parent.coroutineContext))
+}
 
-@UseExperimental(InternalCoroutinesApi::class)
 abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
-    factory: JobScope
-): ViewImpl<V>(factory.coroutineContext), HasUIX {
+    coroutineContext: Job
+): ViewImplBase<V>(coroutineContext), HasUIX {
+    constructor(
+        parent: JobScope
+    ): this(Job(parent.coroutineContext))
+
     val forward = JobSwitch.optional<F>()
+
     override val uix: Exec = run {
         val ex = discardExecutor();
 
@@ -61,33 +69,38 @@ abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
     }
 
     val back = { exec { forward.switchTo(null) } }
-}
 
-class ViewWithForwardImpl<V: Any, F: JobScopeWithView<V>, B: HasView<V>>(
-    factory: JobScope,
-    val base: B,
-    val forward: JobSwitch<F?>
-): ExecImpl(factory.coroutineContext), JobScopeWithView<V> {
-    companion object {
-        fun <V: Any, F: JobScopeWithView<V>, B: ForwardImpl<V, F>> of(
-            factory: JobScope,
-            forward: B
-        ) = ViewWithForwardImpl(factory, forward, forward.forward)
+    private val baseView = object : HasView<V> {
+        override fun view(prepare: V?.() -> Unit): V? = preparedView(prepare)
     }
 
-    private val forwardView = ViewWithForward.of(base, forward)
+    private val forwardView = ViewWithForward.of(baseView, forward)
 
     override fun view(prepare: V?.() -> Unit): V? = forwardView.view(prepare)
 }
 
-suspend fun <J: JobScope, V: Any, F: JobScopeWithView<V>, O: ForwardImpl<V, F>> J.fwd(fn: suspend JobKillsImpl.(J) -> O): ViewWithForwardImpl<V, F, O> {
-    return withChild {
-        ViewWithForwardImpl.of(this, fn(this@fwd))
-    }
-}
-suspend fun <J: JobScope, V: Any, F: JobScopeWithView<V>, O: ForwardImpl<V, F>> J.fwdc(fn: (JobScope, J) -> O): ViewWithForwardImpl<V, F, O> {
-    return withChild {
-        ViewWithForwardImpl.of(this, fn(this, this@fwdc))
-    }
-}
+//class ViewWithForwardImpl<V: Any, F: JobScopeWithView<V>, B: HasView<V>>(
+//    factory: JobScope,
+//    val base: B,
+//    val forward: JobSwitch<F?>
+//): ExecImpl(factory.coroutineContext), JobScopeWithView<V> {
+//    companion object {
+//        fun <V: Any, F: JobScopeWithView<V>, B: ForwardImpl<V, F>> of(
+//            factory: JobScope,
+//            forward: B
+//        ) = ViewWithForwardImpl(factory, forward, forward.forward)
+//    }
+//
+//}
+
+//suspend fun <J: JobScope, V: Any, F: JobScopeWithView<V>, O: ForwardImpl<V, F>> J.fwd(fn: suspend JobKillsImpl.(J) -> O): ViewWithForwardImpl<V, F, O> {
+//    return withChild {
+//        ViewWithForwardImpl.of(this, fn(this@fwd))
+//    }
+//}
+//suspend fun <J: JobScope, V: Any, F: JobScopeWithView<V>, O: ForwardImpl<V, F>> J.fwdc(fn: (JobScope, J) -> O): ViewWithForwardImpl<V, F, O> {
+//    return withChild {
+//        ViewWithForwardImpl.of(this, fn(this, this@fwdc))
+//    }
+//}
 

@@ -1,47 +1,49 @@
 package music.loggedin
 
-import commonfb.UserState
 import commonfb.callable
 import commonlib.commonlib.customToken
 import commonlib.private
 import commonui.widget.*
 import firebase.User
 import firebase.app.App
-import firebase.firestore.Firestore
-import firebase.firestore.collectionRef
-import firebase.firestore.flushQueries
+import firebase.firestore.*
 import firebase.functions.Functions
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
+import music.UserSongs
 import music.boot.Boot
 import music.boot.BootPath
+import music.content.Content
+import music.data.SongInfoSource
 import music.database.Database
+import musiclib.UserSong
 import musiclib.musicLib
 import musiclib.usersongs
 import rx.Var
-import rx.feedTo
 
 open class LoggedInPath(
     val loggedIn: LoggedIn
-): BootPath(loggedIn.boot)
+): BootPath(loggedIn.from)
 
 class LoggedIn(
-    factory: JobScope,
-    from: BootPath,
+    val from: Boot,
     user: User,
-    app: App,
+    val app: App,
     db: Firestore,
-    functions: Functions
-): ForwardBase<TopAndContent>(factory) {
-    val boot = from.boot
+    functions: Functions,
+    override val songInfoSource: SongInfoSource,
+    override val userSongs: UserSongs
+): ForwardBase<TopAndContent>(from), Content {
     val path = LoggedInPath(this)
+
+    val userSongSet by lazy {
+        musicLib.app.private.doc(user.uid).usersongs.query(db).toRxSetWithLookup(kills) { UserSong() }
+    }
 
     override val rawView = ui()
 
     suspend fun database() {
-        forward %= fwdc(::Database)
+        forward %= Database(this)
     }
 
     val syncing = Var(false)
@@ -51,11 +53,15 @@ class LoggedIn(
             console.log(*o)
         }
 
-        val customToken by lazy {
-            GlobalScope.async {
-                val custTokenCall = customToken.callable(functions)
-                custTokenCall.call(Unit)?.let { token ->
-                    app.auth().signInWithCustomToken(token).await()
+        val signinWithCustomToken = run {
+            var signedIn = false
+
+            suspend {
+                if (!signedIn) {
+                    customToken.callable(functions).call(Unit)?.let { token ->
+                        app.auth().signInWithCustomToken(token).await()
+                    }
+                    signedIn = true
                 }
             }
         }
@@ -63,13 +69,18 @@ class LoggedIn(
             if (s) {
                 launch {
                     try {
-                        customToken.await()
+                        signinWithCustomToken()
 
                         db.enableNetwork().await()
 
-                        flushQueries(
-                            musicLib.app.private.doc(user.uid).usersongs.collectionRef(db)
-                        )
+                        try {
+                            flushQueries(
+                                musicLib.app.private.doc(user.uid).usersongs.collectionRef(db)
+                            )
+                        } finally {
+                            db.disableNetwork().await()
+                        }
+
                     } catch (e: dynamic) {
                         path.boot.slots.toasts {
                             danger(
@@ -83,6 +94,10 @@ class LoggedIn(
         }
 
 
+    }
+
+    fun signOut() {
+        app.auth().signOut()
     }
 
     fun sync() {

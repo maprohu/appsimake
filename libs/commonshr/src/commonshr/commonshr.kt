@@ -2,8 +2,10 @@ package commonshr
 
 import common.EmitterIface
 import common.Optional
+import killable.HasKillSet
 import killable.KillSet
 import killable.Killables
+import killable.killables
 import rx.Var
 
 data class SetDiff<T>(
@@ -77,11 +79,32 @@ fun <T> EmitterIface<SetDiff<T>>.toMoves() : EmitterIface<SetMove<T>> = object: 
     }
 }
 
-fun <T> EmitterIface<SetMove<T>>.process(ks: KillSet, fn: (T, KillSet) -> Unit) {
-    toMap(ks, fn)
+fun <T> EmitterIface<SetMove<T>>.process(ks: KillSet, fn: HasKillSet.(T) -> Unit) {
+    val map = mutableMapOf<T, Trigger>()
+
+    ks += {
+        map.values.forEach { it() }
+        map.clear()
+    }
+
+    add { m ->
+        val v = m.value
+        when (m) {
+            is SetAdded -> {
+                val vks = ks.killables().also {
+                    it += { map -= v }
+                }
+                vks.fn(v)
+                map[v] = vks.kill
+            }
+            is SetRemoved -> {
+                map.getValue(v)()
+            }
+        }
+    }
 }
 
-fun <T, S> EmitterIface<SetMove<T>>.toMap(ks: KillSet, fn: (T, KillSet) -> S): Map<T, S> {
+fun <T, S> EmitterIface<SetMove<T>>.toMap(ks: KillSet, fn: HasKillSet.(T) -> S): Map<T, S> {
     val map = mutableMapOf<T, Pair<S, Trigger>>()
 
     ks += {
@@ -93,17 +116,22 @@ fun <T, S> EmitterIface<SetMove<T>>.toMap(ks: KillSet, fn: (T, KillSet) -> S): M
         val v = m.value
         when (m) {
             is SetAdded -> {
-                val vks = Killables()
+                val vks = ks.killables().also {
+                    it += { map -= v }
+                }
                 map[v] = Pair(
-                    fn(v, vks.killSet),
+                    vks.fn(v),
                     vks.kill
                 )
             }
             is SetRemoved -> {
-                map.remove(v)?.let { it.second() }
+                map.getValue(v).second()
             }
         }
     }
 
-    return map.mapValues { it.value.first }
+    return object: AbstractMap<T, S>() {
+        override val entries: Set<Map.Entry<T, S>>
+            get() = map.mapValues { it.value.first }.entries
+    }
 }

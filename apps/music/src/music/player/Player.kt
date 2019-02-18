@@ -35,7 +35,7 @@ class Player(
     }
 
     val state = path.boot.userSongs.map { usi ->
-        usi.item?.let { us -> us.get(playable.id)() } ?: UserSongState.New
+        usi?.let { us -> us.get(playable.id)() } ?: UserSongState.New
     }
 
 
@@ -76,7 +76,7 @@ class Player(
         readCounterNow()
     }
     fun like() {
-        path.boot.userSongs.now.item?.let { us ->
+        path.boot.userSongs.now?.let { us ->
             us.like(playable.id)
         }
     }

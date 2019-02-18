@@ -5,6 +5,7 @@ import common.ListenableList
 import common.ListenableMutableList
 import common.map
 import commonlib.CollectionWrap
+import commonshr.Trigger
 import commonshr.invoke
 import commonshr.plusAssign
 import commonui.RootPanel
@@ -144,6 +145,14 @@ fun <T: HasFBProps<*>> showClosableList(
     }
 
     listUI(killables, config(onClick))
+}
+
+fun <T: HasFBProps<*>> T.listenToSnapshots(
+    killables: KillSet,
+    db: Firestore,
+    onFirst: Trigger = {}
+) {
+    props.docWrapOrFail.docRef(db).listen(this, onFirst)
 }
 
 fun <T: HasFBProps<*>> T.keepAlive(

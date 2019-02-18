@@ -12,7 +12,7 @@ function define(args, fn) {
     );
 }
 
-define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_commonshr) {
+define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], function (_, Kotlin, $module$appsimake_commonshr, $module$kotlinx_coroutines_core) {
   'use strict';
   var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var Unit = Kotlin.kotlin.Unit;
@@ -47,7 +47,10 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   var sortedArray = Kotlin.kotlin.collections.sortedArray_j2hqw1$;
   var ensureNotNull = Kotlin.ensureNotNull;
   var throwCCE = Kotlin.throwCCE;
+  var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
+  var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var Listeners = $module$appsimake_commonshr.common.Listeners;
+  var CompletableDeferred = $module$kotlinx_coroutines_core.kotlinx.coroutines.CompletableDeferred_xptg6w$;
   var CollectionWrap = $module$appsimake_commonshr.commonlib.CollectionWrap;
   var get_js = Kotlin.kotlin.js.get_js_1yb8b7$;
   var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
@@ -1013,6 +1016,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     this.isValid_e2ztvi$_0 = lazy(Props$isValid$lambda(this));
     this.onDeleted_7zgssq$_0 = lazy(Props$onDeleted$lambda(this));
     this.live = new Var(false);
+    this.extracted_8be2vx$ = CompletableDeferred();
     this.dirty_51pztq$_0 = lazy(Props$dirty$lambda(this));
   }
   Object.defineProperty(Props.prototype, 'isPersisted', {
@@ -1054,6 +1058,12 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
       this.id.transform_ru8m0w$(Props$set_Props$deleted$lambda(v));
     }
   });
+  Props.prototype.waitExtracted = function (continuation) {
+    return this.extracted_8be2vx$.await(continuation);
+  };
+  Props.prototype.markAsExtracted = function () {
+    this.extracted_8be2vx$.complete_11rb$(Unit);
+  };
   Props.prototype.extractInitial_za3rmp$ = function (o) {
     var tmp$;
     tmp$ = this.list_8be2vx$.iterator();
@@ -1061,6 +1071,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
       var element = tmp$.next();
       element.extractInitial_za3rmp$(o);
     }
+    this.markAsExtracted();
   };
   Props.prototype.resetInitial = function () {
     var tmp$;
@@ -1232,6 +1243,59 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     simpleName: 'Props',
     interfaces: [PropTasks]
   };
+  function Coroutine$waitExtracted($receiver_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$$receiver = $receiver_0;
+  }
+  Coroutine$waitExtracted.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$waitExtracted.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$waitExtracted.prototype.constructor = Coroutine$waitExtracted;
+  Coroutine$waitExtracted.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.state_0 = 2;
+            this.result_0 = this.local$$receiver.props.waitExtracted(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return this.local$$receiver;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function waitExtracted($receiver_0, continuation_0, suspended) {
+    var instance = new Coroutine$waitExtracted($receiver_0, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
+  }
+  function asExtracted($receiver) {
+    $receiver.props.markAsExtracted();
+    return $receiver;
+  }
   function HasProps() {
   }
   HasProps.$metadata$ = {
@@ -1493,6 +1557,8 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   package$firebaseshr.IdState = IdState;
   package$firebaseshr.FBProps = FBProps;
   package$firebaseshr.Props = Props;
+  package$firebaseshr.waitExtracted_datb2l$ = waitExtracted;
+  package$firebaseshr.asExtracted_datb2l$ = asExtracted;
   package$firebaseshr.HasProps = HasProps;
   package$firebaseshr.HasFBProps = HasFBProps;
   package$firebaseshr.saveIfDirty_4zsub3$ = saveIfDirty;

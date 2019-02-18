@@ -1,8 +1,7 @@
 package music
 
 import common.*
-import commonfb.FB
-import commonfb.merge
+import commonfb.*
 import commonlib.CollectionWrap
 import commonlib.private
 import commonshr.process
@@ -15,10 +14,7 @@ import firebaseshr.ids
 import killable.KillSet
 import killable.addedTo
 import musiclib.*
-import rx.Rx
-import rx.RxIface
-import rx.Var
-import rx.process
+import rx.*
 
 typealias GetUserSongState = (String) -> RxIface<UserSongState>
 typealias SetUserSongState = (String, UserSongState) -> Unit
@@ -39,28 +35,25 @@ suspend fun userSongs(
     db: Firestore = FB.db
 ): UserSongs {
     val cw = musicLib.app.private.doc(uid).usersongs
-    val source = cw.toRxSetWithLookup(uks, db) { UserSong() }
 
-    val map = mutableMapOf<String, Var<UserSongState>>()
+    val map = mutableMapOf<String, UserSong>()
 
-    fun rxv(id: String)= map.getOrPut(id) { Var(UserSongState.New) }
-
-    source.set.process(uks) { item, ks ->
-        val rxv = rxv(item.props.idOrFail)
-        item.state.initial.forEach(ks) { st ->
-            rxv.now = st.getOrDefault(UserSongState.New)
+    fun item(id: String)= map.getOrPut(id) {
+        UserSong().apply {
+            props.persisted(cw.doc(id))
+            listenToSnapshots(uks, db)
         }
     }
 
     return UserSongs(
-        get = { rxv(it) },
+        get = { id ->
+            item(id).state.initial.map(uks) { it.getOrDefault(UserSongState.New) }
+        },
         set = { id, state ->
-            rxv(id).now = state
-
-            UserSong().apply {
-                props.persisted(cw.doc(id))
+            item(id).apply {
                 this.state.cv = state
-                merge(db)
+                save(db)
+                props.clearDirty()
             }
         }
     )

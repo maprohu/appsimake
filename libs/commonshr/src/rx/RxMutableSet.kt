@@ -2,19 +2,43 @@ package rx
 
 import common.*
 import commonshr.*
+import killable.HasKillSet
 import killable.KillSet
+import killable.wrap
 
 interface RxSet<out E>: Set<E> {
     val sizeRx: RxIface<Int>
+    val iterableRx: RxIface<Iterable<E>>
     val isEmptyRx: RxIface<Boolean>
     val isNotEmptyRx: RxIface<Boolean>
     val diffs: EmitterIface<SetDiff<@UnsafeVariance E>>
     fun containsRx(ks: KillSet, value: @UnsafeVariance E): RxIface<Boolean>
+
+    fun anyRx(ks: KillSet, fn: HasKillSet.(E) -> Boolean): RxIface<Boolean> = with(ks.wrap) {
+        rx { iterableRx().any { fn(it) } }
+    }
+
+    val diffsAll get() = diffs.withInitial { listOf(SetDiff(added = this)) }
+
+    fun filtered(ks: KillSet, fn: HasKillSet.(E) -> Boolean): RxSet<E>
 }
 
 class RxMutableSet<E>(
     private val delegate: MutableSet<E> = mutableSetOf()
 ): AbstractMutableSet<E>(), RxSet<E>, MutableSet<E> by delegate {
+
+    override val iterableRx by lazy {
+        fun iterable() = object : Iterable<E> {
+            override fun iterator() = this@RxMutableSet.iterator()
+        }
+
+        val rxv = Var<Iterable<E>>(iterable())
+        diffs += {
+            rxv.now = iterable()
+        }
+        rxv
+    }
+
 
     override fun contains(element: E): Boolean {
         return delegate.contains(element)
@@ -134,6 +158,21 @@ class RxMutableSet<E>(
     override fun containsRx(ks: KillSet, value: @UnsafeVariance E): RxIface<Boolean> {
         return containsRxs.get(ks, value)
     }
+
+    override fun filtered(ks: KillSet, fn: HasKillSet.(E) -> Boolean): RxSet<E> {
+        val fset = RxMutableSet<E>()
+
+        process(ks) { item ->
+            rx { fn(item) }.forEach { v ->
+                if (v) {
+                    fset += item
+                    kills += { fset -= item }
+                }
+            }
+        }
+
+        return fset
+    }
 }
 
 class RxMutableIterator<T>(
@@ -189,9 +228,9 @@ fun <P1, T> chain(delegate: (P1) -> T) = FunChain1(delegate)
 
 
 
-fun <T, S> RxSet<T>.toMap(ks: KillSet, fn: (T, KillSet) -> S): Map<T, S> {
-    return diffs.withInitial(SetDiff(added = this.toSet())).toMoves().toMap(ks, fn)
+fun <T, S> RxSet<T>.toMap(ks: KillSet, fn: HasKillSet.(T) -> S): Map<T, S> {
+    return diffsAll.toMoves().toMap(ks, fn)
 }
-fun <T> RxSet<T>.process(ks: KillSet, fn: (T, KillSet) -> Unit) {
-    toMap(ks, fn)
+fun <T> RxSet<T>.process(ks: KillSet, fn: HasKillSet.(T) -> Unit) {
+    diffsAll.toMoves().process(ks, fn)
 }

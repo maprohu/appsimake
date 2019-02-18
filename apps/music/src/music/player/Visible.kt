@@ -7,7 +7,9 @@ import commonshr.*
 import commonui.widget.*
 import domx.audio
 import domx.invoke
+import firebaseshr.asExtracted
 import firebaseshr.saveIfDirty
+import firebaseshr.waitExtracted
 import killable.KillSet
 import killable.addedTo
 import killable.seq
@@ -44,19 +46,25 @@ class Visible(
 
     val player = switchOpt<Player>()
 
-    val tag = Var(Mp3File()).apply {
-        rx {
-            path.boot.songInfoSource().item to player()?.playable
-        }.mapAsync(Var(None)) { (s, p) ->
-            p?.let { s.invoke(p) }
-        }.forEach { t ->
-            rx {
-                t.toOptional().flatMap { it() }.getOrElse { Mp3File() }
-            }.forEach {
-                now = it
-            }
-        }
-    }
+    val tag = rx {
+        player()?.let { p ->
+            path.boot.songInfoSource()(p.playable.id) { p.playable.blob }
+        } ?: Mp3File().asExtracted()
+    }.mapAsync(Mp3File()) { it.waitExtracted() }
+
+//        Var(Mp3File()).apply {
+//        rx {
+//            path.boot.songInfoSource().item to player()?.playable
+//        }.mapAsync(Var(None)) { (s, p) ->
+//            p?.let { s.invoke(p) }
+//        }.forEach { t ->
+//            rx {
+//                t.toOptional().flatMap { it() }.getOrElse { Mp3File() }
+//            }.forEach {
+//                now = it
+//            }
+//        }
+//    }
 
     val totalDuration = Var(0)
     val currentPosition = Var(0)

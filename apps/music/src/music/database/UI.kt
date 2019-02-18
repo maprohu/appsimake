@@ -1,6 +1,9 @@
 package music.database
 
+import bootstrap.border
 import bootstrap.m1
+import bootstrap.p1
+import bootstrap.rounded
 import commonshr.*
 import commonui.widget.*
 import domx.*
@@ -46,7 +49,48 @@ fun Database.ui() = TopAndContent(
 
         }
     }.node,
-    content = null
+    content = factory.scrollPane {
+        pane {
+            cls.p1
+            fun statusPanel(
+                st: Database.Status,
+                title: String
+            ) {
+                insert.wraps.div {
+                    cls {
+                        m1
+                        p1
+                        border
+                        rounded
+                    }
+                    h6 {
+                        cls.m1
+                        this %= title
+                    }
+                    dl {
+                        cls.m1
+                        dt %= "Songs"
+                        dd %= { st.set.sizeRx().groupThousands }
+                        dt %= "Bytes"
+                        dd %= { st.size().groupThousands }
+                        dt %= "Duration"
+                        dd %= { st.duration().toInt().formatSecs }
+                    }
+                }
+
+            }
+
+            statusPanel(
+                localSongIds,
+                "Local Songs"
+            )
+            statusPanel(
+                toBeDeleted,
+                "To Be Deleted"
+            )
+        }
+
+    }.node
 )
 
 

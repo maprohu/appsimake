@@ -314,7 +314,7 @@ data class SortedListenableListConfig<T, C: Comparable<C>>(
                     sorted.removeAt(sortedIndex)
                     val to = find(k)
                     currentKey = k
-                    sorted.add(to, this)
+                    sorted.add(to, this@Holder)
                     if (to != from) {
                         val move = Move.of(from, to)
                         move.range.map(sorted::get).forEach { it.sortedIndex += move.shift }

@@ -7,14 +7,20 @@ import commonshr.*
 import firebase.app.App
 import killable.killables
 import kotlinx.coroutines.Job
+import music.UserSongs
 import music.boot.Boot
 import music.boot.BootPath
+import music.content.Content
+import music.data.SongInfoSource
 
 class NotLoggedIn(
-    factory: JobScope,
-    val app: App,
-    val path: BootPath
-): ForwardBase<TopAndContent>(factory) {
+    val boot: Boot,
+    val app: App
+): ForwardBase<TopAndContent>(boot), Content {
+    val path = boot.path
+    override val userSongs: UserSongs? = null
+    override val songInfoSource: SongInfoSource = boot.localSongInfoSource
+
     override val rawView = ui()
 
     suspend fun signIn() {

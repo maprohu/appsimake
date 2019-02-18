@@ -14,6 +14,7 @@ import kotlinx.coroutines.*
 import music.*
 import music.common.LocalSongs
 import music.common.toLatestUid
+import music.content.Content
 import music.content.UserUnknown
 import music.data.*
 import music.loggedin.LoggedIn
@@ -33,7 +34,6 @@ open class BootPath(
 class Boot(
     parent: JobScope,
     from: BodyPath,
-    idb: IDBDatabase,
     val localSongs: LocalSongs
 ): ViewImpl<HTMLElement>(parent) {
     val body = from.body
@@ -47,7 +47,7 @@ class Boot(
                 val idb = localDatabase()
                 val localSongs = LocalSongs(this, idb)
 
-                Boot(this, BodyPath(body), idb, localSongs).also {
+                Boot(this, BodyPath(body), localSongs).also {
                     body.content.switchTo(
                         ItemWithViewRx.hasView<JobScope, HTMLElement>(
                             this,
@@ -88,33 +88,36 @@ class Boot(
         }
     )
 
-    val content = viewsAny(UserUnknown(this), contentHole)
+    val localSongInfoSource = localSongInfoSource()
 
-    val userSongs = wrap<UserSongs?>(null)
+    val content = views<Content>().of(UserUnknown(this), contentHole)
 
+    val userSongs = content.map { it.item.userSongs }
 
-    private val songInclude = songInclude(
-        kills,
-        localSongs,
-        rx { userSongs().item?.get }
-    )
+    val songInfoSource = content.map { it.item.songInfoSource }
+
 
     val songSource = songSource(
-        songInclude,
+        songInclude(
+            localSongs,
+            userSongs.map { it?.get }
+        ),
         localSongs
     )
 
+    val hasSongsToPlay = songSource.map { it != null }
 
 
-    val player = slots.player.viewsAny().viewFromRx(songSource) { s ->
-        s?.invoke()?.let { Visible(this).apply { loadNextSong(false) } }
+
+    val player = slots.player.viewsAny().viewFromRx(hasSongsToPlay) { v ->
+        if (v) Visible(this).apply { loadNextSong(false) }
+        else null
     }
 
-    val songInfoSource = wrap(localSongInfoSource())
 
-    val signOut = Var<Action> {
-        userState.now = UserState.Unknown
-    }
+//    val signOut = Var<Action> {
+//        userState.now = UserState.Unknown
+//    }
 
     init {
 
@@ -133,55 +136,50 @@ class Boot(
 
 
             runUserState(app).forEach { st ->
-                userState.now = st
-            }
+                exec {
+                    userState.now = st
 
-            content.viewFromRx(userState) { u ->
-                when (u) {
-                    is UserState.NotLoggedIn -> fwd { NotLoggedIn(this, app, path) }
-                    is UserState.LoggedIn -> fwd { LoggedIn(this, path, u.user, app, db, functions) }
-                    else -> UserUnknown(this@Boot)
-                }
-            }
-
-            user.toLatestUid(kills, idb).apply {
-                rxv.forEach { uid ->
-                    exec {
-                        userSongs.switchToWrap {
-                            uid?.let { id ->
-                                userSongs(kills, id, db)
+                    when (st) {
+                        is UserState.LoggedIn -> {
+                            content.switchToView {
+                                LoggedIn(
+                                    this@Boot,
+                                    st.user,
+                                    app,
+                                    db,
+                                    functions,
+                                    cloudSongInfoSource(db),
+                                    userSongs(kills, st.user.uid, db)
+                                )
                             }
                         }
+                        is UserState.NotLoggedIn -> {
+                            content.switchToView {
+                                NotLoggedIn(this@Boot, app)
+                            }
+
+                        }
+                        else -> {
+                            content.switchToView {
+                                UserUnknown(this@Boot)
+                            }
+                        }
+
                     }
-                }
 
-                signOut.now =  {
-                    userState.now = UserState.Unknown
-                    clear()
-                    app.auth().signOut()
                 }
             }
-
-            songInfoSource.wrapFromRx(user) {
-                if (it == null) {
-                    localSongInfoSource()
-                } else {
-                    cloudSongInfoSource(db)
-                }
-
-            }
-
         }
     }
 
 
     fun like(id: String) {
-        userSongs.now.item?.let { us ->
+        userSongs.now?.let { us ->
             us.like(id)
         }
     }
     fun dontLike(id: String) {
-        userSongs.now.item?.let { us ->
+        userSongs.now?.let { us ->
             us.dontLike(id)
         }
     }

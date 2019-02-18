@@ -144,9 +144,12 @@ internal class Slots(
 val Node.widget get() = slots.slot
 val Node.hole get() = slots.slot.hole
 
-val Node.insert get() = Factory() with {
-    this?.let { appendChild(this) }
-}
+val Node.insert: Factory
+    get() {
+        return Factory() with {
+            this?.let { this@insert.appendChild(this) }
+        }
+    }
 
 fun Node.widget(ps: Widget) { ps.slot %= widget }
 
