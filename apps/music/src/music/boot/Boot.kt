@@ -139,7 +139,7 @@ class Boot(
                 }
             ).await()
 
-            statusMessage %= "Disabling network..."
+            statusMessage %= "Switching to offline data..."
             db.disableNetwork().await()
 
 
@@ -165,6 +165,7 @@ class Boot(
                             }
                         }
                         is UserState.NotLoggedIn -> {
+                            statusMessage %= "Logging out..."
                             content.switchToView {
                                 NotLoggedIn(this@Boot, app)
                             }
