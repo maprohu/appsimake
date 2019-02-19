@@ -10,10 +10,7 @@ import firebaseshr.*
 import killable.*
 import kotlinx.coroutines.*
 import org.w3c.dom.Element
-import rx.RxMutableSet
-import rx.RxSet
-import rx.RxVal
-import rx.Var
+import rx.*
 import kotlin.reflect.KProperty
 
 fun setOptionsMerge() = obj<SetOptions> { merge = true }
@@ -631,4 +628,16 @@ suspend fun CoroutineScope.flushQueries(
             }
         }
     }
+}
+
+fun <T: HasFBProps<*>> RxSet<T>.ids(ks: KillSet): RxSet<String> {
+    val ids = RxMutableSet<String>()
+
+    process(ks) { item ->
+        val id = item.props.idOrFail
+        ids += id
+        kills += { ids -= id }
+    }
+
+    return ids
 }

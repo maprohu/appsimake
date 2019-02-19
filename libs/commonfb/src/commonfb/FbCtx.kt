@@ -65,6 +65,8 @@ object FB {
         }
     }
 
+    val storage = app.storage()
+
 
 
 }

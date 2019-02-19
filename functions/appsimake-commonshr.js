@@ -3127,6 +3127,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function get_groupThousands($receiver) {
     return groups($receiver.toString(), 3);
   }
+  function get_groupThousands_0($receiver) {
+    return groups($receiver.toString(), 3);
+  }
   var Math_0 = Math;
   function get_formatSecs($receiver) {
     var mins = $receiver / 60.0;
@@ -5296,6 +5299,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.plusAssign_aeyq4w$ = plusAssign_0;
   package$commonshr.groups_eu8zx7$ = groups;
   package$commonshr.get_groupThousands_s8ev3n$ = get_groupThousands;
+  package$commonshr.get_groupThousands_mts6qi$ = get_groupThousands_0;
   package$commonshr.get_formatSecs_s8ev3n$ = get_formatSecs;
   var package$killable = _.killable || (_.killable = {});
   package$killable.asyncKills_9scqh$ = asyncKills;

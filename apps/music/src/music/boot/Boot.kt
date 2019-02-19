@@ -125,6 +125,7 @@ class Boot(
             val app = FB.app
             val db = FB.db
             val functions = FB.functions()
+            val storage = FB.storage
 
             db.enablePersistence(
                 obj {
@@ -148,6 +149,7 @@ class Boot(
                                     app,
                                     db,
                                     functions,
+                                    storage,
                                     cloudSongInfoSource(db),
                                     userSongs(kills, st.user.uid, db)
                                 )
@@ -197,6 +199,15 @@ class Boot(
         }
     }
 
+    class SongProcess {
+        val uploading = Var(false)
+
+
+    }
+
+    private val songProcessMap = mutableMapOf<String, SongProcess>()
+
+    fun processOf(id: String) = songProcessMap.getOrPut(id) { SongProcess() }
 }
 
 

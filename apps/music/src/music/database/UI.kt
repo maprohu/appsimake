@@ -1,9 +1,6 @@
 package music.database
 
-import bootstrap.border
-import bootstrap.m1
-import bootstrap.p1
-import bootstrap.rounded
+import bootstrap.*
 import commonshr.*
 import commonui.widget.*
 import domx.*
@@ -54,7 +51,8 @@ fun Database.ui() = TopAndContent(
             cls.p1
             fun statusPanel(
                 st: Database.Status,
-                title: String
+                title: String,
+                bgfn: ButtonGroup.(() -> Set<String>) -> Unit = {}
             ) {
                 insert.wraps.div {
                     cls {
@@ -62,6 +60,7 @@ fun Database.ui() = TopAndContent(
                         p1
                         border
                         rounded
+                        column()
                     }
                     h6 {
                         cls.m1
@@ -70,23 +69,74 @@ fun Database.ui() = TopAndContent(
                     dl {
                         cls.m1
                         dt %= "Songs"
-                        dd %= { st.set.sizeRx().groupThousands }
+                        dd %= { st.count().groupThousands }
                         dt %= "Bytes"
                         dd %= { st.size().groupThousands }
                         dt %= "Duration"
                         dd %= { st.duration().toInt().formatSecs }
+                    }
+                    div {
+                        cls {
+                            row()
+                            justifyContentEnd
+                        }
+                        insert.buttonGroup {
+                            cls.m1
+
+                            bgfn { st.set.toSet() }
+
+                            button {
+                                p2
+                                secondary
+                                fa.list
+                                click {
+                                    showStatus(
+                                        st,
+                                        title
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
             }
 
             statusPanel(
-                localSongIds,
-                "Local Songs"
+                toBeDownloaded,
+                "To Be Downloaded"
+            )
+            statusPanel(
+                toBeUploaded,
+                "To Be Uploaded"
             )
             statusPanel(
                 toBeDeleted,
                 "To Be Deleted"
+            )
+            statusPanel(
+                localSongIds,
+                "Local Songs"
+            )
+            statusPanel(
+                new,
+                "New"
+            )
+            statusPanel(
+                like,
+                "Like"
+            )
+            statusPanel(
+                dontLike,
+                "Don't Like"
+            )
+            statusPanel(
+                cloud,
+                "Cloud"
+            )
+            statusPanel(
+                uploading,
+                "Uploading"
             )
         }
 

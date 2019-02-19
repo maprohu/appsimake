@@ -234,3 +234,4 @@ fun <T, S> RxSet<T>.toMap(ks: KillSet, fn: HasKillSet.(T) -> S): Map<T, S> {
 fun <T> RxSet<T>.process(ks: KillSet, fn: HasKillSet.(T) -> Unit) {
     diffsAll.toMoves().process(ks, fn)
 }
+

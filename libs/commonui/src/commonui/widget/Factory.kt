@@ -192,7 +192,7 @@ class SlotVar(
 abstract class ScreenWrap: HasHTMLElement, InvokeApply {
     val target = Var<Slot?>(null)
 
-    fun HasKillSet.visible(fn: () -> Boolean) {
+    fun HasKillSet.visible(fn: HasKillSet.() -> Boolean) {
         rx {
             target()?.let { t ->
                 uiapi {

@@ -6,6 +6,7 @@ fun String.groups(size: Int = 3, separator: String = ",") =
     toList().reversed().chunked(size) { String(it.reversed().toCharArray()) }.reversed().joinToString(separator)
 
 val Int.groupThousands: String get() = toString().groups(3)
+val Long.groupThousands: String get() = toString().groups(3)
 
 val Int.formatSecs: String get() {
     val mins = this / 60.0
