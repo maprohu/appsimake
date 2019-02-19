@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import music.UserSongs
 import music.boot.Boot
 import music.boot.BootPath
+import music.common.MusicApi
 import music.content.Content
 import music.data.SongInfoSource
 import music.database.Database
@@ -27,14 +28,14 @@ open class LoggedInPath(
 
 class LoggedIn(
     val from: Boot,
-    user: User,
+    val user: User,
     val app: App,
     val db: Firestore,
     functions: Functions,
     val storage: Storage,
     override val songInfoSource: SongInfoSource,
     override val userSongs: UserSongs
-): ForwardBase<TopAndContent>(from), Content, FBApi {
+): ForwardBase<TopAndContent>(from), Content, MusicApi {
     val path = LoggedInPath(this)
 
     val storageRef = storage.ref("music/files")
@@ -57,13 +58,11 @@ class LoggedIn(
         !it.uploaded.initial().getOrDefault(true)
     }.ids
 
-    override val rawView = ui()
 
     suspend fun database() {
         forward %= Database(this)
     }
 
-    val syncing = Var(false)
 
     val signinWithCustomToken = run {
         var signedIn = false
@@ -88,34 +87,6 @@ class LoggedIn(
             console.log(*o)
         }
 
-        syncing.forEach { s ->
-            if (s) {
-                launch {
-                    try {
-                        privileged {
-                            db.enableNetwork().await()
-
-                            try {
-                                flushQueries(
-                                    musicLib.app.private.doc(user.uid).usersongs.collectionRef(db),
-                                    musicLib.app.storage.collectionRef(db)
-                                )
-                            } finally {
-                                db.disableNetwork().await()
-                            }
-                        }
-
-                    } catch (e: dynamic) {
-                        path.boot.slots.toasts {
-                            danger(
-                                "Synchronizing failed: ${e.message}"
-                            )
-                        }
-                    }
-                    syncing.now = false
-                }
-            }
-        }
 
 
     }
@@ -124,7 +95,7 @@ class LoggedIn(
         app.auth().signOut()
     }
 
-    fun sync() {
-        syncing.now = true
-    }
+    val sync = Sync(this)
+
+    override val rawView = ui()
 }

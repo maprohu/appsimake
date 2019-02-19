@@ -42,10 +42,6 @@ class LocalSongs(parent: JobScope, val idb: IDBDatabase, initial: Set<String>): 
     private val mutableSet = RxMutableSet(initial.toMutableSet())
     val set : RxSet<String> = mutableSet
 
-    private fun emit(m: SetMove<String>) {
-        m.applyTo(mutableSet)
-    }
-
     private val tabsChannel = org.w3c.dom.BroadcastChannel("appsimake-music-localSongs").also {
         kills += { it.close() }
     }
@@ -54,13 +50,11 @@ class LocalSongs(parent: JobScope, val idb: IDBDatabase, initial: Set<String>): 
         tabsChannel.onmessage = { e ->
             val data = e.data.unsafeCast<LocalSongEvent>()
 
-            emit(
-                when (data.type) {
-                    LocalSongEventType.added -> SetAdded(data.id)
-                    LocalSongEventType.removed -> SetRemoved(data.id)
-                    else -> throw Error("Unknown LocalSongEventType: ${data.type}")
-                }
-            )
+            when (data.type) {
+                LocalSongEventType.added -> mutableSet += data.id
+                LocalSongEventType.removed -> mutableSet -= data.id
+                else -> throw Error("Unknown LocalSongEventType: ${data.type}")
+            }
         }
     }
 
@@ -72,9 +66,7 @@ class LocalSongs(parent: JobScope, val idb: IDBDatabase, initial: Set<String>): 
                 this.type = LocalSongEventType.added
             }
         )
-        emit(
-            SetAdded(id)
-        )
+        mutableSet += id
     }
     fun removed(id: String) {
         tabsChannel.postMessage(
@@ -83,15 +75,13 @@ class LocalSongs(parent: JobScope, val idb: IDBDatabase, initial: Set<String>): 
                 this.type = LocalSongEventType.removed
             }
         )
-        emit(
-            SetRemoved(id)
-        )
+        mutableSet -= id
     }
 
     suspend fun load(id: String) : Blob? {
         val blob = idb.readMp3(id)
         if (blob == null) {
-            emit(SetRemoved(id))
+            mutableSet -= id
         }
         return blob
 

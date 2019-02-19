@@ -2,7 +2,6 @@ package common
 
 import commonshr.*
 import killable.*
-import rx.Rx
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 import kotlinx.coroutines.CompletableDeferred
@@ -11,8 +10,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
-import rx.RxIface
-import rx.Var
+import rx.*
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun dyn() = js("{}")
@@ -537,10 +535,23 @@ fun <T> EmitterIface<SetMove<T>>.andIn(other: EmitterIface<SetMove<T>>, ks: Kill
     return combineAnd(ks, this, other)
 }
 
-fun <T> EmitterIface<SetMove<T>>.feedTo(list: MutableList<T>): Trigger {
-    return add { m ->
+fun <T> EmitterIface<SetMove<T>>.feedTo(ks: killable.KillSet, list: MutableList<T>) {
+    ks += add { m ->
         m.applyTo(list)
     }
+}
+fun <T> EmitterIface<SetMove<T>>.feedTo(ks: killable.KillSet, list: MutableSet<T>) {
+    ks += add { m ->
+        m.applyTo(list)
+    }
+}
+
+fun <T> EmitterIface<SetMove<T>>.toRxSet(ks: KillSet): RxSet<T> {
+    val set = RxMutableSet<T>()
+
+    feedTo(ks, set)
+
+    return set
 }
 
 interface SetSource<T> {

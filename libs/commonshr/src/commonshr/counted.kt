@@ -56,7 +56,7 @@ class RefCountMap<K, V>(
         return map.getOrPut(key) {
             val iks = Killables()
             iks += { map -= key }
-            val item = create(iks.killSet.wrap, key)
+            val item = iks.create(key)
             RefCount(item, iks.kill)
         }.apply {
             count += 1
@@ -69,7 +69,7 @@ class RefCountMap<K, V>(
         }.value
     }
 
-    fun apply(key: K, fn: V.() -> Unit) {
+    fun applyTo(key: K, fn: V.() -> Unit) {
         map[key]?.let { fn(it.value) }
     }
 

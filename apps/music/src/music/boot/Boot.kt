@@ -4,6 +4,9 @@ import common.obj
 import commonfb.*
 import commonlib.private
 import commonshr.Action
+import commonshr.Exec
+import commonshr.executor
+import commonshr.withCounter
 import commonui.usericon.UnknownUserSrc
 import commonui.widget.*
 import firebase.firestore.collectionRef
@@ -38,6 +41,8 @@ class Boot(
 ): ViewImpl<HTMLElement>(parent) {
     val body = from.body
     val path = BootPath(this)
+
+    val tasks = { t:Action -> launch { t() }; Unit }.withCounter
 
     companion object {
         suspend fun create(): Boot {
@@ -201,6 +206,9 @@ class Boot(
 
     class SongProcess {
         val uploading = Var(false)
+        val downloading = Var(false)
+        val deletingFromLocal = Var(false)
+        val deletingFromCloud = Var(false)
 
 
     }
@@ -208,6 +216,19 @@ class Boot(
     private val songProcessMap = mutableMapOf<String, SongProcess>()
 
     fun processOf(id: String) = songProcessMap.getOrPut(id) { SongProcess() }
+
+    fun task(process: Var<Boolean>, fn: suspend () -> Unit) {
+        if (!process.now) {
+            process.now = true
+            path.boot.tasks.exec {
+                try {
+                    fn()
+                } finally {
+                    process.now = false
+                }
+            }
+        }
+    }
 }
 
 

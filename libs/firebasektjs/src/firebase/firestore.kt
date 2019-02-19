@@ -99,6 +99,9 @@ external interface DocumentReference {
 
     val id: String
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentReference?authuser=0#path
+    val path: String
+
     fun collection(path: String) : CollectionReference
 
     fun get(options: GetOptions = definedExternally) : Promise<DocumentSnapshot>
@@ -140,6 +143,12 @@ open external class Query {
             directionStr: String = definedExternally // [asc, desc]
     ) : Query
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.Query?authuser=0#onSnapshot
+    fun onSnapshot(
+        options: SnapshotListenOptions,
+        onNext: (QuerySnapshot) -> Unit,
+        onError: (Throwable) -> Unit
+    ) : () -> Unit
     fun onSnapshot(
             onNext: (QuerySnapshot) -> Unit,
             onError: (Throwable) -> Unit
@@ -244,6 +253,9 @@ external interface QuerySnapshot {
     fun docChanges(
             options: SnapshotOptions = definedExternally
     ) : Array<DocumentChange>
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.QuerySnapshot?authuser=0#metadata
+    val metadata: SnapshotMetadata
 
 }
 

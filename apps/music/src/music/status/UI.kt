@@ -11,6 +11,10 @@ import killable.HasKillSet
 import killable.KillSet
 import kotlinx.coroutines.launch
 import music.common.songUi
+import music.loggedin.deleteFromCloud
+import music.loggedin.deleteFromLocal
+import music.loggedin.download
+import music.loggedin.upload
 import kotlin.browser.document
 
 fun Status.ui() = TopAndContent(
@@ -20,6 +24,12 @@ fun Status.ui() = TopAndContent(
             click {
                 path.database.back()
             }
+        }
+        right.tasksUi(path.boot)
+        slots.right.slots.syncUi(path.loggedIn)
+        right.buttonGroup {
+            m1
+            bgfn(this)
         }
         title %= this@ui.title
     }.node,
@@ -49,15 +59,52 @@ fun Status.ui() = TopAndContent(
 
                             button {
                                 p2
+                                fa.download
+                                secondary
+                                visible {
+                                    !path.boot.localSongs.set.containsRx(id)() &&
+                                            path.loggedIn.storageIds.containsRx(id)()
+                                }
+                                process.downloading.forEach { node.disabled = it }
+                                click {
+                                    path.loggedIn.download(id)
+                                }
+                            }
+                            button {
+                                p2
                                 fa.upload
                                 secondary
                                 visible {
                                     path.boot.localSongs.set.containsRx(id)() &&
-                                            !path.loggedIn.uploadedSet.containsRx(id)()
+                                            !path.loggedIn.storageIds.containsRx(id)()
                                 }
                                 process.uploading.forEach { node.disabled = it }
                                 click {
-                                    path.database.upload(id)
+                                    path.loggedIn.upload(id)
+                                }
+                            }
+                            button {
+                                p2
+                                fa.trashAlt
+                                danger
+                                visible {
+                                    path.boot.localSongs.set.containsRx(id)()
+                                }
+                                process.deletingFromLocal.forEach { node.disabled = it }
+                                click {
+                                    path.loggedIn.deleteFromLocal(id)
+                                }
+                            }
+                            button {
+                                p2
+                                fa.pooStorm
+                                danger
+                                visible {
+                                    path.loggedIn.storageIds.containsRx(id)()
+                                }
+                                process.deletingFromCloud.forEach { node.disabled = it }
+                                click {
+                                    path.loggedIn.deleteFromCloud(id)
                                 }
                             }
 

@@ -51,6 +51,9 @@ external interface Reference {
     // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#getDownloadURL
     fun getDownloadURL(): Promise<String>
 
+    // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#delete
+    fun delete(): Promise<Unit>
+
 }
 
 // https://firebase.google.com/docs/reference/js/firebase.storage.UploadMetadata

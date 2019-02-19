@@ -33,7 +33,7 @@ data class SetDiff<T>(
         )
 
         fun <T> added(vararg e: T) = SetDiff(added = setOf(*e))
-        fun <T> removed(vararg e: T) = SetDiff(added = setOf(*e))
+        fun <T> removed(vararg e: T) = SetDiff(removed = setOf(*e))
 
     }
 
@@ -87,7 +87,7 @@ fun <T> EmitterIface<SetMove<T>>.process(ks: KillSet, fn: HasKillSet.(T) -> Unit
         map.clear()
     }
 
-    add { m ->
+    ks += add { m ->
         val v = m.value
         when (m) {
             is SetAdded -> {

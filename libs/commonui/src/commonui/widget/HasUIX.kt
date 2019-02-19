@@ -4,6 +4,7 @@ import commonshr.Action
 import commonshr.Exec
 import domx.clickEvent
 import domx.rxEnabled
+import killable.HasKillSet
 import org.w3c.dom.events.EventTarget
 
 interface HasUIX {
@@ -19,3 +20,5 @@ interface HasUIX {
     fun Button.click(action: Action) = node.click(action)
 
 }
+
+interface HasUIXApi: HasUIX, HasKillSet

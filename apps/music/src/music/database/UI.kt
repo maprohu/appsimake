@@ -1,11 +1,16 @@
 package music.database
 
 import bootstrap.*
+import common.toRxSet
 import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
+import killable.HasKillSet
 import killable.KillSet
+import music.loggedin.deleteFromLocal
+import music.loggedin.download
+import music.loggedin.upload
 import kotlin.browser.document
 
 fun Database.ui() = TopAndContent(
@@ -17,17 +22,8 @@ fun Database.ui() = TopAndContent(
             }
         }
         title %= "Database"
-        right.wraps.span {
-            visible { path.loggedIn.syncing() }
-            cls {
-               m1
-               fa {
-                   fw
-                   syncAlt
-                   spin
-               }
-            }
-        }
+        right.tasksUi(path.boot)
+        slots.right.slots.syncUi(path.loggedIn)
         right.dropdown {
             bars
             right
@@ -40,7 +36,7 @@ fun Database.ui() = TopAndContent(
                 item {
                     fa.syncAlt
                     text %= "Synchronize"
-                    click { path.loggedIn.sync() }
+                    click { path.loggedIn.sync.sync() }
                 }
             }
 
@@ -52,7 +48,7 @@ fun Database.ui() = TopAndContent(
             fun statusPanel(
                 st: Database.Status,
                 title: String,
-                bgfn: ButtonGroup.(() -> Set<String>) -> Unit = {}
+                bgfn: HasUIXApi.(ButtonGroup) -> Unit = {}
             ) {
                 insert.wraps.div {
                     cls {
@@ -83,7 +79,7 @@ fun Database.ui() = TopAndContent(
                         insert.buttonGroup {
                             cls.m1
 
-                            bgfn { st.set.toSet() }
+                            bgfn(this)
 
                             button {
                                 p2
@@ -92,7 +88,8 @@ fun Database.ui() = TopAndContent(
                                 click {
                                     showStatus(
                                         st,
-                                        title
+                                        title,
+                                        bgfn
                                     )
                                 }
                             }
@@ -105,14 +102,69 @@ fun Database.ui() = TopAndContent(
             statusPanel(
                 toBeDownloaded,
                 "To Be Downloaded"
-            )
+            ) { bg ->
+                bg.button {
+                    p2
+                    secondary
+                    fa.download
+                    rxEnabled {
+                        toBeDownloaded.set.iterableRx().any { id ->
+                            !path.boot.processOf(id).downloading()
+                        }
+                    }
+                    click {
+                        toBeDownloaded.set.forEach { id ->
+                            path.loggedIn.download(id)
+                        }
+                    }
+                }
+
+            }
             statusPanel(
                 toBeUploaded,
                 "To Be Uploaded"
-            )
+            ) { bg ->
+                bg.button {
+                    p2
+                    secondary
+                    fa.upload
+                    rxEnabled {
+                        toBeUploaded.set.iterableRx().any { id ->
+                            !path.boot.processOf(id).uploading()
+                        }
+                    }
+                    click {
+                        toBeUploaded.set.forEach { id ->
+                            path.loggedIn.upload(id)
+                        }
+                    }
+                }
+
+            }
             statusPanel(
                 toBeDeleted,
                 "To Be Deleted"
+            ) { bg ->
+                bg.button {
+                    p2
+                    secondary
+                    fa.trashAlt
+                    rxEnabled {
+                        toBeDeleted.set.iterableRx().any { id ->
+                            !path.boot.processOf(id).deletingFromLocal()
+                        }
+                    }
+                    click {
+                        toBeDeleted.set.forEach { id ->
+                            path.loggedIn.deleteFromLocal(id)
+                        }
+                    }
+                }
+
+            }
+            statusPanel(
+                newInCloud,
+                "New in Cloud"
             )
             statusPanel(
                 localSongIds,

@@ -1,5 +1,7 @@
 package killable
 
+import common.EmitterIface
+import common.toRxSet
 import commonshr.*
 import kotlinx.coroutines.Job
 import org.w3c.dom.Element
@@ -89,6 +91,8 @@ interface HasKillSet {
 
     fun <E> RxSet<E>.containsRx(value: E) = containsRx(kills, value)
     fun <E> RxSet<E>.process(fn: HasKillSet.(E) -> Unit): Unit = process(kills, fn)
+
+    fun <T> EmitterIface<SetMove<T>>.toRxSet() = toRxSet(kills)
 
 }
 

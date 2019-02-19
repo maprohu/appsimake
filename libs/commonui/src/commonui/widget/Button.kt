@@ -35,6 +35,12 @@ class Button(): ScreenWrap() {
     val secondary by lazy {
         cls.btnSecondary
     }
+    val warning by lazy {
+        cls.btnWarning
+    }
+    val danger by lazy {
+        cls.btnDanger
+    }
 
     val icon by lazy {
         document.span.setTo(slots.icon)

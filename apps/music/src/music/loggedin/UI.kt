@@ -6,9 +6,8 @@ import commonshr.*
 import commonui.widget.*
 import domx.invoke
 import domx.remAssign
-import fontawesome.bars
-import fontawesome.database
-import fontawesome.signOutAlt
+import fontawesome.*
+import killable.HasKillSet
 
 fun LoggedIn.ui() = TopAndContent(
     topbar = Factory().topbar {
@@ -38,6 +37,7 @@ fun LoggedIn.ui() = TopAndContent(
             }
         }
         title %= "Music"
+        slots.right.slots.syncUi(this@ui)
         right.userIcon(kills, path.boot.userIcon).apply {
             node {
                 cls.m1
@@ -46,3 +46,33 @@ fun LoggedIn.ui() = TopAndContent(
     }.node,
     content = null
 )
+
+fun HasUIXApi.syncUi(
+    holes: SlotHoles,
+    loggedIn: LoggedIn
+) {
+    holes.slot.insert.wraps.span {
+        visible { loggedIn.sync.syncing() }
+        cls {
+            m1
+            fa {
+                fw
+                syncAlt
+                spin
+            }
+        }
+    }
+    holes.slot.insert.button {
+        visible {
+            !loggedIn.sync.syncing() &&
+                    loggedIn.sync.pendingWrites.isNotEmptyRx()
+        }
+        m1p2
+        fa.syncAlt
+        warning
+        click {
+            loggedIn.sync.sync()
+        }
+    }
+
+}

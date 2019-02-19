@@ -7,7 +7,10 @@ import commonfb.save
 import commonshr.*
 import commonui.widget.*
 import firebase.FBApi
+import killable.HasKillSet
 import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
+import music.common.MusicApi
 import music.import.Import
 import music.loggedin.LoggedIn
 import music.loggedin.LoggedInPath
@@ -27,7 +30,7 @@ open class DatabasePath(
 
 class Database(
     val from: LoggedIn
-): ForwardBase<TopAndContent>(from), FBApi {
+): ForwardBase<TopAndContent>(from), MusicApi {
     val path = DatabasePath(this)
 
     val localSongIds = Status(
@@ -78,6 +81,15 @@ class Database(
         }.diffsAll.toMoves().map { m -> m.map { s -> s.props.idOrFail } }
     )
 
+    val newInCloud = Status(
+        path.loggedIn.storageSet.set.filtered { us ->
+            val id = us.props.idOrFail
+            us.uploaded.initial().getOrDefault(false) &&
+                    !path.boot.localSongs.set.containsRx(id)() &&
+                    path.loggedIn.userSongs.get(id)() == UserSongState.New
+        }.diffsAll.toMoves().map { m -> m.map { s -> s.props.idOrFail } }
+    )
+
     val uploading = Status(
         path.loggedIn.uploadingIds
     )
@@ -93,7 +105,8 @@ class Database(
             set: RxSet<String>
         ): this(set.diffsAll.toMoves())
 
-        val set = mutableSetOf<String>()
+        val set = items.toRxSet()
+
         val count = Var(0)
         val size = Var(0L)
         val duration = Var(0.0)
@@ -103,9 +116,6 @@ class Database(
                 val tag = path.loggedIn.songInfoSource(id) {
                     path.boot.localSongs.load(id)
                 }
-
-                set += id
-                kills += { set -= id }
 
                 count.transform { it + 1 }
                 kills += {
@@ -136,39 +146,10 @@ class Database(
 
     suspend fun showStatus(
         st: Status,
-        title: String
+        title: String,
+        bgfn: HasUIXApi.(ButtonGroup) -> Unit
     ) {
-        forward %= music.status.Status(this, st, title)
+        forward %= music.status.Status(this, st, title, bgfn)
     }
 
-    suspend fun upload(id: String) {
-        val process = path.boot.processOf(id).uploading
-        if (!process.now) {
-            try {
-                process.now = true
-                path.loggedIn.privileged {
-                    val file = path.boot.localSongs.load(id)
-                    if (file != null) {
-                        val store = StoreState().apply {
-                            props.persisted(
-                                musicLib.app.storage.doc(id)
-                            )
-
-                            uploaded.cv = false
-                            save(path.loggedIn.db)
-                        }
-
-                        val ref = path.loggedIn.storageRef.child(id)
-                        ref.put(file).await()
-                        store.apply {
-                            uploaded.cv = true
-                            save(path.loggedIn.db)
-                        }
-                    }
-                }
-            } finally {
-                process.now = false
-            }
-        }
-    }
 }

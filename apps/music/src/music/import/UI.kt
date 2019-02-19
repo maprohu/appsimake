@@ -26,13 +26,7 @@ fun Import.ui() = TopAndContent(
         }
         title %= "Import MP3s"
         val inputContainer = node
-        right.badge {
-            visible { work.pending() != 0 }
-            cls.p1
-            pill
-            warning
-            node %= { work.pending().toString() }
-        }
+        right.tasksUi(path.boot)
         right.buttonGroup {
             m1
             if (webkitdirectorySupported) {
@@ -212,7 +206,7 @@ fun ImportFile.ui() = document.div {
                 secondary
                 fa.ban
                 click {
-                    cancel()
+                    coroutineContext.cancel()
                 }
             }
 

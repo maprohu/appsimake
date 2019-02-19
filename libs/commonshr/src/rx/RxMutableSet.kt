@@ -6,13 +6,13 @@ import killable.HasKillSet
 import killable.KillSet
 import killable.wrap
 
-interface RxSet<out E>: Set<E> {
+interface RxSet<E>: Set<E> {
     val sizeRx: RxIface<Int>
     val iterableRx: RxIface<Iterable<E>>
     val isEmptyRx: RxIface<Boolean>
     val isNotEmptyRx: RxIface<Boolean>
-    val diffs: EmitterIface<SetDiff<@UnsafeVariance E>>
-    fun containsRx(ks: KillSet, value: @UnsafeVariance E): RxIface<Boolean>
+    val diffs: EmitterIface<SetDiff<E>>
+    fun containsRx(ks: KillSet, value: E): RxIface<Boolean>
 
     fun anyRx(ks: KillSet, fn: HasKillSet.(E) -> Boolean): RxIface<Boolean> = with(ks.wrap) {
         rx { iterableRx().any { fn(it) } }
@@ -144,19 +144,29 @@ class RxMutableSet<E>(
     override val isNotEmptyRx by lazy { rxProperty { isNotEmpty() } }
 
 
+//    private fun containsVar(id: E) = containsRxs.getOrPut(id) { Var(contains(id)) }
     private val containsRxs by lazy {
+//        val rxs = mutableMapOf<E, Var<Boolean>>()
+//        fun applyTo(id: E, fn: Var<Boolean>.() -> Unit) = rxs[id]?.fn()
+//        diffs += { d ->
+//            console.dir(d)
+//            d.removed.forEach { id -> applyTo(id) { now = false } }
+//            d.added.forEach { id -> applyTo(id) { now = true } }
+//        }
+//        rxs
         RefCountMap<E, Var<Boolean>> {
             Var(contains(it))
         }.apply {
             diffs += { d ->
-                d.removed.forEach { id -> apply(id) { now = false } }
-                d.added.forEach { id -> apply(id) { now = true } }
+                d.removed.forEach { id -> applyTo(id) { now = false } }
+                d.added.forEach { id -> applyTo(id) { now = true } }
             }
         }
     }
 
-    override fun containsRx(ks: KillSet, value: @UnsafeVariance E): RxIface<Boolean> {
+    override fun containsRx(ks: KillSet, value: E): RxIface<Boolean> {
         return containsRxs.get(ks, value)
+//        return containsVar(value)
     }
 
     override fun filtered(ks: KillSet, fn: HasKillSet.(E) -> Boolean): RxSet<E> {

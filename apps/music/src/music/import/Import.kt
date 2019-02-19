@@ -7,6 +7,7 @@ import commonshr.withCounter
 import commonui.widget.TopAndContent
 import commonui.widget.UIBase
 import music.Playable
+import music.common.MusicApi
 import music.data.readAsArrayBuffer
 import music.database.Database
 import music.database.DatabasePath
@@ -23,10 +24,9 @@ class ImportPath(
 
 class Import(
     val from: Database
-): UIBase<TopAndContent>(from) {
+): UIBase<TopAndContent>(from), MusicApi {
     val path = ImportPath(this)
 
-    val work = executor().withCounter
 
     val loadable = RxMutableSet<ImportFile>()
     val loadList = ListenableMutableList<ImportFile>()
@@ -39,7 +39,7 @@ class Import(
 
     suspend fun load(list: List<File>) {
         list.filter { it.name.endsWith(".mp3") }.forEach { file ->
-            work.exec {
+            path.boot.tasks.exec {
                 val id = file.readAsArrayBuffer().hash()
 
                 if (id !in loadIds) {
@@ -83,7 +83,7 @@ class ImportFile(
             path.import.loadable.apply {
                 if (i) {
                     remove(this@ImportFile)
-                    path.import.work.exec {
+                    path.boot.tasks.exec {
                         path.boot.localSongs.addMp3(playable)
                     }
                 }
