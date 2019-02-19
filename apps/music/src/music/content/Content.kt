@@ -1,5 +1,6 @@
 package music.content
 
+import commonui.UiApi
 import commonui.widget.*
 import music.UserSongs
 import music.boot.Boot
@@ -15,8 +16,8 @@ interface Content: JobScopeWithView<TopAndContent> {
 
 }
 
-class UserUnknown(boot: Boot): ViewImpl<TopAndContent>(boot), Content {
-    override val rawView = TopAndContent.hourglass
+class UserUnknown(val boot: Boot): ViewImpl<TopAndContent>(boot), Content, UiApi {
     override val userSongs: UserSongs? = null
     override val songInfoSource: SongInfoSource = boot.localSongInfoSource
+    override val rawView = ui()
 }

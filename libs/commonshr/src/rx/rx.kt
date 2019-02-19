@@ -435,6 +435,8 @@ open class Var<T>(
         set(value) { setValue(value) }
 
     fun transform(fn: (T) -> T) { now = fn(now) }
+
+    operator fun remAssign(v: T) { now = v }
 }
 
 fun Var<Int>.increase() = transform { it + 1 }

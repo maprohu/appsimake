@@ -39,7 +39,6 @@ class Boot(
     val body = from.body
     val path = BootPath(this)
 
-//    val tasks = { t:Action -> launch { t() }; Unit }.withCounter
     val tasks = discardExecutor().withCounter
 
     companion object {
@@ -93,6 +92,8 @@ class Boot(
 
     val localSongInfoSource = localSongInfoSource()
 
+    val statusMessage = Var("Loading Music Player...")
+
     val content = views<Content>().of(UserUnknown(this), contentHole)
 
     val userSongs = content.map { it.item.userSongs }
@@ -130,21 +131,26 @@ class Boot(
             val functions = FB.functions()
             val storage = FB.storage
 
+            statusMessage %= "Enabling persistence..."
+
             db.enablePersistence(
                 obj {
                     experimentalTabSynchronization = true
                 }
             ).await()
 
+            statusMessage %= "Disabling network..."
             db.disableNetwork().await()
 
 
+            statusMessage %= "Checking user..."
             runUserState(app).forEach { st ->
                 exec {
                     userState.now = st
 
                     when (st) {
                         is UserState.LoggedIn -> {
+                            statusMessage %= "Logging in..."
                             content.switchToView {
                                 LoggedIn(
                                     this@Boot,
