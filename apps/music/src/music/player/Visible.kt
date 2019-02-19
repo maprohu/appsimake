@@ -73,10 +73,12 @@ class Visible(
     val playing = rx { player()?.let { it.playState().isPlaying } ?: false }
 
 
-    suspend fun loadNextSong(startPlaying: Boolean) {
-        player.switchTo(
-            path.boot.songSource.now?.invoke()?.let { Player(this, it, startPlaying) }
-        )
+    fun loadNextSong(startPlaying: Boolean) {
+        exec {
+            player.switchTo(
+                path.boot.songSource.now?.invoke()?.let { Player(this, it, startPlaying) }
+            )
+        }
     }
 
 

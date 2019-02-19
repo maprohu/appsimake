@@ -2,27 +2,15 @@ package music.database
 
 import common.EmitterIface
 import common.Some
-import common.map
-import commonfb.save
 import commonshr.*
 import commonui.widget.*
-import firebase.FBApi
-import killable.HasKillSet
-import kotlinx.coroutines.await
-import kotlinx.coroutines.launch
 import music.common.MusicApi
 import music.import.Import
 import music.loggedin.LoggedIn
 import music.loggedin.LoggedInPath
-import music.status.Status
-import musiclib.StoreState
 import musiclib.UserSongState
-import musiclib.musicLib
-import musiclib.storage
-import rx.RxMutableSet
 import rx.RxSet
 import rx.Var
-import rx.process
 
 open class DatabasePath(
     val database: Database
@@ -31,7 +19,7 @@ open class DatabasePath(
 class Database(
     val from: LoggedIn
 ): ForwardBase<TopAndContent>(from), MusicApi {
-    val path = DatabasePath(this)
+    override val path = DatabasePath(this)
 
     val localSongIds = Status(
         path.boot.localSongs.set
@@ -66,28 +54,28 @@ class Database(
     val like = Status(
         path.loggedIn.userSongSet.set.filtered { us ->
             us.state.initial() == Some(UserSongState.Like)
-        }.diffsAll.toMoves().map { m -> m.map { s -> s.props.idOrFail } }
+        }.ids
     )
 
     val dontLike = Status(
         path.loggedIn.userSongSet.set.filtered { us ->
             us.state.initial() == Some(UserSongState.DontLike)
-        }.diffsAll.toMoves().map { m -> m.map { s -> s.props.idOrFail } }
+        }.ids
     )
 
     val cloud = Status(
         path.loggedIn.storageSet.set.filtered { us ->
             us.uploaded.initial().getOrDefault(false)
-        }.diffsAll.toMoves().map { m -> m.map { s -> s.props.idOrFail } }
+        }.ids
     )
 
     val newInCloud = Status(
         path.loggedIn.storageSet.set.filtered { us ->
-            val id = us.props.idOrFail
-            us.uploaded.initial().getOrDefault(false) &&
-                    !path.boot.localSongs.set.containsRx(id)() &&
+            us.uploaded.initial().getOrDefault(false)
+        }.ids.filtered { id ->
+            !path.boot.localSongs.set.containsRx(id)() &&
                     path.loggedIn.userSongs.get(id)() == UserSongState.New
-        }.diffsAll.toMoves().map { m -> m.map { s -> s.props.idOrFail } }
+        }
     )
 
     val uploading = Status(
@@ -147,7 +135,7 @@ class Database(
     suspend fun showStatus(
         st: Status,
         title: String,
-        bgfn: HasUIXApi.(ButtonGroup) -> Unit
+        bgfn: HasKillSetAndUIX.(ButtonGroup) -> Unit
     ) {
         forward %= music.status.Status(this, st, title, bgfn)
     }

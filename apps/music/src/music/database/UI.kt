@@ -1,17 +1,13 @@
 package music.database
 
 import bootstrap.*
-import common.toRxSet
 import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
-import killable.HasKillSet
-import killable.KillSet
 import music.loggedin.deleteFromLocal
 import music.loggedin.download
 import music.loggedin.upload
-import kotlin.browser.document
 
 fun Database.ui() = TopAndContent(
     topbar = factory.topbar {
@@ -22,8 +18,8 @@ fun Database.ui() = TopAndContent(
             }
         }
         title %= "Database"
-        right.tasksUi(path.boot)
-        slots.right.slots.syncUi(path.loggedIn)
+        right.tasksUi()
+        slots.right.slots.syncUi()
         right.dropdown {
             bars
             right
@@ -48,7 +44,7 @@ fun Database.ui() = TopAndContent(
             fun statusPanel(
                 st: Database.Status,
                 title: String,
-                bgfn: HasUIXApi.(ButtonGroup) -> Unit = {}
+                bgfn: HasKillSetAndUIX.(ButtonGroup) -> Unit = {}
             ) {
                 insert.wraps.div {
                     cls {
@@ -139,7 +135,6 @@ fun Database.ui() = TopAndContent(
                         }
                     }
                 }
-
             }
             statusPanel(
                 toBeDeleted,

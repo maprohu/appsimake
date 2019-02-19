@@ -25,6 +25,7 @@ fun LoggedIn.upload(id: String) {
 
                     uploaded.cv = false
                     save(path.loggedIn.db)
+                    props.clearDirty()
                 }
 
                 val ref = path.loggedIn.storageRef.child(id)
@@ -32,6 +33,7 @@ fun LoggedIn.upload(id: String) {
                 store.apply {
                     uploaded.cv = true
                     save(path.loggedIn.db)
+                    props.clearDirty()
                 }
             }
         }

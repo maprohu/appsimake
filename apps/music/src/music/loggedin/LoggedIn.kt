@@ -36,7 +36,7 @@ class LoggedIn(
     override val songInfoSource: SongInfoSource,
     override val userSongs: UserSongs
 ): ForwardBase<TopAndContent>(from), Content, MusicApi {
-    val path = LoggedInPath(this)
+    override val path = LoggedInPath(this)
 
     val storageRef = storage.ref("music/files")
 

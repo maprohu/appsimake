@@ -1,18 +1,13 @@
-function define(args, fn) {
-    fn(
-        ...args.map(function(a) {
-            if (a == 'exports') {
-                return module.exports;
-            } else if (a.startsWith('appsimake-')) {
-                return require('./' + a);
-            } else {
-                return require(a);
-            }
-        })
-    );
+if (typeof kotlin === 'undefined') {
+  throw new Error("Error loading module 'appsimake-firebaseshr'. Its dependency 'kotlin' was not found. Please, check whether 'kotlin' is loaded prior to 'appsimake-firebaseshr'.");
 }
-
-define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], function (_, Kotlin, $module$appsimake_commonshr, $module$kotlinx_coroutines_core) {
+if (typeof this['appsimake-commonshr'] === 'undefined') {
+  throw new Error("Error loading module 'appsimake-firebaseshr'. Its dependency 'appsimake-commonshr' was not found. Please, check whether 'appsimake-commonshr' is loaded prior to 'appsimake-firebaseshr'.");
+}
+if (typeof this['kotlinx-coroutines-core'] === 'undefined') {
+  throw new Error("Error loading module 'appsimake-firebaseshr'. Its dependency 'kotlinx-coroutines-core' was not found. Please, check whether 'kotlinx-coroutines-core' is loaded prior to 'appsimake-firebaseshr'.");
+}
+this['appsimake-firebaseshr'] = function (_, Kotlin, $module$appsimake_commonshr, $module$kotlinx_coroutines_core) {
   'use strict';
   var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var Unit = Kotlin.kotlin.Unit;
@@ -1592,4 +1587,4 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
   binderOpsInternal = null;
   Kotlin.defineModule('appsimake-firebaseshr', _);
   return _;
-});
+}(typeof this['appsimake-firebaseshr'] === 'undefined' ? {} : this['appsimake-firebaseshr'], kotlin, this['appsimake-commonshr'], this['kotlinx-coroutines-core']);

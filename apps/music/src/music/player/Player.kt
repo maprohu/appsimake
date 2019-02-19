@@ -41,7 +41,7 @@ class Player(
 
     suspend fun nextTrack() { next() }
 
-    suspend fun next() {
+    fun next() {
         path.visible.loadNextSong(isPlaying)
     }
 

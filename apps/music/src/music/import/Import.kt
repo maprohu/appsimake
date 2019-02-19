@@ -25,7 +25,7 @@ class ImportPath(
 class Import(
     val from: Database
 ): UIBase<TopAndContent>(from), MusicApi {
-    val path = ImportPath(this)
+    override val path = ImportPath(this)
 
 
     val loadable = RxMutableSet<ImportFile>()

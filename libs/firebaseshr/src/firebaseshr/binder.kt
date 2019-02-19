@@ -4,6 +4,8 @@ import common.*
 import commonlib.CollectionWrap
 import commonlib.DocWrap
 import commonshr.SetDiff
+import commonshr.SetMove
+import commonshr.toMoves
 import firebaseshr.firestore.Timestamp
 import killable.Killables
 import killable.NoKill
@@ -619,5 +621,9 @@ open class BasePropFactory<in O, out N, out P, PR: Props<O, N, P>>(
 
 val <T: HasFBProps<T>> SetSource<T>.ids
     get() = map { it.props.idOrFail }
+
+val <T: HasFBProps<T>> RxSet<T>.ids: EmitterIface<SetMove<String>>
+    get() = diffsAll.toMoves().map { m -> m.map { s -> s.props.idOrFail } }
+
 
 

@@ -3,6 +3,7 @@ package music.status
 import bootstrap.*
 import common.removeFromParent
 import commonfb.CommonFbApi
+import commonfb.fbapi
 import commonshr.*
 import commonui.widget.*
 import domx.*
@@ -25,8 +26,8 @@ fun Status.ui() = TopAndContent(
                 path.database.back()
             }
         }
-        right.tasksUi(path.boot)
-        slots.right.slots.syncUi(path.loggedIn)
+        right.tasksUi()
+        slots.right.slots.syncUi()
         right.buttonGroup {
             m1
             bgfn(this)
@@ -40,9 +41,7 @@ fun Status.ui() = TopAndContent(
             launch {
                 status.items.process(kills) { id ->
                     launch {
-                        val api: CommonFbApi = object : CommonFbApi by this@ui {
-                            override val kills = this@process.kills
-                        }
+                        val api = (this@ui + this@process).fbapi
                         val node = api.songUi(
                             id,
                             null,

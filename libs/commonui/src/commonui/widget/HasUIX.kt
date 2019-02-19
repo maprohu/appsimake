@@ -5,6 +5,7 @@ import commonshr.Exec
 import domx.clickEvent
 import domx.rxEnabled
 import killable.HasKillSet
+import killable.KillSet
 import org.w3c.dom.events.EventTarget
 
 interface HasUIX {
@@ -21,4 +22,9 @@ interface HasUIX {
 
 }
 
-interface HasUIXApi: HasUIX, HasKillSet
+interface HasKillSetAndUIX: HasUIX, HasKillSet
+
+operator fun HasUIX.plus(ks: HasKillSet) = object : HasKillSetAndUIX {
+    override val uix = this@plus.uix
+    override val kills = ks.kills
+}

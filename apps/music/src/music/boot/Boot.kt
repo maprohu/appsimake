@@ -3,10 +3,7 @@ package music.boot
 import common.obj
 import commonfb.*
 import commonlib.private
-import commonshr.Action
-import commonshr.Exec
-import commonshr.executor
-import commonshr.withCounter
+import commonshr.*
 import commonui.usericon.UnknownUserSrc
 import commonui.widget.*
 import firebase.firestore.collectionRef
@@ -42,7 +39,8 @@ class Boot(
     val body = from.body
     val path = BootPath(this)
 
-    val tasks = { t:Action -> launch { t() }; Unit }.withCounter
+//    val tasks = { t:Action -> launch { t() }; Unit }.withCounter
+    val tasks = discardExecutor().withCounter
 
     companion object {
         suspend fun create(): Boot {
@@ -192,13 +190,15 @@ class Boot(
     }
     fun play(playable: Playable) {
         exec {
+            lateinit var vis: Visible
             player.switchToView {
-                Visible(this).apply {
-                    exec {
-                        player.switchTo(
-                            Player(this, playable, true)
-                        )
-                    }
+                Visible(this).also { vis = it }
+            }
+            vis.apply {
+                exec {
+                    player.switchTo(
+                        Player(this, playable, true)
+                    )
                 }
             }
         }
