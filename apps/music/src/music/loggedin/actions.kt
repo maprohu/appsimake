@@ -1,9 +1,14 @@
 package music.loggedin
 
+import common.Some
 import commonfb.save
+import commonshr.Action
+import commonshr.reportd
 import firebase.firestore.docRef
+import firebaseshr.waitExtracted
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.await
+import music.boot.Boot
 import musiclib.StoreState
 import musiclib.musicLib
 import musiclib.storage
@@ -11,10 +16,17 @@ import org.w3c.files.Blob
 import org.w3c.xhr.BLOB
 import org.w3c.xhr.XMLHttpRequest
 import org.w3c.xhr.XMLHttpRequestResponseType
+import rx.Var
+
+fun LoggedIn.task(id: String, pr: Boot.SongProcess.() -> Var<Boolean>, fn: Action) {
+    path.boot.task(
+        path.boot.processOf(id).pr(),
+        fn
+    )
+}
 
 fun LoggedIn.upload(id: String) {
-    val process = path.boot.processOf(id).uploading
-    path.boot.task(process) {
+    task(id, {uploading}) {
         path.loggedIn.privileged {
             val file = path.boot.localSongs.load(id)
             if (file != null) {
@@ -41,8 +53,7 @@ fun LoggedIn.upload(id: String) {
 }
 
 fun LoggedIn.download(id: String) {
-    val process = path.boot.processOf(id).downloading
-    path.boot.task(process) {
+    task(id, {downloading}) {
         path.loggedIn.privileged {
 
             val url = storageRef.child(id).getDownloadURL().await()
@@ -62,19 +73,46 @@ fun LoggedIn.download(id: String) {
 }
 
 fun LoggedIn.deleteFromLocal(id: String) {
-    val process = path.boot.processOf(id).deletingFromLocal
-    path.boot.task(process) {
+    task(id, {deletingFromLocal}) {
         path.boot.localSongs.removeMp3(id)
     }
 }
 
 fun LoggedIn.deleteFromCloud(id: String) {
-    val process = path.boot.processOf(id).deletingFromCloud
-    path.boot.task(process) {
+    task(id, {deletingFromCloud}) {
         path.loggedIn.privileged {
             musicLib.app.storage.doc(id).docRef(path.loggedIn.db).delete()
             storageRef.child(id).delete().await()
         }
     }
 }
+
+fun LoggedIn.checkStorage(id: String) {
+    task(id, {checkingStorage}) {
+        path.loggedIn.privileged {
+            try {
+                val tag = songInfoSource(id) { path.boot.localSongs.load(id) }
+                tag.waitExtracted()
+                val localSizeOpt = tag.bytes.initial.now
+
+                if (localSizeOpt is Some) {
+                    val localSize = localSizeOpt.value
+                    val meta = storageRef.child(id).getMetadata().await()
+                    val cloudSize = meta.size
+
+                    require (localSize == cloudSize) {
+                        "Cloud storage size does not match local file. id: $id cloud: $cloudSize local: $localSize"
+                    }
+                }
+            } catch (e: dynamic) {
+                console.dir(e.unsafeCast<Any())
+                path.boot.slots.toasts {
+                    error(e.message.unsafeCast<String>())
+                }
+            }
+        }
+    }
+}
+
+
 

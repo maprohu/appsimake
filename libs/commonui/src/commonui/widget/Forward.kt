@@ -48,7 +48,7 @@ abstract class ForwardBase<V: Any>(
 
 abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
     coroutineContext: Job
-): ViewImplBase<V>(coroutineContext), HasUIX {
+): ViewImplBase<V>(coroutineContext), HasKillSetAndUIX {
     constructor(
         parent: JobScope
     ): this(Job(parent.coroutineContext))

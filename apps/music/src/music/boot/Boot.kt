@@ -209,8 +209,7 @@ class Boot(
         val downloading = Var(false)
         val deletingFromLocal = Var(false)
         val deletingFromCloud = Var(false)
-
-
+        val checkingStorage = Var(false)
     }
 
     private val songProcessMap = mutableMapOf<String, SongProcess>()

@@ -78,4 +78,6 @@ external class UploadTask: Promise<UploadTaskSnapshot> {
 external interface UploadTaskSnapshot
 
 // https://firebase.google.com/docs/reference/js/firebase.storage.FullMetadata
-external interface FullMetadata
+external interface FullMetadata {
+    val size: Number
+}

@@ -5,6 +5,7 @@ import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
+import music.common.MusicApi
 import music.loggedin.deleteFromLocal
 import music.loggedin.download
 import music.loggedin.upload
@@ -34,6 +35,11 @@ fun Database.ui() = TopAndContent(
                     text %= "Synchronize"
                     click { path.loggedIn.sync.sync() }
                 }
+                item {
+                    fa.list
+                    text %= "Details"
+                    click { details() }
+                }
             }
 
         }
@@ -41,57 +47,19 @@ fun Database.ui() = TopAndContent(
     content = factory.scrollPane {
         pane {
             cls.p1
+
             fun statusPanel(
-                st: Database.Status,
+                status: Database.Status,
                 title: String,
                 bgfn: HasKillSetAndUIX.(ButtonGroup) -> Unit = {}
             ) {
-                insert.wraps.div {
-                    cls {
-                        m1
-                        p1
-                        border
-                        rounded
-                        column()
-                    }
-                    h6 {
-                        cls.m1
-                        this %= title
-                    }
-                    dl {
-                        cls.m1
-                        dt %= "Songs"
-                        dd %= { st.count().groupThousands }
-                        dt %= "Bytes"
-                        dd %= { st.size().groupThousands }
-                        dt %= "Duration"
-                        dd %= { st.duration().toInt().formatSecs }
-                    }
-                    div {
-                        cls {
-                            row()
-                            justifyContentEnd
-                        }
-                        insert.buttonGroup {
-                            cls.m1
-
-                            bgfn(this)
-
-                            button {
-                                p2
-                                secondary
-                                fa.list
-                                click {
-                                    showStatus(
-                                        st,
-                                        title,
-                                        bgfn
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                statusPanel(
+                    insert,
+                    this@ui,
+                    status,
+                    title,
+                    bgfn
+                )
 
             }
 
@@ -161,33 +129,73 @@ fun Database.ui() = TopAndContent(
                 newInCloud,
                 "New in Cloud"
             )
-            statusPanel(
-                localSongIds,
-                "Local Songs"
-            )
-            statusPanel(
-                new,
-                "New"
-            )
-            statusPanel(
-                like,
-                "Like"
-            )
-            statusPanel(
-                dontLike,
-                "Don't Like"
-            )
-            statusPanel(
-                cloud,
-                "Cloud"
-            )
-            statusPanel(
-                uploading,
-                "Uploading"
-            )
         }
 
     }.node
 )
 
 
+suspend fun ForwardBase<TopAndContent>.showStatus(
+    database: Database,
+    st: Database.Status,
+    title: String,
+    bgfn: HasKillSetAndUIX.(ButtonGroup) -> Unit
+) {
+    forward %= music.status.Status(this, database, st, title, bgfn)
+}
+fun ForwardBase<TopAndContent>.statusPanel(
+    factory: Factory,
+    database: Database,
+    st: Database.Status,
+    title: String,
+    bgfn: HasKillSetAndUIX.(ButtonGroup) -> Unit = {}
+) {
+    factory.wraps.div {
+        cls {
+            m1
+            p1
+            border
+            rounded
+            column()
+        }
+        h6 {
+            cls.m1
+            this %= title
+        }
+        dl {
+            cls.m1
+            dt %= "Songs"
+            dd %= { st.count().groupThousands }
+            dt %= "Bytes"
+            dd %= { st.size().groupThousands }
+            dt %= "Duration"
+            dd %= { st.duration().toInt().formatSecs }
+        }
+        div {
+            cls {
+                row()
+                justifyContentEnd
+            }
+            insert.buttonGroup {
+                cls.m1
+
+                bgfn(this)
+
+                button {
+                    p2
+                    secondary
+                    fa.list
+                    click {
+                        showStatus(
+                            database,
+                            st,
+                            title,
+                            bgfn
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+}

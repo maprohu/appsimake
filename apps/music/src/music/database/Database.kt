@@ -4,7 +4,10 @@ import common.EmitterIface
 import common.Some
 import commonshr.*
 import commonui.widget.*
+import killable.HasKillSet
+import killable.KillSet
 import music.common.MusicApi
+import music.database.details.Details
 import music.import.Import
 import music.loggedin.LoggedIn
 import music.loggedin.LoggedInPath
@@ -21,55 +24,28 @@ class Database(
 ): ForwardBase<TopAndContent>(from), MusicApi {
     override val path = DatabasePath(this)
 
-    val localSongIds = Status(
-        path.boot.localSongs.set
-    )
 
-    val toBeDownloaded = Status(
+    val toBeDownloaded = status(
         path.loggedIn.uploadedSet.ids.filtered { id ->
             path.loggedIn.userSongs.get(id)() == UserSongState.Like &&
                     !path.boot.localSongs.set.containsRx(id)()
         }
     )
 
-    val toBeUploaded = Status(
+    val toBeUploaded = status(
         path.boot.localSongs.set.filtered { id ->
             path.loggedIn.userSongs.get(id)() == UserSongState.Like &&
                     !path.loggedIn.storageIds.containsRx(id)()
         }
     )
 
-    val toBeDeleted = Status(
+    val toBeDeleted = status(
         path.boot.localSongs.set.filtered { id ->
             path.loggedIn.userSongs.get(id)() == UserSongState.DontLike
         }
     )
 
-    val new = Status(
-        path.boot.localSongs.set.filtered { id ->
-            path.loggedIn.userSongs.get(id)() == UserSongState.New
-        }
-    )
-
-    val like = Status(
-        path.loggedIn.userSongSet.set.filtered { us ->
-            us.state.initial() == Some(UserSongState.Like)
-        }.ids
-    )
-
-    val dontLike = Status(
-        path.loggedIn.userSongSet.set.filtered { us ->
-            us.state.initial() == Some(UserSongState.DontLike)
-        }.ids
-    )
-
-    val cloud = Status(
-        path.loggedIn.storageSet.set.filtered { us ->
-            us.uploaded.initial().getOrDefault(false)
-        }.ids
-    )
-
-    val newInCloud = Status(
+    val newInCloud = status(
         path.loggedIn.storageSet.set.filtered { us ->
             us.uploaded.initial().getOrDefault(false)
         }.ids.filtered { id ->
@@ -78,20 +54,19 @@ class Database(
         }
     )
 
-    val uploading = Status(
-        path.loggedIn.uploadingIds
-    )
-
     suspend fun import() {
         forward %= Import(this)
     }
 
-    inner class Status(
-        val items: EmitterIface<SetMove<String>>
-    ) {
-        constructor(
-            set: RxSet<String>
-        ): this(set.diffsAll.toMoves())
+    suspend fun details() {
+        forward %= Details(this)
+    }
+
+    class Status(
+        val items: EmitterIface<SetMove<String>>,
+        val path: LoggedInPath,
+        override val kills: KillSet
+    ): HasKillSet {
 
         val set = items.toRxSet()
 
@@ -132,12 +107,5 @@ class Database(
 
     override val rawView = ui()
 
-    suspend fun showStatus(
-        st: Status,
-        title: String,
-        bgfn: HasKillSetAndUIX.(ButtonGroup) -> Unit
-    ) {
-        forward %= music.status.Status(this, st, title, bgfn)
-    }
 
 }
