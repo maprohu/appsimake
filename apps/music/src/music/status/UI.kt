@@ -40,7 +40,7 @@ fun Status.ui() = TopAndContent(
 
             launch {
                 status.items.process(kills) { id ->
-                    launch {
+                    launch(this@ui.coroutineContext) {
                         val api = (this@ui + this@process).fbapi
                         val node = api.songUi(
                             id,
