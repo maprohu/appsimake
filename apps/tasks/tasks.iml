@@ -7,8 +7,8 @@
     </content>
     <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry exported="" type="library" name="kotlin-stdlib" level="project" />
-    <orderEntry exported="" type="module" module-name="taskslib"/>
-    <orderEntry exported="" type="module" module-name="commonfb"/>
+    <orderEntry type="library" exported="" name="kotlin-stdlib" level="project" />
+    <orderEntry type="module" module-name="taskslib" exported="" />
+    <orderEntry type="module" module-name="commonfb" exported="" />
   </component>
 </module>

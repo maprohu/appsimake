@@ -13,7 +13,7 @@ import java.util.zip.ZipInputStream;
 
 public class BootJava {
 
-    public static final String KOTLIN_VERSION = "1.3.20";
+    public static final String KOTLIN_VERSION = "1.3.21";
     public static final String KOTLIN_FILE_BASE_NAME = "kotlin-compiler-"+KOTLIN_VERSION;
     public static final String KOTLIN_ZIP_FILE_NAME = KOTLIN_FILE_BASE_NAME+".zip";
     public static final String KOTLIN_URL = "https://github.com/JetBrains/kotlin/releases/download/v"+KOTLIN_VERSION+"/"+KOTLIN_ZIP_FILE_NAME;

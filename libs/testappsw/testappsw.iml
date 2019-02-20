@@ -7,8 +7,8 @@
     </content>
     <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry exported="" type="library" name="kotlin-stdlib" level="project" />
-    <orderEntry exported="" type="module" module-name="fbmessagingsw"/>
-    <orderEntry exported="" type="module" module-name="testapplib"/>
+    <orderEntry type="library" exported="" name="kotlin-stdlib" level="project" />
+    <orderEntry type="module" module-name="fbmessagingsw" exported="" />
+    <orderEntry type="module" module-name="testapplib" exported="" />
   </component>
 </module>
