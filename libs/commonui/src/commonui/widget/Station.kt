@@ -268,7 +268,7 @@ class JobScopeWithItem<T>(
     val item: T
 )
 
-suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>>.switchTo(item: I) {
+suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<JobScope, V>>.switchToView(item: I) {
     switchTo(ItemWithViewRx(item) { item.view(it) })
 }
 suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.switchToView(item: suspend () -> I) {

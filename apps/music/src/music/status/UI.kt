@@ -23,7 +23,7 @@ fun Status.ui() = TopAndContent(
         left.button {
             back
             click {
-                path.database.back()
+                from.back()
             }
         }
         right.tasksUi()

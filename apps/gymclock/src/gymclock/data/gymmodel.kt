@@ -1,6 +1,8 @@
-package gymclock
+package gymclock.data
 
 import common.obj
+import killable.HasKillSet
+import killable.KillSet
 import org.w3c.dom.get
 import org.w3c.dom.set
 import rx.Rx
@@ -16,7 +18,7 @@ external interface Settings {
 
 const val SettingsKey = "gymclock-settings"
 
-object Model {
+class Model(override val kills: KillSet) : HasKillSet {
 
     var settings =
         window.localStorage[SettingsKey]?.let { JSON.parse<Settings>(it) } ?: obj {
@@ -31,7 +33,7 @@ object Model {
     val delay = Var(settings.delay)
     val sounds = Var(settings.sounds)
 
-    val settingsRx = Rx {
+    val settingsRx = rx {
         obj<Settings> {
             work = work()
             rest = rest()

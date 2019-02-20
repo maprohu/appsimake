@@ -1,25 +1,26 @@
 package gymclock
 
 import bootstrap.*
+import commonui.APP
 import commonui.AppCtx
 import commonui.screenLayout
 import domx.*
+import gymclock.form.Form
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import rx.Rx
 import rx.Var
 import rx.rxClassOpt
 import styles.cursorPointer
 import styles.pointerEventsNone
 
-fun main(args: Array<String>) {
-    Form.show()
-}
-
-object Main {
-    val appCtx = AppCtx("Gym Clock").apply {
-        registerServiceWorker()
+fun main() {
+    GlobalScope.launch {
+        APP.registerServiceWorker()
+        Form.boot()
     }
-
 }
+
 
 
 
