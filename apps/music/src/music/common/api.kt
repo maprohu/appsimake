@@ -16,6 +16,7 @@ interface MusicApi: FBApi, HasKillSetAndUIX {
     val path: LoggedInPath
 
     fun Factory.tasksUi() = tasksUi(this, path.boot)
+    fun Factory.tasksUi(fn: () -> Int) = tasksUi(this, fn)
 
     fun SlotHoles.syncUi() = syncUi(this, path.loggedIn)
 

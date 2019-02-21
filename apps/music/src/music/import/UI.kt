@@ -26,7 +26,7 @@ fun Import.ui() = TopAndContent(
         }
         title %= "Import MP3s"
         val inputContainer = node
-        right.tasksUi()
+        right.tasksUi { path.boot.tasks.pending() + loader.pending() }
         right.buttonGroup {
             m1
             if (webkitdirectorySupported) {

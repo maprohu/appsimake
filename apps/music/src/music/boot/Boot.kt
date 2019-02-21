@@ -170,11 +170,6 @@ class Boot(
                 statusMessage %= "Switching to offline data..."
                 db.disableNetwork().await()
 
-                app.auth().onIdTokenChanged { u ->
-                    if (u != null) console.dir(u)
-                }
-
-
                 statusMessage %= "Checking user..."
                 runUserState(app).forEach { st ->
                     exec {

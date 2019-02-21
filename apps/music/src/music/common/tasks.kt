@@ -10,10 +10,15 @@ import music.boot.Boot
 fun HasKillSet.tasksUi(
     factory: Factory,
     boot: Boot
+) = tasksUi(factory) { boot.tasks.pending() }
+
+fun HasKillSet.tasksUi(
+    factory: Factory,
+    fn: () -> Int
 ) = factory.badge {
-    visible { boot.tasks.pending() != 0 }
+    visible { fn() != 0 }
     cls.m1
     pill
     warning
-    node %= { boot.tasks.pending().toString() }
+    node %= { fn().toString() }
 }

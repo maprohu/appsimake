@@ -1,6 +1,7 @@
 package music.import
 
 import common.*
+import commonshr.discardExecutor
 import commonshr.executor
 import commonshr.plusAssign
 import commonshr.withCounter
@@ -31,15 +32,16 @@ class Import(
     val loadable = RxMutableSet<ImportFile>()
     val loadList = ListenableMutableList<ImportFile>()
 
-    override val rawView = ui()
 
     private val loadIds: Set<String> = mutableSetOf<String>().apply {
         loadList.emitter.map { m -> m.map { v -> v.playable.id } }.feedTo(this)
     }
 
+    val loader = discardExecutor().withCounter
+
     suspend fun load(list: List<File>) {
         list.filter { it.name.endsWith(".mp3") }.forEach { file ->
-            path.boot.tasks.exec {
+            loader.exec {
                 val id = file.readAsArrayBuffer().hash()
 
                 if (id !in loadIds) {
@@ -69,6 +71,8 @@ class Import(
             it.coroutineContext.cancel()
         }
     }
+
+    override val rawView = ui()
 }
 
 class ImportFile(

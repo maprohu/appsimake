@@ -105,6 +105,9 @@ class LoggedIn(
     override val rawView = ui()
 
     init {
-        globalStatus %= "Logged in."
+        launch {
+            path.boot.customTokenReady.await()
+            globalStatus %= "Logged in."
+        }
     }
 }
