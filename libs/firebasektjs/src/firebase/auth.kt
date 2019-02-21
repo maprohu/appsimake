@@ -34,6 +34,13 @@ external class Auth {
             completed: () -> Unit
     ) : () -> Unit
 
+
+    // https://firebase.google.com/docs/reference/js/firebase.auth.Auth#onIdTokenChanged
+    fun onIdTokenChanged(
+        next: (User?) -> Unit
+    ) : () -> Unit
+
+
     fun signOut() : Promise<Unit>
 
     // https://firebase.google.com/docs/reference/js/firebase.auth.Auth#signInWithRedirect

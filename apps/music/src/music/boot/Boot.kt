@@ -7,8 +7,13 @@ import commonshr.*
 import commonui.globalStatus
 import commonui.usericon.UnknownUserSrc
 import commonui.widget.*
+import firebase.app.App
+import firebase.auth.UserCredential
+import firebase.firestore.Firestore
 import firebase.firestore.collectionRef
 import firebase.firestore.flushQueries
+import firebase.functions.Functions
+import firebase.storage.Storage
 import indexeddb.IDBDatabase
 import killable.*
 import kotlinx.coroutines.*
@@ -62,6 +67,8 @@ class Boot(
 
         }
     }
+
+    var customTokenReady: Deferred<Unit> = CompletableDeferred(Unit)
 
     val userState = Var<UserState>(UserState.Unknown)
 
@@ -117,70 +124,94 @@ class Boot(
         else null
     }
 
+    class FBRefs(
+        val app: App,
+        val db: Firestore,
+        val functions: Functions,
+        val storage: Storage
+    )
+
+    val statusMessage = globalStatus
+
+    private val fbRefsDeferred by lazy {
+        GlobalScope.async {
+            statusMessage %= "Initializing Firebase..."
+
+            FBRefs(
+                FB.app,
+                FB.db,
+                FB.functions(),
+                FB.storage
+            )
+        }
+    }
+
+    suspend fun fbRefs() = fbRefsDeferred.await()
+
+
 
 //    val signOut = Var<Action> {
 //        userState.now = UserState.Unknown
 //    }
 
     init {
-        val statusMessage = globalStatus
 
         GlobalScope.launch {
-            statusMessage %= "Initializing Firebase..."
+            with (fbRefs()) {
 
-            val app = FB.app
-            val db = FB.db
-            val functions = FB.functions()
-            val storage = FB.storage
+                statusMessage %= "Enabling persistence..."
 
-            statusMessage %= "Enabling persistence..."
+                db.enablePersistence(
+                    obj {
+                        experimentalTabSynchronization = true
+                    }
+                ).await()
 
-            db.enablePersistence(
-                obj {
-                    experimentalTabSynchronization = true
+                statusMessage %= "Switching to offline data..."
+                db.disableNetwork().await()
+
+                app.auth().onIdTokenChanged { u ->
+                    if (u != null) console.dir(u)
                 }
-            ).await()
-
-            statusMessage %= "Switching to offline data..."
-            db.disableNetwork().await()
 
 
-            statusMessage %= "Checking user..."
-            runUserState(app).forEach { st ->
-                exec {
-                    userState.now = st
+                statusMessage %= "Checking user..."
+                runUserState(app).forEach { st ->
+                    exec {
+                        userState.now = st
 
-                    when (st) {
-                        is UserState.LoggedIn -> {
-                            statusMessage %= "Logging in..."
-                            content.switchToView {
-                                LoggedIn(
-                                    this@Boot,
-                                    st.user,
-                                    app,
-                                    db,
-                                    functions,
-                                    storage,
-                                    cloudSongInfoSource(db),
-                                    userSongs(kills, st.user.uid, db)
-                                )
+                        when (st) {
+                            is UserState.LoggedIn -> {
+                                statusMessage %= "Logging in..."
+                                content.switchToView {
+                                    LoggedIn(
+                                        this@Boot,
+                                        st.user,
+                                        app,
+                                        db,
+                                        functions,
+                                        storage,
+                                        cloudSongInfoSource(db),
+                                        userSongs(kills, st.user.uid, db)
+                                    )
+                                }
                             }
-                        }
-                        is UserState.NotLoggedIn -> {
-                            statusMessage %= "Logging out..."
-                            content.switchToView {
-                                NotLoggedIn(this@Boot, app)
+                            is UserState.NotLoggedIn -> {
+                                statusMessage %= "Logging out..."
+                                content.switchToView {
+                                    NotLoggedIn(this@Boot, app)
+                                }
+
+                            }
+                            else -> {
+                                content.switchToView {
+                                    UserUnknown(this@Boot)
+                                }
                             }
 
-                        }
-                        else -> {
-                            content.switchToView {
-                                UserUnknown(this@Boot)
-                            }
                         }
 
                     }
-
                 }
             }
         }

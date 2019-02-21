@@ -65,27 +65,29 @@ class LoggedIn(
     }
 
 
-    val signinWithCustomToken = run {
-        var signedIn = false
-
-        suspend {
-            if (!signedIn) {
-                globalStatus %= "Requesting online token..."
-                customToken.callable(functions).call(Unit)?.let { token ->
-                    globalStatus %= "Signing in with online token..."
-                    app.auth().signInWithCustomToken(token).await()
-                }
-                signedIn = true
-            }
-        }
-    }
+//    val signinWithCustomToken = run {
+//        var signedIn = false
+//
+//        suspend {
+//            if (!signedIn) {
+//                globalStatus %= "Requesting online token..."
+//                customToken.callable(functions).call(Unit)?.let { token ->
+//                    globalStatus %= "Signing in with online token..."
+//                    app.auth().signInWithCustomToken(token).await()
+//                }
+//                signedIn = true
+//            }
+//        }
+//    }
 
     suspend fun <T> privileged(fn: suspend () -> T): T {
-        signinWithCustomToken()
+        path.boot.customTokenReady.await()
+//        signinWithCustomToken()
         return fn()
     }
 
     init {
+
         fun log(vararg o: Any?) {
             console.log(*o)
         }

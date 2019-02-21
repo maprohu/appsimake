@@ -70,7 +70,6 @@ class Sync(
 
             syncing.forEach { s ->
                 if (s) {
-                    globalStatus %= "Starting syncing..."
                     launch {
                         try {
                             privileged {

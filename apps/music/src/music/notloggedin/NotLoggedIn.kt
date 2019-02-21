@@ -1,12 +1,17 @@
 package music.notloggedin
 
 import commonfb.UserState
+import commonfb.callable
 import commonfb.login.Login
+import commonlib.commonlib.customToken
 import commonui.widget.*
 import commonshr.*
+import commonui.globalStatus
 import firebase.app.App
 import killable.killables
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.await
 import music.UserSongs
 import music.boot.Boot
 import music.boot.BootPath
@@ -24,12 +29,15 @@ class NotLoggedIn(
     override val rawView = ui()
 
     suspend fun signIn() {
+        val customTokenReady = CompletableDeferred<Unit>().also { boot.customTokenReady = it }
+
         forward.switchTo {
             Login(
                 this,
                 app = app,
                 back = back,
                 loggingIn = {
+                    forward.switchTo(HourglassView(this))
                     path.boot.userState.now = UserState.Unknown
                 },
                 loginFailed = {
@@ -38,6 +46,19 @@ class NotLoggedIn(
                         danger("Sign in failed: ${it.message}")
                     }
                     path.boot.userState.now = UserState.NotLoggedIn
+                },
+                loginSucceeded = {
+
+                    val functions = boot.fbRefs().functions
+
+                    globalStatus %= "Requesting online token..."
+                    customToken.callable(functions).call(Unit)?.let { token ->
+                        globalStatus %= "Signing in with online token..."
+                        app.auth().signInWithCustomToken(token).await()
+                    }
+                    globalStatus %= "Signed in with online token."
+
+                    customTokenReady.complete(Unit)
                 }
             )
         }
