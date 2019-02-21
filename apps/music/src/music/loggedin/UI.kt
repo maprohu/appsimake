@@ -1,5 +1,6 @@
 package music.loggedin
 
+import bootstrap.flexGrow1
 import bootstrap.m1
 import commonui.usericon.userIcon
 import commonshr.*
@@ -43,7 +44,10 @@ fun LoggedIn.ui() = TopAndContent(
             }
         }
     }.node,
-    content = null
+    content = factory.status {
+        cls.flexGrow1
+        global
+    }.node
 )
 
 fun HasKillSetAndUIX.syncUi(

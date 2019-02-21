@@ -4,6 +4,7 @@ import common.obj
 import commonfb.*
 import commonlib.private
 import commonshr.*
+import commonui.globalStatus
 import commonui.usericon.UnknownUserSrc
 import commonui.widget.*
 import firebase.firestore.collectionRef
@@ -92,8 +93,6 @@ class Boot(
 
     val localSongInfoSource = localSongInfoSource()
 
-    val statusMessage = Var("Loading Music Player...")
-
     val content = views<Content>().of(UserUnknown(this), contentHole)
 
     val userSongs = content.map { it.item.userSongs }
@@ -124,6 +123,7 @@ class Boot(
 //    }
 
     init {
+        val statusMessage = globalStatus
 
         GlobalScope.launch {
             statusMessage %= "Initializing Firebase..."

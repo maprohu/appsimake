@@ -97,6 +97,7 @@ class Factory(
     val stack get() = Stack().applied
     val toasts get() = Toasts().applied
     val badge get() = Badge().applied
+    val status get() = Status().applied
 
 
 }

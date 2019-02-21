@@ -1,6 +1,11 @@
 package commonui
 
 import common.named
+import commonshr.plusAssign
+import domx.base64
+import domx.source
+import domx.video
+import killable.HasKillSet
 import killable.NoKill
 import org.w3c.dom.events.Event
 import rx.Rx
@@ -64,4 +69,27 @@ val windowHasFocus: RxIface<Boolean> by lazy {
 
 val windowActive by lazy {
     Rx(NoKill) { browserVisible() && windowHasFocus() }
+}
+
+private val keepAwakeVideo by lazy {
+    document.video {
+        loop = true
+        source.base64("video/webm", "GkXfo0AgQoaBAUL3gQFC8oEEQvOBCEKCQAR3ZWJtQoeBAkKFgQIYU4BnQI0VSalmQCgq17FAAw9CQE2AQAZ3aGFtbXlXQUAGd2hhbW15RIlACECPQAAAAAAAFlSua0AxrkAu14EBY8WBAZyBACK1nEADdW5khkAFVl9WUDglhohAA1ZQOIOBAeBABrCBCLqBCB9DtnVAIueBAKNAHIEAAIAwAQCdASoIAAgAAUAmJaQAA3AA")
+        source.base64("video/mp4", "AAAAHGZ0eXBpc29tAAACAGlzb21pc28ybXA0MQAAAAhmcmVlAAAAG21kYXQAAAGzABAHAAABthADAowdbb9")
+    }
+}
+
+private var keepAwakeCounter = 0
+
+fun HasKillSet.keepScreenAwake() {
+    if (keepAwakeCounter == 0) {
+        keepAwakeVideo.play()
+    }
+    keepAwakeCounter++
+    kills += {
+        keepAwakeCounter--
+        if (keepAwakeCounter==0) {
+            keepAwakeVideo.pause()
+        }
+    }
 }

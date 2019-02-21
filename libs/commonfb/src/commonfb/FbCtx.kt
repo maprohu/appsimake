@@ -145,7 +145,7 @@ fun <I, O> Function<I, O>.callPromise(app: Functions, input: I): Promise<HttpsCa
     return app.httpsCallable(qualifiedName)(input)
 }
 
-suspend fun <I, O> Function<I, O>.callable(app: Functions) = object : Callable<I, O> {
+fun <I, O> Function<I, O>.callable(app: Functions) = object : Callable<I, O> {
     val fn = app.httpsCallable(qualifiedName)
     override suspend fun call(input: I): O {
         return fn(input).await().data.unsafeCast<O>()

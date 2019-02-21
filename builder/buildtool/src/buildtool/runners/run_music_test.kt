@@ -2,7 +2,7 @@ package buildtool.runners
 
 import buildtool.*
 
-fun main(args: Array<String>) = runTask {
+fun main() = runTask {
     fns.indexJs
     music.testHtml
     music.testSW

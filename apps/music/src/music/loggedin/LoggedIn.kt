@@ -3,6 +3,7 @@ package music.loggedin
 import commonfb.callable
 import commonlib.commonlib.customToken
 import commonlib.private
+import commonui.globalStatus
 import commonui.widget.*
 import firebase.FBApi
 import firebase.User
@@ -69,7 +70,9 @@ class LoggedIn(
 
         suspend {
             if (!signedIn) {
+                globalStatus %= "Requesting online token..."
                 customToken.callable(functions).call(Unit)?.let { token ->
+                    globalStatus %= "Signing in with online token..."
                     app.auth().signInWithCustomToken(token).await()
                 }
                 signedIn = true
@@ -98,4 +101,8 @@ class LoggedIn(
     val sync = Sync(this)
 
     override val rawView = ui()
+
+    init {
+        globalStatus %= "Logged in."
+    }
 }

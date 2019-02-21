@@ -2,10 +2,6 @@ package gymclock.clock
 
 import bootstrap.*
 import common.*
-import commonui.browserVisible
-import commonui.faButton
-import commonui.faButtonSpan
-import commonui.screenLayout
 import commonui.widget.UIBase
 import domx.*
 import fontawesome.*
@@ -26,6 +22,7 @@ import kotlin.js.Date
 import kotlin.math.floor
 import kotlin.math.min
 import animate.*
+import commonui.*
 
 open class ClockPath(
     val clock: Clock
@@ -201,7 +198,10 @@ class Clock(
         browserVisible.forEach { vis ->
             seq.set(if (vis) start() else ({}))
         }
+
+        keepScreenAwake()
     }
+
 
 
 }

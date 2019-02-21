@@ -25,14 +25,11 @@ fun UserUnknown.ui() = TopAndContent(
                 }
             }
         }
-        div {
+        insert.status {
             cls {
-                alignSelfCenter
                 flexFixedSize()
-                p1
-                textMuted
             }
-            this %= { boot.statusMessage() }
+            global
         }
     }.node
 

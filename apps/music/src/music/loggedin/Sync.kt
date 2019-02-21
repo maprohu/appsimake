@@ -6,6 +6,7 @@ import commonlib.commonlib.customToken
 import commonlib.private
 import commonshr.plusAssign
 import commonshr.report
+import commonui.globalStatus
 import commonui.widget.*
 import firebase.FBApi
 import firebase.User
@@ -69,17 +70,22 @@ class Sync(
 
             syncing.forEach { s ->
                 if (s) {
+                    globalStatus %= "Starting syncing..."
                     launch {
                         try {
                             privileged {
+                                globalStatus %= "Going online..."
                                 db.enableNetwork().await()
 
                                 try {
+                                    globalStatus %= "Flushing data..."
                                     flushQueries(*syncQueries)
                                 } finally {
+                                    globalStatus %= "Going offline..."
                                     db.disableNetwork().await()
                                 }
                             }
+                            globalStatus %= "Syncing complete."
 
                         } catch (e: dynamic) {
                             path.boot.slots.toasts {
@@ -87,6 +93,7 @@ class Sync(
                                     "Synchronizing failed: ${e.message}"
                                 )
                             }
+                            globalStatus %= "Syncing failed: ${e.message}"
                         }
                         syncing.now = false
                     }
