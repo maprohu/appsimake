@@ -1,3 +1,4 @@
+import common.obj
 import commonlib.DocWrap
 import firebaseadmin.admin
 import firebaseadmin.firestore.Firestore
@@ -11,6 +12,12 @@ import kotlinx.coroutines.await
 @JsName("init")
 fun init(exports: dynamic) {
     admin.initializeApp()
+
+    admin.firestore().settings(
+        obj {
+            timestampsInSnapshots = true
+        }
+    )
 
     initialize(exports)
 

@@ -12,8 +12,9 @@ function define(args, fn) {
     );
 }
 
-define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'appsimake-tictactoefns', 'kotlinx-coroutines-core', 'appsimake-commonlib', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_functions, $module$appsimake_testappfns, $module$appsimake_tictactoefns, $module$kotlinx_coroutines_core, $module$appsimake_commonlib, $module$appsimake_commonshr) {
+define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'appsimake-testappfns', 'appsimake-tictactoefns', 'kotlinx-coroutines-core', 'appsimake-commonlib'], function (_, Kotlin, $module$appsimake_functions, $module$appsimake_commonshr, $module$appsimake_testappfns, $module$appsimake_tictactoefns, $module$kotlinx_coroutines_core, $module$appsimake_commonlib) {
   'use strict';
+  var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var firebaseadmin = $module$appsimake_functions.firebaseadmin;
   var init = $module$appsimake_testappfns.testappfns.init_za3rmp$;
   var init_0 = $module$appsimake_tictactoefns.tictactoefns.init_za3rmp$;
@@ -28,6 +29,10 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
   var implementAsync = $module$appsimake_functions.commonfns.implementAsync_1ba0c3$;
   function init_1(exports) {
     firebaseadmin.admin.initializeApp();
+    var tmp$ = firebaseadmin.admin.firestore();
+    var $receiver = {};
+    $receiver.timestampsInSnapshots = true;
+    tmp$.settings($receiver);
     initialize(exports);
     init(exports);
     init_0(exports);
@@ -166,6 +171,7 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-testappfns', 'app
   function tokenImpl(exports) {
     implementAsync(commonlib.customToken, exports, tokenImpl$lambda);
   }
+  $$importsForInline$$['appsimake-commonshr'] = $module$appsimake_commonshr;
   _.init = init_1;
   _.initialize_za3rmp$ = initialize;
   _.docRef_uv400c$ = docRef;
