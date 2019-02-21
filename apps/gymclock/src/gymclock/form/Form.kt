@@ -17,8 +17,8 @@ class Form(
     val sounds by lazy { Sounds() }
 
     companion object {
-        suspend fun boot() {
-            Body().apply {
+        suspend fun boot(hole: Hole) {
+            Body(hole).apply {
                 content.switchToView(Form(this))
             }
         }

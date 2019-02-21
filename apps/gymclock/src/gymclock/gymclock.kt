@@ -4,6 +4,7 @@ import bootstrap.*
 import commonui.APP
 import commonui.AppCtx
 import commonui.screenLayout
+import commonui.widget.Loading
 import domx.*
 import gymclock.form.Form
 import kotlinx.coroutines.GlobalScope
@@ -15,9 +16,14 @@ import styles.cursorPointer
 import styles.pointerEventsNone
 
 fun main() {
+
+    val loading = Loading()
+
     GlobalScope.launch {
+        loading %= "Registering service worker..."
         APP.registerServiceWorker()
-        Form.boot()
+        loading %= "Starting app..."
+        Form.boot(loading.hole)
     }
 }
 

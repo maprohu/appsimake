@@ -173,8 +173,7 @@ object testapp : JsApp(
     "apps/testapp",
     "Test App",
     listOf(
-        commonfb,
-        testapplib
+        kotlinxCoroutines
     ),
     testappsw
 )

@@ -10,7 +10,12 @@ import org.w3c.dom.Node
 import kotlin.browser.document
 
 typealias BodyNode = ItemWithViewRx<JobScope, HTMLElement>
-class Body: JobKillsImpl() {
+class Body(
+    slot: Hole = kotlin.run {
+        setupFullScreen()
+        document.body!!.hole
+    }
+): JobKillsImpl() {
 
     val content = JobSwitch.jobWithView<BodyNode>(
         ItemWithViewRx(
@@ -20,8 +25,6 @@ class Body: JobKillsImpl() {
     )
 
     init {
-        setupFullScreen()
-        val slot = document.body!!.hole
         content.runView(this, slot)
     }
 
