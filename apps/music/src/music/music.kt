@@ -8,7 +8,7 @@ import org.w3c.files.Blob
 fun main() {
 
     GlobalScope.launch {
-        APP.registerServiceWorker()
+        APP.startRegisteringServiceWorker()
         Boot.create()
     }
 

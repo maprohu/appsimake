@@ -126,6 +126,8 @@ class Boot(
     init {
 
         GlobalScope.launch {
+            statusMessage %= "Initializing Firebase..."
+
             val app = FB.app
             val db = FB.db
             val functions = FB.functions()
