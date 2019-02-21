@@ -21,7 +21,7 @@ fun main() {
 
     GlobalScope.launch {
         loading %= "Registering service worker..."
-        APP.registerServiceWorker()
+        APP.startRegisteringServiceWorker()
         loading %= "Starting app..."
         Form.boot(loading.hole)
     }

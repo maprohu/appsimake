@@ -35,6 +35,10 @@ object APP {
         window.navigator.serviceWorker.register(serviceWorkerFileName)
     }
 
+    fun startRegisteringServiceWorker() {
+        registerServiceWorkerPromise
+    }
+
     suspend fun registerServiceWorker(): ServiceWorkerRegistration? {
         return if (isServiceWorkerSupported) {
             registerServiceWorkerPromise.await()
