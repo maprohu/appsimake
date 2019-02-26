@@ -7,6 +7,7 @@ import commonshr.*
 import commonui.UiApi
 import killable.HasKillSet
 import killable.Killables
+import killable.seq
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -29,6 +30,8 @@ interface JobScope: CoroutineScope {
     suspend fun <T> withChild(fn: suspend JobKillsImpl.() -> T): T {
         return JobKillsImpl.childOf(this).run { fn() }
     }
+
+    val <V: Any> V.childUIWrap get() = childUIWrap(this)
 }
 open class JobScopeImpl(
     override val coroutineContext: Job = Job()
@@ -45,7 +48,7 @@ val JobScope.createKills get() = Killables().apply {
 }.killSet
 open class JobKillsImpl(
     coroutineContext: Job = Job()
-): JobScopeImpl(coroutineContext), HasKillSet, UiApi {
+): JobScopeImpl(coroutineContext), HasKillSet, UiApi, JobKillsApi {
     constructor(parent: JobScope): this(Job(parent.coroutineContext))
 
     override val kills = createKills
@@ -57,7 +60,7 @@ open class JobKillsImpl(
 
     fun <V: Any> HoleT<V>.viewsAny() = viewsAny(this)
     fun <V: Any> viewsAny(fn: HoleT<V>) = JobSwitch.viewsOpt<V, JobScopeWithView<V>>(this, null, fn)
-    fun <V: Any> viewsAny(initial: JobScopeWithView<V>, fn: HoleT<V>) = JobSwitch.viewsOpt(this, initial, fn)
+    fun <V: Any> viewsAny(initial: JobScopeWithView<V>, fn: HoleT<V>) = JobSwitch.views(this, initial, fn)
     fun <V: Any, I: JobScopeWithView<V>> views(initial: I, fn: HoleT<V>) = JobSwitch.views(this, initial, fn)
     fun <V: Any, I: JobScopeWithView<V>> viewsOpt(initial: I?, fn: HoleT<V>) = JobSwitch.viewsOpt(this, initial, fn)
     fun <V: Any, I: JobScopeWithView<V>> viewsOpt(fn: HoleT<V>) = viewsOpt<V, I>(null, fn)
@@ -67,6 +70,8 @@ open class JobKillsImpl(
     inline fun <T: JobScopeWithView<*>> views() = this.unsafeCast<Views<T>>()
     fun <T> wrap(initial: T) = JobSwitch.wrap(initial)
     fun <T: Any> wrap() = JobSwitch.wrap<T>()
+
+
 }
 
 interface Views<T: JobScopeWithView<*>>
@@ -143,8 +148,8 @@ abstract class ViewImpl<V: Any>(
     ): this(Job(parent.coroutineContext))
 
     override fun view(prepare: V?.() -> Unit): V? = preparedView(prepare)
-
 }
+
 
 abstract class UIBase<V: Any>(
     coroutineContext: Job
@@ -155,6 +160,18 @@ abstract class UIBase<V: Any>(
 
     override val uix = discardExecutor()
 }
+
+open class UIWrap<V: Any>(
+    coroutineContext: Job,
+    override val rawView: V
+):  UIBase<V>(coroutineContext) {
+    constructor(
+        parent: JobScope,
+        rawView: V
+    ): this(Job(parent.coroutineContext), rawView)
+}
+
+fun <V: Any> JobScope.childUIWrap(rawView: V) = UIWrap(this, rawView)
 
 
 class JobSwitch<T> private constructor(

@@ -39,6 +39,7 @@ fun main() {
         tictactoelib,
         tictactoefns,
         musiclib,
+        checklistlib,
         mainfns,
 
         index,
@@ -48,6 +49,7 @@ fun main() {
         tasks,
         tictactoe,
         chat,
+        checklist,
         music
     )
 

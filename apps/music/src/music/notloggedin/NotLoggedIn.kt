@@ -43,7 +43,7 @@ class NotLoggedIn(
                 loginFailed = {
                     reportd(it)
                     path.boot.slots.toasts {
-                        danger("Sign in failed: ${it.message}")
+                        danger("Sign in failed: ${it?.message}")
                     }
                     path.boot.userState.now = UserState.NotLoggedIn
                 },

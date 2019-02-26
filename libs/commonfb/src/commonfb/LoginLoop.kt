@@ -4,6 +4,7 @@ import commonshr.*
 import commonui.widget.*
 import firebase.User
 import firebase.app.App
+import firebase.auth.Auth
 import firebase.firestore.Firestore
 import killable.*
 import kotlinx.coroutines.GlobalScope
@@ -15,6 +16,9 @@ import rx.Var
 import rx.mapAsync
 
 
+interface HasUserState {
+    val userState: UserState
+}
 sealed class UserState {
     object Unknown: UserState()
     object NotLoggedIn: UserState()
@@ -22,13 +26,20 @@ sealed class UserState {
         val user: User
     ): UserState()
 }
-suspend fun HasKillSet.runUserState(
+suspend fun JobKillsApi.runUserState(
     app: App = FB.app,
+    fn: suspend HasKillSet.(UserState) -> UserState = { it }
+): RxIface<UserState> {
+    return runUserState(app.auth(), fn)
+}
+
+suspend fun JobKillsApi.runUserState(
+    auth: Auth = FB.app.auth(),
     fn: suspend HasKillSet.(UserState) -> UserState = { it }
 ): RxIface<UserState> {
     val rxv = Var<UserState>(UserState.Unknown)
 
-    kills += app.auth().onAuthStateChanged(
+    kills += auth.onAuthStateChanged(
         { u ->
             rxv.now = if (u == null) {
                 UserState.NotLoggedIn
@@ -42,7 +53,7 @@ suspend fun HasKillSet.runUserState(
         }
     )
 
-    return rxv.mapAsync(kills, fn)
+    return rxv.mapAsync(fn)
 }
 
 fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx(ks) {

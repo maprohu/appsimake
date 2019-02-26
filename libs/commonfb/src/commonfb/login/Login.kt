@@ -1,5 +1,7 @@
 package commonfb.login
 
+import commonfb.UserState
+import commonfb.loginbase.UserStateView
 import commonshr.*
 import commonui.widget.*
 import firebase.app.App
@@ -13,12 +15,14 @@ import kotlinx.coroutines.launch
 
 class Login(
     parent: JobScope,
+    val base: JobScope,
     val app: App,
-    val back: Trigger,
-    val loggingIn: Action,
-    val loginFailed: suspend (dynamic) -> Unit,
+    val back: Trigger? = null,
+    val loggingIn: Action = {},
+    val loginFailed: suspend (dynamic) -> Unit = {},
     val loginSucceeded: suspend (UserCredential) -> Unit = {}
-): UIBase<TopAndContent>(parent) {
+): UIBase<TopAndContent>(parent), UserStateView {
+    override val userState = UserState.NotLoggedIn
     override val rawView = ui()
 
     suspend fun tryLogin(fn: suspend () -> UserCredential) {
@@ -31,7 +35,7 @@ class Login(
     }
 
     suspend fun google() {
-        GlobalScope.launch {
+        base.launch {
             val provider = GoogleAuthProvider()
             tryLogin {
                 app.auth().signInWithPopup(provider).await()
@@ -40,7 +44,7 @@ class Login(
     }
 
     suspend fun guest() {
-        GlobalScope.launch {
+        base.launch {
             tryLogin {
                 app.auth().signInAnonymously().await()
             }

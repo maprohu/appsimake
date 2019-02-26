@@ -363,6 +363,23 @@ object music : JsApp(
     )
 )
 
+object checklistlib : JsModule(
+    "libs/checklistlib",
+    listOf(
+        commonlib
+    )
+)
+object checklist : JsApp(
+    JsAppConfig(
+        "apps/checklist",
+        "Checklists",
+        listOf(
+            checklistlib,
+            commonfb
+        )
+    )
+)
+
 object functions : JsModule(
     "libs/functions",
     listOf(

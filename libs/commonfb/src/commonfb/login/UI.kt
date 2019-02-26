@@ -12,12 +12,15 @@ import kotlin.browser.document
 fun Login.ui() = TopAndContent(
     topbar = factory.topbar {
         alignItemsCenter
-        left.button {
-            m1p2
-            secondary
-            fa.chevronLeft
-            click {
-                this@ui.back()
+
+        this@ui.back?.let { bck ->
+            left.button {
+                m1p2
+                secondary
+                fa.chevronLeft
+                click {
+                    bck()
+                }
             }
         }
         middle {

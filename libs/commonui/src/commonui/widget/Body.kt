@@ -9,13 +9,17 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import kotlin.browser.document
 
+interface BodyPath {
+    val body: Body
+}
 typealias BodyNode = ItemWithViewRx<JobScope, HTMLElement>
 class Body(
     slot: Hole = kotlin.run {
         setupFullScreen()
         document.body!!.hole
     }
-): JobKillsImpl() {
+): JobKillsImpl(), BodyPath {
+    override val body = this
 
     val content = JobSwitch.jobWithView<BodyNode>(
         ItemWithViewRx(
@@ -30,6 +34,3 @@ class Body(
 
 }
 
-open class BodyPath(
-    val body: Body
-)

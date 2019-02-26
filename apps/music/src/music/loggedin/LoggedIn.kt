@@ -25,7 +25,7 @@ import rx.Var
 
 open class LoggedInPath(
     val loggedIn: LoggedIn
-): BootPath(loggedIn.from)
+): BootPath by loggedIn.from
 
 class LoggedIn(
     val from: Boot,

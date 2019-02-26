@@ -93,6 +93,7 @@ interface HasKillSet {
     fun <E> RxSet<E>.process(fn: HasKillSet.(E) -> Unit): Unit = process(kills, fn)
 
     fun <T> EmitterIface<SetMove<T>>.toRxSet() = toRxSet(kills)
+    fun <T> RxIface<T>.toChannelLater() = toChannelLater(kills)
 
 }
 

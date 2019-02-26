@@ -188,7 +188,6 @@ fun Node.listAction(
             listGroupItem
             listGroupItemAction
         }
-        classes += "list-group-item list-group-item-action"
         content()
     }
 }

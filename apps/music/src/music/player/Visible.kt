@@ -37,7 +37,7 @@ const val SeekSeconds = 15.0
 
 open class VisiblePath(
     val visible: Visible
-): BootPath(visible.boot)
+): BootPath by visible.boot
 
 class Visible(
     val boot: Boot

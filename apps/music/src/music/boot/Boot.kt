@@ -33,17 +33,17 @@ import musiclib.usersongs
 import org.w3c.dom.HTMLElement
 import rx.*
 
-open class BootPath(
+interface BootPath: BodyPath {
     val boot: Boot
-): BodyPath(boot.body)
+}
 
 class Boot(
     parent: JobScope,
-    from: BodyPath,
+    from: Body,
     val localSongs: LocalSongs
-): ViewImpl<HTMLElement>(parent) {
-    val body = from.body
-    val path = BootPath(this)
+): ViewImpl<HTMLElement>(parent), BootPath, BodyPath by from {
+    override val boot = this
+    val path = this
 
     val tasks = discardExecutor().withCounter
 
@@ -55,7 +55,7 @@ class Boot(
                 val idb = localDatabase()
                 val localSongs = LocalSongs(this, idb)
 
-                Boot(this, BodyPath(body), localSongs).also {
+                Boot(this, body, localSongs).also {
                     body.content.switchTo(
                         ItemWithViewRx.hasView<JobScope, HTMLElement>(
                             this,

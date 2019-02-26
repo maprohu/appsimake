@@ -3508,6 +3508,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   HasKillSet.prototype.toRxSet_jr4bl4$ = function ($receiver) {
     return toRxSet($receiver, this.kills);
   };
+  HasKillSet.prototype.toChannelLater_z5dyp2$ = function ($receiver) {
+    return toChannelLater($receiver, this.kills);
+  };
   HasKillSet.$metadata$ = {
     kind: Kind_INTERFACE,
     simpleName: 'HasKillSet',
@@ -5419,6 +5422,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Killables.prototype.containsRx_1w65cx$ = HasKillSet.prototype.containsRx_1w65cx$;
   Killables.prototype.process_ttzep4$ = HasKillSet.prototype.process_ttzep4$;
   Killables.prototype.toRxSet_jr4bl4$ = HasKillSet.prototype.toRxSet_jr4bl4$;
+  Killables.prototype.toChannelLater_z5dyp2$ = HasKillSet.prototype.toChannelLater_z5dyp2$;
   WrapKillSet.prototype.rx_pn7ch0$ = HasKillSet.prototype.rx_pn7ch0$;
   WrapKillSet.prototype.rx_rf89m5$ = HasKillSet.prototype.rx_rf89m5$;
   WrapKillSet.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;
@@ -5432,6 +5436,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   WrapKillSet.prototype.containsRx_1w65cx$ = HasKillSet.prototype.containsRx_1w65cx$;
   WrapKillSet.prototype.process_ttzep4$ = HasKillSet.prototype.process_ttzep4$;
   WrapKillSet.prototype.toRxSet_jr4bl4$ = HasKillSet.prototype.toRxSet_jr4bl4$;
+  WrapKillSet.prototype.toChannelLater_z5dyp2$ = HasKillSet.prototype.toChannelLater_z5dyp2$;
   RxVal.prototype.map_tx8wzh$ = RxIface.prototype.map_tx8wzh$;
   RxVal.prototype.forEach_yk5nc8$ = RxIface.prototype.forEach_yk5nc8$;
   RxVal.prototype.forEach_f9gkol$ = RxIface.prototype.forEach_f9gkol$;
