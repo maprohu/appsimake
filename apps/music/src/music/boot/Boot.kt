@@ -157,55 +157,61 @@ class Boot(
     init {
 
         GlobalScope.launch {
-            with (fbRefs()) {
+             with (fbRefs()) {
+                try {
+                    statusMessage %= "Enabling persistence..."
 
-                statusMessage %= "Enabling persistence..."
+                    db.enablePersistence(
+                        obj {
+                            experimentalTabSynchronization = true
+                        }
+                    ).await()
 
-                db.enablePersistence(
-                    obj {
-                        experimentalTabSynchronization = true
-                    }
-                ).await()
+                    statusMessage %= "Switching to offline data..."
+                    db.disableNetwork().await()
 
-                statusMessage %= "Switching to offline data..."
-                db.disableNetwork().await()
+                    statusMessage %= "Checking user..."
+                    runUserState(app).forEach { st ->
+                        exec {
+                            userState.now = st
 
-                statusMessage %= "Checking user..."
-                runUserState(app).forEach { st ->
-                    exec {
-                        userState.now = st
-
-                        when (st) {
-                            is UserState.LoggedIn -> {
-                                statusMessage %= "Logging in..."
-                                content.switchToView {
-                                    LoggedIn(
-                                        this@Boot,
-                                        st.user,
-                                        app,
-                                        db,
-                                        functions,
-                                        storage,
-                                        cloudSongInfoSource(db),
-                                        userSongs(kills, st.user.uid, db)
-                                    )
+                            when (st) {
+                                is UserState.LoggedIn -> {
+                                    statusMessage %= "Logging in..."
+                                    content.switchToView {
+                                        LoggedIn(
+                                            this@Boot,
+                                            st.user,
+                                            app,
+                                            db,
+                                            functions,
+                                            storage,
+                                            cloudSongInfoSource(db),
+                                            userSongs(kills, st.user.uid, db)
+                                        )
+                                    }
                                 }
-                            }
-                            is UserState.NotLoggedIn -> {
-                                statusMessage %= "Logging out..."
-                                content.switchToView {
-                                    NotLoggedIn(this@Boot, app)
+                                is UserState.NotLoggedIn -> {
+                                    statusMessage %= "Logging out..."
+                                    content.switchToView {
+                                        NotLoggedIn(this@Boot, app)
+                                    }
+
+                                }
+                                else -> {
+                                    content.switchToView {
+                                        UserUnknown(this@Boot)
+                                    }
                                 }
 
-                            }
-                            else -> {
-                                content.switchToView {
-                                    UserUnknown(this@Boot)
-                                }
                             }
 
                         }
-
+                    }
+                } catch (d: dynamic) {
+                    globalStatus %= "Error: $d"
+                    slots.toasts {
+                        danger("$d")
                     }
                 }
             }
