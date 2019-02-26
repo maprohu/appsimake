@@ -1,6 +1,11 @@
 package common
 
+import commonshr.Exec
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import org.w3c.dom.Navigator
 import org.w3c.dom.Window
 import org.w3c.files.Blob
@@ -147,6 +152,25 @@ external interface FileSystemDirectoryReader {
 
 }
 
+fun CoroutineScope.readAllEntries(dir: FileSystemDirectoryEntry): ReceiveChannel<Array<FileSystemEntry>> {
+    val ch = Channel<Array<FileSystemEntry>>()
+    launch {
+        val reader = dir.createReader()
+        loop@ while(true) {
+            val a = reader.readEntries()
+
+            if (a.isEmpty()) {
+                break@loop
+            }
+
+            ch.send(a)
+        }
+
+        ch.close()
+    }
+    return ch
+}
+
 suspend fun FileSystemDirectoryReader.readEntries(): Array<FileSystemEntry> {
     val cd = CompletableDeferred<Array<FileSystemEntry>>()
     readEntries(
@@ -155,6 +179,8 @@ suspend fun FileSystemDirectoryReader.readEntries(): Array<FileSystemEntry> {
     )
     return cd.await()
 }
+
+
 
 suspend fun FileSystemDirectoryEntry.getDirectory(
     path: String,

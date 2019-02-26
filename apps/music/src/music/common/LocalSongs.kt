@@ -6,6 +6,7 @@ import commonui.widget.JobKillsImpl
 import commonui.widget.JobScope
 import indexeddb.*
 import kotlinx.coroutines.await
+import kotlinx.coroutines.coroutineScope
 import music.Mp3Store
 import music.Playable
 import org.w3c.files.Blob
@@ -86,7 +87,13 @@ class FileSystemLocalSongStorage(val dir: FileSystemDirectoryEntry): LocalSongSt
     }
 
     override suspend fun listMp3s(): Set<String> {
-        return dir.createReader().readEntries().filter { it.isFile }.map { it.name }.toSet()
+        val ids = mutableSetOf<String>()
+        coroutineScope {
+            for (e in readAllEntries(dir)) {
+                ids += e.filter { it.isFile }.map { it.name }.toSet()
+            }
+        }
+        return ids
     }
 
 }
