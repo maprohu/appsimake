@@ -38,7 +38,7 @@ fun LoggedIn.ui() = TopAndContent(
         }
         title %= "Music"
         slots.right.slots.syncUi()
-        right.userIcon(kills, path.boot.userIcon).apply {
+        right.userIcon(kills, boot.userIcon).apply {
             node {
                 cls.m1
             }

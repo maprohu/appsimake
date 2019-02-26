@@ -21,15 +21,17 @@ import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.js.Promise
 
+val isServiceWorkerSupported by lazy {
+    window.navigator.serviceWorker as? Any != null
+}
+
+val isFcmSupported by lazy {
+    isServiceWorkerSupported
+}
+
 object APP {
 
-    val isServiceWorkerSupported by lazy {
-        window.navigator.serviceWorker as? Any != null
-    }
 
-    val isFcmSupported by lazy {
-        isServiceWorkerSupported
-    }
 
     private val registerServiceWorkerPromise by lazy {
         window.navigator.serviceWorker.register(serviceWorkerFileName)

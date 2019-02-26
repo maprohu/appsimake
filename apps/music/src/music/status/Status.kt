@@ -6,18 +6,18 @@ import music.common.MusicApi
 import music.database.Database
 import music.database.DatabasePath
 
-open class StatusPath(
+interface StatusPath: DatabasePath {
     val status: Status
-): DatabasePath(status.database)
+}
 
 class Status(
     val from: ForwardBase<*>,
-    val database: Database,
-    val status: Database.Status,
+    database: Database,
+    val stat: Database.Status,
     val title: String,
     val bgfn: HasKillSetAndUIX.(ButtonGroup) -> Unit
-): UIBase<TopAndContent>(from), CommonFbApi, MusicApi {
-    override val path = StatusPath(this)
+): UIBase<TopAndContent>(from), CommonFbApi, MusicApi, StatusPath, DatabasePath by database {
+    override val status = this
 
     override val rawView = ui()
 }

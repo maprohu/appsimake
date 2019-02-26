@@ -6,6 +6,7 @@ import commonlib.Function
 import commonlib.Lib
 import commonui.APP
 import commonui.AppCtx
+import commonui.isFcmSupported
 import firebase.AppOptions
 import firebase.app.App
 import firebase.firestore.*
@@ -60,7 +61,9 @@ object FB {
 
     val functionDeferred by lazy {
         GlobalScope.async {
-            messagingDeferred.await()
+            if (isFcmSupported) {
+                messagingDeferred.await()
+            }
             app.functions()
         }
     }

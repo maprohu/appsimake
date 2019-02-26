@@ -29,7 +29,6 @@ import rx.Var
 class Sync(
     val loggedIn: LoggedIn
 ) {
-    val path = loggedIn.path
     val syncing = Var(false)
 
     fun sync() {
@@ -87,7 +86,7 @@ class Sync(
                             globalStatus %= "Syncing complete."
 
                         } catch (e: dynamic) {
-                            path.boot.slots.toasts {
+                            boot.slots.toasts {
                                 danger(
                                     "Synchronizing failed: ${e.message}"
                                 )

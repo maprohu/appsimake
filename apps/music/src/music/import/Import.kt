@@ -19,14 +19,14 @@ import org.w3c.files.File
 import rx.RxMutableSet
 import rx.Var
 
-class ImportPath(
+interface ImportPath: DatabasePath {
     val import: Import
-): DatabasePath(import.from)
+}
 
 class Import(
     val from: Database
-): UIBase<TopAndContent>(from), MusicApi {
-    override val path = ImportPath(this)
+): UIBase<TopAndContent>(from), MusicApi, ImportPath, DatabasePath by from {
+    override val import = this
 
 
     val loadable = RxMutableSet<ImportFile>()
@@ -76,19 +76,18 @@ class Import(
 }
 
 class ImportFile(
-    val import: Import,
+    import: Import,
     val file: File,
     val playable: Playable
-): UIBase<HTMLElement>(import) {
-    val path = import.path
+): UIBase<HTMLElement>(import), ImportPath by import {
 
     val importing = Var(false).apply {
         forEach { i ->
-            path.import.loadable.apply {
+            import.loadable.apply {
                 if (i) {
                     remove(this@ImportFile)
-                    path.boot.tasks.exec {
-                        path.boot.localSongs.addMp3(playable)
+                    boot.tasks.exec {
+                        boot.localSongs.addMp3(playable)
                     }
                 }
                 else {
@@ -101,7 +100,7 @@ class ImportFile(
         }
     }
 
-    val state = path.loggedIn.userSongs.get(playable.id).apply {
+    val state = loggedIn.userSongs.get(playable.id).apply {
         forEach { s ->
             if (s == UserSongState.DontLike) {
                 coroutineContext.cancel()
@@ -109,7 +108,7 @@ class ImportFile(
         }
     }
 
-    val tag = path.loggedIn.songInfoSource(playable.id) { playable.blob }
+    val tag = loggedIn.songInfoSource(playable.id) { playable.blob }
 
     override val rawView = ui()
 
@@ -118,7 +117,7 @@ class ImportFile(
     }
 
     init {
-        path.boot.localSongs.set.containsRx(playable.id).forEach { c ->
+        boot.localSongs.set.containsRx(playable.id).forEach { c ->
             if (c) coroutineContext.cancel()
         }
     }

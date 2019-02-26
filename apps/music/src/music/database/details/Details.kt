@@ -14,45 +14,45 @@ import musiclib.UserSongState
 import rx.RxSet
 import rx.Var
 
-open class DetailsPath(
+interface DetailsPath: DatabasePath {
     val details: Details
-): DatabasePath(details.from)
+}
 
 class Details(
     val from: Database
-): ForwardBase<TopAndContent>(from), MusicApi {
-    override val path = DetailsPath(this)
+): ForwardBase<TopAndContent>(from), MusicApi, DetailsPath, DatabasePath by from {
+    override val details = this
 
     val localSongIds = status(
-        path.boot.localSongs.set
+        boot.localSongs.set
     )
 
     val new = status(
-        path.boot.localSongs.set.filtered { id ->
-            path.loggedIn.userSongs.get(id)() == UserSongState.New
+        boot.localSongs.set.filtered { id ->
+            loggedIn.userSongs.get(id)() == UserSongState.New
         }
     )
 
     val like = status(
-        path.loggedIn.userSongSet.set.filtered { us ->
+        loggedIn.userSongSet.set.filtered { us ->
             us.state.initial() == Some(UserSongState.Like)
         }.ids
     )
 
     val dontLike = status(
-        path.loggedIn.userSongSet.set.filtered { us ->
+        loggedIn.userSongSet.set.filtered { us ->
             us.state.initial() == Some(UserSongState.DontLike)
         }.ids
     )
 
     val cloud = status(
-        path.loggedIn.storageSet.set.filtered { us ->
+        loggedIn.storageSet.set.filtered { us ->
             us.uploaded.initial().getOrDefault(false)
         }.ids
     )
 
     val uploading = status(
-        path.loggedIn.uploadingIds
+        loggedIn.uploadingIds
     )
 
 

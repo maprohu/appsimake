@@ -23,9 +23,9 @@ import music.database.Database
 import musiclib.*
 import rx.Var
 
-open class LoggedInPath(
+interface LoggedInPath: BootPath {
     val loggedIn: LoggedIn
-): BootPath by loggedIn.from
+}
 
 class LoggedIn(
     val from: Boot,
@@ -36,8 +36,8 @@ class LoggedIn(
     val storage: Storage,
     override val songInfoSource: SongInfoSource,
     override val userSongs: UserSongs
-): ForwardBase<TopAndContent>(from), Content, MusicApi {
-    override val path = LoggedInPath(this)
+): ForwardBase<TopAndContent>(from), Content, MusicApi, LoggedInPath, BootPath by from {
+    override val loggedIn = this
 
     val storageRef = storage.ref("music/files")
 
@@ -81,7 +81,7 @@ class LoggedIn(
 //    }
 
     suspend fun <T> privileged(fn: suspend () -> T): T {
-        path.boot.customTokenReady.await()
+        boot.customTokenReady.await()
 //        signinWithCustomToken()
         return fn()
     }
@@ -106,7 +106,7 @@ class LoggedIn(
 
     init {
         launch {
-            path.boot.customTokenReady.await()
+            boot.customTokenReady.await()
             globalStatus %= "Logged in."
         }
     }

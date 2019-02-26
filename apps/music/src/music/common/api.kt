@@ -12,18 +12,17 @@ import music.loggedin.LoggedInPath
 import music.loggedin.syncUi
 import rx.RxSet
 
-interface MusicApi: FBApi, HasKillSetAndUIX {
-    val path: LoggedInPath
+interface MusicApi: FBApi, HasKillSetAndUIX, LoggedInPath {
 
-    fun Factory.tasksUi() = tasksUi(this, path.boot)
+    fun Factory.tasksUi() = tasksUi(this, boot)
     fun Factory.tasksUi(fn: () -> Int) = tasksUi(this, fn)
 
-    fun SlotHoles.syncUi() = syncUi(this, path.loggedIn)
+    fun SlotHoles.syncUi() = syncUi(this, loggedIn)
 
 
     fun status(
         items: EmitterIface<SetMove<String>>
-    ) = Database.Status(items, path, kills)
+    ) = Database.Status(items, this, kills)
     fun status(
         set: RxSet<String>
     ) = status(set.diffsAll.toMoves())

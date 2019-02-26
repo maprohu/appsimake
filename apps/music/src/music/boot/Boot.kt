@@ -19,7 +19,6 @@ import killable.*
 import kotlinx.coroutines.*
 import music.*
 import music.common.LocalSongs
-import music.common.toLatestUid
 import music.content.Content
 import music.content.UserUnknown
 import music.data.*
@@ -52,8 +51,8 @@ class Boot(
             val body = Body()
 
             return body.withChild {
-                val idb = localDatabase()
-                val localSongs = LocalSongs(this, idb)
+                val storage = setupFileStorage()
+                val localSongs = LocalSongs(this, storage)
 
                 Boot(this, body, localSongs).also {
                     body.content.switchTo(

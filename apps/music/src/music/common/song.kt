@@ -32,7 +32,7 @@ fun CommonFbApi.songUi(
     loggedIn: LoggedIn,
     bgfn: ButtonGroup.() -> Unit
 ) = document.div {
-    val boot = loggedIn.path.boot
+    val boot = loggedIn.boot
     val tag = loggedIn.songInfoSource(id) { blob()?.invoke() }
 
     cls {

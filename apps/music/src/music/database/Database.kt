@@ -8,6 +8,7 @@ import killable.HasKillSet
 import killable.KillSet
 import music.common.MusicApi
 import music.database.details.Details
+import music.database.usage.Usage
 import music.import.Import
 import music.loggedin.LoggedIn
 import music.loggedin.LoggedInPath
@@ -15,42 +16,42 @@ import musiclib.UserSongState
 import rx.RxSet
 import rx.Var
 
-open class DatabasePath(
+interface DatabasePath: LoggedInPath {
     val database: Database
-): LoggedInPath(database.from)
+}
 
 class Database(
     val from: LoggedIn
-): ForwardBase<TopAndContent>(from), MusicApi {
-    override val path = DatabasePath(this)
+): ForwardBase<TopAndContent>(from), MusicApi, DatabasePath, LoggedInPath by from {
+    override val database = this
 
 
     val toBeDownloaded = status(
-        path.loggedIn.uploadedSet.ids.filtered { id ->
-            path.loggedIn.userSongs.get(id)() == UserSongState.Like &&
-                    !path.boot.localSongs.set.containsRx(id)()
+        loggedIn.uploadedSet.ids.filtered { id ->
+            loggedIn.userSongs.get(id)() == UserSongState.Like &&
+                    !boot.localSongs.set.containsRx(id)()
         }
     )
 
     val toBeUploaded = status(
-        path.boot.localSongs.set.filtered { id ->
-            path.loggedIn.userSongs.get(id)() == UserSongState.Like &&
-                    !path.loggedIn.storageIds.containsRx(id)()
+        boot.localSongs.set.filtered { id ->
+            loggedIn.userSongs.get(id)() == UserSongState.Like &&
+                    !loggedIn.storageIds.containsRx(id)()
         }
     )
 
     val toBeDeleted = status(
-        path.boot.localSongs.set.filtered { id ->
-            path.loggedIn.userSongs.get(id)() == UserSongState.DontLike
+        boot.localSongs.set.filtered { id ->
+            loggedIn.userSongs.get(id)() == UserSongState.DontLike
         }
     )
 
     val newInCloud = status(
-        path.loggedIn.storageSet.set.filtered { us ->
+        loggedIn.storageSet.set.filtered { us ->
             us.uploaded.initial().getOrDefault(false)
         }.ids.filtered { id ->
-            !path.boot.localSongs.set.containsRx(id)() &&
-                    path.loggedIn.userSongs.get(id)() == UserSongState.New
+            !boot.localSongs.set.containsRx(id)() &&
+                    loggedIn.userSongs.get(id)() == UserSongState.New
         }
     )
 
@@ -60,6 +61,10 @@ class Database(
 
     suspend fun details() {
         forward %= Details(this)
+    }
+
+    suspend fun usage() {
+        forward %= Usage(this)
     }
 
     class Status(

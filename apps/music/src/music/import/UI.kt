@@ -26,7 +26,7 @@ fun Import.ui() = TopAndContent(
         }
         title %= "Import MP3s"
         val inputContainer = node
-        right.tasksUi { path.boot.tasks.pending() + loader.pending() }
+        right.tasksUi { boot.tasks.pending() + loader.pending() }
         right.buttonGroup {
             m1
             if (webkitdirectorySupported) {
@@ -170,7 +170,7 @@ fun ImportFile.ui() = document.div {
                 secondary
                 fa.play
                 click {
-                    path.boot.play(playable)
+                    boot.play(playable)
                 }
             }
             button {
@@ -181,7 +181,7 @@ fun ImportFile.ui() = document.div {
                     else Cls.btnSecondary
                 }
                 click {
-                    path.boot.like(playable.id)
+                    boot.like(playable.id)
                 }
             }
             button {
@@ -189,7 +189,7 @@ fun ImportFile.ui() = document.div {
                 secondary
                 fa.thumbsDown
                 click {
-                    path.boot.dontLike(playable.id)
+                    boot.dontLike(playable.id)
                 }
             }
             button {

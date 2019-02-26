@@ -15,7 +15,7 @@ fun Database.ui() = TopAndContent(
         left.button {
             back
             click {
-                path.loggedIn.back()
+                loggedIn.back()
             }
         }
         title %= "Database"
@@ -33,12 +33,17 @@ fun Database.ui() = TopAndContent(
                 item {
                     fa.syncAlt
                     text %= "Synchronize"
-                    click { path.loggedIn.sync.sync() }
+                    click { loggedIn.sync.sync() }
                 }
                 item {
                     fa.list
                     text %= "Details"
                     click { details() }
+                }
+                item {
+                    fa.tachometerAlt
+                    text %= "Usage"
+                    click { usage() }
                 }
             }
 
@@ -73,12 +78,12 @@ fun Database.ui() = TopAndContent(
                     fa.download
                     rxEnabled {
                         toBeDownloaded.set.iterableRx().any { id ->
-                            !path.boot.processOf(id).downloading()
+                            !boot.processOf(id).downloading()
                         }
                     }
                     click {
                         toBeDownloaded.set.forEach { id ->
-                            path.loggedIn.download(id)
+                            loggedIn.download(id)
                         }
                     }
                 }
@@ -94,12 +99,12 @@ fun Database.ui() = TopAndContent(
                     fa.upload
                     rxEnabled {
                         toBeUploaded.set.iterableRx().any { id ->
-                            !path.boot.processOf(id).uploading()
+                            !boot.processOf(id).uploading()
                         }
                     }
                     click {
                         toBeUploaded.set.forEach { id ->
-                            path.loggedIn.upload(id)
+                            loggedIn.upload(id)
                         }
                     }
                 }
@@ -114,12 +119,12 @@ fun Database.ui() = TopAndContent(
                     fa.trashAlt
                     rxEnabled {
                         toBeDeleted.set.iterableRx().any { id ->
-                            !path.boot.processOf(id).deletingFromLocal()
+                            !boot.processOf(id).deletingFromLocal()
                         }
                     }
                     click {
                         toBeDeleted.set.forEach { id ->
-                            path.loggedIn.deleteFromLocal(id)
+                            loggedIn.deleteFromLocal(id)
                         }
                     }
                 }

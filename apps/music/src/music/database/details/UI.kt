@@ -17,7 +17,7 @@ fun Details.ui() = TopAndContent(
         left.button {
             back
             click {
-                path.database.back()
+                database.back()
             }
         }
         title %= "Database Details"
@@ -34,7 +34,7 @@ fun Details.ui() = TopAndContent(
             ) {
                 statusPanel(
                     insert,
-                    path.database,
+                    database,
                     st,
                     title,
                     bgfn
@@ -66,7 +66,7 @@ fun Details.ui() = TopAndContent(
                     secondary
                     click {
                         cloud.set.forEach { id ->
-                            path.loggedIn.checkStorage(id)
+                            loggedIn.checkStorage(id)
                         }
                     }
                 }

@@ -1,19 +1,17 @@
 package music.common
 
-import common.obj
-import commonshr.SetAdded
-import commonshr.SetMove
-import commonshr.SetRemoved
+import common.*
 import commonshr.plusAssign
 import commonui.widget.JobKillsImpl
 import commonui.widget.JobScope
 import indexeddb.*
-import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.await
 import music.Mp3Store
 import music.Playable
 import org.w3c.files.Blob
 import rx.RxMutableSet
 import rx.RxSet
+import kotlin.browser.window
 
 private external interface LocalSongEvent {
     var id: String
@@ -26,15 +24,81 @@ private external interface LocalSongEventType {
 private inline val LocalSongEventType.Companion.added get() = "added".unsafeCast<LocalSongEventType>()
 private inline val LocalSongEventType.Companion.removed get() = "removed".unsafeCast<LocalSongEventType>()
 
+interface LocalSongStorage {
+    val name: String
+    suspend fun usageInfo(): UsageAndQuota?
 
-class LocalSongs(parent: JobScope, val idb: IDBDatabase, initial: Set<String>): JobKillsImpl(parent) {
+    suspend fun readMp3(id: String): Blob?
+    suspend fun writeMp3(id: String, blob: Blob)
+    suspend fun deleteMp3(id: String)
+    suspend fun listMp3s(): Set<String>
+}
+
+class IDBLocalSongStorage(val idb: IDBDatabase): LocalSongStorage {
+    override val name = "IndexedDB"
+
+    override suspend fun usageInfo(): UsageAndQuota? {
+        return if (isStorageManagerSupported) {
+            window.navigator.storage.estimate().await().let { e ->
+                UsageAndQuota(
+                    usage = e.usage,
+                    quota = e.quota
+                )
+            }
+        } else {
+            null
+        }
+    }
+
+    override suspend fun readMp3(id: String): Blob? = idb.readMp3(id)
+    override suspend fun writeMp3(id: String, blob: Blob) = idb.writeMp3Store().put(blob, id).await()
+    override suspend fun deleteMp3(id: String) = idb.writeMp3Store().delete(id).await()
+    override suspend fun listMp3s(): Set<String> = idb.readMp3Store().getAllKeys().await().toSet()
+}
+
+class FileSystemLocalSongStorage(val dir: FileSystemDirectoryEntry): LocalSongStorage {
+    override val name = "FileSystem"
+
+    override suspend fun usageInfo(): UsageAndQuota? {
+        return window.navigator.withQuota.webkitPersistentStorage.queryUsageAndQuota()
+    }
 
     companion object {
-        suspend operator fun invoke(parent: JobScope, idb: IDBDatabase): LocalSongs {
+        suspend fun create(fs: FileSystem): FileSystemLocalSongStorage {
+            return FileSystemLocalSongStorage(fs.root.getDirectory("mp3s"))
+        }
+    }
+
+    override suspend fun readMp3(id: String): Blob? {
+        return try {
+            dir.getFile(id, obj { create = false } )
+        } catch (d: dynamic) {
+            return null
+        }.file()
+    }
+
+    override suspend fun writeMp3(id: String, blob: Blob) {
+        dir.writeFile(id, blob)
+    }
+
+    override suspend fun deleteMp3(id: String) {
+        dir.getFile(id, obj { create = false } ).remove()
+    }
+
+    override suspend fun listMp3s(): Set<String> {
+        return dir.createReader().readEntries().filter { it.isFile }.map { it.name }.toSet()
+    }
+
+}
+
+class LocalSongs(parent: JobScope, val storage: LocalSongStorage, initial: Set<String>): JobKillsImpl(parent) {
+
+    companion object {
+        suspend operator fun invoke(parent: JobScope, str: LocalSongStorage): LocalSongs {
             return LocalSongs(
                 parent,
-                idb,
-                idb.readMp3Store().getAllKeys().await().toSet()
+                str,
+                str.listMp3s()
             )
         }
     }
@@ -79,7 +143,7 @@ class LocalSongs(parent: JobScope, val idb: IDBDatabase, initial: Set<String>): 
     }
 
     suspend fun load(id: String) : Blob? {
-        val blob = idb.readMp3(id)
+        val blob = storage.readMp3(id)
         if (blob == null) {
             mutableSet -= id
         }
@@ -91,26 +155,26 @@ class LocalSongs(parent: JobScope, val idb: IDBDatabase, initial: Set<String>): 
         addMp3(playable.id, playable.blob)
     }
     suspend fun addMp3(id: String, blob: Blob) {
-        idb.writeMp3Store().put(blob, id).await()
+        storage.writeMp3(id, blob)
         added(id)
     }
     suspend fun removeMp3(id: String) {
-        idb.writeMp3Store().delete(id).await()
+        storage.deleteMp3(id)
         removed(id)
     }
-    suspend fun clearMp3s() {
-        val cd = CompletableDeferred<Unit>()
-        val st = idb.writeMp3Store()
-        st.getAllKeys().then { keys ->
-            st.clear().then {
-                keys.forEach { id ->
-                    removed(id)
-                }
-                cd.complete(Unit)
-            }
-        }
-        cd.await()
-    }
+//    suspend fun clearMp3s() {
+//        val cd = CompletableDeferred<Unit>()
+//        val st = idb.writeMp3Store()
+//        st.getAllKeys().then { keys ->
+//            st.clear().then {
+//                keys.forEach { id ->
+//                    removed(id)
+//                }
+//                cd.complete(Unit)
+//            }
+//        }
+//        cd.await()
+//    }
 
 }
 

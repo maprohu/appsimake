@@ -19,16 +19,16 @@ import org.w3c.xhr.XMLHttpRequestResponseType
 import rx.Var
 
 fun LoggedIn.task(id: String, pr: Boot.SongProcess.() -> Var<Boolean>, fn: Action) {
-    path.boot.task(
-        path.boot.processOf(id).pr(),
+    boot.task(
+        boot.processOf(id).pr(),
         fn
     )
 }
 
 fun LoggedIn.upload(id: String) {
     task(id, {uploading}) {
-        path.loggedIn.privileged {
-            val file = path.boot.localSongs.load(id)
+        loggedIn.privileged {
+            val file = boot.localSongs.load(id)
             if (file != null) {
                 val store = StoreState().apply {
                     props.persisted(
@@ -36,15 +36,15 @@ fun LoggedIn.upload(id: String) {
                     )
 
                     uploaded.cv = false
-                    save(path.loggedIn.db)
+                    save(loggedIn.db)
                     props.clearDirty()
                 }
 
-                val ref = path.loggedIn.storageRef.child(id)
+                val ref = loggedIn.storageRef.child(id)
                 ref.put(file).await()
                 store.apply {
                     uploaded.cv = true
-                    save(path.loggedIn.db)
+                    save(loggedIn.db)
                     props.clearDirty()
                 }
             }
@@ -54,7 +54,7 @@ fun LoggedIn.upload(id: String) {
 
 fun LoggedIn.download(id: String) {
     task(id, {downloading}) {
-        path.loggedIn.privileged {
+        loggedIn.privileged {
 
             val url = storageRef.child(id).getDownloadURL().await()
             val res = CompletableDeferred<Blob>()
@@ -67,21 +67,21 @@ fun LoggedIn.download(id: String) {
                 send()
             }
             val file = res.await()
-            path.boot.localSongs.addMp3(id, file)
+            boot.localSongs.addMp3(id, file)
         }
     }
 }
 
 fun LoggedIn.deleteFromLocal(id: String) {
     task(id, {deletingFromLocal}) {
-        path.boot.localSongs.removeMp3(id)
+        boot.localSongs.removeMp3(id)
     }
 }
 
 fun LoggedIn.deleteFromCloud(id: String) {
     task(id, {deletingFromCloud}) {
-        path.loggedIn.privileged {
-            musicLib.app.storage.doc(id).docRef(path.loggedIn.db).delete()
+        loggedIn.privileged {
+            musicLib.app.storage.doc(id).docRef(loggedIn.db).delete()
             storageRef.child(id).delete().await()
         }
     }
@@ -89,9 +89,9 @@ fun LoggedIn.deleteFromCloud(id: String) {
 
 fun LoggedIn.checkStorage(id: String) {
     task(id, {checkingStorage}) {
-        path.loggedIn.privileged {
+        loggedIn.privileged {
             try {
-                val tag = songInfoSource(id) { path.boot.localSongs.load(id) }
+                val tag = songInfoSource(id) { boot.localSongs.load(id) }
                 tag.waitExtracted()
                 val localSizeOpt = tag.bytes.initial.now
 
@@ -106,7 +106,7 @@ fun LoggedIn.checkStorage(id: String) {
                 }
             } catch (e: dynamic) {
                 console.dir(e.unsafeCast<Any())
-                path.boot.slots.toasts {
+                boot.slots.toasts {
                     error(e.message.unsafeCast<String>())
                 }
             }

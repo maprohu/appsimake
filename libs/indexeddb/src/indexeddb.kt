@@ -99,6 +99,9 @@ external interface IDBDatabase {
     // https://developer.mozilla.org/en-US/docs/Web/API/IDBDatabase/createObjectStore
     fun <K, V> createObjectStore(name: String, options: CreateObjectStoreOptions = definedExternally) : IDBObjectStore<K, V>
 
+    // https://developer.mozilla.org/en-US/docs/Web/API/IDBDatabase/deleteObjectStore
+    fun deleteObjectStore(name: String)
+
     // https://developer.mozilla.org/en-US/docs/Web/API/IDBDatabase/transaction
     fun transaction(store: String, mode: TransactionMode = definedExternally): IDBTransaction
     fun transaction(stores: Array<String>, mode: TransactionMode = definedExternally): IDBTransaction

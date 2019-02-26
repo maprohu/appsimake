@@ -39,34 +39,34 @@ fun Status.ui() = TopAndContent(
             cls.p1
 
             launch {
-                status.items.process(kills) { id ->
+                stat.items.process(kills) { id ->
                     launch(this@ui.coroutineContext) {
                         val api = (this@ui + this@process).fbapi
                         val node = api.songUi(
                             id,
                             null,
                             {
-                                if (path.boot.localSongs.set.containsRx(id)()) {
-                                    { path.boot.localSongs.load(id) }
+                                if (boot.localSongs.set.containsRx(id)()) {
+                                    { boot.localSongs.load(id) }
                                 } else {
                                     null
                                 }
                             },
-                            path.loggedIn
+                            loggedIn
                         ) {
-                            val process = path.boot.processOf(id)
+                            val process = boot.processOf(id)
 
                             button {
                                 p2
                                 fa.download
                                 secondary
                                 visible {
-                                    !path.boot.localSongs.set.containsRx(id)() &&
-                                            path.loggedIn.storageIds.containsRx(id)()
+                                    !boot.localSongs.set.containsRx(id)() &&
+                                            loggedIn.storageIds.containsRx(id)()
                                 }
                                 process.downloading.forEach { node.disabled = it }
                                 click {
-                                    path.loggedIn.download(id)
+                                    loggedIn.download(id)
                                 }
                             }
                             button {
@@ -74,12 +74,12 @@ fun Status.ui() = TopAndContent(
                                 fa.upload
                                 secondary
                                 visible {
-                                    path.boot.localSongs.set.containsRx(id)() &&
-                                            !path.loggedIn.storageIds.containsRx(id)()
+                                    boot.localSongs.set.containsRx(id)() &&
+                                            !loggedIn.storageIds.containsRx(id)()
                                 }
                                 process.uploading.forEach { node.disabled = it }
                                 click {
-                                    path.loggedIn.upload(id)
+                                    loggedIn.upload(id)
                                 }
                             }
                             button {
@@ -87,11 +87,11 @@ fun Status.ui() = TopAndContent(
                                 fa.trashAlt
                                 danger
                                 visible {
-                                    path.boot.localSongs.set.containsRx(id)()
+                                    boot.localSongs.set.containsRx(id)()
                                 }
                                 process.deletingFromLocal.forEach { node.disabled = it }
                                 click {
-                                    path.loggedIn.deleteFromLocal(id)
+                                    loggedIn.deleteFromLocal(id)
                                 }
                             }
                             button {
@@ -99,11 +99,11 @@ fun Status.ui() = TopAndContent(
                                 fa.pooStorm
                                 danger
                                 visible {
-                                    path.loggedIn.storageIds.containsRx(id)()
+                                    loggedIn.storageIds.containsRx(id)()
                                 }
                                 process.deletingFromCloud.forEach { node.disabled = it }
                                 click {
-                                    path.loggedIn.deleteFromCloud(id)
+                                    loggedIn.deleteFromCloud(id)
                                 }
                             }
 

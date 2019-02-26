@@ -30,6 +30,7 @@ fun Home.ui() = factory.screen {
             app("tasks", "Tasks")
             app("tictactoe", "Tic Tac Toe")
             app("gymclock", "Gym Clock")
+            app("music", "Music Player")
 
         }
     }
