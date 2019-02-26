@@ -61,18 +61,6 @@ abstract class LoginBase(
     )
 
 
-    suspend fun Firestore.enablePersistenceAndWait() {
-        globalStatus %= "Enabling persistence..."
-        enablePersistence(
-            obj {
-                experimentalTabSynchronization = true
-            }
-        ).await()
-    }
-    suspend fun Firestore.disableNetworkAndWait() {
-        globalStatus %= "Switching to offline data..."
-        disableNetwork().await()
-    }
 
     suspend fun switchToUnkownUser() {
         content.switchToView {
@@ -115,4 +103,18 @@ abstract class LoginBase(
         }
     }
 
+}
+
+suspend fun Firestore.enablePersistenceAndWait() {
+    globalStatus %= "Enabling persistence..."
+    enablePersistence(
+        obj {
+            experimentalTabSynchronization = true
+        }
+    ).await()
+}
+
+suspend fun Firestore.disableNetworkAndWait() {
+    globalStatus %= "Switching to offline data..."
+    disableNetwork().await()
 }

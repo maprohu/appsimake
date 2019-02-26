@@ -5,14 +5,15 @@ import gymclock.clock.Clock
 import gymclock.data.Model
 import org.w3c.dom.HTMLElement
 
-open class FormPath(
+interface FormPath: BodyPath {
     val form: Form
-): BodyPath(form.body)
+}
 
 class Form(
-    val body: Body
-): ForwardBase<HTMLElement>(body) {
-    val path = FormPath(this)
+    body: Body
+): ForwardBase<HTMLElement>(body), FormPath, BodyPath by body {
+    override val form = this
+
 
     val sounds by lazy { Sounds() }
 

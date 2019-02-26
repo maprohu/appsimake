@@ -1,27 +1,33 @@
-package checklist.home
+package download.home
 
-import checklist.loggedin.LoggedIn
 import commonfb.FB
-import commonfb.login.Login
-import commonfb.loginbase.LoginBase
 import commonfb.loginbase.LoginOnly
 import commonui.widget.Body
 import commonui.widget.BodyPath
-import commonui.widget.UIBase
-import commonui.widget.switchToView
+import download.loggedin.LoggedIn
+import firebase.app.App
+import firebase.firestore.Firestore
 import kotlinx.coroutines.launch
-import org.w3c.dom.HTMLElement
 
 interface HomePath: BodyPath {
     val home: Home
 }
 class Home(
-    body: Body
+    body: Body,
+    val app: App,
+    val db: Firestore
 ): LoginOnly(body), HomePath, BodyPath by body {
     override val home = this
 
+
+
+    val auth = app.auth()
+
+    fun signOut() {
+        auth.signOut()
+    }
+
     init {
-        val app = FB.app
         launch {
             start(
                 app

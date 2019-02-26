@@ -380,6 +380,24 @@ object checklist : JsApp(
     )
 )
 
+object downloadlib : JsModule(
+    "libs/downloadlib",
+    listOf(
+        commonlib
+    )
+)
+object download : JsApp(
+    JsAppConfig(
+        "apps/download",
+        "Download",
+        listOf(
+            downloadlib,
+            commonfb
+        )
+    )
+)
+
+
 object functions : JsModule(
     "libs/functions",
     listOf(

@@ -2,12 +2,16 @@ package commonui.widget
 
 import bootstrap.*
 import commonshr.*
+import commonui.globalStatus
 import domx.*
+import killable.Killables
 import kotlin.browser.document
 
 class Loading {
 
-    val hole = document.body!!.hole
+    val ks = Killables()
+
+    private val hole = document.body!!.hole
 
     private val content = hole.insert.wraps.div {
         cls {
@@ -33,14 +37,19 @@ class Loading {
 
     fun status(msg: String) {
         status %= msg
-        console.log(msg)
     }
 
     operator fun remAssign(msg: String) { status(msg) }
 
+    val target = hole.with {
+        ks.kill()
+    }
+
     init {
         setupFullScreen()
-        status("Loading...")
+        globalStatus.forEach(ks.killSet) { msg ->
+            status(msg)
+        }
     }
 
 }

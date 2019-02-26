@@ -23,11 +23,9 @@ fun Login.ui() = TopAndContent(
                 }
             }
         }
-        middle {
-            h5 {
-                cls.m1
-                innerText = "Signing In"
-            }
+        title {
+            cls.p1
+            innerText = "Sign In"
         }
     }.node,
     content = document.div {
