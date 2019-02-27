@@ -19,7 +19,7 @@ fun main() {
         Body(loading.target).apply {
             val app = FB.app
             val db = FB.db
-            db.enablePersistenceAndWait()
+//            db.enablePersistenceAndWait()
             content.switchToView(Home(this, app, db))
         }
     }
