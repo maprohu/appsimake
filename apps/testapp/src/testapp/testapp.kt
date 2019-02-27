@@ -7,6 +7,7 @@ import kotlin.browser.document
 
 
 fun main() {
+
     val target = document.body!!
     fun msg(s: String) {
         val div: HTMLElement = document.createElement("div") as HTMLElement
