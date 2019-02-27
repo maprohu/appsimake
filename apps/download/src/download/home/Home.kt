@@ -19,8 +19,6 @@ class Home(
 ): LoginOnly(body), HomePath, BodyPath by body {
     override val home = this
 
-
-
     val auth = app.auth()
 
     fun signOut() {

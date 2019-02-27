@@ -396,7 +396,8 @@ object download : JsApp(
         listOf(
             downloadlib,
             commonfb
-        )
+        ),
+        serviceWorker = cachingsw
     )
 )
 

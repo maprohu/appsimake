@@ -6,6 +6,7 @@ import commonfb.loginbase.UserStateView
 import commonfb.save
 import commonlib.private
 import commonshr.Trigger
+import commonui.globalStatus
 import commonui.widget.TopAndContent
 import commonui.widget.UIBase
 import download.DownloadItem
@@ -50,6 +51,10 @@ class LoggedIn(
 
 
     override val rawView: TopAndContent = ui()
+
+    init {
+        globalStatus %= "Logged in."
+    }
 
 }
 

@@ -18,10 +18,10 @@ fun main() {
         loading %= "Registering service worker..."
         APP.startRegisteringServiceWorker()
         Body(loading.target).apply {
-//            val app = FB.app
-//            val db = FB.db
-////            db.enablePersistenceAndWait()
-//            content.switchToView(Home(this, app, db))
+            val app = FB.app
+            val db = FB.db
+            db.enablePersistenceAndWait()
+            content.switchToView(Home(this, app, db))
         }
     }
 
