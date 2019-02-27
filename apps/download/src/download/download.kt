@@ -13,9 +13,10 @@ import kotlinx.coroutines.launch
 fun main() {
 
     val loading = Loading()
-    APP.startRegisteringServiceWorker()
 
     GlobalScope.launch {
+        loading %= "Registering service worker..."
+        APP.startRegisteringServiceWorker()
         Body(loading.target).apply {
 //            val app = FB.app
 //            val db = FB.db

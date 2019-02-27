@@ -23,7 +23,7 @@ fun main() {
         loading %= "Registering service worker..."
         APP.startRegisteringServiceWorker()
         loading %= "Starting app..."
-        Form.boot(loading.hole)
+        Form.boot(loading.target)
     }
 }
 
