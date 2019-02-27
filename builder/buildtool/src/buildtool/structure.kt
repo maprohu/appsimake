@@ -158,7 +158,7 @@ object testappsw : JsModule(
     listOf(
         firebasektjs,
         cachingsw,
-//        firebaseMessagingSw,
+        firebaseMessagingSw,
         testapplib
     )
 )
