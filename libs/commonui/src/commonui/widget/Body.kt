@@ -4,6 +4,7 @@ import bootstrap.setupFullScreen
 import commonshr.constant
 import commonshr.funs
 import commonshr.remAssign
+import commonui.progress.Progress
 import kotlinx.coroutines.Job
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
@@ -22,10 +23,7 @@ class Body(
     override val body = this
 
     val content = JobSwitch.jobWithView<BodyNode>(
-        ItemWithViewRx(
-            JobScopeImpl.childOf(this),
-            Factory().hourglass.node.funs.ignore1()
-        )
+        ItemWithViewRx.hasView(Progress(this))
     )
 
     init {
