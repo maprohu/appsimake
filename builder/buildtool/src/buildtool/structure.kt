@@ -156,6 +156,7 @@ object commonui : JsModule(
 object testappsw : JsModule(
     "libs/testappsw",
     listOf(
+        firebasektjs,
         cachingsw,
         testapplib
     )
@@ -176,7 +177,7 @@ object testapp : JsApp(
         commonui,
         testapplib
     ),
-    serviceWorker = cachingsw
+    serviceWorker = testappsw
 )
 
 object testapp2 : JsApp(
