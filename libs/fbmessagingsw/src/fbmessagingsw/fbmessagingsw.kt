@@ -53,8 +53,8 @@ fun main() {
 
     console.log("Updating service worker...")
 
-//    messaging.setBackgroundMessageHandler {
-//        messageHandler(it)
-//    }
+    messaging.setBackgroundMessageHandler {
+        messageHandler(it)
+    }
 
 }
