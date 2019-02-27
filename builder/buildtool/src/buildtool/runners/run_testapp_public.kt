@@ -3,8 +3,8 @@ package buildtool.runners
 import buildtool.*
 import kotlinx.coroutines.channels.ticker
 
-fun main(args: Array<String>) {
-    testapp.publicSW
+fun main() {
     fns.indexJs
+    testapp.publicSW
     testapp.publicHtml
 }

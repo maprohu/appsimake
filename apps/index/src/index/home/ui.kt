@@ -36,6 +36,7 @@ fun Home.ui() = factory.screen {
             app("gymclock", "Gym Clock")
             app("music", "Music Player")
             app("download", "Download")
+            app("testapp", "Test App")
 
         }
     }

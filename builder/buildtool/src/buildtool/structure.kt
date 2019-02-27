@@ -173,7 +173,7 @@ object testapp : JsApp(
     "apps/testapp",
     "Test App",
     listOf(
-        kotlinxCoroutines
+        commonui
     ),
     testappsw
 )

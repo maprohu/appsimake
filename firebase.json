@@ -77,6 +77,15 @@
             "value": "mak-age=0"
           }
         ]
+      },
+      {
+        "source": "/testapp/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "mak-age=0"
+          }
+        ]
       }
     ]
   }

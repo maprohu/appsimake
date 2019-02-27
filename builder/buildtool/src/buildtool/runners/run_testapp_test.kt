@@ -7,6 +7,6 @@ fun main() = runTask {
     fns.indexJs
     testapp.testSW
     testapp.testHtml
-    testapp2.testSW
-    testapp2.testHtml
+//    testapp2.testSW
+//    testapp2.testHtml
 }
