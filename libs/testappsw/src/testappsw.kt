@@ -5,7 +5,7 @@ import org.w3c.notifications.NotificationAction
 import org.w3c.notifications.NotificationOptions
 import testapplib.Msg
 
-fun main(args: Array<String>) {
+fun main() {
 //    sw.onnotificationclick = {
 //        console.dir(it)
 //    }
