@@ -156,7 +156,7 @@ object commonui : JsModule(
 object testappsw : JsModule(
     "libs/testappsw",
     listOf(
-        firebaseMessagingSw,
+        cachingsw,
         testapplib
     )
 )
@@ -173,19 +173,19 @@ object testapp : JsApp(
     "apps/testapp",
     "Test App",
     listOf(
-        commonui
+        commonui,
+        testapplib
     ),
-    testappsw
+    serviceWorker = cachingsw
 )
 
 object testapp2 : JsApp(
     "apps/testapp2",
     "Test App 2",
     listOf(
-        commonfb,
-        testapplib
+        commonfb
     ),
-    testappsw
+    serviceWorker = cachingsw
 )
 
 object cachingsw : JsModule(
