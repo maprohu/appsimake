@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry exported="" type="library" name="kotlin-stdlib" level="project" />
     <orderEntry exported="" type="module" module-name="commonui"/>
+    <orderEntry exported="" type="module" module-name="testapplib"/>
   </component>
 </module>

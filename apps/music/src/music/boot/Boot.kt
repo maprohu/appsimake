@@ -47,8 +47,8 @@ class Boot(
     val tasks = discardExecutor().withCounter
 
     companion object {
-        suspend fun create(): Boot {
-            val body = Body()
+        suspend fun create(target: Hole): Boot {
+            val body = Body(target)
 
             return body.withChild {
                 val storage = setupFileStorage()

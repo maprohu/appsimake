@@ -34,7 +34,7 @@ class NotLoggedIn(
         forward.switchTo {
             Login(
                 this,
-                base = this,
+                base = boot,
                 app = app,
                 back = back,
                 loggingIn = {

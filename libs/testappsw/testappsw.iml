@@ -8,7 +8,8 @@
     <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry exported="" type="library" name="kotlin-stdlib" level="project" />
-    <orderEntry exported="" type="module" module-name="fbmessagingsw"/>
+    <orderEntry exported="" type="module" module-name="firebasektjs"/>
+    <orderEntry exported="" type="module" module-name="cachingsw"/>
     <orderEntry exported="" type="module" module-name="testapplib"/>
   </component>
 </module>
