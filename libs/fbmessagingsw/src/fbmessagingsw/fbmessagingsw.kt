@@ -23,7 +23,7 @@ val messaging by lazy {
     app.messaging()
 }
 
-val appName = run {
+val appName by lazy {
     val scope = sw.registration.scope
 
     scope.substringBeforeLast('/').substringAfterLast('/')
@@ -46,7 +46,6 @@ var messageHandler : (dynamic) -> Promise<Any?> = { msg ->
                 }
             }.unsafeCast<Any?>()
         )
-
     )
 }
 
