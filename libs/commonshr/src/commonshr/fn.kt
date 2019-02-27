@@ -1,6 +1,7 @@
 package commonshr
 
 typealias Assign<T> = (T) -> Unit
+typealias Callback<T> = (T) -> Unit
 typealias OptAssign<T> = Assign<T?>
 
 @Suppress("NOTHING_TO_INLINE")

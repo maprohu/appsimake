@@ -5,6 +5,7 @@ import commonfb.FB
 import commonfb.login.Login
 import commonfb.loginbase.LoginBase
 import commonfb.loginbase.LoginOnly
+import commonfb.loginbase.enablePersistenceAndWait
 import commonui.widget.Body
 import commonui.widget.BodyPath
 import commonui.widget.UIBase
@@ -23,10 +24,19 @@ class Home(
     init {
         val app = FB.app
         launch {
+            val db = FB.db.apply {
+                enablePersistenceAndWait()
+            }
+
             start(
                 app
             ) {
-                LoggedIn(this@Home, it)
+                LoggedIn(
+                    this@Home,
+                    it,
+                    app,
+                    db
+                )
             }
         }
     }

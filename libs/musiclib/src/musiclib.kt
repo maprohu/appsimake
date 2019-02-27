@@ -43,27 +43,27 @@ class Mp3File: Base<Mp3File>() {
 fun Mp3File.fixedArtist() = artistfix.initial().orElse { artist.initial() }
 fun Mp3File.fixedTitle() = titlefix.initial().orElse { title.initial() }
 
-abstract class ActivePlaylist<T: ActivePlaylist<T>>: BaseRootVal<T>() {
-    val position by o.scalar<Double>().prop()
-
-    companion object : ActivePlaylist<Nothing>() {
-        val emptyOf = wrapper(
-            { LocalPlaylist() },
-            { CloudPlaylist() },
-            { CustomPlaylist() }
-        )
-        fun of(d: dynamic) = emptyOf(d).initFrom(d)
-    }
-}
-class LocalPlaylist: ActivePlaylist<LocalPlaylist>()
-class CloudPlaylist: ActivePlaylist<CloudPlaylist>()
-class CustomPlaylist: ActivePlaylist<CustomPlaylist>() {
-    val songs by o.array<String>().prop()
-}
-
-class PlayerSettings: Base<PlayerSettings>() {
-
-    val activePlaylist by
-        o.scalar<ActivePlaylist<*>>().baseProp(ActivePlaylist.emptyOf)
-
-}
+//abstract class ActivePlaylist<T: ActivePlaylist<T>>: BaseRootVal<T>() {
+//    val position by o.scalar<Double>().prop()
+//
+//    companion object : ActivePlaylist<Nothing>() {
+//        val emptyOf = wrapper(
+//            { LocalPlaylist() },
+//            { CloudPlaylist() },
+//            { CustomPlaylist() }
+//        )
+//        fun of(d: dynamic) = emptyOf(d).initFrom(d)
+//    }
+//}
+//class LocalPlaylist: ActivePlaylist<LocalPlaylist>()
+//class CloudPlaylist: ActivePlaylist<CloudPlaylist>()
+//class CustomPlaylist: ActivePlaylist<CustomPlaylist>() {
+//    val songs by o.array<String>().prop()
+//}
+//
+//class PlayerSettings: Base<PlayerSettings>() {
+//
+//    val activePlaylist by
+//        o.scalar<ActivePlaylist<*>>().baseProp(ActivePlaylist.emptyOf)
+//
+//}

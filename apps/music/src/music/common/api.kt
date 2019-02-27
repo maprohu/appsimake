@@ -6,13 +6,13 @@ import commonshr.toMoves
 import commonui.widget.Factory
 import commonui.widget.HasKillSetAndUIX
 import commonui.widget.SlotHoles
-import firebase.FBApi
+import firebase.FirebaseApi
 import music.database.Database
 import music.loggedin.LoggedInPath
 import music.loggedin.syncUi
 import rx.RxSet
 
-interface MusicApi: FBApi, HasKillSetAndUIX, LoggedInPath {
+interface MusicApi: FirebaseApi, HasKillSetAndUIX, LoggedInPath {
 
     fun Factory.tasksUi() = tasksUi(this, boot)
     fun Factory.tasksUi(fn: () -> Int) = tasksUi(this, fn)

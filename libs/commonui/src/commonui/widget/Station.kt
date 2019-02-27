@@ -1,17 +1,13 @@
 package commonui.widget
 
-import common.None
-import common.Optional
-import common.Some
 import commonshr.*
 import commonui.UiApi
+import commonui.UiKillsApi
 import killable.HasKillSet
 import killable.Killables
-import killable.seq
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
-import org.w3c.dom.events.EventTarget
 import rx.RxIface
 import rx.Var
 

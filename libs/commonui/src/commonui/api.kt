@@ -6,9 +6,9 @@ import domx.rxEnabled
 import killable.HasKillSet
 import org.w3c.dom.Node
 
-inline val HasKillSet.uiapi : UiApi get() = object : HasKillSet by this, UiApi {}
+inline val HasKillSet.uiapi : UiKillsApi get() = object : HasKillSet by this, UiKillsApi {}
 
-interface UiApi: HasKillSet, InvokeWith {
+interface UiKillsApi: HasKillSet, InvokeWith {
 
     fun Slot.visibility(fn: () -> Boolean) = visibility(kills, fn)
 
@@ -19,3 +19,7 @@ interface UiApi: HasKillSet, InvokeWith {
     }
 
 }
+
+interface UiCoroutinesApi: NodeListApi
+
+interface UiApi: UiKillsApi, UiCoroutinesApi

@@ -23,6 +23,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var minus = Kotlin.kotlin.collections.minus_2ws7j4$;
   var Unit = Kotlin.kotlin.Unit;
   var CompletableDeferred = $module$kotlinx_coroutines_core.kotlinx.coroutines.CompletableDeferred_xptg6w$;
+  var getCallableRef = Kotlin.getCallableRef;
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var toList = Kotlin.kotlin.collections.toList_us0mfu$;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
@@ -30,7 +31,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var coroutines = $module$kotlinx_coroutines_core.kotlinx.coroutines;
   var launch = $module$kotlinx_coroutines_core.kotlinx.coroutines.launch_s496o7$;
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
-  var getCallableRef = Kotlin.getCallableRef;
   var Pair = Kotlin.kotlin.Pair;
   var listOf = Kotlin.kotlin.collections.listOf_i5x0yv$;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
@@ -47,6 +47,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var throwCCE = Kotlin.throwCCE;
   var NoSuchElementException_init = Kotlin.kotlin.NoSuchElementException_init;
   var setOf = Kotlin.kotlin.collections.setOf_mh5how$;
+  var CoroutineScope = $module$kotlinx_coroutines_core.kotlinx.coroutines.CoroutineScope;
   var PropertyMetadata = Kotlin.PropertyMetadata;
   var setOf_0 = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var lazyOf = Kotlin.kotlin.lazyOf_mh5how$;
@@ -60,6 +61,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var chunked = Kotlin.kotlin.collections.chunked_oqjilr$;
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var numberToInt = Kotlin.numberToInt;
+  var map = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.map_610k8f$;
   var throwUPAE = Kotlin.throwUPAE;
   var L0 = Kotlin.Long.ZERO;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
@@ -91,6 +93,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   SetRemoved.prototype.constructor = SetRemoved;
   toMap$ObjectLiteral.prototype = Object.create(AbstractMap.prototype);
   toMap$ObjectLiteral.prototype.constructor = toMap$ObjectLiteral;
+  ListEvent$Add.prototype = Object.create(ListEvent.prototype);
+  ListEvent$Add.prototype.constructor = ListEvent$Add;
+  ListEvent$Move.prototype = Object.create(ListEvent.prototype);
+  ListEvent$Move.prototype.constructor = ListEvent$Move;
+  ListEvent$Remove.prototype = Object.create(ListEvent.prototype);
+  ListEvent$Remove.prototype.constructor = ListEvent$Remove;
   RxCalc.prototype = Object.create(RxChild.prototype);
   RxCalc.prototype.constructor = RxCalc;
   RxVal.prototype = Object.create(RxParent.prototype);
@@ -242,6 +250,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   EmitterIface.prototype.plusAssign_qlkmfe$ = function (listener) {
     this.add_qlkmfe$(listener);
   };
+  Object.defineProperty(EmitterIface.prototype, 'fn', {
+    get: function () {
+      return getCallableRef('add', function ($receiver, listener) {
+        return $receiver.add_qlkmfe$(listener);
+      }.bind(null, this));
+    }
+  });
   EmitterIface.$metadata$ = {
     kind: Kind_INTERFACE,
     simpleName: 'EmitterIface',
@@ -458,13 +473,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function toSetSource($receiver, sfn) {
     return new toSetSource$ObjectLiteral(sfn, $receiver);
   }
-  function MappedEmitter(emitter, fn) {
+  function MappedEmitter(emitter, map) {
     this.emitter_0 = emitter;
-    this.fn_0 = fn;
+    this.map_0 = map;
   }
   function MappedEmitter$add$lambda(closure$listener, this$MappedEmitter) {
     return function (t) {
-      closure$listener(this$MappedEmitter.fn_0(t));
+      closure$listener(this$MappedEmitter.map_0(t));
       return Unit;
     };
   }
@@ -476,7 +491,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'MappedEmitter',
     interfaces: [EmitterIface]
   };
-  function map($receiver, fn) {
+  function map_0($receiver, fn) {
     return new MappedEmitter($receiver, fn);
   }
   function feedTo$lambda(closure$set) {
@@ -1164,7 +1179,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     kind: Kind_CLASS,
     interfaces: [SetSource]
   };
-  function map_0($receiver, mfn) {
+  function map_1($receiver, mfn) {
     return new map$ObjectLiteral($receiver, mfn);
   }
   function filtered$add_0(closure$curr, closure$f) {
@@ -1864,6 +1879,20 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     kind: Kind_CLASS,
     simpleName: 'Either',
     interfaces: []
+  };
+  function CoroutineWithKills() {
+  }
+  CoroutineWithKills.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'CoroutineWithKills',
+    interfaces: [HasKillSet, CoroutineScope]
+  };
+  function CommonShrApi() {
+  }
+  CommonShrApi.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'CommonShrApi',
+    interfaces: [ListApi]
   };
   function lib$lambda(it) {
     return new Lib(it);
@@ -3152,6 +3181,140 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     var secString = (numberToInt(secPart * 60) + 100 | 0).toString().substring(1);
     var minString = numberToInt(minPart).toString();
     return minString + ':' + secString;
+  }
+  function ListApi() {
+  }
+  ListApi.prototype.map_7tf8nf$ = function ($receiver, fn) {
+    return map_2($receiver, this.kills, fn);
+  };
+  ListApi.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'ListApi',
+    interfaces: [HasKillSet]
+  };
+  function ListEvent() {
+  }
+  function ListEvent$Add(index, item) {
+    ListEvent.call(this);
+    this.index = index;
+    this.item = item;
+  }
+  ListEvent$Add.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Add',
+    interfaces: [ListEvent]
+  };
+  function ListEvent$Move(from, to) {
+    ListEvent.call(this);
+    this.from = from;
+    this.to = to;
+  }
+  ListEvent$Move.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Move',
+    interfaces: [ListEvent]
+  };
+  function ListEvent$Remove(index) {
+    ListEvent.call(this);
+    this.index = index;
+  }
+  ListEvent$Remove.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Remove',
+    interfaces: [ListEvent]
+  };
+  ListEvent.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ListEvent',
+    interfaces: []
+  };
+  function Coroutine$map$lambda(closure$kills_0, closure$itemKills_0, closure$fn_0, e_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$closure$kills = closure$kills_0;
+    this.local$closure$itemKills = closure$itemKills_0;
+    this.local$closure$fn = closure$fn_0;
+    this.local$tmp$ = void 0;
+    this.local$e = e_0;
+  }
+  Coroutine$map$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$map$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$map$lambda.prototype.constructor = Coroutine$map$lambda;
+  Coroutine$map$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            if (Kotlin.isType(this.local$e, ListEvent$Add)) {
+              var ks = killables(this.local$closure$kills);
+              this.local$closure$itemKills.add_wxm5ur$(this.local$e.index, ks.kill);
+              this.local$tmp$ = this.local$e.index;
+              this.state_0 = 4;
+              this.result_0 = this.local$closure$fn(ks, this.local$e.item, this);
+              if (this.result_0 === COROUTINE_SUSPENDED)
+                return COROUTINE_SUSPENDED;
+              continue;
+            }
+             else {
+              if (Kotlin.isType(this.local$e, ListEvent$Move)) {
+                this.local$closure$itemKills.add_wxm5ur$(this.local$e.to, this.local$closure$itemKills.removeAt_za3lpa$(this.local$e.from));
+                return this.local$e;
+              }
+               else {
+                if (Kotlin.isType(this.local$e, ListEvent$Remove)) {
+                  this.local$closure$itemKills.removeAt_za3lpa$(this.local$e.index)();
+                  return this.local$e;
+                }
+                 else {
+                  return Kotlin.noWhenBranchMatched();
+                }
+              }
+            }
+
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.state_0 = 3;
+            continue;
+          case 3:
+            this.state_0 = 5;
+            continue;
+          case 4:
+            return new ListEvent$Add(this.local$tmp$, this.result_0);
+          case 5:
+            return;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function map$lambda(closure$kills_0, closure$itemKills_0, closure$fn_0) {
+    return function (e_0, continuation_0, suspended) {
+      var instance = new Coroutine$map$lambda(closure$kills_0, closure$itemKills_0, closure$fn_0, e_0, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function map_2($receiver, kills, fn) {
+    var itemKills = ArrayList_init();
+    return map($receiver, void 0, map$lambda(kills, itemKills, fn));
   }
   function asyncKills$State(value, kill) {
     this.value = value;
@@ -5210,7 +5373,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$common.Emitter = Emitter;
   package$common.toSetSource_9p620j$ = toSetSource;
   package$common.MappedEmitter = MappedEmitter;
-  package$common.map_x7fpzi$ = map;
+  package$common.map_x7fpzi$ = map_0;
   package$common.feedTo_cenaja$ = feedTo;
   package$common.filtered_duf482$ = filtered;
   package$common.combineAnd_6vwu35$ = combineAnd;
@@ -5230,7 +5393,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$common.RandomSource = RandomSource;
   package$common.random_txoh8m$ = random_0;
   package$common.SetSourceWithKey = SetSourceWithKey;
-  package$common.map_2x290v$ = map_0;
+  package$common.map_2x290v$ = map_1;
   package$common.filtered_tu02nm$ = filtered_0;
   package$common.combineN_oy6zd9$ = combineN_0;
   package$common.combine_eiygni$ = combine_1;
@@ -5260,6 +5423,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Either.Left = Either$Left;
   Either.Right = Either$Right;
   package$common.Either = Either;
+  var package$commonshr = _.commonshr || (_.commonshr = {});
+  package$commonshr.CoroutineWithKills = CoroutineWithKills;
+  package$commonshr.CommonShrApi = CommonShrApi;
   var package$commonlib = _.commonlib || (_.commonlib = {});
   package$commonlib.lib = lib;
   package$commonlib.Lib = Lib;
@@ -5285,7 +5451,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Object.defineProperty(SetDiff, 'Companion', {
     get: SetDiff$Companion_getInstance
   });
-  var package$commonshr = _.commonshr || (_.commonshr = {});
   package$commonshr.SetDiff = SetDiff;
   package$commonshr.toLazy_eoe559$ = toLazy;
   package$commonshr.SetMove = SetMove;
@@ -5326,6 +5491,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.get_groupThousands_s8ev3n$ = get_groupThousands;
   package$commonshr.get_groupThousands_mts6qi$ = get_groupThousands_0;
   package$commonshr.get_formatSecs_s8ev3n$ = get_formatSecs;
+  package$commonshr.ListApi = ListApi;
+  ListEvent.Add = ListEvent$Add;
+  ListEvent.Move = ListEvent$Move;
+  ListEvent.Remove = ListEvent$Remove;
+  package$commonshr.ListEvent = ListEvent;
+  package$commonshr.map_o50ybn$ = map_2;
   var package$killable = _.killable || (_.killable = {});
   package$killable.asyncKills_9scqh$ = asyncKills;
   package$killable.KillableValue = KillableValue;
@@ -5405,10 +5576,58 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.toMap_ycvysl$ = toMap_0;
   package$rx.process_qe6zds$ = process_0;
   withInitial$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  Object.defineProperty(withInitial$ObjectLiteral.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
   Emitter.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  Object.defineProperty(Emitter.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
   MappedEmitter.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  Object.defineProperty(MappedEmitter.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
   toEmitter$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  Object.defineProperty(toEmitter$ObjectLiteral.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
+  CoroutineWithKills.prototype.rx_pn7ch0$ = HasKillSet.prototype.rx_pn7ch0$;
+  CoroutineWithKills.prototype.rx_rf89m5$ = HasKillSet.prototype.rx_rf89m5$;
+  CoroutineWithKills.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;
+  CoroutineWithKills.prototype.forEach_igkruk$ = HasKillSet.prototype.forEach_igkruk$;
+  CoroutineWithKills.prototype.map_i8ud5a$ = HasKillSet.prototype.map_i8ud5a$;
+  CoroutineWithKills.prototype.onChange_ocsf2x$ = HasKillSet.prototype.onChange_ocsf2x$;
+  CoroutineWithKills.prototype.rxClass_wqb4ha$ = HasKillSet.prototype.rxClass_wqb4ha$;
+  CoroutineWithKills.prototype.rxClass_mjd6u9$ = HasKillSet.prototype.rxClass_mjd6u9$;
+  CoroutineWithKills.prototype.filtered_49l5s4$ = HasKillSet.prototype.filtered_49l5s4$;
+  CoroutineWithKills.prototype.remAssign_7fncnf$ = HasKillSet.prototype.remAssign_7fncnf$;
+  CoroutineWithKills.prototype.containsRx_1w65cx$ = HasKillSet.prototype.containsRx_1w65cx$;
+  CoroutineWithKills.prototype.process_ttzep4$ = HasKillSet.prototype.process_ttzep4$;
+  CoroutineWithKills.prototype.toRxSet_jr4bl4$ = HasKillSet.prototype.toRxSet_jr4bl4$;
+  CoroutineWithKills.prototype.toChannelLater_z5dyp2$ = HasKillSet.prototype.toChannelLater_z5dyp2$;
+  ListApi.prototype.map_i8ud5a$ = HasKillSet.prototype.map_i8ud5a$;
+  ListApi.prototype.rx_pn7ch0$ = HasKillSet.prototype.rx_pn7ch0$;
+  ListApi.prototype.rx_rf89m5$ = HasKillSet.prototype.rx_rf89m5$;
+  ListApi.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;
+  ListApi.prototype.forEach_igkruk$ = HasKillSet.prototype.forEach_igkruk$;
+  ListApi.prototype.onChange_ocsf2x$ = HasKillSet.prototype.onChange_ocsf2x$;
+  ListApi.prototype.rxClass_wqb4ha$ = HasKillSet.prototype.rxClass_wqb4ha$;
+  ListApi.prototype.rxClass_mjd6u9$ = HasKillSet.prototype.rxClass_mjd6u9$;
+  ListApi.prototype.filtered_49l5s4$ = HasKillSet.prototype.filtered_49l5s4$;
+  ListApi.prototype.remAssign_7fncnf$ = HasKillSet.prototype.remAssign_7fncnf$;
+  ListApi.prototype.containsRx_1w65cx$ = HasKillSet.prototype.containsRx_1w65cx$;
+  ListApi.prototype.process_ttzep4$ = HasKillSet.prototype.process_ttzep4$;
+  ListApi.prototype.toRxSet_jr4bl4$ = HasKillSet.prototype.toRxSet_jr4bl4$;
+  ListApi.prototype.toChannelLater_z5dyp2$ = HasKillSet.prototype.toChannelLater_z5dyp2$;
+  CommonShrApi.prototype.map_7tf8nf$ = ListApi.prototype.map_7tf8nf$;
+  CommonShrApi.prototype.map_i8ud5a$ = ListApi.prototype.map_i8ud5a$;
+  CommonShrApi.prototype.rx_pn7ch0$ = ListApi.prototype.rx_pn7ch0$;
+  CommonShrApi.prototype.rx_rf89m5$ = ListApi.prototype.rx_rf89m5$;
+  CommonShrApi.prototype.forEach_5mel8p$ = ListApi.prototype.forEach_5mel8p$;
+  CommonShrApi.prototype.forEach_igkruk$ = ListApi.prototype.forEach_igkruk$;
+  CommonShrApi.prototype.onChange_ocsf2x$ = ListApi.prototype.onChange_ocsf2x$;
+  CommonShrApi.prototype.rxClass_wqb4ha$ = ListApi.prototype.rxClass_wqb4ha$;
+  CommonShrApi.prototype.rxClass_mjd6u9$ = ListApi.prototype.rxClass_mjd6u9$;
+  CommonShrApi.prototype.filtered_49l5s4$ = ListApi.prototype.filtered_49l5s4$;
+  CommonShrApi.prototype.remAssign_7fncnf$ = ListApi.prototype.remAssign_7fncnf$;
+  CommonShrApi.prototype.containsRx_1w65cx$ = ListApi.prototype.containsRx_1w65cx$;
+  CommonShrApi.prototype.process_ttzep4$ = ListApi.prototype.process_ttzep4$;
+  CommonShrApi.prototype.toRxSet_jr4bl4$ = ListApi.prototype.toRxSet_jr4bl4$;
+  CommonShrApi.prototype.toChannelLater_z5dyp2$ = ListApi.prototype.toChannelLater_z5dyp2$;
   toMoves$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  Object.defineProperty(toMoves$ObjectLiteral.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
   Killables.prototype.rx_pn7ch0$ = HasKillSet.prototype.rx_pn7ch0$;
   Killables.prototype.rx_rf89m5$ = HasKillSet.prototype.rx_rf89m5$;
   Killables.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;

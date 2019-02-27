@@ -379,7 +379,8 @@ object checklist : JsApp(
         listOf(
             checklistlib,
             commonfb
-        )
+        ),
+        serviceWorker = cachingsw
     )
 )
 

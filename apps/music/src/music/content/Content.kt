@@ -1,13 +1,10 @@
 package music.content
 
-import commonui.UiApi
+import commonui.UiKillsApi
 import commonui.widget.*
 import music.UserSongs
 import music.boot.Boot
-import music.boot.BootPath
 import music.data.SongInfoSource
-import org.w3c.dom.HTMLElement
-
 
 
 interface Content: JobScopeWithView<TopAndContent> {
@@ -16,7 +13,7 @@ interface Content: JobScopeWithView<TopAndContent> {
 
 }
 
-class UserUnknown(val boot: Boot): ViewImpl<TopAndContent>(boot), Content, UiApi {
+class UserUnknown(val boot: Boot): ViewImpl<TopAndContent>(boot), Content, UiKillsApi {
     override val userSongs: UserSongs? = null
     override val songInfoSource: SongInfoSource = boot.localSongInfoSource
     override val rawView = ui()

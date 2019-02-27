@@ -1,10 +1,7 @@
 package commonui.widget
 
 import bootstrap.*
-import commonshr.Trigger
-import commonshr.invoke
-import commonshr.plusAssign
-import commonshr.remAssign
+import commonshr.*
 import domx.*
 import fontawesome.*
 import kotlin.browser.document
@@ -39,6 +36,12 @@ class DropdownMenu(): ScreenWrap() {
     val item get() = DropdownMenuItem().append
     val divider get() = node.div { cls.dropdownDivider }
 
+    fun HasUIX.signOut(action: Action) = item {
+        text %= "Sign Out"
+        fa.signOutAlt
+        click(action)
+    }
+
 }
 class Dropdown(): ScreenWrap() {
     override val node = document.div {
@@ -62,4 +65,6 @@ class Dropdown(): ScreenWrap() {
     }
 
     val menu = DropdownMenu().append
+
+
 }

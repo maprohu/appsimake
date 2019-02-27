@@ -6,9 +6,9 @@ import firebaseshr.HasFBProps
 import killable.HasKillSet
 import rx.RxSet
 
-interface FBApi: HasKillSet, InvokeWith {
+interface FirebaseApi: HasKillSet, InvokeWith {
     val <T: HasFBProps<*>> RxSet<T>.ids get() = ids(kills)
 
 }
 
-val HasKillSet.fbapi: FBApi get() = object : FBApi, HasKillSet by this {}
+val HasKillSet.fbapi: FirebaseApi get() = object : FirebaseApi, HasKillSet by this {}

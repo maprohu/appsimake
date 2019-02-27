@@ -262,6 +262,8 @@ open class Listeners {
 
 }
 
+typealias EmitterFn<T> = AddRemove<Callback<T>>
+
 interface EmitterIface<T> {
 
     operator fun plusAssign(listener: (T) -> Unit) {
@@ -269,6 +271,8 @@ interface EmitterIface<T> {
     }
 
     fun add(listener: (T) -> Unit) : Trigger
+
+    val fn: EmitterFn<T> get() = ::add
 
 }
 
@@ -370,11 +374,11 @@ fun <T> Emitter<SetMove<T>>.toSetSource(sfn: () -> Set<T>) = object : SetSource<
 
 class MappedEmitter<T, S>(
     private val emitter: EmitterIface<T>,
-    private val fn: (T) -> S
+    private val map: (T) -> S
 ): EmitterIface<S> {
     override fun add(listener: (S) -> Unit): Trigger {
         return emitter.add { t ->
-            listener(fn(t))
+            listener(map(t))
         }
     }
 }
