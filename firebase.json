@@ -68,6 +68,15 @@
             "value": "mak-age=0"
           }
         ]
+      },
+      {
+        "source": "/download/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "mak-age=0"
+          }
+        ]
       }
     ]
   }
