@@ -6,6 +6,7 @@ import domx.clickEvent
 import domx.rxEnabled
 import killable.HasKillSet
 import killable.KillSet
+import org.w3c.dom.HTMLAnchorElement
 import org.w3c.dom.events.EventTarget
 
 interface HasUIX {
@@ -19,6 +20,7 @@ interface HasUIX {
 
     fun DropdownMenuItem.click(action: Action) = node.click(action)
     fun Button.click(action: Action) = node.click(action)
+
 
 }
 

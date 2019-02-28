@@ -16,5 +16,8 @@ class Input: ScreenWrap() {
         }
     }
 
+    val required by lazy {
+        node.required = true
+    }
 
 }

@@ -3,6 +3,7 @@ package gymclock
 import bootstrap.*
 import commonui.APP
 import commonui.AppCtx
+import commonui.launchGlobal
 import commonui.screenLayout
 import commonui.widget.Loading
 import domx.*
@@ -19,7 +20,7 @@ fun main() {
 
     val loading = Loading()
 
-    GlobalScope.launch {
+    launchGlobal {
         loading %= "Registering service worker..."
         APP.startRegisteringServiceWorker()
         loading %= "Starting app..."

@@ -5,6 +5,7 @@ import commonfb.*
 import commonlib.private
 import commonshr.*
 import commonui.globalStatus
+import commonui.launchGlobal
 import commonui.usericon.UnknownUserSrc
 import commonui.widget.*
 import firebase.app.App
@@ -133,7 +134,7 @@ class Boot(
     val statusMessage = globalStatus
 
     private val fbRefsDeferred by lazy {
-        GlobalScope.async {
+        async {
             statusMessage %= "Initializing Firebase..."
 
             FBRefs(
@@ -155,7 +156,7 @@ class Boot(
 
     init {
 
-        GlobalScope.launch {
+        launch {
              with (fbRefs()) {
                 try {
                     statusMessage %= "Enabling persistence..."

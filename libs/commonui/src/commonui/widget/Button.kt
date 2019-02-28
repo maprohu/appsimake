@@ -42,6 +42,8 @@ class Button(): ScreenWrap() {
         cls.btnDanger
     }
 
+    val submit: Unit get() { node.type = "submit" }
+
     val icon by lazy {
         document.span.setTo(slots.icon)
     }

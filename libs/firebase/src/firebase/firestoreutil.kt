@@ -332,6 +332,7 @@ fun <T: HasFBProps<*>> DocumentReference.listen(
 
 fun DocWrap<*>.docRef(db: Firestore = firestore()) = db.doc(path)
 fun CollectionWrap<*>.collectionRef(db: Firestore = firestore()) = db.collection(path)
+fun <D> CollectionWrap<D>.randomDoc(db: Firestore = firestore()) = doc(collectionRef(db).doc().id)
 
 const val MaxBatchSize = 500
 
@@ -779,6 +780,14 @@ fun <T: HasFBProps<*>> CoroutineScope.wrapSnapshotEvents(
     )
 }
 
+interface HasFirestore {
+    val db: Firestore
+
+    val <D> CollectionWrap<D>.ref get() = collectionRef(db)
+    val <D> DocWrap<D>.ref get() = docRef(db)
+
+    val <D> CollectionWrap<D>.randomDoc: DocWrap<D> get() = randomDoc(db)
+}
 
 interface FirestoreApi: CoroutineWithKills {
 

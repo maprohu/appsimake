@@ -99,6 +99,9 @@ class Factory(
     val badge get() = Badge().applied
     val status get() = Status().applied
     val input get() = Input().applied
+    val formGroup get() = FormGroup().applied
+    val form get() = Form().applied
+    val inputGroup get() = InputGroup().applied
 
 
 }
@@ -205,4 +208,10 @@ abstract class ScreenWrap: HasHTMLElement, InvokeApply {
     }
 
     val <T: HasHTMLElement> T.append: T get() = apply { this@ScreenWrap.node.widget %= this@apply.node }
+
+}
+
+fun <T: ScreenWrap> T.setTo(slot: Slot): T = apply {
+    slot %= node
+    target %= slot
 }

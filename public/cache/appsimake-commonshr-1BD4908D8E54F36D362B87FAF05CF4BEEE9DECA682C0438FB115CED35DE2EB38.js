@@ -1,18 +1,10 @@
-function define(args, fn) {
-    fn(
-        ...args.map(function(a) {
-            if (a == 'exports') {
-                return module.exports;
-            } else if (a.startsWith('appsimake-')) {
-                return require('./' + a);
-            } else {
-                return require(a);
-            }
-        })
-    );
+if (typeof kotlin === 'undefined') {
+  throw new Error("Error loading module 'appsimake-commonshr'. Its dependency 'kotlin' was not found. Please, check whether 'kotlin' is loaded prior to 'appsimake-commonshr'.");
 }
-
-define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $module$kotlinx_coroutines_core) {
+if (typeof this['kotlinx-coroutines-core'] === 'undefined') {
+  throw new Error("Error loading module 'appsimake-commonshr'. Its dependency 'kotlinx-coroutines-core' was not found. Please, check whether 'kotlinx-coroutines-core' is loaded prior to 'appsimake-commonshr'.");
+}
+this['appsimake-commonshr'] = function (_, Kotlin, $module$kotlinx_coroutines_core) {
   'use strict';
   var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var defineInlineFunction = Kotlin.defineInlineFunction;
@@ -3316,13 +3308,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     var itemKills = ArrayList_init();
     return map($receiver, void 0, map$lambda(kills, itemKills, fn));
   }
-  function RxProps() {
-  }
-  RxProps.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'RxProps',
-    interfaces: []
-  };
   function asyncKills$State(value, kill) {
     this.value = value;
     this.kill = kill;
@@ -3522,27 +3507,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     return Noop;
   }
   var NoKill;
-  function HasNoKill() {
-    HasNoKill_instance = this;
-    this.kills_me57hs$_0 = NoKill;
-  }
-  Object.defineProperty(HasNoKill.prototype, 'kills', {
-    get: function () {
-      return this.kills_me57hs$_0;
-    }
-  });
-  HasNoKill.$metadata$ = {
-    kind: Kind_OBJECT,
-    simpleName: 'HasNoKill',
-    interfaces: [HasKillSet]
-  };
-  var HasNoKill_instance = null;
-  function HasNoKill_getInstance() {
-    if (HasNoKill_instance === null) {
-      new HasNoKill();
-    }
-    return HasNoKill_instance;
-  }
   function addedTo$lambda(this$addedTo) {
     return function () {
       this$addedTo.cancel();
@@ -5525,7 +5489,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   ListEvent.Remove = ListEvent$Remove;
   package$commonshr.ListEvent = ListEvent;
   package$commonshr.map_o50ybn$ = map_2;
-  package$commonshr.RxProps = RxProps;
   var package$killable = _.killable || (_.killable = {});
   package$killable.asyncKills_9scqh$ = asyncKills;
   package$killable.KillableValue = KillableValue;
@@ -5538,9 +5501,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     get: function () {
       return NoKill;
     }
-  });
-  Object.defineProperty(package$killable, 'HasNoKill', {
-    get: HasNoKill_getInstance
   });
   package$killable.addedTo_tjw9ba$ = addedTo;
   package$killable.add_1wvaoy$ = add;
@@ -5660,20 +5620,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   CommonShrApi.prototype.toChannelLater_z5dyp2$ = ListApi.prototype.toChannelLater_z5dyp2$;
   toMoves$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
   Object.defineProperty(toMoves$ObjectLiteral.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
-  HasNoKill.prototype.rx_pn7ch0$ = HasKillSet.prototype.rx_pn7ch0$;
-  HasNoKill.prototype.rx_rf89m5$ = HasKillSet.prototype.rx_rf89m5$;
-  HasNoKill.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;
-  HasNoKill.prototype.forEach_igkruk$ = HasKillSet.prototype.forEach_igkruk$;
-  HasNoKill.prototype.map_i8ud5a$ = HasKillSet.prototype.map_i8ud5a$;
-  HasNoKill.prototype.onChange_ocsf2x$ = HasKillSet.prototype.onChange_ocsf2x$;
-  HasNoKill.prototype.rxClass_wqb4ha$ = HasKillSet.prototype.rxClass_wqb4ha$;
-  HasNoKill.prototype.rxClass_mjd6u9$ = HasKillSet.prototype.rxClass_mjd6u9$;
-  HasNoKill.prototype.filtered_49l5s4$ = HasKillSet.prototype.filtered_49l5s4$;
-  HasNoKill.prototype.remAssign_7fncnf$ = HasKillSet.prototype.remAssign_7fncnf$;
-  HasNoKill.prototype.containsRx_1w65cx$ = HasKillSet.prototype.containsRx_1w65cx$;
-  HasNoKill.prototype.process_ttzep4$ = HasKillSet.prototype.process_ttzep4$;
-  HasNoKill.prototype.toRxSet_jr4bl4$ = HasKillSet.prototype.toRxSet_jr4bl4$;
-  HasNoKill.prototype.toChannelLater_z5dyp2$ = HasKillSet.prototype.toChannelLater_z5dyp2$;
   Killables.prototype.rx_pn7ch0$ = HasKillSet.prototype.rx_pn7ch0$;
   Killables.prototype.rx_rf89m5$ = HasKillSet.prototype.rx_rf89m5$;
   Killables.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;
@@ -5726,4 +5672,4 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   affected = ArrayList_init();
   Kotlin.defineModule('appsimake-commonshr', _);
   return _;
-});
+}(typeof this['appsimake-commonshr'] === 'undefined' ? {} : this['appsimake-commonshr'], kotlin, this['kotlinx-coroutines-core']);

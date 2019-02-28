@@ -15,7 +15,7 @@ fun main() {
         APP.startRegisteringServiceWorker()
     }
 
-    GlobalScope.launch {
+    launchGlobal {
         Boot.create(loading.target)
     }
 

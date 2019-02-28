@@ -15,4 +15,5 @@ class Text(parent: Node): InvokeApply {
 class Icon(parent: Node): InvokeApply {
     val node = parent.span
     val fa by lazy { node.cls.fa }
+    val fw by lazy { fa.fw }
 }

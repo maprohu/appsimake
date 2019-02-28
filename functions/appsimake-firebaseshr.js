@@ -1489,6 +1489,9 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
       return this.scalar_287e2$().map_4zme6a$(BasePropFactory$enum$lambda_0(E_0, isE), BasePropFactory$enum$lambda);
     };
   }));
+  BasePropFactory.prototype.list_igwpum$ = function () {
+    return new ScalarPropBase$Ops(this.registry_6dehl9$_0);
+  };
   function BasePropFactory$registry$ObjectLiteral(this$BasePropFactory) {
     this.this$BasePropFactory = this$BasePropFactory;
   }

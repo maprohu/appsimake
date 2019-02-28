@@ -616,6 +616,8 @@ open class BasePropFactory<in O, out N, out P, PR: Props<O, N, P>>(
         w = { it.name },
         r = { enumValueOf<E>(it.unsafeCast<String>()) }
     )
+
+    fun <T: BaseRootVal<*>> list() = ScalarPropBase.Ops<O, List<T>>(registry)
 }
 
 

@@ -2,6 +2,7 @@ package checklist.home
 
 import checklist.loggedin.LoggedIn
 import commonfb.FB
+import commonfb.FBApi
 import commonfb.login.Login
 import commonfb.loginbase.LoginBase
 import commonfb.loginbase.LoginOnly

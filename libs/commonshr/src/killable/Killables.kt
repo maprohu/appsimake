@@ -13,6 +13,10 @@ typealias KillSet = AddRemove<Trigger>
 val Noop: Trigger = {}
 val NoKill : KillSet = { Noop }
 
+object HasNoKill: HasKillSet {
+    override val kills = NoKill
+}
+
 fun Job.addedTo(ks: KillSet): Job {
     val remove = ks.add { cancel() }
     invokeOnCompletion {

@@ -4,10 +4,7 @@ import bootstrap.flexColumn
 import bootstrap.listAction
 import bootstrap.listGroup
 import bootstrap.padding2
-import commonui.APP
-import commonui.AppCtx
-import commonui.screenLayout
-import commonui.topbar
+import commonui.*
 import commonui.widget.Body
 import commonui.widget.switchToView
 import domx.invoke
@@ -19,7 +16,7 @@ import kotlin.browser.document
 
 fun main() {
     APP.startRegisteringServiceWorker()
-    GlobalScope.launch {
+    launchGlobal {
         Body().apply {
             content.switchToView(Home(this))
         }

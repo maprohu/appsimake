@@ -135,6 +135,7 @@ val Fa.redoAlt by facss()
 val Fa.tachometerAlt by facss()
 val Fa.spinner by facss()
 val Fa.spin by facss()
+val Fa.info by facss()
 val FaBrands.google by facss()
 
 val Fa.x2 by facss("2x")

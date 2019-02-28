@@ -5,6 +5,7 @@ import commonfb.HasUserState
 import commonfb.UserState
 import commonfb.runUserState
 import commonui.globalStatus
+import commonui.topandcontent.ProgressTC
 import commonui.widget.*
 import firebase.User
 import firebase.app.App
@@ -22,7 +23,7 @@ interface UserStateView: JobScopeWithView<TopAndContent> {
 
 class UnkownUser(
     parent: JobScope
-): UIWrap<TopAndContent>(parent, TopAndContent.hourglass), UserStateView {
+): ProgressTC(parent), UserStateView {
     override val userState = UserState.Unknown
 }
 
@@ -84,13 +85,13 @@ abstract class LoginBase(
 
                 when (st) {
                     is UserState.LoggedIn -> {
-                        globalStatus %= "Logging in..."
+                        globalStatus %= "Logged in."
                         content.switchToView {
                             loggedInView(st.user)
                         }
                     }
                     is UserState.NotLoggedIn -> {
-                        globalStatus %= "Logging out..."
+                        globalStatus %= "Logged out."
                         content.switchToView {
                             notLoggedInView()
                         }

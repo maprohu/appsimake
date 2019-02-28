@@ -31,22 +31,22 @@ val isFcmSupported by lazy {
 
 object APP {
 
-
-
     private val registerServiceWorkerPromise by lazy {
-        window.navigator.serviceWorker.register(serviceWorkerFileName)
+        if (isServiceWorkerSupported) {
+            globalStatus %= "Registering service worker..."
+            window.navigator.serviceWorker.register(serviceWorkerFileName)
+        } else {
+            globalStatus %= "Service worker not supported."
+            null
+        }
     }
 
-    fun startRegisteringServiceWorker() {
-        registerServiceWorkerPromise
+    fun startRegisteringServiceWorker(): Promise<ServiceWorkerRegistration>? {
+        return registerServiceWorkerPromise
     }
 
     suspend fun registerServiceWorker(): ServiceWorkerRegistration? {
-        return if (isServiceWorkerSupported) {
-            registerServiceWorkerPromise.await()
-        } else {
-            null
-        }
+        return startRegisteringServiceWorker()?.await()
     }
 }
 

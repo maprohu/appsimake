@@ -32,6 +32,9 @@ fun LoggedIn.ui() = TopAndContent(
             m1p2
             fa.plus
             primary
+            click {
+                new()
+            }
         }
     }.node,
     content = factory.scrollPane {

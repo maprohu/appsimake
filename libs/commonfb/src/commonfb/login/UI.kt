@@ -11,7 +11,6 @@ import kotlin.browser.document
 
 fun Login.ui() = TopAndContent(
     topbar = factory.topbar {
-        alignItemsCenter
 
         this@ui.back?.let { bck ->
             left.button {

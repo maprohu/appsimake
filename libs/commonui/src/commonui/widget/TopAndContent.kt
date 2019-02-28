@@ -15,3 +15,4 @@ class TopAndContent(
 class HourglassView(parent: JobScope): ViewImpl<TopAndContent>(parent) {
     override val rawView = TopAndContent.hourglass
 }
+
