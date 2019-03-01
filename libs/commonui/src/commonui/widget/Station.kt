@@ -11,8 +11,7 @@ import kotlinx.coroutines.cancelAndJoin
 import rx.RxIface
 import rx.Var
 
-interface JobScope: CoroutineScope {
-    override val coroutineContext: Job
+interface JobScopeApi: JobScope {
 
     suspend fun <T> JobSwitch<JobScopeWithItem<T>>.switchToWrap(fn: suspend JobKillsImpl.() -> T) {
         withChild {
@@ -31,7 +30,7 @@ interface JobScope: CoroutineScope {
 }
 open class JobScopeImpl(
     override val coroutineContext: Job = Job()
-): JobScope {
+): JobScopeApi {
     constructor(parent: JobScope): this(Job(parent.coroutineContext))
 
     companion object {
@@ -240,7 +239,7 @@ class JobSwitch<T> private constructor(
 }
 
 fun <S, V> JobSwitch<JobScopeWithItem<V>>.fromRx(
-    job: JobScope,
+    job: JobScopeApi,
     kills: HasKillSet,
     exec: Exec,
     source: RxIface<S>,

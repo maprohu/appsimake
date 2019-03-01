@@ -10,7 +10,6 @@ import common.dyn
 import common.obj
 import common.resizeEvent
 import fontawesome.*
-import rx.Var
 import kotlin.browser.window
 import kotlin.math.min
 
@@ -21,7 +20,7 @@ fun Clock.ui() = factory.screen {
             back
             fa.x3
             click {
-                form.back()
+                form.redisplay()
             }
         }
         title %= "Workout"

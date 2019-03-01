@@ -24,7 +24,7 @@ import rx.Var
 //                        btnPrimary()
 //                        innerText = "Turn on Game Notifications"
 //                        val canClick = Var(true)
-//                        rxEnabled(canClick)
+//                        enabled(canClick)
 //                        clickEvent {
 //                            if (canClick.now) {
 //                                canClick.now = false

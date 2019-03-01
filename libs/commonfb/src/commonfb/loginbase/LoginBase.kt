@@ -4,6 +4,7 @@ import common.obj
 import commonfb.HasUserState
 import commonfb.UserState
 import commonfb.runUserState
+import commonshr.JobScope
 import commonui.globalStatus
 import commonui.topandcontent.ProgressTC
 import commonui.widget.*

@@ -1,8 +1,6 @@
 package commonui.widget
 
-import bootstrap.btnGroup
-import bootstrap.m1
-import bootstrap.p1
+import bootstrap.*
 import commonshr.*
 import domx.*
 import kotlin.browser.document
@@ -18,6 +16,28 @@ class ButtonGroup: ScreenWrap() {
         cls.m1
     }
 
-    val button get() = node.widget.insert.button
+    inner class Slots {
+        val buttons = node.slots
+        val split = slot
+        val menu = slot
+    }
+    val slots = Slots()
+
+    val button get() = slots.buttons.slot.insert.button
+
+    val dropdownSplit by lazy {
+        slots.split.insert.button {
+            node {
+                dataToggleDropdown()
+                dataReferenceParent()
+            }
+            cls {
+                dropdownToggle
+                dropdownToggleSplit
+            }
+        }
+    }
+
+    val menu by lazy { slots.menu.insert.dropdownMenu }
 }
 

@@ -1,4 +1,4 @@
-package commonshr
+package commonshr.properties
 
 import kotlin.js.Date
 
@@ -8,3 +8,4 @@ sealed class TS {
     ): TS()
     object Server : TS()
 }
+

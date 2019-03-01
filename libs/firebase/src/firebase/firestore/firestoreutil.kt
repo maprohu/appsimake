@@ -144,7 +144,9 @@ fun Query.idDiffs(fn: ((SetDiff<String>) -> Unit)) : Trigger = onSnapshotNext { 
     }.also(fn)
 }
 
-
+fun DocumentReference.onSnapshotNext(
+    onNext: (DocumentSnapshot) -> Unit
+) : Trigger = onSnapshot(onNext, { report(it.unsafeCast<Throwable>()) })
 
 data class ListenConfig<T>(
     val list: ListenableMutableList<T>,
@@ -330,9 +332,6 @@ fun <T: HasFBProps<*>> DocumentReference.listen(
     }.once()
 }
 
-fun DocWrap<*>.docRef(db: Firestore = firestore()) = db.doc(path)
-fun CollectionWrap<*>.collectionRef(db: Firestore = firestore()) = db.collection(path)
-fun <D> CollectionWrap<D>.randomDoc(db: Firestore = firestore()) = doc(collectionRef(db).doc().id)
 
 const val MaxBatchSize = 500
 
@@ -778,15 +777,6 @@ fun <T: HasFBProps<*>> CoroutineScope.wrapSnapshotEvents(
             initFrom(data)
         }
     )
-}
-
-interface HasFirestore {
-    val db: Firestore
-
-    val <D> CollectionWrap<D>.ref get() = collectionRef(db)
-    val <D> DocWrap<D>.ref get() = docRef(db)
-
-    val <D> CollectionWrap<D>.randomDoc: DocWrap<D> get() = randomDoc(db)
 }
 
 interface FirestoreApi: CoroutineWithKills {

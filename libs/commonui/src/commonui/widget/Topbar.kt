@@ -23,41 +23,49 @@ import kotlin.browser.document
 class Topbar(): ScreenWrap() {
     override val node = document.row {
         cls {
-            navTabs
+//            navTabs
             flexFixedSize()
             bgLight
         }
     }
 
-//    val alignItemsCenter by lazy {
-//        node.cls {
-//            alignItemsCenter
-//        }
-//    }
+    private val beforeSlot = slot
+    private val tabsSlot = slot
+    private val afterSlot = slot
 
+    private val before = document.row {
+        cls {
+            flexGrow1
+            borderBottom
+        }
+    }.setTo(beforeSlot)
 
-    inner class Slots {
-        val left = slot
-        val middle = slot
-        val tabs = slot
-        val right = node.slots
-    }
-    val slots = Slots()
-
-    val left = slots.left.insert
-
-    val middle = document.div {
-        cls.flexGrow1
-    }.setTo(slots.middle)
-
-    val middleFlexRow by lazy {
-        middle.cls {
-            row()
+    private val after by lazy {
+        node.row {
+            cls {
+                flexFixedSize()
+                borderBottom
+            }
         }
     }
 
+    inner class Slots {
+        val left = before.slots
+        val middle = before.widget
+        val tabs = slot
+        val right = after.slotholes
+    }
+
+    val slots = Slots()
+
+    val left by lazy { slots.left.slot.insert }
+
+    val middle = document.row {
+        cls.flexGrow1
+    }.setTo(slots.middle)
+
+
     val title by lazy {
-        middleFlexRow
         middle.h5 {
             cls {
                 alignSelfCenter
@@ -76,8 +84,9 @@ class Topbar(): ScreenWrap() {
 class Tabs: ScreenWrap() {
     override val node = document.div {
         cls {
+            navTabs
             row()
-            mx1
+            px1
         }
     }
 

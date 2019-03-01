@@ -5,7 +5,6 @@ import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
-import music.common.MusicApi
 import music.loggedin.deleteFromLocal
 import music.loggedin.download
 import music.loggedin.upload
@@ -15,7 +14,7 @@ fun Database.ui() = TopAndContent(
         left.button {
             back
             click {
-                loggedIn.back()
+                loggedIn.redisplay()
             }
         }
         title %= "Database"
@@ -76,7 +75,7 @@ fun Database.ui() = TopAndContent(
                     p2
                     secondary
                     fa.download
-                    rxEnabled {
+                    enabled {
                         toBeDownloaded.set.iterableRx().any { id ->
                             !boot.processOf(id).downloading()
                         }
@@ -97,7 +96,7 @@ fun Database.ui() = TopAndContent(
                     p2
                     secondary
                     fa.upload
-                    rxEnabled {
+                    enabled {
                         toBeUploaded.set.iterableRx().any { id ->
                             !boot.processOf(id).uploading()
                         }
@@ -117,7 +116,7 @@ fun Database.ui() = TopAndContent(
                     p2
                     secondary
                     fa.trashAlt
-                    rxEnabled {
+                    enabled {
                         toBeDeleted.set.iterableRx().any { id ->
                             !boot.processOf(id).deletingFromLocal()
                         }

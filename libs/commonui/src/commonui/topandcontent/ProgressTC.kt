@@ -1,7 +1,7 @@
 package commonui.topandcontent
 
+import commonshr.JobScope
 import commonui.progress.progressUI
-import commonui.widget.JobScope
 import commonui.widget.TopAndContent
 import commonui.widget.UIBase
 

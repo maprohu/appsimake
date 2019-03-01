@@ -2,7 +2,7 @@ package commonfb.loginbase
 
 import commonfb.UserState
 import commonfb.login.Login
-import commonui.widget.JobScope
+import commonshr.JobScope
 import commonui.widget.switchToView
 import firebase.User
 import firebase.app.App

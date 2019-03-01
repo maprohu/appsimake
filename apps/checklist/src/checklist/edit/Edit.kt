@@ -7,27 +7,41 @@ import checklist.loggedin.LoggedInPath
 import common.ListenableMutableList
 import common.eventsEmitter
 import commonfb.FBApi
+import commonfb.editing.FsEditingApi
 import commonshr.*
+import commonshr.properties.TS
+import commonshr.properties.now
+import commonshr.properties.remAssign
+import commonui.editing.RxEditing
+import commonui.editing.EditingApi
+import commonui.widget.ForwardImpl
 import commonui.widget.TopAndContent
 import commonui.widget.UIBase
-import kotlinx.coroutines.launch
+import firebase.firestore.FirestoreViewApi
 import rx.Var
 
 interface EditPath: LoggedInPath {
     val edit: Edit
 }
+
 class Edit(
     loggedIn: LoggedIn,
-    val initial: Checklist
-): UIBase<TopAndContent>(loggedIn), EditPath, LoggedInPath by loggedIn, FBApi {
+    override val from: ForwardImpl<TopAndContent, *>,
+    initial: FsDoc<Checklist>
+): UIBase<TopAndContent>(from), EditPath, LoggedInPath by loggedIn, FBApi, FsEditingApi, FirestoreViewApi {
     override val edit = this
 
-    val current = initial.copy()
+    override val editing: RxEditing<Checklist> = rxEditing(initial) { current ->
+        if (adder.now.isNotBlank()) {
+            performAdd()
+        }
+        current.ts %= TS.Server
+    }
 
     val items = ListenableMutableList<ChecklistItem>().apply {
-        addAll(current.items.now)
+        addAll(editing.current.items.now)
         eventsEmitter(false).invoke {
-            current.items %= toList()
+            editing.current.items %= toList()
         }
     }
 
@@ -40,10 +54,11 @@ class Edit(
         )
     }
 
-    val adder = Var("")
-    val dirty = rx {
-        adder().isNotBlank() || !rxCompare(initial, current)
+    val adder: Var<String> = Var("").also {
+        editing.extraDirty.transform { d -> d + rx { it().isNotBlank() } }
     }
+
+    var performAdd = {}
 
     override val rawView = ui()
 }

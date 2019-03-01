@@ -1,6 +1,7 @@
 package commonui.widget
 
 import bootstrap.setupFullScreen
+import commonshr.JobScope
 import commonshr.constant
 import commonshr.funs
 import commonshr.remAssign

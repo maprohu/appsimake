@@ -1,12 +1,17 @@
 package commonshr
 
 import common.EmitterIface
+import common.None
 import common.Optional
+import common.Some
 import killable.HasKillSet
 import killable.KillSet
 import killable.Killables
 import killable.killables
 import rx.Var
+
+fun hasOwnProperty(d: dynamic, prop: String) = d.hasOwnProperty(prop).unsafeCast<Boolean>()
+fun <T> opt(d: dynamic, name: String) = if (hasOwnProperty(d, name)) Some(d[name].unsafeCast<T>()) else None
 
 data class SetDiff<T>(
     val removed: Set<T> = setOf(),

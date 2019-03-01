@@ -1,6 +1,6 @@
 package commonui.widget
 
-import kotlinx.coroutines.Job
+import commonshr.JobScope
 import org.w3c.dom.HTMLElement
 
 class TopAndContent(

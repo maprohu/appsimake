@@ -33,7 +33,7 @@ operator fun <T> Msg<T>.invoke(msg: T) = wrap(msg)
 
 private const val SlotsAttribute = "appsimakeSlots"
 typealias Slot = OptAssign<Node>
-val Node.slots : SlotHoles
+val Node.slotholes : SlotHoles
     get() = asDynamic()[SlotsAttribute].unsafeCast<Slots?>()
         ?: Slots(
             SlotsOwner.NodeRef(this),
@@ -77,6 +77,9 @@ interface SlotHoles: InvokeApply {
     val slot: Slot
     val slots: SlotHoles
 }
+
+//val SlotHoles.insert get() = slot.insert
+
 internal abstract class PrevRef {
     abstract val lastNode: Node?
 
@@ -141,8 +144,9 @@ internal class Slots(
 
 }
 
-val Node.widget get() = slots.slot
-val Node.hole get() = slots.slot.hole
+val Node.widget get() = slotholes.slot
+val Node.hole get() = slotholes.slot.hole
+val Node.slots get() = slotholes.slots
 
 val Node.insert: Factory
     get() {

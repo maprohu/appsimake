@@ -1,6 +1,6 @@
 package commonui.progress
 
-import commonui.widget.JobScope
+import commonshr.JobScope
 import commonui.widget.UIBase
 import org.w3c.dom.HTMLElement
 

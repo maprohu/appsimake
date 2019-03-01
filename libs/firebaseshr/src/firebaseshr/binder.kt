@@ -5,6 +5,7 @@ import commonlib.CollectionWrap
 import commonlib.DocWrap
 import commonshr.SetDiff
 import commonshr.SetMove
+import commonshr.opt
 import commonshr.toMoves
 import firebaseshr.firestore.Timestamp
 import killable.Killables
@@ -13,8 +14,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import rx.*
 
-fun hasOwnProperty(d: dynamic, prop: String) = d.hasOwnProperty(prop).unsafeCast<Boolean>()
-fun <T> opt(d: dynamic, name: String) = if (hasOwnProperty(d, name)) Some(d[name].unsafeCast<T>()) else None
 
 
 data class PropOps(

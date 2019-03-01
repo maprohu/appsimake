@@ -6,7 +6,6 @@ import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.redoAlt
-import fontawesome.syncAlt
 import kotlin.math.roundToInt
 
 fun Usage.ui() = TopAndContent(
@@ -14,7 +13,7 @@ fun Usage.ui() = TopAndContent(
         left.button {
             back
             click {
-                database.back()
+                database.redisplay()
             }
         }
         right.button {

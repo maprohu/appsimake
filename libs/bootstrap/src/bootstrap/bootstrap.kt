@@ -124,6 +124,9 @@ class DropdownGroup(
 fun HTMLButtonElement.dataToggleDropdown() {
     attr["data-toggle"] = "dropdown"
 }
+fun HTMLButtonElement.dataReferenceParent() {
+    attr["data-reference"] = "parent"
+}
 
 val Node.dropdownSplit: HTMLButtonElement
     get() = button {

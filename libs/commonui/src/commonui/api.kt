@@ -12,7 +12,7 @@ interface UiKillsApi: HasKillSet, InvokeWith {
 
     fun Slot.visibility(fn: () -> Boolean) = visibility(kills, fn)
 
-    fun Button.rxEnabled(fn: () -> Boolean) = node.rxEnabled(kills, fn)
+    fun Button.enabled(fn: () -> Boolean) = node.rxEnabled(kills, fn)
 
     operator fun Slot.remAssign(fn: () -> Node?) {
         rx { fn() }.forEach { this@remAssign %= it }

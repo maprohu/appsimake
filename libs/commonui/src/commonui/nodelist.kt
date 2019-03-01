@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import org.w3c.dom.Node
+import org.w3c.dom.get
 
 interface NodeListApi: CoroutineScope {
 
@@ -20,7 +21,7 @@ fun CoroutineScope.nodeList(
     target: Node,
     nodes: ReceiveChannel<ListEvent<Node>>
 ) {
-//    require(!target.hasChildNodes()) { "List container node must be empty!" }
+    require(!target.hasChildNodes()) { "List container node must be empty!" }
 
     launch {
         for (e in nodes) {

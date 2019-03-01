@@ -19,17 +19,18 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
   var equals = Kotlin.equals;
   var Some = $module$appsimake_commonshr.common.Some;
   var Kind_CLASS = Kotlin.Kind.CLASS;
-  var common = $module$appsimake_commonshr.common;
   var IllegalStateException_init = Kotlin.kotlin.IllegalStateException_init_pdl1vj$;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
+  var opt = $module$appsimake_commonshr.commonshr.opt_h8phid$;
   var getCallableRef = Kotlin.getCallableRef;
   var namedThis = $module$appsimake_commonshr.common.namedThis_5cxx4g$;
   var setOf = Kotlin.kotlin.collections.setOf_mh5how$;
   var plus = Kotlin.kotlin.collections.plus_khz7k3$;
   var defineInlineFunction = Kotlin.defineInlineFunction;
   var wrapFunction = Kotlin.wrapFunction;
+  var common = $module$appsimake_commonshr.common;
   var get_0 = $module$appsimake_commonshr.rx.get_kw0pia$;
   var set_0 = $module$appsimake_commonshr.rx.set_atqor6$;
   var PropertyMetadata = Kotlin.PropertyMetadata;
@@ -184,12 +185,6 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
     simpleName: 'BaseValProp',
     interfaces: [ScalarPropBase]
   };
-  function hasOwnProperty(d, prop) {
-    return d.hasOwnProperty(prop);
-  }
-  function opt(d, name) {
-    return hasOwnProperty(d, name) ? new Some(d[name]) : common.None;
-  }
   function PropOps(delete_0, serverTimestamp, deleteCollection, createId, write, merge, arrayUnion, arrayRemove) {
     PropOps$Companion_getInstance();
     this.delete = delete_0;
@@ -1527,8 +1522,6 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
   $$importsForInline$$['appsimake-commonshr'] = $module$appsimake_commonshr;
   var package$firebaseshr = _.firebaseshr || (_.firebaseshr = {});
   package$firebaseshr.BaseValProp = BaseValProp;
-  package$firebaseshr.hasOwnProperty_hwpqgh$ = hasOwnProperty;
-  package$firebaseshr.opt_h8phid$ = opt;
   Object.defineProperty(PropOps, 'Companion', {
     get: PropOps$Companion_getInstance
   });

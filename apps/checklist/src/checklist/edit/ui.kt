@@ -10,32 +10,12 @@ import fontawesome.*
 import killable.NoKill
 
 fun Edit.ui(): TopAndContent {
-    var submitter = {}
 
     return TopAndContent(
         topbar = factory.topbar {
-            left.button {
-                m1p2
-                fa.chevronLeft
-
-                node.rxClass {
-                    if (dirty()) Cls.btnDanger
-                    else Cls.btnSecondary
-                }
-
-                click {
-                    loggedIn.back()
-                }
-            }
+            slots.left.backSaveDiscard
             title %= "Edit Checklist"
-            right.button {
-                m1p2
-                primary
-                fa.save
-                click {
-                    submitter()
-                }
-            }
+            right.saveButton
         }.node,
         content = factory.scrollPane {
             pane {
@@ -44,13 +24,13 @@ fun Edit.ui(): TopAndContent {
                     column()
                 }
                 insert.form {
-                    val mainForm = this
+
                     insert.formGroup {
                         cls.flexFixedSize()
                         label %= "Title"
                         input {
                             required
-                            bindTo(initial.name.rxv)
+                            bindTo(editing.current.name.rxv)
                         }
                     }
                     insert.formGroup {
@@ -64,15 +44,10 @@ fun Edit.ui(): TopAndContent {
                                 input {
                                     required
                                     bindTo(adder)
-                                    fun performAdd() {
+                                    performAdd = {
                                         addItem(value)
+                                        adder %= ""
                                         value = ""
-                                    }
-                                    submitter = {
-                                        if (value.isNotBlank()) {
-                                            performAdd()
-                                        }
-                                        mainForm.hiddenSubmit.node.click()
                                     }
                                     onsubmit {
                                         performAdd()
@@ -94,7 +69,7 @@ fun Edit.ui(): TopAndContent {
                         node.div {
                             list(
                                 items.events(NoKill).map { cl ->
-                                    insert.inputGroup {
+                                    factory.inputGroup {
                                         cls.m1
                                         input {
                                             required

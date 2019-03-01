@@ -6,9 +6,6 @@ import commonui.widget.*
 import domx.*
 import fontawesome.*
 import music.database.Database
-import music.loggedin.deleteFromLocal
-import music.loggedin.download
-import music.loggedin.upload
 import music.database.statusPanel
 import music.loggedin.checkStorage
 
@@ -17,7 +14,7 @@ fun Details.ui() = TopAndContent(
         left.button {
             back
             click {
-                database.back()
+                database.redisplay()
             }
         }
         title %= "Database Details"

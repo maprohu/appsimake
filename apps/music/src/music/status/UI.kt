@@ -2,28 +2,24 @@ package music.status
 
 import bootstrap.*
 import common.removeFromParent
-import commonfb.CommonFbApi
 import commonfb.fbapi
 import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
-import killable.HasKillSet
-import killable.KillSet
 import kotlinx.coroutines.launch
 import music.common.songUi
 import music.loggedin.deleteFromCloud
 import music.loggedin.deleteFromLocal
 import music.loggedin.download
 import music.loggedin.upload
-import kotlin.browser.document
 
 fun Status.ui() = TopAndContent(
     topbar = factory.topbar {
         left.button {
             back
             click {
-                from.back()
+                from.redisplay()
             }
         }
         right.tasksUi()

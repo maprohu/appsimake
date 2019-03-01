@@ -65,6 +65,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var asSequence = Kotlin.kotlin.collections.asSequence_7wnvza$;
   var zip = Kotlin.kotlin.sequences.zip_r7q3s9$;
   var get_js = Kotlin.kotlin.js.get_js_1yb8b7$;
+  var Error_init = Kotlin.kotlin.Error_init_pdl1vj$;
   var throwUPAE = Kotlin.throwUPAE;
   var L0 = Kotlin.Long.ZERO;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
@@ -106,6 +107,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   TS$Value.prototype.constructor = TS$Value;
   TS$Server.prototype = Object.create(TS.prototype);
   TS$Server.prototype.constructor = TS$Server;
+  FsIdState$NoId.prototype = Object.create(FsIdState.prototype);
+  FsIdState$NoId.prototype.constructor = FsIdState$NoId;
+  FsIdState$HasId.prototype = Object.create(FsIdState.prototype);
+  FsIdState$HasId.prototype.constructor = FsIdState$HasId;
   RxCalc.prototype = Object.create(RxChild.prototype);
   RxCalc.prototype.constructor = RxCalc;
   RxVal.prototype = Object.create(RxParent.prototype);
@@ -1894,6 +1899,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'CommonShrApi',
     interfaces: [ListApi]
   };
+  function JobScope() {
+  }
+  JobScope.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'JobScope',
+    interfaces: [CoroutineScope]
+  };
   function lib$lambda(it) {
     return new Lib(it);
   }
@@ -2074,6 +2086,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'FcmToken',
     interfaces: []
   };
+  function hasOwnProperty(d, prop) {
+    return d.hasOwnProperty(prop);
+  }
+  function opt(d, name) {
+    return hasOwnProperty(d, name) ? new Some(d[name]) : None_getInstance();
+  }
   function SetDiff(removed, added) {
     SetDiff$Companion_getInstance();
     if (removed === void 0) {
@@ -3321,6 +3339,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     var itemKills = ArrayList_init();
     return map($receiver, void 0, map$lambda(kills, itemKills, fn));
   }
+  function DynamicOps() {
+  }
+  DynamicOps.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'DynamicOps',
+    interfaces: []
+  };
   function Identity$lambda(it) {
     return it;
   }
@@ -3329,41 +3354,92 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     return equals(a, b);
   }
   var CompareEquals;
-  var identity = defineInlineFunction('appsimake-commonshr.commonshr.identity_287e2$', wrapFunction(function () {
-    var commonshr = _.commonshr;
+  function IdentityWriteDynamic$lambda(t, f) {
+    return t;
+  }
+  var IdentityWriteDynamic;
+  function IdentityReadDynamic$lambda(t, f) {
+    return t;
+  }
+  var IdentityReadDynamic;
+  var identityCopier = defineInlineFunction('appsimake-commonshr.commonshr.properties.identityCopier_287e2$', wrapFunction(function () {
+    var properties = _.commonshr.properties;
     return function () {
-      return commonshr.Identity;
+      return properties.Identity;
     };
   }));
-  var compareEquals = defineInlineFunction('appsimake-commonshr.commonshr.compareEquals_287e2$', wrapFunction(function () {
-    var commonshr = _.commonshr;
+  var identityWriteDynamic = defineInlineFunction('appsimake-commonshr.commonshr.properties.identityWriteDynamic_287e2$', wrapFunction(function () {
+    var properties = _.commonshr.properties;
     return function () {
-      return commonshr.CompareEquals;
+      return properties.IdentityWriteDynamic;
     };
   }));
-  function PropertyItem(index, name, value, copier, compare) {
+  var identityReadDynamic = defineInlineFunction('appsimake-commonshr.commonshr.properties.identityReadDynamic_287e2$', wrapFunction(function () {
+    var properties = _.commonshr.properties;
+    return function () {
+      return properties.IdentityReadDynamic;
+    };
+  }));
+  var compareEquals = defineInlineFunction('appsimake-commonshr.commonshr.properties.compareEquals_287e2$', wrapFunction(function () {
+    var properties = _.commonshr.properties;
+    return function () {
+      return properties.CompareEquals;
+    };
+  }));
+  function PropertyType(copier, compare, writeDynamic, readDynamic) {
     if (copier === void 0) {
-      copier = package$commonshr.Identity;
+      copier = package$properties.Identity;
     }
     if (compare === void 0) {
-      compare = package$commonshr.CompareEquals;
+      compare = package$properties.CompareEquals;
     }
-    this.index = index;
-    this.name = name;
+    if (writeDynamic === void 0) {
+      writeDynamic = package$properties.IdentityWriteDynamic;
+    }
+    if (readDynamic === void 0) {
+      readDynamic = package$properties.IdentityReadDynamic;
+    }
     this.copier = copier;
     this.compare = compare;
-    this.rxv = new Var(value);
+    this.writeDynamic = writeDynamic;
+    this.readDynamic = readDynamic;
   }
-  Object.defineProperty(PropertyItem.prototype, 'copy', {
-    get: function () {
-      return this.copier(get_now(this));
-    }
-  });
+  PropertyType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PropertyType',
+    interfaces: []
+  };
+  var IdentityType;
+  var identityType = defineInlineFunction('appsimake-commonshr.commonshr.properties.identityType_287e2$', wrapFunction(function () {
+    var properties = _.commonshr.properties;
+    return function () {
+      return properties.IdentityType;
+    };
+  }));
+  function PropertyItem(index, name, defaultValue, type) {
+    this.index = index;
+    this.name = name;
+    this.defaultValue = defaultValue;
+    this.type = type;
+    this.rxv = new Var(this.defaultValue);
+  }
   PropertyItem.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'PropertyItem',
     interfaces: []
   };
+  function writeDynamic($receiver, ops) {
+    return $receiver.type.writeDynamic(get_now($receiver), ops);
+  }
+  function readDynamic($receiver, d, ops) {
+    $receiver.rxv.remAssign_11rb$($receiver.type.readDynamic(d, ops));
+  }
+  function get_copy($receiver) {
+    return $receiver.type.copier(get_now($receiver));
+  }
+  function resetToDefault($receiver) {
+    $receiver.rxv.remAssign_11rb$($receiver.defaultValue);
+  }
   function remAssign_1($receiver, v) {
     $receiver.rxv.remAssign_11rb$(v);
   }
@@ -3379,70 +3455,33 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function PropertyList() {
     this.items = ArrayList_init();
   }
-  function PropertyList$prop$lambda(this$PropertyList, closure$value, closure$copier, closure$compare) {
+  function PropertyList$prop$lambda(this$PropertyList, closure$value, closure$type) {
     return function (name) {
-      var $receiver = new PropertyItem(this$PropertyList.items.size, name, closure$value, closure$copier, closure$compare);
+      var $receiver = new PropertyItem(this$PropertyList.items.size, name, closure$value, closure$type);
       this$PropertyList.items.add_11rb$($receiver);
       return $receiver;
     };
   }
-  PropertyList.prototype.prop_evvu67$ = function (value, copier, compare) {
-    if (copier === void 0) {
-      copier = package$commonshr.Identity;
+  PropertyList.prototype.prop_z4bjo6$ = function (value, type) {
+    if (type === void 0) {
+      type = package$properties.IdentityType;
     }
-    if (compare === void 0) {
-      compare = package$commonshr.CompareEquals;
-    }
-    return named(PropertyList$prop$lambda(this, value, copier, compare));
+    return named(PropertyList$prop$lambda(this, value, type));
   };
   PropertyList.prototype.string = function () {
-    return this.prop_evvu67$('');
+    return this.prop_z4bjo6$('');
   };
   PropertyList.prototype.timestamp = function () {
-    return this.prop_evvu67$(TS$Server_getInstance());
+    return this.prop_z4bjo6$(TS$Server_getInstance(), TSPropertyType);
   };
   PropertyList.prototype.list_287e2$ = function () {
-    return this.prop_evvu67$(emptyList());
+    return this.prop_z4bjo6$(emptyList());
   };
-  function PropertyList$rxlist$lambda(list) {
-    var destination = ArrayList_init_0(collectionSizeOrDefault(list, 10));
-    var tmp$;
-    tmp$ = list.iterator();
-    while (tmp$.hasNext()) {
-      var item = tmp$.next();
-      destination.add_11rb$(copy(item));
-    }
-    return destination;
-  }
-  function PropertyList$rxlist$lambda_0(a, b) {
-    var tmp$ = a.size === b.size;
-    if (tmp$) {
-      var $receiver = zip(asSequence(a), asSequence(b));
-      var all$result;
-      all$break: do {
-        var tmp$_0;
-        tmp$_0 = $receiver.iterator();
-        while (tmp$_0.hasNext()) {
-          var element = tmp$_0.next();
-          var ba = element.component1()
-          , bb = element.component2();
-          if (!rxCompare(ba, bb)) {
-            all$result = false;
-            break all$break;
-          }
-        }
-        all$result = true;
-      }
-       while (false);
-      tmp$ = all$result;
-    }
-    return tmp$;
-  }
-  PropertyList.prototype.rxlist_8r1j7v$ = function () {
-    return this.prop_evvu67$(emptyList(), PropertyList$rxlist$lambda, PropertyList$rxlist$lambda_0);
+  PropertyList.prototype.rxlist_4okrys$ = function (create) {
+    return this.prop_z4bjo6$(emptyList(), rxListType(create));
   };
   PropertyList.prototype.boolean = function () {
-    return this.prop_evvu67$(false);
+    return this.prop_z4bjo6$(false);
   };
   PropertyList.$metadata$ = {
     kind: Kind_CLASS,
@@ -3462,7 +3501,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
           var element = tmp$_1.next();
           var pa = element.component1()
           , pb = element.component2();
-          if (!pa.compare(invoke_1(pa), invoke_1(pb))) {
+          if (!pa.type.compare(invoke_1(pa), invoke_1(pb))) {
             all$result = false;
             break all$break;
           }
@@ -3495,10 +3534,109 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       var element = tmp$_0.next();
       var old = element.component1()
       , new_0 = element.component2();
-      set_now(new_0, old.copy);
+      set_now(new_0, get_copy(old));
     }
     return $receiver_0;
   }
+  function writeDynamic_0($receiver, ops) {
+    var d = {};
+    var tmp$;
+    tmp$ = $receiver.o.items.iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      d[element.name] = writeDynamic(element, ops);
+    }
+    return d;
+  }
+  function readDynamic_0($receiver, d, ops) {
+    var tmp$;
+    tmp$ = $receiver.o.items.iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      if (hasOwnProperty(d, element.name)) {
+        readDynamic(element, d[element.name], ops);
+      }
+       else {
+        resetToDefault(element);
+      }
+    }
+  }
+  function rxListType$lambda(closure$create) {
+    return function (d, ops) {
+      var $receiver = closure$create();
+      readDynamic_0($receiver, d, ops);
+      return $receiver;
+    };
+  }
+  function rxListType(create) {
+    return rxListType_0(rxListType$lambda(create));
+  }
+  function rxListType$lambda_0(list) {
+    var destination = ArrayList_init_0(collectionSizeOrDefault(list, 10));
+    var tmp$;
+    tmp$ = list.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      destination.add_11rb$(copy(item));
+    }
+    return destination;
+  }
+  function rxListType$lambda_1(a, b) {
+    var tmp$ = a.size === b.size;
+    if (tmp$) {
+      var $receiver = zip(asSequence(a), asSequence(b));
+      var all$result;
+      all$break: do {
+        var tmp$_0;
+        tmp$_0 = $receiver.iterator();
+        while (tmp$_0.hasNext()) {
+          var element = tmp$_0.next();
+          var ba = element.component1()
+          , bb = element.component2();
+          if (!rxCompare(ba, bb)) {
+            all$result = false;
+            break all$break;
+          }
+        }
+        all$result = true;
+      }
+       while (false);
+      tmp$ = all$result;
+    }
+    return tmp$;
+  }
+  var copyToArray = Kotlin.kotlin.collections.copyToArray;
+  function rxListType$lambda_2(list, ops) {
+    var destination = ArrayList_init_0(collectionSizeOrDefault(list, 10));
+    var tmp$;
+    tmp$ = list.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      destination.add_11rb$(writeDynamic_0(item, ops));
+    }
+    return copyToArray(destination);
+  }
+  function rxListType$lambda_3(closure$read) {
+    return function (d, ops) {
+      var destination = ArrayList_init_0(d.length);
+      var tmp$;
+      for (tmp$ = 0; tmp$ !== d.length; ++tmp$) {
+        var item = d[tmp$];
+        destination.add_11rb$(closure$read(item, ops));
+      }
+      return destination;
+    };
+  }
+  function rxListType_0(read) {
+    return new PropertyType(rxListType$lambda_0, rxListType$lambda_1, rxListType$lambda_2, rxListType$lambda_3(read));
+  }
+  function TSPropertyType$lambda(f, f_0) {
+    return true;
+  }
+  function TSPropertyType$lambda_0(v, ops) {
+    return ops.writeTimestamp_frv8pu$(v);
+  }
+  var TSPropertyType;
   function TS() {
   }
   function TS$Value(date) {
@@ -3531,6 +3669,113 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'TS',
     interfaces: []
   };
+  function RefDoc(id, doc) {
+    this.id = id;
+    this.doc = doc;
+  }
+  RefDoc.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RefDoc',
+    interfaces: []
+  };
+  function FsIdState() {
+  }
+  function FsIdState$NoId() {
+    FsIdState$NoId_instance = this;
+    FsIdState.call(this);
+    this.exists_aoytwz$_0 = false;
+  }
+  Object.defineProperty(FsIdState$NoId.prototype, 'exists', {
+    get: function () {
+      return this.exists_aoytwz$_0;
+    }
+  });
+  FsIdState$NoId.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'NoId',
+    interfaces: [FsIdState]
+  };
+  var FsIdState$NoId_instance = null;
+  function FsIdState$NoId_getInstance() {
+    if (FsIdState$NoId_instance === null) {
+      new FsIdState$NoId();
+    }
+    return FsIdState$NoId_instance;
+  }
+  function FsIdState$HasId(id, exists) {
+    FsIdState.call(this);
+    this.id = id;
+    this.exists_848kjo$_0 = exists;
+  }
+  Object.defineProperty(FsIdState$HasId.prototype, 'exists', {
+    get: function () {
+      return this.exists_848kjo$_0;
+    }
+  });
+  FsIdState$HasId.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'HasId',
+    interfaces: [FsIdState]
+  };
+  FsIdState$HasId.prototype.component1 = function () {
+    return this.id;
+  };
+  FsIdState$HasId.prototype.component2 = function () {
+    return this.exists;
+  };
+  FsIdState$HasId.prototype.copy_ivxn3r$ = function (id, exists) {
+    return new FsIdState$HasId(id === void 0 ? this.id : id, exists === void 0 ? this.exists : exists);
+  };
+  FsIdState$HasId.prototype.toString = function () {
+    return 'HasId(id=' + Kotlin.toString(this.id) + (', exists=' + Kotlin.toString(this.exists)) + ')';
+  };
+  FsIdState$HasId.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    result = result * 31 + Kotlin.hashCode(this.exists) | 0;
+    return result;
+  };
+  FsIdState$HasId.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.exists, other.exists)))));
+  };
+  FsIdState.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FsIdState',
+    interfaces: []
+  };
+  function FsId(coll, st) {
+    this.coll = coll;
+    this.state = new Var(st);
+  }
+  FsId.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FsId',
+    interfaces: []
+  };
+  function FsId_init(dw, exists, $this) {
+    $this = $this || Object.create(FsId.prototype);
+    FsId.call($this, ensureNotNull(dw.parent), new FsIdState$HasId(dw.id, exists));
+    return $this;
+  }
+  function get_docWrap($receiver) {
+    var st = $receiver.state.now;
+    var block$result;
+    if (equals(st, FsIdState$NoId_getInstance()))
+      throw Error_init('Doc has no id!');
+    else if (Kotlin.isType(st, FsIdState$HasId)) {
+      block$result = $receiver.coll.doc_61zpoe$(st.id);
+    }
+     else {
+      block$result = Kotlin.noWhenBranchMatched();
+    }
+    return block$result;
+  }
+  function toFsDoc($receiver, id) {
+    return new RefDoc(id, $receiver);
+  }
+  function toFsDoc_0($receiver, cw) {
+    return toFsDoc($receiver, new FsId(cw, FsIdState$NoId_getInstance()));
+  }
   function asyncKills$State(value, kill) {
     this.value = value;
     this.kill = kill;
@@ -4724,7 +4969,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function rxClasses($receiver, ks, style) {
     rxClasses_0($receiver, ks, toRx_0(style, ks));
   }
-  var copyToArray = Kotlin.kotlin.collections.copyToArray;
   function rxClasses$lambda(this$rxClasses) {
     return function (it) {
       addClass(this$rxClasses, copyToArray(it).slice());
@@ -5662,6 +5906,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var package$commonshr = _.commonshr || (_.commonshr = {});
   package$commonshr.CoroutineWithKills = CoroutineWithKills;
   package$commonshr.CommonShrApi = CommonShrApi;
+  package$commonshr.JobScope = JobScope;
   var package$commonlib = _.commonlib || (_.commonlib = {});
   package$commonlib.lib = lib;
   package$commonlib.Lib = Lib;
@@ -5684,6 +5929,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonlib.AdminDoc = AdminDoc;
   package$commonlib.get_fcmtokens_z8qup$ = get_fcmtokens;
   package$commonlib.FcmToken = FcmToken;
+  package$commonshr.hasOwnProperty_hwpqgh$ = hasOwnProperty;
+  package$commonshr.opt_h8phid$ = opt;
   Object.defineProperty(SetDiff, 'Companion', {
     get: SetDiff$Companion_getInstance
   });
@@ -5734,33 +5981,78 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   ListEvent.Remove = ListEvent$Remove;
   package$commonshr.ListEvent = ListEvent;
   package$commonshr.map_o50ybn$ = map_2;
-  Object.defineProperty(package$commonshr, 'Identity', {
+  var package$properties = package$commonshr.properties || (package$commonshr.properties = {});
+  package$properties.DynamicOps = DynamicOps;
+  Object.defineProperty(package$properties, 'Identity', {
     get: function () {
       return Identity;
     }
   });
-  Object.defineProperty(package$commonshr, 'CompareEquals', {
+  Object.defineProperty(package$properties, 'CompareEquals', {
     get: function () {
       return CompareEquals;
     }
   });
-  package$commonshr.identity_287e2$ = identity;
-  package$commonshr.compareEquals_287e2$ = compareEquals;
-  package$commonshr.PropertyItem = PropertyItem;
-  package$commonshr.remAssign_8cxlfx$ = remAssign_1;
-  package$commonshr.get_now_lzxrst$ = get_now;
-  package$commonshr.set_now_jnb77t$ = set_now;
-  package$commonshr.invoke_u60y6x$ = invoke_1;
-  package$commonshr.PropertyList = PropertyList;
-  package$commonshr.rxCompare_9szhd7$ = rxCompare;
-  package$commonshr.RxBase = RxBase;
-  package$commonshr.zipItems_9szhd7$ = zipItems;
-  package$commonshr.copy_j472fg$ = copy;
+  Object.defineProperty(package$properties, 'IdentityWriteDynamic', {
+    get: function () {
+      return IdentityWriteDynamic;
+    }
+  });
+  Object.defineProperty(package$properties, 'IdentityReadDynamic', {
+    get: function () {
+      return IdentityReadDynamic;
+    }
+  });
+  package$properties.identityCopier_287e2$ = identityCopier;
+  package$properties.identityWriteDynamic_287e2$ = identityWriteDynamic;
+  package$properties.identityReadDynamic_287e2$ = identityReadDynamic;
+  package$properties.compareEquals_287e2$ = compareEquals;
+  package$properties.PropertyType = PropertyType;
+  Object.defineProperty(package$properties, 'IdentityType', {
+    get: function () {
+      return IdentityType;
+    }
+  });
+  package$properties.identityType_287e2$ = identityType;
+  package$properties.PropertyItem = PropertyItem;
+  package$properties.writeDynamic_uvx324$ = writeDynamic;
+  package$properties.readDynamic_r4sz0x$ = readDynamic;
+  package$properties.get_copy_onaa3k$ = get_copy;
+  package$properties.resetToDefault_32q2wm$ = resetToDefault;
+  package$properties.remAssign_rwr88g$ = remAssign_1;
+  package$properties.get_now_onaa3k$ = get_now;
+  package$properties.set_now_6z2sje$ = set_now;
+  package$properties.invoke_32q2wm$ = invoke_1;
+  package$properties.PropertyList = PropertyList;
+  package$properties.rxCompare_kagv6q$ = rxCompare;
+  package$properties.RxBase = RxBase;
+  package$properties.zipItems_kagv6q$ = zipItems;
+  package$properties.copy_szlj5h$ = copy;
+  package$properties.writeDynamic_y9dcxh$ = writeDynamic_0;
+  package$properties.readDynamic_121my8$ = readDynamic_0;
+  package$properties.rxListType_4okrys$ = rxListType;
+  package$properties.rxListType_68r5d9$ = rxListType_0;
+  Object.defineProperty(package$properties, 'TSPropertyType', {
+    get: function () {
+      return TSPropertyType;
+    }
+  });
   TS.Value = TS$Value;
   Object.defineProperty(TS, 'Server', {
     get: TS$Server_getInstance
   });
-  package$commonshr.TS = TS;
+  package$properties.TS = TS;
+  package$commonshr.RefDoc = RefDoc;
+  Object.defineProperty(FsIdState, 'NoId', {
+    get: FsIdState$NoId_getInstance
+  });
+  FsIdState.HasId = FsIdState$HasId;
+  package$commonshr.FsIdState = FsIdState;
+  package$commonshr.FsId_init_7116yu$ = FsId_init;
+  package$commonshr.FsId = FsId;
+  package$commonshr.get_docWrap_axmc3l$ = get_docWrap;
+  package$commonshr.toFsDoc_9d6cjt$ = toFsDoc;
+  package$commonshr.toFsDoc_5g5te8$ = toFsDoc_0;
   var package$killable = _.killable || (_.killable = {});
   package$killable.asyncKills_9scqh$ = asyncKills;
   package$killable.KillableValue = KillableValue;
@@ -5952,6 +6244,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   fcmtokens = coll();
   Identity = Identity$lambda;
   CompareEquals = CompareEquals$lambda;
+  IdentityWriteDynamic = IdentityWriteDynamic$lambda;
+  IdentityReadDynamic = IdentityReadDynamic$lambda;
+  IdentityType = new PropertyType();
+  TSPropertyType = new PropertyType(void 0, TSPropertyType$lambda, TSPropertyType$lambda_0);
   Noop = Noop$lambda;
   NoKill = NoKill$lambda;
   currentChild = null;

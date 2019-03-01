@@ -8,13 +8,10 @@ import commonui.widget.*
 import commonshr.*
 import commonui.globalStatus
 import firebase.app.App
-import killable.killables
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.await
 import music.UserSongs
 import music.boot.Boot
-import music.boot.BootPath
 import music.content.Content
 import music.data.SongInfoSource
 
@@ -36,7 +33,7 @@ class NotLoggedIn(
                 this,
                 base = boot,
                 app = app,
-                back = back,
+                back = redisplay,
                 loggingIn = {
                     forward.switchTo(HourglassView(this))
                     path.boot.userState.now = UserState.Unknown

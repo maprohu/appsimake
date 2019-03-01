@@ -3,13 +3,10 @@ package gymclock.form
 import bootstrap.*
 import common.Listeners
 import commonshr.*
-import commonui.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
 import rx.*
-import styles.cursorPointer
-import styles.pointerEventsNone
 
 fun Form.ui() = factory.screen {
     topbar {
@@ -126,7 +123,7 @@ fun Form.ui() = factory.screen {
                 val canSubmit = rx {
                     valids.all { it() }
                 }
-                rxEnabled { canSubmit() }
+                enabled { canSubmit() }
                 click {
                     submit.fire()
                     start()

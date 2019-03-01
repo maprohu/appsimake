@@ -2,8 +2,10 @@ package commonui.widget
 
 import bootstrap.*
 import commonshr.*
+import commonui.UiKillsApi
 import domx.*
 import fontawesome.*
+import killable.HasKillSet
 import org.w3c.dom.*
 import kotlin.browser.document
 
@@ -63,6 +65,7 @@ class Button(): ScreenWrap() {
         fa.chevronLeft
         secondary
     }
+
 
 }
 

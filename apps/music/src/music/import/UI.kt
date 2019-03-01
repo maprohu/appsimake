@@ -8,7 +8,6 @@ import commonui.widget.*
 import domx.*
 import fontawesome.*
 import fontawesome.folderOpen
-import kotlinx.coroutines.cancel
 import musiclib.UserSongState
 import musiclib.fixedArtist
 import musiclib.fixedTitle
@@ -21,7 +20,7 @@ fun Import.ui() = TopAndContent(
         left.button {
             back
             click {
-                from.back()
+                from.redisplay()
             }
         }
         title %= "Import MP3s"
@@ -196,7 +195,7 @@ fun ImportFile.ui() = document.div {
                 p2
                 secondary
                 fa.fileImport
-                rxEnabled { !importing() }
+                enabled { !importing() }
                 click {
                     startImporting()
                 }

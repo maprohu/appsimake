@@ -120,6 +120,10 @@ external interface DocumentReference {
             onNext: (DocumentSnapshot) -> Unit
     ) : () -> Unit
     fun onSnapshot(
+        onNext: (DocumentSnapshot) -> Unit,
+        onError: (Throwable) -> Unit
+    ) : () -> Unit
+    fun onSnapshot(
         options: SnapshotListenOptions,
         onNext: (DocumentSnapshot) -> Unit,
         onError: (Throwable) -> Unit
@@ -275,8 +279,8 @@ external class FieldValue {
 // https://firebase.google.com/docs/reference/js/firebase.firestore.Timestamp
 external class Timestamp : firebaseshr.firestore.Timestamp {
 
-    override var nanoseconds: Long
-    override var seconds: Long
+    override var nanoseconds: Number
+    override var seconds: Number
 
     override fun toDate() : Date
     override fun toMillis() : Long

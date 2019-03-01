@@ -3,10 +3,7 @@ package commonui.widget
 import common.None
 import common.Optional
 import common.Some
-import commonshr.Action
-import commonshr.Exec
-import commonshr.discardExecutor
-import commonshr.executor
+import commonshr.*
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import rx.RxIface
@@ -46,9 +43,17 @@ abstract class ForwardBase<V: Any>(
     ): this(Job(parent.coroutineContext))
 }
 
+interface HasRedisplay {
+    val redisplay: Trigger
+}
+
+interface HasFrom {
+    val from: HasRedisplay
+}
+
 abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
     coroutineContext: Job
-): ViewImplBase<V>(coroutineContext), HasKillSetAndUIX {
+): ViewImplBase<V>(coroutineContext), HasKillSetAndUIX, HasRedisplay {
     constructor(
         parent: JobScope
     ): this(Job(parent.coroutineContext))
@@ -68,7 +73,7 @@ abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
         }
     }
 
-    val back = { exec { forward.switchTo(null) } }
+    override val redisplay = { exec { forward.switchTo(null) } }
 
     private val baseView = object : HasView<V> {
         override fun view(prepare: V?.() -> Unit): V? = preparedView(prepare)
