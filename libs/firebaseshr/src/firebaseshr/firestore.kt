@@ -4,11 +4,11 @@ import kotlin.js.Date
 
 external interface Timestamp {
 
-    var nanoseconds: Long
-    var seconds: Long
+    var nanoseconds: Number
+    var seconds: Number
 
     fun toDate() : Date
-    fun toMillis() : Long
+    fun toMillis() : Number
 
 }
 

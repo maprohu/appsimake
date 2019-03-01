@@ -1,6 +1,7 @@
 package checklist.loggedin
 
 import checklist.Checklist
+import checklist.ChecklistItem
 import checklist.checklistLib
 import checklist.checklists
 import checklist.edit.Edit
@@ -11,6 +12,7 @@ import commonfb.FBApi
 import commonfb.UserState
 import commonfb.loginbase.UserStateView
 import commonlib.private
+import commonshr.remAssign
 import commonui.widget.ForwardBase
 import commonui.widget.TopAndContent
 import commonui.widget.UIBase
@@ -47,7 +49,18 @@ class LoggedIn(
             Edit(
                 this,
                 Checklist().apply {
-                    props.collection = checklists
+                    name %= "<unknown>"
+                    items %= listOf(
+                        ChecklistItem().apply {
+                            name %= "nchk"
+                            checked %= false
+                        },
+                        ChecklistItem().apply {
+                            name %= "chk"
+                            checked %= true
+                        }
+                    )
+//                    props.collection = checklists
                 }
             )
         }

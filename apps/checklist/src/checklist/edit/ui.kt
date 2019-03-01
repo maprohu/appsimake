@@ -15,7 +15,14 @@ fun Edit.ui(): TopAndContent {
     return TopAndContent(
         topbar = factory.topbar {
             left.button {
-                back
+                m1p2
+                fa.chevronLeft
+
+                node.rxClass {
+                    if (dirty()) Cls.btnDanger
+                    else Cls.btnSecondary
+                }
+
                 click {
                     loggedIn.back()
                 }
@@ -43,7 +50,7 @@ fun Edit.ui(): TopAndContent {
                         label %= "Title"
                         input {
                             required
-                            node.value = item.name.initial.now.getOrDefault("<unnamed>")
+                            bindTo(initial.name.rxv)
                         }
                     }
                     insert.formGroup {
@@ -56,15 +63,13 @@ fun Edit.ui(): TopAndContent {
                             insert.inputGroup {
                                 input {
                                     required
+                                    bindTo(adder)
                                     fun performAdd() {
-                                        node {
-                                            val v = value
-                                            value = ""
-                                            addItem(v)
-                                        }
+                                        addItem(value)
+                                        value = ""
                                     }
                                     submitter = {
-                                        if (node.value.isNotBlank()) {
+                                        if (value.isNotBlank()) {
                                             performAdd()
                                         }
                                         mainForm.hiddenSubmit.node.click()
@@ -93,7 +98,7 @@ fun Edit.ui(): TopAndContent {
                                         cls.m1
                                         input {
                                             required
-                                            node.value = cl.name
+                                            bindTo(cl.name.rxv)
                                         }
                                         append {
                                             insert.button {

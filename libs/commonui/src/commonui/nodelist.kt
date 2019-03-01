@@ -20,7 +20,7 @@ fun CoroutineScope.nodeList(
     target: Node,
     nodes: ReceiveChannel<ListEvent<Node>>
 ) {
-    require(!target.hasChildNodes()) { "List container node must be empty!" }
+//    require(!target.hasChildNodes()) { "List container node must be empty!" }
 
     launch {
         for (e in nodes) {

@@ -23,7 +23,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var minus = Kotlin.kotlin.collections.minus_2ws7j4$;
   var Unit = Kotlin.kotlin.Unit;
   var CompletableDeferred = $module$kotlinx_coroutines_core.kotlinx.coroutines.CompletableDeferred_xptg6w$;
-  var getCallableRef = Kotlin.getCallableRef;
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var toList = Kotlin.kotlin.collections.toList_us0mfu$;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
@@ -31,6 +30,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var coroutines = $module$kotlinx_coroutines_core.kotlinx.coroutines;
   var launch = $module$kotlinx_coroutines_core.kotlinx.coroutines.launch_s496o7$;
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
+  var getCallableRef = Kotlin.getCallableRef;
   var Pair = Kotlin.kotlin.Pair;
   var listOf = Kotlin.kotlin.collections.listOf_i5x0yv$;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
@@ -62,6 +62,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var numberToInt = Kotlin.numberToInt;
   var map = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.map_610k8f$;
+  var asSequence = Kotlin.kotlin.collections.asSequence_7wnvza$;
+  var zip = Kotlin.kotlin.sequences.zip_r7q3s9$;
+  var get_js = Kotlin.kotlin.js.get_js_1yb8b7$;
   var throwUPAE = Kotlin.throwUPAE;
   var L0 = Kotlin.Long.ZERO;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
@@ -99,6 +102,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   ListEvent$Move.prototype.constructor = ListEvent$Move;
   ListEvent$Remove.prototype = Object.create(ListEvent.prototype);
   ListEvent$Remove.prototype.constructor = ListEvent$Remove;
+  TS$Value.prototype = Object.create(TS.prototype);
+  TS$Value.prototype.constructor = TS$Value;
+  TS$Server.prototype = Object.create(TS.prototype);
+  TS$Server.prototype.constructor = TS$Server;
   RxCalc.prototype = Object.create(RxChild.prototype);
   RxCalc.prototype.constructor = RxCalc;
   RxVal.prototype = Object.create(RxParent.prototype);
@@ -250,13 +257,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   EmitterIface.prototype.plusAssign_qlkmfe$ = function (listener) {
     this.add_qlkmfe$(listener);
   };
-  Object.defineProperty(EmitterIface.prototype, 'fn', {
-    get: function () {
-      return getCallableRef('add', function ($receiver, listener) {
-        return $receiver.add_qlkmfe$(listener);
-      }.bind(null, this));
-    }
-  });
   EmitterIface.$metadata$ = {
     kind: Kind_INTERFACE,
     simpleName: 'EmitterIface',
@@ -3009,6 +3009,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'RefCount',
     interfaces: []
   };
+  function get_fn($receiver) {
+    return getCallableRef('add', function ($receiver, listener) {
+      return $receiver.add_qlkmfe$(listener);
+    }.bind(null, $receiver));
+  }
   function reportd(error) {
     report(error);
   }
@@ -3316,11 +3321,214 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     var itemKills = ArrayList_init();
     return map($receiver, void 0, map$lambda(kills, itemKills, fn));
   }
-  function RxProps() {
+  function Identity$lambda(it) {
+    return it;
   }
-  RxProps.$metadata$ = {
+  var Identity;
+  function CompareEquals$lambda(a, b) {
+    return equals(a, b);
+  }
+  var CompareEquals;
+  var identity = defineInlineFunction('appsimake-commonshr.commonshr.identity_287e2$', wrapFunction(function () {
+    var commonshr = _.commonshr;
+    return function () {
+      return commonshr.Identity;
+    };
+  }));
+  var compareEquals = defineInlineFunction('appsimake-commonshr.commonshr.compareEquals_287e2$', wrapFunction(function () {
+    var commonshr = _.commonshr;
+    return function () {
+      return commonshr.CompareEquals;
+    };
+  }));
+  function PropertyItem(index, name, value, copier, compare) {
+    if (copier === void 0) {
+      copier = package$commonshr.Identity;
+    }
+    if (compare === void 0) {
+      compare = package$commonshr.CompareEquals;
+    }
+    this.index = index;
+    this.name = name;
+    this.copier = copier;
+    this.compare = compare;
+    this.rxv = new Var(value);
+  }
+  Object.defineProperty(PropertyItem.prototype, 'copy', {
+    get: function () {
+      return this.copier(get_now(this));
+    }
+  });
+  PropertyItem.$metadata$ = {
     kind: Kind_CLASS,
-    simpleName: 'RxProps',
+    simpleName: 'PropertyItem',
+    interfaces: []
+  };
+  function remAssign_1($receiver, v) {
+    $receiver.rxv.remAssign_11rb$(v);
+  }
+  function get_now($receiver) {
+    return $receiver.rxv.now;
+  }
+  function set_now($receiver, v) {
+    $receiver.rxv.now = v;
+  }
+  function invoke_1($receiver) {
+    return $receiver.rxv.invoke();
+  }
+  function PropertyList() {
+    this.items = ArrayList_init();
+  }
+  function PropertyList$prop$lambda(this$PropertyList, closure$value, closure$copier, closure$compare) {
+    return function (name) {
+      var $receiver = new PropertyItem(this$PropertyList.items.size, name, closure$value, closure$copier, closure$compare);
+      this$PropertyList.items.add_11rb$($receiver);
+      return $receiver;
+    };
+  }
+  PropertyList.prototype.prop_evvu67$ = function (value, copier, compare) {
+    if (copier === void 0) {
+      copier = package$commonshr.Identity;
+    }
+    if (compare === void 0) {
+      compare = package$commonshr.CompareEquals;
+    }
+    return named(PropertyList$prop$lambda(this, value, copier, compare));
+  };
+  PropertyList.prototype.string = function () {
+    return this.prop_evvu67$('');
+  };
+  PropertyList.prototype.timestamp = function () {
+    return this.prop_evvu67$(TS$Server_getInstance());
+  };
+  PropertyList.prototype.list_287e2$ = function () {
+    return this.prop_evvu67$(emptyList());
+  };
+  function PropertyList$rxlist$lambda(list) {
+    var destination = ArrayList_init_0(collectionSizeOrDefault(list, 10));
+    var tmp$;
+    tmp$ = list.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      destination.add_11rb$(copy(item));
+    }
+    return destination;
+  }
+  function PropertyList$rxlist$lambda_0(a, b) {
+    var tmp$ = a.size === b.size;
+    if (tmp$) {
+      var $receiver = zip(asSequence(a), asSequence(b));
+      var all$result;
+      all$break: do {
+        var tmp$_0;
+        tmp$_0 = $receiver.iterator();
+        while (tmp$_0.hasNext()) {
+          var element = tmp$_0.next();
+          var ba = element.component1()
+          , bb = element.component2();
+          if (!rxCompare(ba, bb)) {
+            all$result = false;
+            break all$break;
+          }
+        }
+        all$result = true;
+      }
+       while (false);
+      tmp$ = all$result;
+    }
+    return tmp$;
+  }
+  PropertyList.prototype.rxlist_8r1j7v$ = function () {
+    return this.prop_evvu67$(emptyList(), PropertyList$rxlist$lambda, PropertyList$rxlist$lambda_0);
+  };
+  PropertyList.prototype.boolean = function () {
+    return this.prop_evvu67$(false);
+  };
+  PropertyList.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PropertyList',
+    interfaces: []
+  };
+  function rxCompare(a, b) {
+    var tmp$;
+    var tmp$_0 = ((tmp$ = Kotlin.getKClassFromExpression(a)) != null ? tmp$.equals(Kotlin.getKClassFromExpression(b)) : null) && a.o.items.size === b.o.items.size;
+    if (tmp$_0) {
+      var $receiver = zipItems(a, b);
+      var all$result;
+      all$break: do {
+        var tmp$_1;
+        tmp$_1 = $receiver.iterator();
+        while (tmp$_1.hasNext()) {
+          var element = tmp$_1.next();
+          var pa = element.component1()
+          , pb = element.component2();
+          if (!pa.compare(invoke_1(pa), invoke_1(pb))) {
+            all$result = false;
+            break all$break;
+          }
+        }
+        all$result = true;
+      }
+       while (false);
+      tmp$_0 = all$result;
+    }
+    return tmp$_0;
+  }
+  function RxBase() {
+    this.o = new PropertyList();
+  }
+  RxBase.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RxBase',
+    interfaces: []
+  };
+  function zipItems(a, b) {
+    return zip(asSequence(a.o.items), asSequence(b.o.items));
+  }
+  var Any = Object;
+  function copy($receiver) {
+    var tmp$;
+    var $receiver_0 = Kotlin.isType(tmp$ = new (get_js(Kotlin.getKClassFromExpression($receiver)))(), Any) ? tmp$ : throwCCE();
+    var tmp$_0;
+    tmp$_0 = zipItems($receiver, $receiver_0).iterator();
+    while (tmp$_0.hasNext()) {
+      var element = tmp$_0.next();
+      var old = element.component1()
+      , new_0 = element.component2();
+      set_now(new_0, old.copy);
+    }
+    return $receiver_0;
+  }
+  function TS() {
+  }
+  function TS$Value(date) {
+    TS.call(this);
+    this.date = date;
+  }
+  TS$Value.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Value',
+    interfaces: [TS]
+  };
+  function TS$Server() {
+    TS$Server_instance = this;
+    TS.call(this);
+  }
+  TS$Server.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Server',
+    interfaces: [TS]
+  };
+  var TS$Server_instance = null;
+  function TS$Server_getInstance() {
+    if (TS$Server_instance === null) {
+      new TS$Server();
+    }
+    return TS$Server_instance;
+  }
+  TS.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TS',
     interfaces: []
   };
   function asyncKills$State(value, kill) {
@@ -5501,6 +5709,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.Counted = Counted;
   package$commonshr.RefCountMap = RefCountMap;
   package$commonshr.RefCount = RefCount;
+  package$commonshr.get_fn_4b7k9i$ = get_fn;
   package$commonshr.reportd_za3rmp$ = reportd;
   package$commonshr.report_s8jyv4$ = report;
   package$commonshr.remAssign_t3h96y$ = remAssign;
@@ -5525,7 +5734,33 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   ListEvent.Remove = ListEvent$Remove;
   package$commonshr.ListEvent = ListEvent;
   package$commonshr.map_o50ybn$ = map_2;
-  package$commonshr.RxProps = RxProps;
+  Object.defineProperty(package$commonshr, 'Identity', {
+    get: function () {
+      return Identity;
+    }
+  });
+  Object.defineProperty(package$commonshr, 'CompareEquals', {
+    get: function () {
+      return CompareEquals;
+    }
+  });
+  package$commonshr.identity_287e2$ = identity;
+  package$commonshr.compareEquals_287e2$ = compareEquals;
+  package$commonshr.PropertyItem = PropertyItem;
+  package$commonshr.remAssign_8cxlfx$ = remAssign_1;
+  package$commonshr.get_now_lzxrst$ = get_now;
+  package$commonshr.set_now_jnb77t$ = set_now;
+  package$commonshr.invoke_u60y6x$ = invoke_1;
+  package$commonshr.PropertyList = PropertyList;
+  package$commonshr.rxCompare_9szhd7$ = rxCompare;
+  package$commonshr.RxBase = RxBase;
+  package$commonshr.zipItems_9szhd7$ = zipItems;
+  package$commonshr.copy_j472fg$ = copy;
+  TS.Value = TS$Value;
+  Object.defineProperty(TS, 'Server', {
+    get: TS$Server_getInstance
+  });
+  package$commonshr.TS = TS;
   var package$killable = _.killable || (_.killable = {});
   package$killable.asyncKills_9scqh$ = asyncKills;
   package$killable.KillableValue = KillableValue;
@@ -5608,13 +5843,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.toMap_ycvysl$ = toMap_0;
   package$rx.process_qe6zds$ = process_0;
   withInitial$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
-  Object.defineProperty(withInitial$ObjectLiteral.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
   Emitter.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
-  Object.defineProperty(Emitter.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
   MappedEmitter.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
-  Object.defineProperty(MappedEmitter.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
   toEmitter$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
-  Object.defineProperty(toEmitter$ObjectLiteral.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
   CoroutineWithKills.prototype.rx_pn7ch0$ = HasKillSet.prototype.rx_pn7ch0$;
   CoroutineWithKills.prototype.rx_rf89m5$ = HasKillSet.prototype.rx_rf89m5$;
   CoroutineWithKills.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;
@@ -5659,7 +5890,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   CommonShrApi.prototype.toRxSet_jr4bl4$ = ListApi.prototype.toRxSet_jr4bl4$;
   CommonShrApi.prototype.toChannelLater_z5dyp2$ = ListApi.prototype.toChannelLater_z5dyp2$;
   toMoves$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
-  Object.defineProperty(toMoves$ObjectLiteral.prototype, 'fn', Object.getOwnPropertyDescriptor(EmitterIface.prototype, 'fn'));
   HasNoKill.prototype.rx_pn7ch0$ = HasKillSet.prototype.rx_pn7ch0$;
   HasNoKill.prototype.rx_rf89m5$ = HasKillSet.prototype.rx_rf89m5$;
   HasNoKill.prototype.forEach_5mel8p$ = HasKillSet.prototype.forEach_5mel8p$;
@@ -5720,6 +5950,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   private_0 = coll();
   singletons = coll();
   fcmtokens = coll();
+  Identity = Identity$lambda;
+  CompareEquals = CompareEquals$lambda;
   Noop = Noop$lambda;
   NoKill = NoKill$lambda;
   currentChild = null;

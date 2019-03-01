@@ -2,45 +2,47 @@ package checklist.edit
 
 import checklist.Checklist
 import checklist.ChecklistItem
-import checklist.home.Home
-import checklist.home.HomePath
 import checklist.loggedin.LoggedIn
 import checklist.loggedin.LoggedInPath
-import common.Emitter
 import common.ListenableMutableList
-import common.obj
-import commonfb.EditScreenConfig
+import common.eventsEmitter
 import commonfb.FBApi
-import commonui.widget.JobScope
+import commonshr.*
 import commonui.widget.TopAndContent
 import commonui.widget.UIBase
+import kotlinx.coroutines.launch
+import rx.Var
 
 interface EditPath: LoggedInPath {
     val edit: Edit
 }
 class Edit(
     loggedIn: LoggedIn,
-    val item: Checklist
+    val initial: Checklist
 ): UIBase<TopAndContent>(loggedIn), EditPath, LoggedInPath by loggedIn, FBApi {
     override val edit = this
 
-    val items = ListenableMutableList<ChecklistItem>()
+    val current = initial.copy()
 
-    data class X(val a: Int, val b: Int, val c: Int)
-    init {
-        val x = X(0, 0, 0)
-        val (a, b, c, d) = x
-
+    val items = ListenableMutableList<ChecklistItem>().apply {
+        addAll(current.items.now)
+        eventsEmitter(false).invoke {
+            current.items %= toList()
+        }
     }
 
     fun addItem(name: String) {
         items.add(
             0,
-            obj {
-                this.name = name
-                checked = false
+            ChecklistItem().apply {
+                this.name %= name
             }
         )
+    }
+
+    val adder = Var("")
+    val dirty = rx {
+        adder().isNotBlank() || !rxCompare(initial, current)
     }
 
     override val rawView = ui()

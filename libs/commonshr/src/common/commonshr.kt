@@ -262,7 +262,6 @@ open class Listeners {
 
 }
 
-typealias EmitterFn<T> = AddRemove<Callback<T>>
 
 interface EmitterIface<T> {
 
@@ -271,8 +270,6 @@ interface EmitterIface<T> {
     }
 
     fun add(listener: (T) -> Unit) : Trigger
-
-    val fn: EmitterFn<T> get() = ::add
 
 }
 

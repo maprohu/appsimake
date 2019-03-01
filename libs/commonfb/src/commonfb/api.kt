@@ -1,5 +1,6 @@
 package commonfb
 
+import common.CommonApi
 import commonshr.CommonShrApi
 import commonui.UiApi
 import commonui.UiKillsApi
@@ -13,4 +14,4 @@ interface CommonFbApi: HasUIX, UiKillsApi, FirebaseApi, HasKillSet
 
 val HasKillSetAndUIX.fbapi: CommonFbApi get() = object : CommonFbApi, HasKillSetAndUIX by this {}
 
-interface FBApi: CommonFbApi, FirebaseApi, FirestoreApi, UiApi, CommonShrApi
+interface FBApi: CommonFbApi, FirebaseApi, FirestoreApi, UiApi, CommonShrApi, CommonApi

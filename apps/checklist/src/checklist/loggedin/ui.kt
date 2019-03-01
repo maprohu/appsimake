@@ -41,21 +41,21 @@ fun LoggedIn.ui() = TopAndContent(
         pane {
             cls.p2
 
-            list(
-                checklists
-                    .query(db) { Checklist.ts.desc() }
-                    .wrap { Checklist() }
-                    .map { cl ->
-                        document.div {
-                            cls {
-                                p1
-                                m1
-                                border
-                            }
-                        }
-                    }
-
-            )
+//            list(
+//                checklists
+//                    .query(db) { Checklist.ts.desc() }
+//                    .wrap { Checklist() }
+//                    .map { cl ->
+//                        document.div {
+//                            cls {
+//                                p1
+//                                m1
+//                                border
+//                            }
+//                        }
+//                    }
+//
+//            )
 
         }
     }.node

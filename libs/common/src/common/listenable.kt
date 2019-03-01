@@ -14,7 +14,8 @@ interface ListenableApi: HasKillSet {
 }
 interface ListenableList<out T> : List<T> {
 
-    fun addListener(listener: Listener<T>) : Trigger
+    fun addListener(listener: Listener<T>) = addListener(listener, true)
+    fun addListener(listener: Listener<T>, all: Boolean) : Trigger
 
     data class Listener<in T>(
         val added: (Int, T) -> Unit = { _, _ -> },
@@ -25,9 +26,41 @@ interface ListenableList<out T> : List<T> {
     val isEmptyRx: RxIface<Boolean>
 }
 
+interface Collector<T> {
+    operator fun plusAssign(t: T)
+}
+
+fun <T> collector(fn: (T) -> Unit): Collector<T> {
+    return object: Collector<T> {
+        override fun plusAssign(t: T) {
+            fn(t)
+        }
+    }
+}
+
 fun <T> ListenableList<T>.events(ks: KillSet): ReceiveChannel<ListEvent<T>> {
-    val channel = Channel<ListEvent<T>>(Channel.UNLIMITED)
-    ks += addListener(
+    return Channel<ListEvent<T>>(Channel.UNLIMITED).apply {
+        ks += events(
+            collector {
+                offer(it)
+            }
+        )
+    }
+}
+
+fun <T> ListenableList<T>.eventsEmitter(all: Boolean = true): EmitterFn<ListEvent<T>> {
+    return { cb ->
+        events(
+            collector {
+                cb(it)
+            },
+            all
+        )
+    }
+}
+
+fun <T> ListenableList<T>.events(channel: Collector<ListEvent<T>>, all: Boolean = true): Trigger {
+    return addListener(
         ListenableList.Listener(
             added = { i, t ->
                 channel += ListEvent.Add(i, t)
@@ -38,9 +71,9 @@ fun <T> ListenableList<T>.events(ks: KillSet): ReceiveChannel<ListEvent<T>> {
             removed = { i, _ ->
                 channel += ListEvent.Remove(i)
             }
-        )
+        ),
+        all
     )
-    return channel
 }
 
 class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
@@ -52,10 +85,10 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
 
     override val isEmptyRx = Rx(NoKill) { sizeVar() == 0 }
 
-    override fun addListener(listener: ListenableList.Listener<T>): Trigger {
+    override fun addListener(listener: ListenableList.Listener<T>, all: Boolean): Trigger {
         listeners += listener
 
-        forEachIndexed(listener.added)
+        if (all) forEachIndexed(listener.added)
 
         return {
             listeners -= listener
