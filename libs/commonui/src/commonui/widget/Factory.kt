@@ -103,6 +103,8 @@ class Factory(
     val formGroup get() = FormGroup().applied
     val form get() = Form().applied
     val inputGroup get() = InputGroup().applied
+    val listGroup get() = ListGroup().applied
+    val listGroupButton get() = ListGroupButton().applied
 
 
 }

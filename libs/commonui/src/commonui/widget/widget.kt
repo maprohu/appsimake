@@ -197,10 +197,12 @@ interface HasNode {
 open class NodeWrap(
     override val node: Node
 ): HasNode
+
 interface HasElement: HasNode {
     override val node: Element
     val cls get() = node.cls
 }
+
 interface HasHTMLElement: HasElement {
     override val node: HTMLElement
 }

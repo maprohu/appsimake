@@ -3,6 +3,7 @@ package checklist.edit
 import bootstrap.*
 import common.events
 import commonshr.*
+import commonui.editing.required
 import commonui.widget.*
 import domx.div
 import domx.*
@@ -29,8 +30,7 @@ fun Edit.ui(): TopAndContent {
                         cls.flexFixedSize()
                         label %= "Title"
                         input {
-                            required
-                            bindTo(editing.current.name.rxv)
+                            bind(kills, editing.current.name.rxv).required()
                         }
                     }
                     insert.formGroup {
@@ -72,8 +72,7 @@ fun Edit.ui(): TopAndContent {
                                     factory.inputGroup {
                                         cls.m1
                                         input {
-                                            required
-                                            bindTo(cl.name.rxv)
+                                            bind(kills, cl.name.rxv).required()
                                         }
                                         append {
                                             insert.button {

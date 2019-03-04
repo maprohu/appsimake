@@ -18,6 +18,8 @@ interface UiKillsApi: HasKillSet, InvokeWith {
         rx { fn() }.forEach { this@remAssign %= it }
     }
 
+    fun HasElement.rxClass(stl: String, fn: HasKillSet.() -> Boolean) = node.rxClass(stl, fn)
+
 }
 
 interface UiCoroutinesApi: NodeListApi

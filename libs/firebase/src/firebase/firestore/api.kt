@@ -15,4 +15,4 @@ interface HasFirestore {
 
 interface HasFirestoreApi: FsDocApi
 
-interface FirestoreViewApi: FsDocApiWithHasKillSetWithCoroutineScope, JobScope
+interface FirestoreViewApi: FsDocApiWithHasKillSetWithCoroutineScope, SnapshotApi, JobScope

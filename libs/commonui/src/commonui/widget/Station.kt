@@ -145,7 +145,6 @@ abstract class ViewImpl<V: Any>(
     override fun view(prepare: V?.() -> Unit): V? = preparedView(prepare)
 }
 
-
 abstract class UIBase<V: Any>(
     coroutineContext: Job
 ): ViewImpl<V>(coroutineContext), HasUIX {

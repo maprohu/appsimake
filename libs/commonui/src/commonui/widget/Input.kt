@@ -4,10 +4,11 @@ import bootstrap.*
 import common.Listeners
 import common.listen
 import commonshr.*
-import commonui.globalStatus
 import domx.*
 import killable.HasKillSet
+import killable.NoKill
 import rx.Var
+import rx.rxClass
 import styles.widthAuto
 import kotlin.browser.document
 
@@ -19,7 +20,21 @@ class Input: ScreenWrap() {
         }
     }
 
-    val change = Listeners().apply {
+    val rxv by lazy {
+        val rxv = Var(value)
+        changeListeners += {
+            rxv %= value
+        }
+        rxv
+    }
+
+    val valid by lazy {
+        Var(true).also { v ->
+            node.rxClass(NoKill, Cls.isInvalid) { !v() }
+        }
+    }
+
+    val changeListeners = Listeners().apply {
         node.listen("input") {
             fire()
         }
@@ -29,7 +44,7 @@ class Input: ScreenWrap() {
         get() = node.value
         set(v) {
             node.value = v
-            change.fire()
+            changeListeners.fire()
         }
 
     val required by lazy {
@@ -39,7 +54,7 @@ class Input: ScreenWrap() {
     fun HasKillSet.bindTo(rxv: Var<String>) {
         value = rxv.now
 
-        kills += change.add {
+        kills += changeListeners.add {
             rxv.now = value
         }
     }

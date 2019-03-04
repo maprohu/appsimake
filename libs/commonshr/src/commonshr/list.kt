@@ -1,5 +1,6 @@
 package commonshr
 
+import commonshr.properties.RxBase
 import killable.HasKillSet
 import killable.KillSet
 import killable.killables
@@ -56,3 +57,6 @@ fun <T, S> ReceiveChannel<ListEvent<T>>.map(
         }
     }
 }
+
+
+

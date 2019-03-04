@@ -2,7 +2,11 @@ package commonshr
 
 import commonlib.CollectionWrap
 import commonlib.DocWrap
+import commonshr.properties.DynamicOps
 import commonshr.properties.RxBase
+import commonshr.properties.readDynamic
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.ReceiveChannel
 import rx.Var
 
 class RefDoc<I, D>(
@@ -55,4 +59,5 @@ typealias FsDoc<D> = RefDoc<FsId<D>, D>
 
 fun <D: RxBase<*>> D.toFsDoc(id: FsId<D>) = FsDoc(id, this)
 fun <D: RxBase<*>> D.toFsDoc(cw: CollectionWrap<D>) = toFsDoc(FsId(cw, FsIdState.NoId))
+fun <D: RxBase<*>> D.toFsDoc(cw: CollectionWrap<D>, id: String) = toFsDoc(FsId(cw, FsIdState.HasId(id, true)))
 

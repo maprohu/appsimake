@@ -1,9 +1,11 @@
 package commonshr.properties
 
+import common.NamedDelegate
 import common.dyn
 import common.jsNew
 import common.named
 import commonshr.hasOwnProperty
+import rx.RxIface
 import rx.Var
 
 typealias Copier<V> = (V) -> V
@@ -37,14 +39,20 @@ val IdentityType = PropertyType<Nothing>()
 @Suppress("NOTHING_TO_INLINE")
 inline fun <V> identityType() = IdentityType.unsafeCast<PropertyType<V>>()
 
+interface ROProp<T, V> {
+    val name: String
+    val rxv: RxIface<V>
+}
 
 class PropertyItem<T, V>(
     val index: Int,
-    val name: String,
+    override val name: String,
     val defaultValue: V,
     val type: PropertyType<V>
-) {
-    val rxv = Var(defaultValue)
+): ROProp<T, V> {
+    override val rxv = Var(defaultValue)
+
+    operator fun invoke() = rxv()
 }
 
 fun <V> PropertyItem<*, V>.writeDynamic(ops: DynamicOps): dynamic = type.writeDynamic(now, ops)
@@ -66,6 +74,12 @@ operator fun <V> PropertyItem<*, V>.invoke() = rxv()
 open class PropertyList<T> {
     val items = mutableListOf<PropertyItem<T, *>>()
 
+    fun <V> readOnlyProp(
+        value: V,
+        type: PropertyType<V> = identityType()
+    ) : NamedDelegate<ROProp<T, V>> = prop(value, type)
+
+
     fun <V> prop(
         value: V,
         type: PropertyType<V> = identityType()
@@ -81,7 +95,7 @@ open class PropertyList<T> {
     }
 
     fun string() = prop("")
-    fun timestamp() = prop(TS.Server, TSPropertyType)
+    fun serverTimestamp() = readOnlyProp(TS.Server, ServerTimestampPropertyType)
 
     fun <V> list() = prop(emptyList<V>())
 

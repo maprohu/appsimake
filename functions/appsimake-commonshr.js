@@ -103,6 +103,14 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   ListEvent$Move.prototype.constructor = ListEvent$Move;
   ListEvent$Remove.prototype = Object.create(ListEvent.prototype);
   ListEvent$Remove.prototype.constructor = ListEvent$Remove;
+  SnapshotEvent$Added.prototype = Object.create(SnapshotEvent.prototype);
+  SnapshotEvent$Added.prototype.constructor = SnapshotEvent$Added;
+  SnapshotEvent$Modified.prototype = Object.create(SnapshotEvent.prototype);
+  SnapshotEvent$Modified.prototype.constructor = SnapshotEvent$Modified;
+  SnapshotEvent$Moved.prototype = Object.create(SnapshotEvent.prototype);
+  SnapshotEvent$Moved.prototype.constructor = SnapshotEvent$Moved;
+  SnapshotEvent$Removed.prototype = Object.create(SnapshotEvent.prototype);
+  SnapshotEvent$Removed.prototype.constructor = SnapshotEvent$Removed;
   TS$Value.prototype = Object.create(TS.prototype);
   TS$Value.prototype.constructor = TS$Value;
   TS$Server.prototype = Object.create(TS.prototype);
@@ -3416,17 +3424,37 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return properties.IdentityType;
     };
   }));
+  function ROProp() {
+  }
+  ROProp.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'ROProp',
+    interfaces: []
+  };
   function PropertyItem(index, name, defaultValue, type) {
     this.index = index;
-    this.name = name;
+    this.name_s9hwbs$_0 = name;
     this.defaultValue = defaultValue;
     this.type = type;
-    this.rxv = new Var(this.defaultValue);
+    this.rxv_wzqcep$_0 = new Var(this.defaultValue);
   }
+  Object.defineProperty(PropertyItem.prototype, 'name', {
+    get: function () {
+      return this.name_s9hwbs$_0;
+    }
+  });
+  Object.defineProperty(PropertyItem.prototype, 'rxv', {
+    get: function () {
+      return this.rxv_wzqcep$_0;
+    }
+  });
+  PropertyItem.prototype.invoke = function () {
+    return this.rxv.invoke();
+  };
   PropertyItem.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'PropertyItem',
-    interfaces: []
+    interfaces: [ROProp]
   };
   function writeDynamic($receiver, ops) {
     return $receiver.type.writeDynamic(get_now($receiver), ops);
@@ -3455,6 +3483,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function PropertyList() {
     this.items = ArrayList_init();
   }
+  PropertyList.prototype.readOnlyProp_z4bjo6$ = function (value, type) {
+    if (type === void 0) {
+      type = package$properties.IdentityType;
+    }
+    return this.prop_z4bjo6$(value, type);
+  };
   function PropertyList$prop$lambda(this$PropertyList, closure$value, closure$type) {
     return function (name) {
       var $receiver = new PropertyItem(this$PropertyList.items.size, name, closure$value, closure$type);
@@ -3471,8 +3505,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   PropertyList.prototype.string = function () {
     return this.prop_z4bjo6$('');
   };
-  PropertyList.prototype.timestamp = function () {
-    return this.prop_z4bjo6$(TS$Server_getInstance(), TSPropertyType);
+  PropertyList.prototype.serverTimestamp = function () {
+    return this.readOnlyProp_z4bjo6$(TS$Server_getInstance(), ServerTimestampPropertyType);
   };
   PropertyList.prototype.list_287e2$ = function () {
     return this.prop_z4bjo6$(emptyList());
@@ -3501,7 +3535,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
           var element = tmp$_1.next();
           var pa = element.component1()
           , pb = element.component2();
-          if (!pa.type.compare(invoke_1(pa), invoke_1(pb))) {
+          if (!pa.type.compare(pa.invoke(), pb.invoke())) {
             all$result = false;
             break all$break;
           }
@@ -3630,13 +3664,182 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function rxListType_0(read) {
     return new PropertyType(rxListType$lambda_0, rxListType$lambda_1, rxListType$lambda_2, rxListType$lambda_3(read));
   }
-  function TSPropertyType$lambda(f, f_0) {
+  function ServerTimestampPropertyType$lambda(f, f_0) {
     return true;
   }
-  function TSPropertyType$lambda_0(v, ops) {
-    return ops.writeTimestamp_frv8pu$(v);
+  function ServerTimestampPropertyType$lambda_0(f, ops) {
+    return ops.writeTimestamp_frv8pu$(TS$Server_getInstance());
   }
-  var TSPropertyType;
+  var ServerTimestampPropertyType;
+  function SnapshotEvent() {
+  }
+  function SnapshotEvent$Added(id, index, data) {
+    SnapshotEvent.call(this);
+    this.id = id;
+    this.index = index;
+    this.data = data;
+  }
+  SnapshotEvent$Added.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Added',
+    interfaces: [SnapshotEvent]
+  };
+  function SnapshotEvent$Modified(index, data) {
+    SnapshotEvent.call(this);
+    this.index = index;
+    this.data = data;
+  }
+  SnapshotEvent$Modified.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Modified',
+    interfaces: [SnapshotEvent]
+  };
+  function SnapshotEvent$Moved(from, to) {
+    SnapshotEvent.call(this);
+    this.from = from;
+    this.to = to;
+  }
+  SnapshotEvent$Moved.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Moved',
+    interfaces: [SnapshotEvent]
+  };
+  function SnapshotEvent$Removed(index) {
+    SnapshotEvent.call(this);
+    this.index = index;
+  }
+  SnapshotEvent$Removed.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Removed',
+    interfaces: [SnapshotEvent]
+  };
+  SnapshotEvent.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SnapshotEvent',
+    interfaces: []
+  };
+  function Coroutine$wrapSnapshotEvents$lambda(closure$ses_0, closure$create_0, closure$wrapped_0, closure$channel_0, closure$update_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$ses = closure$ses_0;
+    this.local$closure$create = closure$create_0;
+    this.local$closure$wrapped = closure$wrapped_0;
+    this.local$closure$channel = closure$channel_0;
+    this.local$closure$update = closure$update_0;
+    this.local$tmp$ = void 0;
+  }
+  Coroutine$wrapSnapshotEvents$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$wrapSnapshotEvents$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$wrapSnapshotEvents$lambda.prototype.constructor = Coroutine$wrapSnapshotEvents$lambda;
+  Coroutine$wrapSnapshotEvents$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$tmp$ = this.local$closure$ses.iterator();
+            this.state_0 = 2;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.state_0 = 3;
+            this.result_0 = this.local$tmp$.hasNext(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 3:
+            if (!this.result_0) {
+              this.state_0 = 6;
+              continue;
+            }
+             else {
+              this.state_0 = 4;
+              continue;
+            }
+
+          case 4:
+            this.state_0 = 5;
+            this.result_0 = this.local$tmp$.next(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 5:
+            var e_0 = this.result_0;
+            if (Kotlin.isType(e_0, SnapshotEvent$Added)) {
+              var item = this.local$closure$create(e_0.id, e_0.data);
+              this.local$closure$wrapped.add_wxm5ur$(e_0.index, item);
+              plusAssign(this.local$closure$channel, new ListEvent$Add(e_0.index, item));
+            }
+             else if (Kotlin.isType(e_0, SnapshotEvent$Modified))
+              this.local$closure$update(this.local$closure$wrapped.get_za3lpa$(e_0.index), e_0.data);
+            else if (Kotlin.isType(e_0, SnapshotEvent$Moved)) {
+              this.local$closure$wrapped.add_wxm5ur$(e_0.to, this.local$closure$wrapped.removeAt_za3lpa$(e_0.from));
+              plusAssign(this.local$closure$channel, new ListEvent$Move(e_0.from, e_0.to));
+            }
+             else if (Kotlin.isType(e_0, SnapshotEvent$Removed))
+              plusAssign(this.local$closure$channel, new ListEvent$Remove(e_0.index));
+            this.state_0 = 2;
+            continue;
+          case 6:
+            return Unit;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function wrapSnapshotEvents$lambda(closure$ses_0, closure$create_0, closure$wrapped_0, closure$channel_0, closure$update_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$wrapSnapshotEvents$lambda(closure$ses_0, closure$create_0, closure$wrapped_0, closure$channel_0, closure$update_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function wrapSnapshotEvents($receiver, ses, create, update) {
+    var channel = Channel(2147483647);
+    var wrapped = ArrayList_init();
+    launch($receiver, void 0, void 0, wrapSnapshotEvents$lambda(ses, create, wrapped, channel, update));
+    return channel;
+  }
+  function listEvents$createPersisted(closure$create, closure$collectionWrap) {
+    return function (id) {
+      return toFsDoc_1(closure$create(), closure$collectionWrap, id);
+    };
+  }
+  function listEvents$lambda(closure$createPersisted, closure$ops) {
+    return function (id, data) {
+      var $receiver = closure$createPersisted(id);
+      readDynamic_0($receiver.doc, data, closure$ops);
+      return $receiver;
+    };
+  }
+  function listEvents$lambda_0(closure$ops) {
+    return function ($receiver, data) {
+      readDynamic_0($receiver.doc, data, closure$ops);
+      return Unit;
+    };
+  }
+  function listEvents($receiver, ses, collectionWrap, ops, create) {
+    var createPersisted = listEvents$createPersisted(create, collectionWrap);
+    return wrapSnapshotEvents($receiver, ses, listEvents$lambda(createPersisted, ops), listEvents$lambda_0(ops));
+  }
   function TS() {
   }
   function TS$Value(date) {
@@ -3775,6 +3978,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function toFsDoc_0($receiver, cw) {
     return toFsDoc($receiver, new FsId(cw, FsIdState$NoId_getInstance()));
+  }
+  function toFsDoc_1($receiver, cw, id) {
+    return toFsDoc($receiver, new FsId(cw, new FsIdState$HasId(id, true)));
   }
   function asyncKills$State(value, kill) {
     this.value = value;
@@ -6014,6 +6220,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
   });
   package$properties.identityType_287e2$ = identityType;
+  package$properties.ROProp = ROProp;
   package$properties.PropertyItem = PropertyItem;
   package$properties.writeDynamic_uvx324$ = writeDynamic;
   package$properties.readDynamic_r4sz0x$ = readDynamic;
@@ -6032,11 +6239,18 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$properties.readDynamic_121my8$ = readDynamic_0;
   package$properties.rxListType_4okrys$ = rxListType;
   package$properties.rxListType_68r5d9$ = rxListType_0;
-  Object.defineProperty(package$properties, 'TSPropertyType', {
+  Object.defineProperty(package$properties, 'ServerTimestampPropertyType', {
     get: function () {
-      return TSPropertyType;
+      return ServerTimestampPropertyType;
     }
   });
+  SnapshotEvent.Added = SnapshotEvent$Added;
+  SnapshotEvent.Modified = SnapshotEvent$Modified;
+  SnapshotEvent.Moved = SnapshotEvent$Moved;
+  SnapshotEvent.Removed = SnapshotEvent$Removed;
+  package$properties.SnapshotEvent = SnapshotEvent;
+  package$properties.wrapSnapshotEvents_kqphs4$ = wrapSnapshotEvents;
+  package$properties.listEvents_4qvmko$ = listEvents;
   TS.Value = TS$Value;
   Object.defineProperty(TS, 'Server', {
     get: TS$Server_getInstance
@@ -6053,6 +6267,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.get_docWrap_axmc3l$ = get_docWrap;
   package$commonshr.toFsDoc_9d6cjt$ = toFsDoc;
   package$commonshr.toFsDoc_5g5te8$ = toFsDoc_0;
+  package$commonshr.toFsDoc_osc41u$ = toFsDoc_1;
   var package$killable = _.killable || (_.killable = {});
   package$killable.asyncKills_9scqh$ = asyncKills;
   package$killable.KillableValue = KillableValue;
@@ -6247,7 +6462,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   IdentityWriteDynamic = IdentityWriteDynamic$lambda;
   IdentityReadDynamic = IdentityReadDynamic$lambda;
   IdentityType = new PropertyType();
-  TSPropertyType = new PropertyType(void 0, TSPropertyType$lambda, TSPropertyType$lambda_0);
+  ServerTimestampPropertyType = new PropertyType(void 0, ServerTimestampPropertyType$lambda, ServerTimestampPropertyType$lambda_0);
   Noop = Noop$lambda;
   NoKill = NoKill$lambda;
   currentChild = null;

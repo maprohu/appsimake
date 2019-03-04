@@ -4,6 +4,8 @@ import common.*
 import commonlib.CollectionWrap
 import commonlib.DocWrap
 import commonshr.*
+import commonshr.properties.SnapshotEvent
+import commonshr.properties.wrapSnapshotEvents
 import firebase.FirebaseError
 import firebase.firestore
 import firebaseshr.*
@@ -646,116 +648,6 @@ fun <T: HasFBProps<*>> RxSet<T>.ids(ks: KillSet): RxSet<String> {
     return ids
 }
 
-sealed class SnapshotEvent {
-    class Added(
-        val id: String,
-        val index: Int,
-        val data: dynamic
-    ): SnapshotEvent()
-    class Modified(
-        val index: Int,
-        val data: dynamic
-    ): SnapshotEvent()
-    class Moved(
-        val from: Int,
-        val to: Int
-    ): SnapshotEvent()
-    class Removed(
-        val index: Int
-    ): SnapshotEvent()
-}
-
-fun Query.documentChanges(kills: KillSet) : ReceiveChannel<DocumentChange> {
-    val channel = Channel<DocumentChange>(Channel.UNLIMITED).apply {
-        kills += { close() }
-    }
-
-    kills += onSnapshot(
-        onNext = { qs ->
-            qs.docChanges().forEach { channel.offer(it) }
-        },
-        onError = { channel.close(it) }
-    )
-
-    return channel
-}
-
-
-fun CoroutineScope.toSnapshotEvents(dcs: ReceiveChannel<DocumentChange>): ReceiveChannel<SnapshotEvent> {
-    val channel = Channel<SnapshotEvent>(Channel.UNLIMITED)
-
-    launch {
-        for(dc in dcs) {
-            when (dc.type) {
-                DocumentChangeType.added -> {
-                    channel += SnapshotEvent.Added(
-                        id = dc.doc.id,
-                        index = dc.newIndex,
-                        data = dc.doc.data()
-                    )
-                }
-                DocumentChangeType.removed -> {
-                    channel += SnapshotEvent.Removed(
-                        index = dc.oldIndex
-                    )
-                }
-                DocumentChangeType.modified -> {
-                    channel += SnapshotEvent.Modified(
-                        index = dc.oldIndex,
-                        data = dc.doc.data()
-                    )
-                    if (dc.newIndex != dc.oldIndex) {
-                        channel += SnapshotEvent.Moved(
-                            from = dc.oldIndex,
-                            to = dc.newIndex
-                        )
-                    }
-                }
-                else -> throw Error("Unkown type: ${dc.type}")
-            }
-        }
-    }
-
-    return channel
-}
-
-fun <T> CoroutineScope.wrapSnapshotEvents(
-    ses: ReceiveChannel<SnapshotEvent>,
-    create: (String, dynamic) -> T,
-    update: T.(dynamic) -> Unit
-): ReceiveChannel<ListEvent<T>> {
-    val channel = Channel<ListEvent<T>>(Channel.UNLIMITED)
-
-    val wrapped = mutableListOf<T>()
-
-    launch {
-        for (e in ses) {
-            when (e) {
-                is SnapshotEvent.Added -> {
-                    val item = create(e.id, e.data)
-                    wrapped.add(e.index, item)
-                    channel += ListEvent.Add(e.index, item)
-                }
-                is SnapshotEvent.Modified -> {
-                    wrapped[e.index].update(e.data)
-                }
-                is SnapshotEvent.Moved -> {
-                    wrapped.add(e.to, wrapped.removeAt(e.from))
-                    channel += ListEvent.Move(
-                        from = e.from,
-                        to = e.to
-                    )
-                }
-                is SnapshotEvent.Removed -> {
-                    channel += ListEvent.Remove(e.index)
-                }
-            }
-        }
-    }
-
-    return channel
-}
-
 fun <T: HasFBProps<*>> CoroutineScope.wrapSnapshotEvents(
     ses: ReceiveChannel<SnapshotEvent>,
     collectionWrap: CollectionWrap<T>,
@@ -779,10 +671,7 @@ fun <T: HasFBProps<*>> CoroutineScope.wrapSnapshotEvents(
     )
 }
 
-interface FirestoreApi: CoroutineWithKills {
-
-    fun Query.documentChanges() = documentChanges(kills)
-    fun ReceiveChannel<DocumentChange>.toSnapshotEvents() = toSnapshotEvents(this)
+interface FirestoreApi: SnapshotApi, CoroutineWithKills {
 
     fun <T: HasFBProps<*>> ReceiveChannel<SnapshotEvent>.wrap(
         collectionWrap: CollectionWrap<T>,
@@ -790,9 +679,9 @@ interface FirestoreApi: CoroutineWithKills {
     ) = wrapSnapshotEvents(this, collectionWrap, create)
 
     fun <T: HasFBProps<*>> QueryWrap<T>.wrap(create: () -> T) =
-            query
-                .documentChanges()
-                .toSnapshotEvents()
-                .wrap(collectionWrap, create)
+        query
+            .documentChanges()
+            .toSnapshotEvents()
+            .wrap(collectionWrap, create)
 
 }

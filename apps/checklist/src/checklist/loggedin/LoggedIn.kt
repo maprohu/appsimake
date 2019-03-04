@@ -7,16 +7,15 @@ import checklist.checklists
 import checklist.edit.Edit
 import checklist.home.Home
 import checklist.home.HomePath
-import checklist.home.ui
+import checklist.view.ViewChecklist
 import commonfb.FBApi
 import commonfb.UserState
 import commonfb.loginbase.UserStateView
 import commonlib.private
+import commonshr.FsDoc
 import commonshr.properties.remAssign
-import commonshr.remAssign
 import commonui.widget.ForwardBase
 import commonui.widget.TopAndContent
-import commonui.widget.UIBase
 import firebase.User
 import firebase.app.App
 import firebase.firestore.*
@@ -67,6 +66,12 @@ class LoggedIn(
             ).apply {
                 item.live
             }
+        }
+    }
+
+    suspend fun viewChecklist(cl: FsDoc<Checklist>) {
+        forward.switchTo {
+            ViewChecklist(this, cl)
         }
     }
 

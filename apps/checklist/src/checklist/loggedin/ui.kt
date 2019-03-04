@@ -1,20 +1,11 @@
-package checklist.home
+package checklist.loggedin
 
-import bootstrap.border
-import bootstrap.m1
-import bootstrap.p1
-import bootstrap.p2
+import bootstrap.*
 import checklist.Checklist
-import checklist.loggedin.LoggedIn
-import commonshr.invoke
-import commonui.widget.TopAndContent
-import commonui.widget.factory
-import commonui.widget.insert
-import domx.div
-import domx.invoke
-import domx.remAssign
-import firebase.firestore.query
-import fontawesome.plus
+import commonshr.*
+import commonui.widget.*
+import domx.*
+import fontawesome.*
 import kotlin.browser.document
 
 fun LoggedIn.ui() = TopAndContent(
@@ -39,24 +30,26 @@ fun LoggedIn.ui() = TopAndContent(
     }.node,
     content = factory.scrollPane {
         pane {
-            cls.p2
+            cls.p1
+            insert.listGroup {
+                cls.m1
+                node.list(
+                    checklists
+                        .listEvents(
+                            { Checklist() },
+                            { Checklist.ts.desc }
+                        )
+                        .map { cl ->
+                            factory.listGroupButton {
+                                text %= { cl.doc.name.rxv() }
+                                click {
+                                    viewChecklist(cl)
+                                }
+                            }.node
+                        }
+                )
 
-//            list(
-//                checklists
-//                    .query(db) { Checklist.ts.desc() }
-//                    .wrap { Checklist() }
-//                    .map { cl ->
-//                        document.div {
-//                            cls {
-//                                p1
-//                                m1
-//                                border
-//                            }
-//                        }
-//                    }
-//
-//            )
-
+            }
         }
     }.node
 )

@@ -35,7 +35,6 @@ class Edit(
         if (adder.now.isNotBlank()) {
             performAdd()
         }
-        current.ts %= TS.Server
     }
 
     val items = ListenableMutableList<ChecklistItem>().apply {

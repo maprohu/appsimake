@@ -33,9 +33,9 @@ fun <V: RxBase<*>> rxListType(
     }
 )
 
-val TSPropertyType = PropertyType<TS>(
+val ServerTimestampPropertyType = PropertyType<TS>(
     compare = { _, _ ->  true },
-    writeDynamic = { v, ops ->
-        ops.writeTimestamp(v)
+    writeDynamic = { _, ops ->
+        ops.writeTimestamp(TS.Server)
     }
 )
