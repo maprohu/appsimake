@@ -1,5 +1,6 @@
 package commonfb
 
+import firebase.DbDeps
 import firebase.firestore.Firestore
 import firebase.firestore.docRef
 import firebase.firestore.setOptionsMerge
@@ -13,7 +14,7 @@ fun <T: HasFBProps<T>> T.save(db: Firestore): Promise<Unit> {
 }
 
 fun <T: HasFBProps<T>> T.merge(db: Firestore): Promise<Unit> {
-    return props.docWrapOrFail.docRef(db).set(
+    return props.docWrapOrFail.docRef(DbDeps(db)).set(
         props.merge(),
         setOptionsMerge()
     )

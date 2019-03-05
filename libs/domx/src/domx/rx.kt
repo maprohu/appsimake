@@ -3,7 +3,6 @@ package domx
 import common.*
 import commonshr.*
 import killable.*
-import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 
 fun <T> Node.listenableList(
@@ -38,8 +37,7 @@ fun <T> Node.listenableList(
             },
             removed = { index, _ ->
                 removeAt(index)
-                val ks = kills.removeAt(index)
-                ks()
+                kills.removeAt(index).invoke()
             },
             moved = { from, to ->
                 insertAt (to, removeAt(from))
@@ -49,11 +47,11 @@ fun <T> Node.listenableList(
     )
 }
 
-inline fun <T> HasKillSet.domx(fn: DomxHasKillSet.() -> T): T {
+inline fun <T> KillsApi.domx(fn: DomxHasKillSet.() -> T): T {
     return unsafeCast<DomxHasKillSet>().run { fn() }
 }
 
-abstract class DomxHasKillSet: HasKillSet {
+abstract class DomxHasKillSet: KillsApi {
 
 
 }

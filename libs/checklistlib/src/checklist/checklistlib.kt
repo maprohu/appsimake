@@ -8,7 +8,7 @@ import commonshr.properties.RxBase
 
 val checklistLib = Lib("checklist")
 
-val DocWrap<Private>.checklists by coll<Checklist>()
+val DocWrap<Private>.checklists by coll { Checklist() }
 
 open class Checklist: RxBase<Checklist>() {
     val name by o.string()

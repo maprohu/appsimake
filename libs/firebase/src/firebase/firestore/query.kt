@@ -2,6 +2,8 @@ package firebase.firestore
 
 import commonlib.CollectionWrap
 import commonshr.properties.ROProp
+import firebase.DbApi
+import firebase.HasDb
 
 data class QuerySettings(
     val order: List<OrderBy> = emptyList()
@@ -59,12 +61,11 @@ typealias TypedQuery<T> = Query
 typealias TypedCollectionReference<T> = CollectionReference
 typealias TypedDocumentReference<T> = DocumentReference
 
-interface QueryApi: HasFirestore {
+fun <T> CollectionWrap<T>.query(
+    deps: HasDb,
+    query: QuerySettingsBuilder<T>.() -> Unit = {}
+): TypedQuery<T> = collectionRef(deps).apply(querySettings(query))
 
-    fun <T> CollectionWrap<T>.query(query: QuerySettingsBuilder<T>.() -> Unit = {}): TypedQuery<T> = ref.apply(querySettings(query))
-
-
-}
 
 
 

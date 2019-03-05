@@ -3,7 +3,9 @@ package checklist.edit
 import bootstrap.*
 import common.events
 import commonshr.*
+import commonui.editing.bind
 import commonui.editing.required
+import commonui.plus
 import commonui.widget.*
 import domx.div
 import domx.*
@@ -30,7 +32,7 @@ fun Edit.ui(): TopAndContent {
                         cls.flexFixedSize()
                         label %= "Title"
                         input {
-                            bind(kills, editing.current.name.rxv).required()
+                            bind(editing.current.name.rxv).required()
                         }
                     }
                     insert.formGroup {
@@ -68,11 +70,11 @@ fun Edit.ui(): TopAndContent {
 
                         node.div {
                             list(
-                                items.events(NoKill).map { cl ->
+                                items.events().map { cl ->
                                     factory.inputGroup {
                                         cls.m1
                                         input {
-                                            bind(kills, cl.name.rxv).required()
+                                            bind(editing + kills, cl.name.rxv).required()
                                         }
                                         append {
                                             insert.button {

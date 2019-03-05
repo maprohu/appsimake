@@ -2,6 +2,8 @@ package commonui.widget
 
 import bootstrap.*
 import commonshr.*
+import commonui.HasUix
+import commonui.UixApi
 import domx.*
 import fontawesome.*
 import kotlin.browser.document
@@ -36,10 +38,10 @@ class DropdownMenu(): ScreenWrap() {
     val item get() = DropdownMenuItem().append
     val divider get() = node.div { cls.dropdownDivider }
 
-    fun HasUIX.signOut(action: Action) = item {
+    fun signOut(deps: HasUix, action: Action) = item {
         text %= "Sign Out"
         fa.signOutAlt
-        click(action)
+        click(deps, action)
     }
 
 }

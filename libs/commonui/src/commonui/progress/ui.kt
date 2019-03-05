@@ -5,11 +5,11 @@ import commonshr.*
 import commonui.globalStatus
 import commonui.widget.*
 import domx.*
-import killable.HasKillSet
+import commonshr.KillsApi
 
 fun Progress.ui() = progressUI()
 
-fun HasKillSet.progressUI() = factory.wraps.div {
+fun KillsApi.progressUI() = factory.wraps.div {
     cls {
         flexGrow1
         column()

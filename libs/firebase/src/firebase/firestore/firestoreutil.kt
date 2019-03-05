@@ -2,19 +2,14 @@ package firebase.firestore
 
 import common.*
 import commonlib.CollectionWrap
-import commonlib.DocWrap
 import commonshr.*
 import commonshr.properties.SnapshotEvent
 import commonshr.properties.wrapSnapshotEvents
-import firebase.FirebaseError
-import firebase.firestore
+import firebase.HasDb
 import firebaseshr.*
 import killable.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.flatMap
-import kotlinx.coroutines.channels.map
 import org.w3c.dom.Element
 import rx.*
 import kotlin.reflect.KProperty
@@ -366,23 +361,23 @@ fun deleteCollection(
 }
 
 fun initBinder(
-    db: Firestore
+    deps: HasDb
 ) {
     initBinder(
         PropOps(
             delete = { FieldValue.delete() },
             serverTimestamp = { FieldValue.serverTimestamp() },
             deleteCollection = { cw ->
-                deleteCollection(cw.collectionRef(db), db)
+                deleteCollection(cw.collectionRef(deps), deps.db)
             },
             createId = {
-                it.collectionRef(db).doc().id
+                it.collectionRef(deps).doc().id
             },
             write = { w, d ->
-                w.docRef(db).set(d).asDeferred()
+                w.docRef(deps).set(d).asDeferred()
             },
             merge = { w, d ->
-                w.docRef(db).set(d, setOptionsMerge()).asDeferred()
+                w.docRef(deps).set(d, setOptionsMerge()).asDeferred()
             },
             arrayUnion = { vs ->
                 FieldValue.arrayUnion(*vs)
@@ -648,8 +643,8 @@ fun <T: HasFBProps<*>> RxSet<T>.ids(ks: KillSet): RxSet<String> {
     return ids
 }
 
-fun <T: HasFBProps<*>> CoroutineScope.wrapSnapshotEvents(
-    ses: ReceiveChannel<SnapshotEvent>,
+fun <T: HasFBProps<*>> ReceiveChannel<SnapshotEvent>.listEvents(
+    deps: CoroutineScope,
     collectionWrap: CollectionWrap<T>,
     create: () -> T
 ): ReceiveChannel<ListEvent<T>> {
@@ -659,7 +654,7 @@ fun <T: HasFBProps<*>> CoroutineScope.wrapSnapshotEvents(
         )
     }
     return wrapSnapshotEvents(
-        ses,
+        deps,
         create = { id, data ->
             createPersisted(id).apply {
                 initFrom(data)
@@ -671,17 +666,9 @@ fun <T: HasFBProps<*>> CoroutineScope.wrapSnapshotEvents(
     )
 }
 
-interface FirestoreApi: SnapshotApi, CoroutineWithKills {
+fun <T: HasFBProps<*>> QueryWrap<T>.listEvents(deps: HasCsKills, create: () -> T) =
+    query
+        .documentChanges(deps)
+        .toSnapshotEvents(deps)
+        .listEvents(deps, collectionWrap, create)
 
-    fun <T: HasFBProps<*>> ReceiveChannel<SnapshotEvent>.wrap(
-        collectionWrap: CollectionWrap<T>,
-        create: () -> T
-    ) = wrapSnapshotEvents(this, collectionWrap, create)
-
-    fun <T: HasFBProps<*>> QueryWrap<T>.wrap(create: () -> T) =
-        query
-            .documentChanges()
-            .toSnapshotEvents()
-            .wrap(collectionWrap, create)
-
-}

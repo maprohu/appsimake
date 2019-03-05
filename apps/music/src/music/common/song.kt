@@ -3,32 +3,23 @@ package music.common
 import bootstrap.*
 import commonfb.CommonFbApi
 import commonshr.*
-import commonui.faButtonSpan
-import commonui.webkitdirectorySupported
 import commonui.widget.*
 import domx.*
 import fontawesome.*
-import fontawesome.folderOpen
-import killable.HasKillSet
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.cancel
+import commonshr.KillsApi
 import music.Playable
-import music.boot.Boot
 import music.loggedin.LoggedIn
-import musiclib.Mp3File
 import musiclib.UserSongState
 import musiclib.fixedArtist
 import musiclib.fixedTitle
-import org.w3c.dom.asList
 import org.w3c.files.Blob
-import org.w3c.files.File
 import kotlin.browser.document
 import kotlin.math.roundToInt
 
 fun CommonFbApi.songUi(
     id: String,
     fileName: String?,
-    blob: HasKillSet.() -> (suspend () -> Blob?)?,
+    blob: KillsApi.() -> (suspend () -> Blob?)?,
     loggedIn: LoggedIn,
     bgfn: ButtonGroup.() -> Unit
 ) = document.div {

@@ -1,11 +1,10 @@
 package commonui.widget
 
 import commonshr.*
-import commonui.UiApi
-import commonui.UiKillsApi
-import killable.HasKillSet
+import commonshr.KillsApi
+import commonui.HasUix
+import commonui.UixApi
 import killable.Killables
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import rx.RxIface
@@ -43,7 +42,7 @@ val JobScope.createKills get() = Killables().apply {
 }.killSet
 open class JobKillsImpl(
     coroutineContext: Job = Job()
-): JobScopeImpl(coroutineContext), HasKillSet, UiApi, JobKillsApi {
+): JobScopeImpl(coroutineContext), KillsApi, JobKillsApi {
     constructor(parent: JobScope): this(Job(parent.coroutineContext))
 
     override val kills = createKills
@@ -147,7 +146,7 @@ abstract class ViewImpl<V: Any>(
 
 abstract class UIBase<V: Any>(
     coroutineContext: Job
-): ViewImpl<V>(coroutineContext), HasUIX {
+): ViewImpl<V>(coroutineContext), UixApi {
     constructor(
         parent: JobScope
     ): this(Job(parent.coroutineContext))
@@ -192,7 +191,7 @@ class JobSwitch<T> private constructor(
         current.now = fn()
     }
 
-    fun <S> fromRx(kills: HasKillSet, exec: Exec, source: RxIface<S>, fn: suspend (S) -> T) = with(kills) {
+    fun <S> fromRx(kills: KillsApi, exec: Exec, source: RxIface<S>, fn: suspend (S) -> T) = with(kills) {
         source.forEach { s ->
             exec {
                 switchTo {
@@ -212,14 +211,14 @@ class JobSwitch<T> private constructor(
             initial,
             job = { this?.let { item.coroutineContext } }
         )
-        fun <V: Any, I: JobScopeWithView<V>> views(kills: HasKillSet, initial: I, fn: HoleT<V>): JobSwitch<ItemWithViewRx<I, V>> {
+        fun <V: Any, I: JobScopeWithView<V>> views(kills: KillsApi, initial: I, fn: HoleT<V>): JobSwitch<ItemWithViewRx<I, V>> {
             fun I.wrap() = ItemWithViewRx<I, V>(this) { this.view(it) }
 
             return jobWithView(initial.wrap()).apply {
                 runView(kills, fn)
             }
         }
-        fun <V: Any, I: JobScopeWithView<V>> viewsOpt(kills: HasKillSet, initial: I?, fn: HoleT<V>): JobSwitch<ItemWithViewRx<I, V>?> {
+        fun <V: Any, I: JobScopeWithView<V>> viewsOpt(kills: KillsApi, initial: I?, fn: HoleT<V>): JobSwitch<ItemWithViewRx<I, V>?> {
             fun I?.wrap() = this?.let { ItemWithViewRx<I, V>(this) { this.view(it) } }
 
             return jobWithView(initial.wrap()).apply {
@@ -239,7 +238,7 @@ class JobSwitch<T> private constructor(
 
 fun <S, V> JobSwitch<JobScopeWithItem<V>>.fromRx(
     job: JobScopeApi,
-    kills: HasKillSet,
+    kills: KillsApi,
     exec: Exec,
     source: RxIface<S>,
     fn: suspend JobKillsImpl.(S) -> V
@@ -263,7 +262,7 @@ suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.sw
     item()?.let { v -> ItemWithViewRx.hasView(v) }
 }
 
-fun <S, V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.fromRx(kills: HasKillSet, exec: Exec, source: RxIface<S>, fn: suspend (S) -> I?) = apply {
+fun <S, V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>?>.fromRx(kills: KillsApi, exec: Exec, source: RxIface<S>, fn: suspend (S) -> I?) = apply {
     with(kills) {
         source.forEach { s ->
             exec {
@@ -289,10 +288,10 @@ suspend fun <V: Any, I: JobScopeWithView<V>> JobSwitch<ItemWithViewRx<I, V>>.swi
     switchTo { item().let { i -> ItemWithViewRx(i) { i.view(it) } } }
 }
 
-fun <V, T: ItemWithViewRx<*, V?>> JobSwitch<T?>.runViewOpt(kills: HasKillSet, fn: HoleT<V>) = with(kills) {
+fun <V, T: ItemWithViewRx<*, V?>> JobSwitch<T?>.runViewOpt(kills: KillsApi, fn: HoleT<V>) = with(kills) {
     rx { invoke()?.view?.invoke(fn.prepareOrNull) }.forEach(fn.assign.ignoreThis)
 }
-fun <V: Any, T: ItemWithViewRx<*, V>> JobSwitch<T>.runView(kills: HasKillSet, hole: HoleT<V>) = with(kills) {
+fun <V: Any, T: ItemWithViewRx<*, V>> JobSwitch<T>.runView(kills: KillsApi, hole: HoleT<V>) = with(kills) {
     rx { invoke().view(hole.prepareOrNull) }.forEach(hole.assign.ignoreThis)
 }
 

@@ -2,22 +2,12 @@ package commonui.widget
 
 import bootstrap.*
 import commonshr.Action
-import commonshr.InvokeApply
 import commonshr.invoke
-import commonshr.remAssign
 import domx.*
-import fontawesome.chevronLeft
-import fontawesome.fa
-import fontawesome.fw
-import killable.HasKillSet
+import commonshr.KillsApi
+import commonui.HasUix
 import killable.HasNoKill
-import killable.NoKill
-import org.w3c.dom.Element
-import org.w3c.dom.HTMLElement
-import org.w3c.dom.Node
-import rx.Rx
 import rx.Var
-import rx.rxClass
 import kotlin.browser.document
 
 class Topbar(): ScreenWrap() {
@@ -95,7 +85,7 @@ class Tabs: ScreenWrap() {
 }
 
 
-class Tab(val owner: Tabs): ScreenWrap(), HasKillSet by HasNoKill {
+class Tab(val owner: Tabs): ScreenWrap(), KillsApi by HasNoKill {
 
     val isActive = rx { owner.active() == this@Tab }
 
@@ -122,9 +112,9 @@ class Tab(val owner: Tabs): ScreenWrap(), HasKillSet by HasNoKill {
         owner.active %= this
     }
 
-    fun HasUIX.click(action: Action) = anchor.click(action)
+    fun click(deps: HasUix, action: Action) = anchor.click(deps, action)
 
-    val HasUIX.clickActivate get() = click { activate() }
+    fun clickActivate(deps: HasUix) = click(deps) { activate() }
 
 }
 

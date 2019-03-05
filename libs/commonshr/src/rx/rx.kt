@@ -33,7 +33,7 @@ typealias KillOrder = (process: Trigger, kill: Trigger) -> Unit
 
 class RxCalc<T>(
     ks: KillSet,
-    private val fn: HasKillSet.() -> T,
+    private val fn: KillsApi.() -> T,
     val killOrder: KillOrder = KillFirst
 ) : RxChild() {
 
@@ -105,7 +105,7 @@ class Obs<T>(
     private val parent: RxVal<T>,
     killStart: Trigger = {},
     val killOrder: KillOrder = KillFirst,
-    private val fn: HasKillSet.(T) -> Unit
+    private val fn: KillsApi.(T) -> Unit
 ) {
 
     init {
@@ -132,12 +132,12 @@ interface RxIface<out T> {
 
     operator fun invoke(): T
 
-    fun <S> map(ks: KillSet, fn: HasKillSet.(T) -> S) = Rx(ks) { fn(invoke()) }
+    fun <S> map(ks: KillSet, fn: KillsApi.(T) -> S) = Rx(ks) { fn(invoke()) }
 
-//    fun <S> flatMap(ks: KillSet, fn: HasKillSet.(T) -> RxIface<S>) = Rx(ks) { fn(invoke()) }
+//    fun <S> flatMap(ks: KillSet, fn: KillsApi.(T) -> RxIface<S>) = Rx(ks) { fn(invoke()) }
 
-    fun forEach(ks: KillSet, fn: HasKillSet.(T) -> Unit) = forEach(ks, KillFirst, fn)
-    fun forEach(ks: KillSet, killOrder: KillOrder, fn: HasKillSet.(T) -> Unit) {
+    fun forEach(ks: KillSet, fn: KillsApi.(T) -> Unit) = forEach(ks, KillFirst, fn)
+    fun forEach(ks: KillSet, killOrder: KillOrder, fn: KillsApi.(T) -> Unit) {
         val ks0 = ks.killables()
         ks0.fn(now)
         return forEachLater(ks, ks0.kill, killOrder) {
@@ -156,10 +156,10 @@ interface RxIface<out T> {
         ks: KillSet,
         killStart: Trigger = {},
         killOrder: KillOrder = KillFirst,
-        fn: HasKillSet.(T) -> Unit
+        fn: KillsApi.(T) -> Unit
     )
 
-//    fun forEachLater(ks: KillSet, fn: HasKillSet.(T) -> Unit)
+//    fun forEachLater(ks: KillSet, fn: KillsApi.(T) -> Unit)
 
     fun <F> fold(ks: KillSet, z0: F, fn: (F, T) -> F) {
         var z = z0
@@ -214,7 +214,7 @@ interface RxIface<out T> {
 //        }
 //    }
 
-    fun <F> foldLater(ks: KillSet, z0: F, fn: HasKillSet.(F, T) -> F) {
+    fun <F> foldLater(ks: KillSet, z0: F, fn: KillsApi.(F, T) -> F) {
         var z = z0
 
         forEachLater(ks) {
@@ -222,7 +222,7 @@ interface RxIface<out T> {
         }
     }
 
-    fun onChange(ks: KillSet, fn: HasKillSet.(old: T /* old */, new: T /* new */) -> Unit) {
+    fun onChange(ks: KillSet, fn: KillsApi.(old: T /* old */, new: T /* new */) -> Unit) {
         return foldLater(ks, now) { old, new ->
             fn(old, new)
             new
@@ -343,7 +343,7 @@ abstract class RxVal<T>(
         ks: KillSet,
         killStart: Trigger,
         killOrder: KillOrder,
-        fn: HasKillSet.(T) -> Unit
+        fn: KillsApi.(T) -> Unit
     ) {
         val obs = Obs(ks, this, killStart, killOrder, fn)
         observers += obs
@@ -398,13 +398,13 @@ class Rx<T> private constructor(
 
     constructor(
         ks: KillSet,
-        fn: HasKillSet.() -> T
+        fn: KillsApi.() -> T
     ) : this(ks, RxCalc(ks, fn))
 
     constructor(
         ks: KillSet,
         killFirst: Boolean,
-        fn: HasKillSet.() -> T
+        fn: KillsApi.() -> T
     ) : this(ks, RxCalc(ks, fn, if (killFirst) KillFirst else KillLast))
 }
 
@@ -450,7 +450,7 @@ fun <T> Var<Optional<T>>.set(v: T) {
 
 fun Element.rxClass(
     ks: KillSet,
-    style: HasKillSet.() -> String
+    style: KillsApi.() -> String
 )  {
     val rxv = Rx(ks, style)
     rxClass(ks, rxv)
@@ -487,7 +487,7 @@ fun Element.rxClass(
 fun Element.rxClass(
     ks: KillSet,
     style: String,
-    fn: HasKillSet.() -> Boolean
+    fn: KillsApi.() -> Boolean
 )  {
     val rxv = Rx(ks) { fn() }
     rxClass(ks, style, rxv)
@@ -504,11 +504,11 @@ fun Element.rxClassOpt(
     )
 }
 
-fun <T> (HasKillSet.() -> T).toRx(ks: KillSet) = Rx(ks, this)
+fun <T> (KillsApi.() -> T).toRx(ks: KillSet) = Rx(ks, this)
 
 fun Element.rxClasses(
     ks: KillSet,
-    style: HasKillSet.() -> Collection<String>
+    style: KillsApi.() -> Collection<String>
 ) = rxClasses(ks, style.toRx(ks))
 
 fun Element.rxClasses(
@@ -537,7 +537,7 @@ fun <T> RxIface<T>.toChannelLater(ks: KillSet): ReceiveChannel<T> {
 
 suspend fun <T, S> RxIface<T>.mapAsync(
     ks: KillSet,
-    fn: suspend HasKillSet.(T) -> S
+    fn: suspend KillsApi.(T) -> S
 ): RxIface<S> {
     val kseq = ks.seq()
 
@@ -556,5 +556,5 @@ suspend fun <T, S> RxIface<T>.mapAsync(
 }
 
 
-fun <T> KillSet.rx(fn: HasKillSet.() -> T): RxIface<T> = Rx(this, fn)
+fun <T> KillSet.rx(fn: KillsApi.() -> T): RxIface<T> = Rx(this, fn)
 fun <T> T.toVar() = Var(this)

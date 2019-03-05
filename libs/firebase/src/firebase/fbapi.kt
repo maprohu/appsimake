@@ -3,12 +3,12 @@ package firebase
 import commonshr.InvokeWith
 import firebase.firestore.ids
 import firebaseshr.HasFBProps
-import killable.HasKillSet
+import commonshr.KillsApi
 import rx.RxSet
 
-interface FirebaseApi: HasKillSet, InvokeWith {
+interface FirebaseApi: KillsApi, InvokeWith {
     val <T: HasFBProps<*>> RxSet<T>.ids get() = ids(kills)
 
 }
 
-val HasKillSet.fbapi: FirebaseApi get() = object : FirebaseApi, HasKillSet by this {}
+val KillsApi.fbapi: FirebaseApi get() = object : FirebaseApi, KillsApi by this {}

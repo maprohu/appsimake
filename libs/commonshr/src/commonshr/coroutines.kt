@@ -10,6 +10,7 @@ import rx.Var
 import kotlin.coroutines.CoroutineContext
 
 operator fun <T> SendChannel<T>.plusAssign(msg: T) { this.offer(msg) }
+suspend operator fun <T> SendChannel<T>.timesAssign(msg: T) { this.send(msg) }
 
 typealias Action = suspend () -> Unit
 typealias Exec = (Action) -> Unit

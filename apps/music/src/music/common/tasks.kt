@@ -1,18 +1,17 @@
 package music.common
 
-import commonfb.CommonFbApi
 import commonui.widget.Factory
 import bootstrap.*
 import commonshr.*
-import killable.HasKillSet
+import commonshr.KillsApi
 import music.boot.Boot
 
-fun HasKillSet.tasksUi(
+fun KillsApi.tasksUi(
     factory: Factory,
     boot: Boot
 ) = tasksUi(factory) { boot.tasks.pending() }
 
-fun HasKillSet.tasksUi(
+fun KillsApi.tasksUi(
     factory: Factory,
     fn: () -> Int
 ) = factory.badge {

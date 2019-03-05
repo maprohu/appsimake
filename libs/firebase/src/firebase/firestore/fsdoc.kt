@@ -1,79 +1,85 @@
 package firebase.firestore
 
+import common.dyn
+import commonlib.CollectionSource
 import commonlib.CollectionWrap
+import commonlib.DocSource
 import commonlib.DocWrap
 import commonshr.*
 import commonshr.properties.*
-import firebase.firestore
-import killable.HasKillSet
-import kotlinx.coroutines.CoroutineScope
+import firebase.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.map
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.launch
 import kotlin.js.Promise
 
-fun DocWrap<*>.docRef(db: Firestore = firestore()) = db.doc(path)
-fun CollectionWrap<*>.collectionRef(db: Firestore = firestore()) = db.collection(path)
-fun <D> CollectionWrap<D>.randomDoc(db: Firestore = firestore()) = doc(collectionRef(db).doc().id)
+fun DocWrap<*>.docRef(db: Firestore) = db.doc(path)
+fun DocWrap<*>.docRef(deps: HasDb) = deps.db.doc(path)
+fun CollectionWrap<*>.collectionRef(deps: HasDb) = deps.db.collection(path)
+fun <D> CollectionWrap<D>.randomDoc(deps: HasDb) = doc(collectionRef(deps).doc().id)
+fun <D> CollectionSource<D>.randomDoc(deps: HasDb) = doc(collectionRef(deps).doc().id)
 
-interface FsDocApi: HasFirestore {
-
-    fun <D: RxBase<*>> D.toRandomFsDoc(cw: CollectionWrap<D>) = toFsDoc(FsId(cw.randomDoc, false))
-
-    fun <D: RxBase<*>> FsDoc<D>.save(): Promise<Unit> {
-        return id.state.now.let { st ->
-            val dw = when (st) {
-                FsIdState.NoId -> {
-                    id.coll.randomDoc.also { rdw ->
-                        id.state %= FsIdState.HasId(rdw.id, false)
-                    }
-                }
-                is FsIdState.HasId -> {
-                    id.coll.doc(st.id)
+fun <D: RxBase<*>> FsDoc<D>.save(deps: HasDb): Promise<Unit> {
+    return id.state.now.let { st ->
+        val dw = when (st) {
+            FsIdState.NoId -> {
+                id.coll.randomDoc(deps).also { rdw ->
+                    id.state %= FsIdState.HasId(rdw.id, false)
                 }
             }
-
-            dw.ref.set(
-                doc.writeDynamic(FsDynamicOps)
-            )
-        }
-    }
-
-    fun <D: RxBase<*>> FsDoc<D>.delete(): Promise<Unit> = id.docWrap.ref.delete()
-
-}
-
-interface FsDocApiWithHasKillSet: FsDocApi, HasKillSet {
-
-    val <D : RxBase<*>> FsDoc<D>.snapshots: ReceiveChannel<DocumentSnapshot>
-        get() {
-            val channel = Channel<DocumentSnapshot>(Channel.UNLIMITED)
-
-            kills += id.docWrap.ref.onSnapshotNext { ds ->
-                channel += ds
-            }
-
-            return channel
-        }
-}
-
-interface FsDocApiWithHasKillSetWithCoroutineScope: FsDocApiWithHasKillSet, JobScope {
-
-    val <D: RxBase<*>> FsDoc<D>.live get() = apply {
-        launch {
-            for (s in snapshots) {
-                updateFrom(s)
+            is FsIdState.HasId -> {
+                id.coll.doc(st.id)
             }
         }
-    }
 
+        dw.docRef(deps).set(
+            doc.writeDynamic(FsDynamicOps)
+        )
+    }
 }
+
+fun <D: RxBase<*>> FsDoc<D>.delete(deps: HasDb): Promise<Unit> = id.docWrap.docRef(deps).delete()
+
+fun <D: RxBase<*>> D.toRandomFsDoc(deps: HasDb, cw: CollectionSource<D>) = toFsDoc(FsId(cw.randomDoc(deps), false))
+
+
+fun <D : RxBase<*>> FsDoc<D>.snapshots(deps: HasCsDbKills) = id.docWrap.snapshots(deps)
+
+fun <D> DocSource<D>.read(ds: DocumentSnapshot): D? {
+    return if (ds.exists) {
+        parent.factory(ds.data(), FsDynamicOps)
+    } else {
+        null
+    }
+}
+
+@UseExperimental(ExperimentalCoroutinesApi::class)
+fun <D> DocSource<D>.docs(deps: HasCsDbKills): ReceiveChannel<D> = deps.produce(capacity = Channel.UNLIMITED) {
+    for (s in snapshots(deps)) {
+        read(s)?.let {
+            channel *= it
+        }
+    }
+}
+
+fun <D: RxBase<*>> FsDoc<D>.live(deps: HasCsDbKills) = apply {
+    deps.launch {
+        for (s in snapshots(deps)) {
+            updateFrom(s)
+        }
+    }
+}
+
+val DocumentSnapshot.fsIdState get() = FsIdState.HasId(
+    ref.id,
+    exists
+)
 
 fun <D: RxBase<*>> FsDoc<D>.updateFrom(ds: DocumentSnapshot) {
-    id.state %= FsIdState.HasId(
-        ds.ref.id,
-        ds.exists
-    )
+    id.state %= ds.fsIdState
 
     if (ds.exists) {
         doc.readDynamic(ds.data(), FsDynamicOps)

@@ -4,6 +4,7 @@ import common.None
 import common.Optional
 import common.Some
 import commonshr.*
+import commonui.HasKillsUix
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import rx.RxIface
@@ -47,13 +48,10 @@ interface HasRedisplay {
     val redisplay: Trigger
 }
 
-interface HasFrom {
-    val from: HasRedisplay
-}
 
 abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
     coroutineContext: Job
-): ViewImplBase<V>(coroutineContext), HasKillSetAndUIX, HasRedisplay {
+): ViewImplBase<V>(coroutineContext), HasKillsUix, HasRedisplay {
     constructor(
         parent: JobScope
     ): this(Job(parent.coroutineContext))

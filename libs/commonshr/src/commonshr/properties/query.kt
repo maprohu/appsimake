@@ -1,5 +1,6 @@
 package commonshr.properties
 
+import commonlib.CollectionSource
 import commonlib.CollectionWrap
 import commonshr.FsDoc
 import commonshr.ListEvent
@@ -29,8 +30,8 @@ sealed class SnapshotEvent {
     ): SnapshotEvent()
 }
 
-fun <T> CoroutineScope.wrapSnapshotEvents(
-    ses: ReceiveChannel<SnapshotEvent>,
+fun <T> ReceiveChannel<SnapshotEvent>.wrapSnapshotEvents(
+    deps: CoroutineScope,
     create: (String, dynamic) -> T,
     update: T.(dynamic) -> Unit
 ): ReceiveChannel<ListEvent<T>> {
@@ -38,8 +39,8 @@ fun <T> CoroutineScope.wrapSnapshotEvents(
 
     val wrapped = mutableListOf<T>()
 
-    launch {
-        for (e in ses) {
+    deps.launch {
+        for (e in this@wrapSnapshotEvents) {
             when (e) {
                 is SnapshotEvent.Added -> {
                     val item = create(e.id, e.data)
@@ -66,16 +67,16 @@ fun <T> CoroutineScope.wrapSnapshotEvents(
     return channel
 }
 
-fun <T: RxBase<*>> CoroutineScope.listEvents(
-    ses: ReceiveChannel<SnapshotEvent>,
-    collectionWrap: CollectionWrap<T>,
+fun <T: RxBase<*>> ReceiveChannel<SnapshotEvent>.listEvents(
+    deps: CoroutineScope,
+    collectionWrap: CollectionSource<T>,
     ops: DynamicOps,
     create: () -> T
 ): ReceiveChannel<ListEvent<FsDoc<T>>> {
     fun createPersisted(id: String) = create().toFsDoc(collectionWrap, id)
 
     return wrapSnapshotEvents(
-        ses,
+        deps,
         create = { id, data ->
             createPersisted(id).apply {
                 doc.readDynamic(data, ops)

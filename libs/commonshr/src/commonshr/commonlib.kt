@@ -1,6 +1,9 @@
 package commonlib
 
 import common.named
+import commonshr.properties.DynamicOps
+import commonshr.properties.RxBase
+import commonshr.properties.readDynamic
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -26,11 +29,24 @@ class Function<in I, out O>(
 
 
 
-open class DocWrap<in D>(
-    val id: String,
+interface DocWrap<in D>: HasPath {
+    val id: String
     val parent: CollectionWrap<D>?
-): HasPath {
-    override val path : String = "${parent?.path ?: ""}/$id"
+}
+
+class DocWrapImpl<in D>(
+    override val id: String,
+    override val parent: CollectionWrap<D>?
+): DocWrap<D> {
+    override val path : String  = "${parent?.path ?: ""}/$id"
+}
+
+
+class DocSource<D>(
+    override val id: String,
+    override val parent: CollectionSource<D>
+): DocWrap<D> {
+    override val path : String  = "${parent.path}/$id"
 }
 
 fun <D2> coll() = object : ReadOnlyProperty<DocWrap<*>, CollectionWrap<D2>> {
@@ -38,7 +54,14 @@ fun <D2> coll() = object : ReadOnlyProperty<DocWrap<*>, CollectionWrap<D2>> {
         CollectionWrap<D2>(property.name, thisRef)
 }
 
-
+fun <D2: RxBase<*>> coll(fn: () -> D2) = object : ReadOnlyProperty<DocWrap<*>, CollectionSource<D2>> {
+    override fun getValue(thisRef: DocWrap<*>, property: KProperty<*>) =
+        CollectionSource(property.name, thisRef) { d, ops ->
+            fn().apply {
+                readDynamic(d, ops)
+            }
+        }
+}
 
 interface HasPath {
     val path: String
@@ -50,15 +73,23 @@ open class CollectionWrap<in D>(
 ) : HasPath {
     override val path : String = "${parent?.path ?: ""}/$id"
 
-    fun <D2: D> docd(id: String) = DocWrap<D2>(id, this)
-    fun doc(id: String) = docd<D>(id)
+    open fun doc(id: String): DocWrap<D> = DocWrapImpl(id, this)
+}
+
+class CollectionSource<D>(
+    id: String,
+    parent: DocWrap<*>? = null,
+    val factory: (dynamic, DynamicOps) -> D
+): CollectionWrap<D>(id, parent) {
+
+    override fun doc(id: String) = DocSource(id, this)
+
 }
 
 fun <D2> doc() = object : ReadOnlyProperty<CollectionWrap<D2>, DocWrap<D2>> {
     override fun getValue(thisRef: CollectionWrap<D2>, property: KProperty<*>) =
-            DocWrap<D2>(property.name, thisRef)
+            DocWrapImpl(property.name, thisRef)
 }
-fun <D> docn() = doc<D>()
 
 object apps : CollectionWrap<AppDoc>("apps", null)
 

@@ -8,6 +8,7 @@ import commonui.APP
 import commonui.AppCtx
 import commonui.isFcmSupported
 import firebase.AppOptions
+import firebase.DbDeps
 import firebase.app.App
 import firebase.firestore.*
 import firebase.functions.Functions
@@ -36,7 +37,7 @@ object FB {
 
     val db by lazy {
         app.firestore().withDefaultSettings().also { db ->
-            initBinder(db)
+            initBinder(DbDeps(db))
         }
     }
 
@@ -74,15 +75,15 @@ object FB {
 
 }
 
-interface HasDB {
-    val db: Firestore
-
-    val DocWrap<*>.ref
-        get() = docRef(db)
-
-    val CollectionWrap<*>.ref
-        get() = collectionRef(db)
-}
+//interface HasDB {
+//    val db: Firestore
+//
+//    val DocWrap<*>.ref
+//        get() = docRef(db)
+//
+//    val CollectionWrap<*>.ref
+//        get() = collectionRef(db)
+//}
 
 //class FbCtx(
 //    val appCtx: AppCtx,

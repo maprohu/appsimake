@@ -13,7 +13,7 @@ import rx.RxCalc.Companion.KillLast
 typealias SongSource = RxIface<(suspend () -> Playable?)?>
 typealias SongIncludeRx = (String) -> RxIface<Boolean>
 
-fun HasKillSet.songSource(
+fun KillsApi.songSource(
     includeSong: RxIface<SongIncludeRx>,
     localSongsDB: LocalSongs
 ): SongSource {
@@ -84,7 +84,7 @@ fun HasKillSet.songSource(
 
 }
 
-private fun HasKillSet.getInclude(states: GetUserSongState, state: UserSongState): SongIncludeRx {
+private fun KillsApi.getInclude(states: GetUserSongState, state: UserSongState): SongIncludeRx {
     val map = mutableMapOf<String, RxIface<Boolean>>()
 
     return { id ->
@@ -104,7 +104,7 @@ private sealed class IncludeState {
         val like: SongIncludeRx
     ): IncludeState()
 }
-fun HasKillSet.songInclude(
+fun KillsApi.songInclude(
     localSongs: LocalSongs,
     userSongs: RxIface<GetUserSongState?>
 ): RxIface<SongIncludeRx> {

@@ -9,6 +9,7 @@ import commonshr.invoke
 import commonshr.plusAssign
 import commonui.*
 import domx.*
+import firebase.HasDb
 import firebase.firestore.*
 import firebaseshr.*
 import fontawesome.*
@@ -76,7 +77,7 @@ fun <T: HasFBProps<*>> EditScreenConfig<T>.build(
     panel: RootPanel,
     item: T,
     close: () -> Unit,
-    db: Firestore
+    db: HasDb
 ) {
 
     item.props.rollback()

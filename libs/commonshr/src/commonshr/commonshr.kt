@@ -4,9 +4,8 @@ import common.EmitterIface
 import common.None
 import common.Optional
 import common.Some
-import killable.HasKillSet
+import commonshr.KillsApi
 import killable.KillSet
-import killable.Killables
 import killable.killables
 import rx.Var
 
@@ -84,7 +83,7 @@ fun <T> EmitterIface<SetDiff<T>>.toMoves() : EmitterIface<SetMove<T>> = object: 
     }
 }
 
-fun <T> EmitterIface<SetMove<T>>.process(ks: KillSet, fn: HasKillSet.(T) -> Unit) {
+fun <T> EmitterIface<SetMove<T>>.process(ks: KillSet, fn: KillsApi.(T) -> Unit) {
     val map = mutableMapOf<T, Trigger>()
 
     ks += {
@@ -109,7 +108,7 @@ fun <T> EmitterIface<SetMove<T>>.process(ks: KillSet, fn: HasKillSet.(T) -> Unit
     }
 }
 
-fun <T, S> EmitterIface<SetMove<T>>.toMap(ks: KillSet, fn: HasKillSet.(T) -> S): Map<T, S> {
+fun <T, S> EmitterIface<SetMove<T>>.toMap(ks: KillSet, fn: KillsApi.(T) -> S): Map<T, S> {
     val map = mutableMapOf<T, Pair<S, Trigger>>()
 
     ks += {

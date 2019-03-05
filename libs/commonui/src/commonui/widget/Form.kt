@@ -4,11 +4,9 @@ import bootstrap.*
 import common.listen
 import commonshr.*
 import domx.*
-import killable.HasKillSet
 import killable.NoKill
 import org.w3c.dom.events.Event
 import rx.Rx
-import rx.RxIface
 import rx.Var
 import kotlin.browser.document
 

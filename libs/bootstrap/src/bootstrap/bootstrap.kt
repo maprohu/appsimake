@@ -7,7 +7,7 @@ import kotlin.browser.document
 import common.*
 import commonshr.invoke
 import domx.*
-import killable.HasKillSet
+import commonshr.KillsApi
 import killable.KillSet
 import org.w3c.dom.events.MouseEvent
 import styles.*
@@ -291,7 +291,7 @@ fun HTMLElement.rxText(ks: KillSet, rxVal: RxVal<String>) {
     }
 }
 
-fun HTMLElement.rxText(ks: KillSet, fn: HasKillSet.() -> String) {
+fun HTMLElement.rxText(ks: KillSet, fn: KillsApi.() -> String) {
     val rx = Rx(ks, fn)
     rxText(ks, rx)
 }

@@ -1,18 +1,24 @@
 package commonfb
 
-import common.CommonApi
-import commonshr.CommonShrApi
-import commonui.UiApi
-import commonui.UiKillsApi
-import commonui.widget.HasKillSetAndUIX
-import commonui.widget.HasUIX
-import firebase.FirebaseApi
-import firebase.firestore.FirestoreApi
-import firebase.firestore.FirestoreViewApi
-import killable.HasKillSet
+import commonshr.FsDoc
+import commonshr.api
+import commonfb.editing.*
+import commonshr.properties.RxBase
+import commonui.CsApiCommonui
+import commonui.KillsApiCommonui
+import commonui.UixApi
+import firebase.CsDbKillsApi
+import firebase.DbKillsApi
 
-interface CommonFbApi: HasUIX, UiKillsApi, FirebaseApi, HasKillSet
 
-val HasKillSetAndUIX.fbapi: CommonFbApi get() = object : CommonFbApi, HasKillSetAndUIX by this {}
+interface DbKillsApiCommonfb: DbKillsApi {
+    fun <T: RxBase<*>> rxEditing(initial: FsDoc<T>, preSave: suspend (T) -> Unit) = rxEditing(api, initial, preSave)
 
-interface FBApi: CommonFbApi, FirebaseApi, FirestoreViewApi, UiApi, CommonShrApi, CommonApi
+}
+
+typealias FBApi = CsDbKillsApiCommonfb
+
+interface CsDbKillsApiCommonfb: CsDbKillsApi, DbKillsApiCommonfb, UixApi, CsApiCommonui, KillsApiCommonui {
+
+}
+

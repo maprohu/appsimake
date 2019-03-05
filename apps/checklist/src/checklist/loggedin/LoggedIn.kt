@@ -16,12 +16,13 @@ import commonshr.FsDoc
 import commonshr.properties.remAssign
 import commonui.widget.ForwardBase
 import commonui.widget.TopAndContent
+import firebase.HasDb
 import firebase.User
 import firebase.app.App
 import firebase.firestore.*
 import kotlinx.coroutines.launch
 
-interface LoggedInPath: HomePath, HasFirestoreApi {
+interface LoggedInPath: HomePath, HasDb {
     val loggedIn: LoggedIn
 }
 
@@ -47,16 +48,6 @@ class LoggedIn(
         forward.switchTo {
             val item = Checklist().apply {
                 name %= "<unknown>"
-                items %= listOf(
-                    ChecklistItem().apply {
-                        name %= "nchk"
-                        checked %= false
-                    },
-                    ChecklistItem().apply {
-                        name %= "chk"
-                        checked %= true
-                    }
-                )
             }.toRandomFsDoc(checklists)
 
             Edit(

@@ -40,6 +40,9 @@ val Node.slotholes : SlotHoles
             PrevRef.of(lastChild)
         ).also { asDynamic()[SlotsAttribute] = it }
 
+fun Slot.rx(deps: HasKills, fn: () -> Node?) {
+    Rx(deps.kills) { fn() }.forEach(deps.kills) { this@rx %= it }
+}
 
 val Node.append : Slot
     get() {
@@ -273,9 +276,9 @@ fun Slot.toHole(prepare: HTMLElement.() -> Unit = {}) = Hole(
 val Slot.hole get() = toHole()
 
 
-fun Slot.visibility(ks: KillSet, fn: () -> Boolean) = Factory() with {
+fun Slot.visibility(deps: HasKills, fn: () -> Boolean) = Factory() with {
     val element = this
-    Rx(ks) { fn() }.forEach(ks) { v ->
+    Rx(deps.kills) { fn() }.forEach(deps.kills) { v ->
         this@visibility %= if (v) element else null
     }
 }

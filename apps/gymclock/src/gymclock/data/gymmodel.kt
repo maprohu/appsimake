@@ -1,11 +1,10 @@
 package gymclock.data
 
 import common.obj
-import killable.HasKillSet
+import commonshr.KillsApi
 import killable.KillSet
 import org.w3c.dom.get
 import org.w3c.dom.set
-import rx.Rx
 import rx.Var
 import kotlin.browser.window
 
@@ -18,7 +17,7 @@ external interface Settings {
 
 const val SettingsKey = "gymclock-settings"
 
-class Model(override val kills: KillSet) : HasKillSet {
+class Model(override val kills: KillSet) : KillsApi {
 
     var settings =
         window.localStorage[SettingsKey]?.let { JSON.parse<Settings>(it) } ?: obj {

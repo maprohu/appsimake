@@ -7,17 +7,15 @@ import checklist.loggedin.LoggedInPath
 import common.ListenableMutableList
 import common.eventsEmitter
 import commonfb.FBApi
-import commonfb.editing.FsEditingApi
 import commonshr.*
-import commonshr.properties.TS
 import commonshr.properties.now
 import commonshr.properties.remAssign
+import commonui.EditFromKillsUixApi
+import commonui.HasEditFrom
 import commonui.editing.RxEditing
-import commonui.editing.EditingApi
 import commonui.widget.ForwardImpl
 import commonui.widget.TopAndContent
 import commonui.widget.UIBase
-import firebase.firestore.FirestoreViewApi
 import rx.Var
 
 interface EditPath: LoggedInPath {
@@ -28,7 +26,7 @@ class Edit(
     loggedIn: LoggedIn,
     override val from: ForwardImpl<TopAndContent, *>,
     initial: FsDoc<Checklist>
-): UIBase<TopAndContent>(from), EditPath, LoggedInPath by loggedIn, FBApi, FsEditingApi, FirestoreViewApi {
+): UIBase<TopAndContent>(from), EditPath, LoggedInPath by loggedIn, FBApi, EditFromKillsUixApi {
     override val edit = this
 
     override val editing: RxEditing<Checklist> = rxEditing(initial) { current ->

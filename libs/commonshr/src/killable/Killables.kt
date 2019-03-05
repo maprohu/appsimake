@@ -3,6 +3,7 @@ package killable
 import common.EmitterIface
 import common.toRxSet
 import commonshr.*
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
@@ -13,7 +14,7 @@ typealias KillSet = AddRemove<Trigger>
 val Noop: Trigger = {}
 val NoKill : KillSet = { Noop }
 
-object HasNoKill: HasKillSet {
+object HasNoKill: KillsApi {
     override val kills = NoKill
 }
 
@@ -31,7 +32,7 @@ fun KillSet.seq() = KillableSeq().also { it.onKill += add(it.kill) }
 
 fun Trigger.addedTo(ks: KillSet) = apply { ks += this }
 
-class Killables: HasKillSet {
+class Killables: KillsApi {
 
     val killSet: KillSet = ::add
     override val kills = killSet
@@ -76,32 +77,14 @@ class Killables: HasKillSet {
 
 }
 
-interface HasKillSet {
-    val kills: KillSet
-
-    fun <T> rx(fn: HasKillSet.() -> T) = Rx(kills, fn)
-    fun <T> rx(killFirst: Boolean, fn: HasKillSet.() -> T) = Rx(kills, killFirst, fn)
-    fun <T> RxIface<T>.forEach(fn: HasKillSet.(T) -> Unit) = forEach(kills, fn)
-    fun <T> RxIface<T>.forEach(killOrder: KillOrder, fn: HasKillSet.(T) -> Unit) = forEach(kills, killOrder, fn)
-    fun <T, S> RxIface<T>.map(fn: HasKillSet.(T) -> S) = map(kills, fn)
-    fun <T> RxIface<T>.onChange(fn: HasKillSet.(old: T /* old */, new: T /* new */) -> Unit) = onChange(kills, fn)
-    fun Element.rxClass(fn: HasKillSet.() -> String) = rxClass(kills, fn)
-    fun Element.rxClass(stl: String, fn: HasKillSet.() -> Boolean) = rxClass(kills, stl, fn)
-    fun <E> RxSet<E>.filtered(fn: HasKillSet.(E) -> Boolean) = filtered(kills, fn)
-
-    operator fun HTMLElement.remAssign(fn: () -> String) {
-        rx { fn() }.forEach { this@remAssign.innerText = it }
-    }
-
-    fun <E> RxSet<E>.containsRx(value: E) = containsRx(kills, value)
-    fun <E> RxSet<E>.process(fn: HasKillSet.(E) -> Unit): Unit = process(kills, fn)
-
-    fun <T> EmitterIface<SetMove<T>>.toRxSet() = toRxSet(kills)
-    fun <T> RxIface<T>.toChannelLater() = toChannelLater(kills)
-
-}
 
 class WrapKillSet(
     override val kills: KillSet
-): HasKillSet, InvokeApply
+): KillsApi, InvokeApply
 val KillSet.wrap get() = WrapKillSet(this)
+
+suspend fun KillSet.join() {
+    val cd = CompletableDeferred<Unit>()
+    this += { cd.complete(Unit) }
+    cd.await()
+}

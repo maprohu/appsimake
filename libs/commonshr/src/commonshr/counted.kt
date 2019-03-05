@@ -48,7 +48,7 @@ class Counted<T>(
 }
 
 class RefCountMap<K, V>(
-    val create: HasKillSet.(K) -> V
+    val create: KillsApi.(K) -> V
 ) {
     private val map = mutableMapOf<K, RefCount<V>>()
 

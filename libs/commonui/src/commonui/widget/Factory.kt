@@ -3,9 +3,8 @@ package commonui.widget
 import commonshr.InvokeApply
 import commonshr.invoke
 import commonshr.remAssign
-import commonui.uiapi
 import domx.*
-import killable.HasKillSet
+import commonshr.KillsApi
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
@@ -200,12 +199,10 @@ class SlotVar(
 abstract class ScreenWrap: HasHTMLElement, InvokeApply {
     val target = Var<Slot?>(null)
 
-    fun HasKillSet.visible(fn: HasKillSet.() -> Boolean) {
+    fun KillsApi.visible(fn: KillsApi.() -> Boolean) {
         rx {
-            target()?.let { t ->
-                uiapi {
-                    t %= { if (fn()) node else null }
-                }
+            target()?.let { slot ->
+                slot.rx(this) { if (fn()) node else null }
             }
         }
     }

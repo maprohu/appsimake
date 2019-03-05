@@ -36,7 +36,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
   var PropertyMetadata = Kotlin.PropertyMetadata;
   var Var = $module$appsimake_commonshr.rx.Var;
   var killable = $module$appsimake_commonshr.killable;
-  var Rx_init = $module$appsimake_commonshr.rx.Rx_init_3k3t3o$;
+  var Rx_init = $module$appsimake_commonshr.rx.Rx_init_lqp1nt$;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
   var lazyOf = Kotlin.kotlin.lazyOf_mh5how$;
   var Error_init = Kotlin.kotlin.Error_init_pdl1vj$;
@@ -407,7 +407,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
     var tmp$, tmp$_0;
     var tmp$_1;
     if ((tmp$ = this.ops.calculate) != null) {
-      Rx_init(killable.NoKill, ScalarPropBase$beforeWrite$lambda$lambda(tmp$)).forEach_yk5nc8$(killable.NoKill, ScalarPropBase$beforeWrite$lambda$lambda_0(this));
+      Rx_init(killable.NoKill, ScalarPropBase$beforeWrite$lambda$lambda(tmp$)).forEach_aaomyj$(killable.NoKill, ScalarPropBase$beforeWrite$lambda$lambda_0(this));
       tmp$_1 = ScalarPropBase$beforeWrite$lambda$lambda_1(this);
     }
      else
@@ -1202,7 +1202,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
   function Props$onDeleted$lambda(this$Props) {
     return function () {
       var l = new Listeners();
-      this$Props.isDeleted.forEach_yk5nc8$(killable.NoKill, Props$onDeleted$lambda$lambda(l));
+      this$Props.isDeleted.forEach_aaomyj$(killable.NoKill, Props$onDeleted$lambda$lambda(l));
       return l;
     };
   }

@@ -5,7 +5,7 @@ import common.Listeners
 import common.listen
 import commonshr.*
 import domx.*
-import killable.HasKillSet
+import commonshr.KillsApi
 import killable.NoKill
 import rx.Var
 import rx.rxClass
@@ -51,7 +51,7 @@ class Input: ScreenWrap() {
         node.required = true
     }
 
-    fun HasKillSet.bindTo(rxv: Var<String>) {
+    fun KillsApi.bindTo(rxv: Var<String>) {
         value = rxv.now
 
         kills += changeListeners.add {

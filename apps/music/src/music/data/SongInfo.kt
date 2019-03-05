@@ -4,7 +4,7 @@ import commonfb.*
 import domx.audio
 import domx.invoke
 import firebase.firestore.Firestore
-import killable.HasKillSet
+import commonshr.KillsApi
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -35,7 +35,7 @@ fun localSongInfoSource(): SongInfoSource {
     }
 }
 
-fun HasKillSet.cloudSongInfoSource(
+fun KillsApi.cloudSongInfoSource(
     db: Firestore = FB.db
 ): SongInfoSource {
     val map = mutableMapOf<String, Mp3File>()

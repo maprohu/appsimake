@@ -11,6 +11,7 @@ import commonshr.plusAssign
 import commonui.RootPanel
 import commonui.showClosable
 import domx.*
+import firebase.DbDeps
 import firebase.firestore.*
 import firebase.firestore.ListenConfig.Companion.hasProps
 import firebaseshr.HasFBProps
@@ -152,7 +153,7 @@ fun <T: HasFBProps<*>> T.listenToSnapshots(
     db: Firestore,
     onFirst: Trigger = {}
 ) {
-    props.docWrapOrFail.docRef(db).listen(this, onFirst)
+    props.docWrapOrFail.docRef(DbDeps(db)).listen(this, onFirst)
 }
 
 fun <T: HasFBProps<*>> T.keepAlive(
@@ -162,7 +163,7 @@ fun <T: HasFBProps<*>> T.keepAlive(
     val killListen = Killables()
     props.live.forEach(killables) { alive ->
         if (!alive) {
-            killListen += props.docWrapOrFail.docRef(db).listen(this@keepAlive)
+            killListen += props.docWrapOrFail.docRef(DbDeps(db)).listen(this@keepAlive)
         }
     }
 

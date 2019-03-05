@@ -2,32 +2,21 @@ package commonui.widget
 
 import commonshr.Action
 import commonshr.Exec
+import commonshr.HasKills
 import domx.clickEvent
-import domx.rxEnabled
-import killable.HasKillSet
-import killable.KillSet
-import org.w3c.dom.HTMLAnchorElement
+import commonshr.KillsApi
+import commonui.HasUix
 import org.w3c.dom.events.EventTarget
 
-interface HasUIX {
-    val uix: Exec
 
-    fun EventTarget.click(action: Action) {
-        clickEvent {
-            uix(action)
-        }
+
+fun EventTarget.click(deps: HasUix, action: Action) {
+    clickEvent {
+        deps.uix(action)
     }
-
-    fun DropdownMenuItem.click(action: Action) = node.click(action)
-    fun Button.click(action: Action) = node.click(action)
-    fun ListGroupButton.click(action: Action) = node.click(action)
-
-
 }
 
-interface HasKillSetAndUIX: HasUIX, HasKillSet
+fun Button.click(deps: HasUix, action: Action) = node.click(deps, action)
+fun DropdownMenuItem.click(deps: HasUix, action: Action) = node.click(deps, action)
+fun ListGroupButton.click(deps: HasUix, action: Action) = node.click(deps, action)
 
-operator fun HasUIX.plus(ks: HasKillSet) = object : HasKillSetAndUIX {
-    override val uix = this@plus.uix
-    override val kills = ks.kills
-}

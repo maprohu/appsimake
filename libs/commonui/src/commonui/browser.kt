@@ -5,7 +5,7 @@ import commonshr.plusAssign
 import domx.base64
 import domx.source
 import domx.video
-import killable.HasKillSet
+import commonshr.KillsApi
 import killable.NoKill
 import org.w3c.dom.events.Event
 import rx.Rx
@@ -81,7 +81,7 @@ private val keepAwakeVideo by lazy {
 
 private var keepAwakeCounter = 0
 
-fun HasKillSet.keepScreenAwake() {
+fun KillsApi.keepScreenAwake() {
     if (keepAwakeCounter == 0) {
         keepAwakeVideo.play()
     }

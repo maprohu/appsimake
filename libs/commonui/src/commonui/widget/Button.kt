@@ -2,11 +2,8 @@ package commonui.widget
 
 import bootstrap.*
 import commonshr.*
-import commonui.UiKillsApi
 import domx.*
 import fontawesome.*
-import killable.HasKillSet
-import org.w3c.dom.*
 import kotlin.browser.document
 
 class Button(): ScreenWrap() {
@@ -66,6 +63,7 @@ class Button(): ScreenWrap() {
         secondary
     }
 
+    fun enabled(deps: HasKills, fn: () -> Boolean) = node.rxEnabled(deps, fn)
 
 }
 

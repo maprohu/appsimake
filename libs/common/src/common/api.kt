@@ -1,3 +1,10 @@
 package common
 
-interface CommonApi: ListenableApi
+import commonshr.CsKillsApi
+import commonshr.api
+
+interface CsKillsApiCommon: CsKillsApi {
+
+    fun <T> ListenableList<T>.events() = events(api)
+
+}

@@ -1,10 +1,9 @@
 package music.database
 
 import common.EmitterIface
-import common.Some
 import commonshr.*
 import commonui.widget.*
-import killable.HasKillSet
+import commonshr.KillsApi
 import killable.KillSet
 import music.common.MusicApi
 import music.database.details.Details
@@ -13,7 +12,6 @@ import music.import.Import
 import music.loggedin.LoggedIn
 import music.loggedin.LoggedInPath
 import musiclib.UserSongState
-import rx.RxSet
 import rx.Var
 
 interface DatabasePath: LoggedInPath {
@@ -71,7 +69,7 @@ class Database(
         val items: EmitterIface<SetMove<String>>,
         val path: LoggedInPath,
         override val kills: KillSet
-    ): HasKillSet {
+    ): KillsApi {
 
         val set = items.toRxSet()
 

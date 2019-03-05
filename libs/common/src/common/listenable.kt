@@ -2,16 +2,15 @@ package common
 
 import commonshr.*
 import killable.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
 import rx.Rx
 import rx.RxIface
 import rx.RxVal
 import rx.Var
 
-interface ListenableApi: HasKillSet {
-    fun <T> ListenableList<T>.events() = events(kills)
-}
 interface ListenableList<out T> : List<T> {
 
     fun addListener(listener: Listener<T>) = addListener(listener, true)
@@ -38,14 +37,15 @@ fun <T> collector(fn: (T) -> Unit): Collector<T> {
     }
 }
 
-fun <T> ListenableList<T>.events(ks: KillSet): ReceiveChannel<ListEvent<T>> {
-    return Channel<ListEvent<T>>(Channel.UNLIMITED).apply {
-        ks += events(
-            collector {
-                offer(it)
-            }
-        )
-    }
+
+@UseExperimental(ExperimentalCoroutinesApi::class)
+fun <T> ListenableList<T>.events(deps: HasCsKills): ReceiveChannel<ListEvent<T>> = deps.produce(capacity = Channel.UNLIMITED) {
+    deps.kills += events(
+        collector {
+            offer(it)
+        }
+    )
+    deps.kills.join()
 }
 
 fun <T> ListenableList<T>.eventsEmitter(all: Boolean = true): EmitterFn<ListEvent<T>> {
@@ -162,13 +162,13 @@ class ListenableMutableList<T>(items: List<T>) : AbstractMutableList<T>(), Liste
 
 fun <T, C: Comparable<C>> ListenableList<T>.sorted(
     kills: KillSet,
-    key: HasKillSet.(T) -> C
+    key: KillsApi.(T) -> C
 ): ListenableList<T> {
     val sorted = ListenableMutableList<T>()
 
     class Holder(
         val item: T
-    ): HasKillSet {
+    ): KillsApi {
         val ks = kills.killables()
         override val kills = ks.kills
         val krx = rx { key(item) }
@@ -233,7 +233,7 @@ fun <T, C: Comparable<C>> ListenableList<T>.sorted(
 //data class SortedListenableListConfig<T, C: Comparable<C>>(
 //    val list: ListenableList<T>,
 //    val killables: KillSet,
-//    val key: HasKillSet.(T) -> C
+//    val key: KillsApi.(T) -> C
 //) {
 //    class Move(
 //        val forward: Boolean,

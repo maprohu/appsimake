@@ -4,7 +4,7 @@ import bootstrap.*
 import commonshr.*
 import commonui.globalStatus
 import domx.*
-import killable.HasKillSet
+import commonshr.KillsApi
 import kotlin.browser.document
 
 class Status: ScreenWrap() {
@@ -24,7 +24,7 @@ class Status: ScreenWrap() {
         }
     }
 
-    val HasKillSet.global: Unit get() {
+    val KillsApi.global: Unit get() {
         text %= { globalStatus() }
     }
 

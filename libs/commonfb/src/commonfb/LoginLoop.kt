@@ -5,15 +5,10 @@ import commonui.widget.*
 import firebase.User
 import firebase.app.App
 import firebase.auth.Auth
-import firebase.firestore.Firestore
 import killable.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
 import rx.Rx
 import rx.RxIface
 import rx.Var
-import rx.mapAsync
 
 
 interface HasUserState {
@@ -28,14 +23,14 @@ sealed class UserState {
 }
 suspend fun JobKillsApi.runUserState(
     app: App = FB.app,
-    fn: suspend HasKillSet.(UserState) -> UserState = { it }
+    fn: suspend KillsApi.(UserState) -> UserState = { it }
 ): RxIface<UserState> {
     return runUserState(app.auth(), fn)
 }
 
 suspend fun JobKillsApi.runUserState(
     auth: Auth = FB.app.auth(),
-    fn: suspend HasKillSet.(UserState) -> UserState = { it }
+    fn: suspend KillsApi.(UserState) -> UserState = { it }
 ): RxIface<UserState> {
     val rxv = Var<UserState>(UserState.Unknown)
 

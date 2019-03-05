@@ -1,9 +1,7 @@
 package domx
 
 import common.*
-import commonshr.InvokeApply
-import commonshr.Trigger
-import commonshr.plusAssign
+import commonshr.*
 import killable.*
 import org.w3c.dom.*
 import org.w3c.dom.css.ElementCSSInlineStyle
@@ -165,15 +163,15 @@ fun HTMLInputElement.listenInput(fn: (String) -> Unit) {
 fun HTMLButtonElement.rxEnabled(ks: KillSet, rx: RxVal<Boolean>) {
     rx.forEach(ks) { disabled = !it }
 }
-fun HTMLButtonElement.rxEnabled(ks: KillSet, fn: () -> Boolean) {
-    Rx(ks) { fn() }.also { rxEnabled(ks, it) }
+fun HTMLButtonElement.rxEnabled(deps: HasKills, fn: () -> Boolean) {
+    Rx(deps.kills) { fn() }.also { rxEnabled(deps.kills, it) }
 }
 
 fun ElementCSSInlineStyle.rxVisible(ks: KillSet, rxv: RxVal<Boolean>) {
     rxv.forEach(ks) { style.visibility = if (it) "visible" else "collapse" }
 }
 
-fun ElementCSSInlineStyle.rxVisible(ks: KillSet, fn: HasKillSet.() -> Boolean): Rx<Boolean> {
+fun ElementCSSInlineStyle.rxVisible(ks: KillSet, fn: KillsApi.() -> Boolean): Rx<Boolean> {
     return Rx(ks, fn).also { rxVisible(ks, it) }
 }
 

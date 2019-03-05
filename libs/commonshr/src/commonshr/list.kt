@@ -1,19 +1,11 @@
 package commonshr
 
-import commonshr.properties.RxBase
-import killable.HasKillSet
+import commonshr.KillsApi
 import killable.KillSet
 import killable.killables
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.map
 
-interface ListApi: HasKillSet {
-
-    fun <T, S> ReceiveChannel<ListEvent<T>>.map(
-        fn: suspend HasKillSet.(T) -> S
-    ) = map(kills, fn)
-
-}
 
 sealed class ListEvent<out T> {
     class Add<out T>(
@@ -31,15 +23,15 @@ sealed class ListEvent<out T> {
 }
 
 fun <T, S> ReceiveChannel<ListEvent<T>>.map(
-    kills: KillSet,
-    fn: suspend HasKillSet.(T) -> S
+    deps: HasKills,
+    fn: suspend KillsApi.(T) -> S
 ): ReceiveChannel<ListEvent<S>> {
     val itemKills = mutableListOf<Trigger>()
 
     return map { e ->
         when (e) {
             is ListEvent.Add -> {
-                val ks = kills.killables()
+                val ks = deps.kills.killables()
                 itemKills.add(e.index, ks.kill)
                 ListEvent.Add(
                     index = e.index,
@@ -57,6 +49,5 @@ fun <T, S> ReceiveChannel<ListEvent<T>>.map(
         }
     }
 }
-
 
 

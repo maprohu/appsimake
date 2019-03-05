@@ -1,6 +1,8 @@
 package commonshr
 
+import commonlib.CollectionSource
 import commonlib.CollectionWrap
+import commonlib.DocSource
 import commonlib.DocWrap
 import commonshr.properties.DynamicOps
 import commonshr.properties.RxBase
@@ -26,11 +28,11 @@ sealed class FsIdState {
 }
 
 class FsId<D>(
-    val coll: CollectionWrap<D>,
+    val coll: CollectionSource<D>,
     st: FsIdState
 ) {
     constructor(
-        dw: DocWrap<D>,
+        dw: DocSource<D>,
         exists: Boolean
     ): this(
         dw.parent!!,
@@ -57,7 +59,12 @@ val <D> FsId<D>.docWrap
 
 typealias FsDoc<D> = RefDoc<FsId<D>, D>
 
+val <D> FsDoc<D>.docWrap get() = id.docWrap
+
+fun <D> CollectionSource<D>.toFsId(state: FsIdState) = FsId(this, state)
+fun <D> DocSource<D>.toFsId(exists: Boolean) = parent.toFsId(FsIdState.HasId(id, exists))
+
 fun <D: RxBase<*>> D.toFsDoc(id: FsId<D>) = FsDoc(id, this)
-fun <D: RxBase<*>> D.toFsDoc(cw: CollectionWrap<D>) = toFsDoc(FsId(cw, FsIdState.NoId))
-fun <D: RxBase<*>> D.toFsDoc(cw: CollectionWrap<D>, id: String) = toFsDoc(FsId(cw, FsIdState.HasId(id, true)))
+fun <D: RxBase<*>> D.toFsDoc(cw: CollectionSource<D>) = toFsDoc(cw.toFsId(FsIdState.NoId))
+fun <D: RxBase<*>> D.toFsDoc(cw: CollectionSource<D>, id: String) = toFsDoc(cw.toFsId(FsIdState.HasId(id, true)))
 

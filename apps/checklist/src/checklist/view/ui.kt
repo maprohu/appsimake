@@ -2,6 +2,7 @@ package checklist.view
 
 import bootstrap.*
 import common.ListenableMutableList
+import common.events
 import common.sorted
 import commonshr.*
 import commonui.widget.*
@@ -43,7 +44,7 @@ fun ViewChecklist.ui() = TopAndContent(
                 primary
                 fa.eraser
                 click {
-                    clearChecklist()
+                    docs.now.clear()
                 }
             }
             insert.buttonGroup {
@@ -74,41 +75,43 @@ fun ViewChecklist.ui() = TopAndContent(
                 factory.listGroup {
                     cls.m1
                     node.list(
-                        chklist.doc.items.rxv().let { items ->
-                            ListenableMutableList(items)
-                                .sorted(kills) { i ->
-                                    ItemOrder(
-                                        i.checked(),
-                                        i.name()
-                                    )
-                                }
-                                .events().map { i ->
-                                    factory.listGroupButton {
-                                        cls {
-                                            p1
-                                            alignItemsCenter
-                                        }
-                                        middle {
-                                            cls.m1
-                                            this %= { i.name() }
-                                        }
-
-                                        left.insert.wraps.span {
-//                                            visible { i.checked() }
+                        docs().let { cl ->
+                            console.dir(cl)
+                            cl.items().let { items ->
+                                ListenableMutableList(items)
+                                    .sorted(kills) { i ->
+                                        ItemOrder(
+                                            i.checked(),
+                                            i.name()
+                                        )
+                                    }
+                                    .events().map { i ->
+                                        factory.listGroupButton {
                                             cls {
-                                                m1
-                                                fa {
-                                                    fw
-//                                                    check
-                                                }
-                                                rxClass(Fa.check) { i.checked() }
+                                                p1
+                                                alignItemsCenter
                                             }
-                                        }
-                                        click {
-                                            i.toggle()
-                                        }
-                                    }.node
-                                }
+                                            middle {
+                                                cls.m1
+                                                this %= { i.name() }
+                                            }
+
+                                            left.insert.wraps.span {
+                                                cls {
+                                                    m1
+                                                    fa {
+                                                        fw
+                                                    }
+                                                    rxClass(Fa.check) { i.checked() }
+                                                }
+                                            }
+                                            node.on("mousedown") {
+                                                console.dir(it)
+                                                cl.toggle(i)
+                                            }
+                                        }.node
+                                    }
+                            }
                         }
                     )
                 }.node

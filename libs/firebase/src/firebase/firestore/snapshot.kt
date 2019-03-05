@@ -1,83 +1,85 @@
 package firebase.firestore
 
+import commonlib.CollectionSource
 import commonlib.CollectionWrap
+import commonlib.DocWrap
 import commonshr.*
 import commonshr.properties.*
+import firebase.HasCsDbKills
+import firebase.HasDb
+import firebase.HasDbKills
 import killable.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.produce
 
-fun Query.documentChanges(kills: KillSet) : ReceiveChannel<DocumentChange> {
-    val channel = Channel<DocumentChange>(Channel.UNLIMITED).apply {
-        kills += { close() }
-    }
-
-    kills += onSnapshot(
+@UseExperimental(ExperimentalCoroutinesApi::class)
+fun Query.documentChanges(deps: HasCsKills) : ReceiveChannel<DocumentChange> = deps.produce(capacity = Channel.UNLIMITED) {
+    deps.kills += onSnapshot(
         onNext = { qs ->
             qs.docChanges().forEach { channel.offer(it) }
         },
         onError = { channel.close(it) }
     )
-
-    return channel
+    deps.kills.join()
 }
 
+@UseExperimental(ExperimentalCoroutinesApi::class)
+fun DocumentReference.documentSnapshots(deps: HasCsKills): ReceiveChannel<DocumentSnapshot> = deps.produce(capacity = Channel.UNLIMITED) {
+    deps.kills += onSnapshotNext { ds ->
+        channel += ds
+    }
+    deps.kills.join()
+}
 
-fun CoroutineScope.toSnapshotEvents(dcs: ReceiveChannel<DocumentChange>): ReceiveChannel<SnapshotEvent> {
-    val channel = Channel<SnapshotEvent>(Channel.UNLIMITED)
+@UseExperimental(ExperimentalCoroutinesApi::class)
+fun ReceiveChannel<DocumentChange>.toSnapshotEvents(deps: CoroutineScope): ReceiveChannel<SnapshotEvent> = deps.produce {
 
-    launch {
-        for(dc in dcs) {
-            when (dc.type) {
-                DocumentChangeType.added -> {
-                    channel += SnapshotEvent.Added(
-                        id = dc.doc.id,
-                        index = dc.newIndex,
-                        data = dc.doc.data()
-                    )
-                }
-                DocumentChangeType.removed -> {
-                    channel += SnapshotEvent.Removed(
-                        index = dc.oldIndex
-                    )
-                }
-                DocumentChangeType.modified -> {
-                    channel += SnapshotEvent.Modified(
-                        index = dc.oldIndex,
-                        data = dc.doc.data()
-                    )
-                    if (dc.newIndex != dc.oldIndex) {
-                        channel += SnapshotEvent.Moved(
-                            from = dc.oldIndex,
-                            to = dc.newIndex
-                        )
-                    }
-                }
-                else -> throw Error("Unkown type: ${dc.type}")
+    for(dc in this@toSnapshotEvents) {
+        when (dc.type) {
+            DocumentChangeType.added -> {
+                channel *= SnapshotEvent.Added(
+                    id = dc.doc.id,
+                    index = dc.newIndex,
+                    data = dc.doc.data()
+                )
             }
+            DocumentChangeType.removed -> {
+                channel *= SnapshotEvent.Removed(
+                    index = dc.oldIndex
+                )
+            }
+            DocumentChangeType.modified -> {
+                channel *= SnapshotEvent.Modified(
+                    index = dc.oldIndex,
+                    data = dc.doc.data()
+                )
+                if (dc.newIndex != dc.oldIndex) {
+                    channel *= SnapshotEvent.Moved(
+                        from = dc.oldIndex,
+                        to = dc.newIndex
+                    )
+                }
+            }
+            else -> throw Error("Unkown type: ${dc.type}")
         }
     }
 
-    return channel
 }
 
 
 
-interface SnapshotApi: QueryApi, HasKillSet, CoroutineScope {
 
-    fun Query.documentChanges() = documentChanges(kills)
-    fun ReceiveChannel<DocumentChange>.toSnapshotEvents() = toSnapshotEvents(this)
+fun <D> DocWrap<D>.snapshots(deps: HasCsDbKills) = docRef(deps).documentSnapshots(deps)
 
-    fun <T: RxBase<*>> CollectionWrap<T>.listEvents(
-        create: () -> T,
-        query: QuerySettingsBuilder<T>.() -> Unit = {}
-    ) =
-        query(query)
-            .documentChanges()
-            .toSnapshotEvents()
-            .let {
-                listEvents(it, this, FsDynamicOps, create)
-            }
+fun <T: RxBase<*>> CollectionSource<T>.listEvents(
+    deps: HasCsDbKills,
+    create: () -> T,
+    query: QuerySettingsBuilder<T>.() -> Unit = {}
+) =
+    query(deps, query)
+        .documentChanges(deps)
+        .toSnapshotEvents(deps)
+        .listEvents(deps, this, FsDynamicOps, create)
 
-}

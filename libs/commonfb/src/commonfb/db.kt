@@ -6,6 +6,7 @@ import common.Some
 import commonlib.CollectionWrap
 import commonlib.DocWrap
 import commonshr.plusAssign
+import firebase.DbDeps
 import firebase.firestore.Firestore
 import firebase.firestore.docRef
 import firebase.firestore.listen
@@ -57,7 +58,7 @@ fun <T: HasFBProps<T>> CollectionWrap<T>.lazy(
             }
             val cd = CompletableDeferred<Var<Optional<T>>>()
 
-            kills += dw.docRef(db).listen(t) {
+            kills += dw.docRef(DbDeps(db)).listen(t) {
                 cd.complete(rxv)
             }
             t.props.isDeleted.forEach(kills) { d ->

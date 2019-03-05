@@ -1,18 +1,16 @@
 package commonui.widget
 
-import killable.HasKillSet
+import commonshr.KillsApi
 import killable.seq
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import rx.RxIface
 import rx.Var
-import rx.toChannelLater
 
-interface JobKillsApi: CoroutineScope, HasKillSet {
+interface JobKillsApi: CoroutineScope, KillsApi {
 
     suspend fun <T, S> RxIface<T>.mapAsync(
-        fn: suspend HasKillSet.(T) -> S
+        fn: suspend KillsApi.(T) -> S
     ): RxIface<S> {
         val kseq = kills.seq()
 
