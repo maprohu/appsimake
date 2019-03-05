@@ -14,10 +14,30 @@ class ListGroupButton: ScreenWrap() {
         }
     }
 
-    val text by lazy {
-        node.span
+
+    inner class Slots {
+        val left = slot
+        val middle = slot
+        val right = slot
+    }
+    val slots by lazy {
+        cls {
+            dFlex
+            flexRow
+        }
+        Slots()
+    }
+    val middle by lazy {
+        document.row {
+            cls.flexGrow1
+        }.setTo(slots.middle)
     }
 
+    val left by lazy { slots.left }
+    val right by lazy {
+        middle
+        slots.right
+    }
 
 }
 

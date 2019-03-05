@@ -39,6 +39,7 @@ interface FsDocApi: HasFirestore {
         }
     }
 
+    fun <D: RxBase<*>> FsDoc<D>.delete(): Promise<Unit> = id.docWrap.ref.delete()
 
 }
 

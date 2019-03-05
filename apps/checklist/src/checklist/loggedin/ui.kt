@@ -41,7 +41,7 @@ fun LoggedIn.ui() = TopAndContent(
                         )
                         .map { cl ->
                             factory.listGroupButton {
-                                text %= { cl.doc.name.rxv() }
+                                middle %= { cl.doc.name.rxv() }
                                 click {
                                     viewChecklist(cl)
                                 }

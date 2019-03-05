@@ -76,7 +76,9 @@ fun <T> ListenableList<T>.events(channel: Collector<ListEvent<T>>, all: Boolean 
     )
 }
 
-class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
+class ListenableMutableList<T>(items: List<T>) : AbstractMutableList<T>(), ListenableList<T> {
+    constructor(): this(emptyList())
+
 
     private val sizeVar = Var(0)
 
@@ -155,123 +157,190 @@ class ListenableMutableList<T> : AbstractMutableList<T>(), ListenableList<T> {
         e
     }
 
-
-
-
+    init { addAll(items) }
 }
 
+fun <T, C: Comparable<C>> ListenableList<T>.sorted(
+    kills: KillSet,
+    key: HasKillSet.(T) -> C
+): ListenableList<T> {
+    val sorted = ListenableMutableList<T>()
 
-data class SortedListenableListConfig<T, C: Comparable<C>>(
-    val list: ListenableList<T>,
-    val killables: Killables,
-    val key: (T, Killables) -> RxIface<C>
-) {
-    class Move(
-        val forward: Boolean,
-        val range: IntRange
-    ) {
-        val shift = if (forward) -1 else 1
-
-        companion object {
-            fun of(from: Int, to: Int): Move {
-                return if (from < to) {
-                    Move(
-                        true,
-                        from until to
-                    )
-                } else {
-                    Move(
-                        false,
-                        to+1 .. from
-                    )
-                }
-            }
-        }
+    class Holder(
+        val item: T
+    ): HasKillSet {
+        val ks = kills.killables()
+        override val kills = ks.kills
+        val krx = rx { key(item) }
+        var keyValue = krx.now
+        var orderedIndex: Int = 0
+        fun dec() { orderedIndex -= 1}
+        fun inc() { orderedIndex += 1}
     }
 
-    fun build(): ListenableList<T> {
+    val original = mutableListOf<Holder>()
+    val ordered = mutableListOf<Holder>()
 
-        val result = ListenableMutableList<T>()
+    fun Holder.find() = ordered.binarySearchBy(keyValue) { it.keyValue }.let { i ->
+        if (i < 0) -i-1 else i
+    }.also { orderedIndex = it }
 
-        class Holder(
-            val holders: MutableList<Holder>,
-            val sorted: MutableList<Holder>,
-            item: T,
-            holdersIndex: Int
-        ) {
-            fun find(k: C) = sorted.binarySearchBy(k) { it.currentKey }.let { i ->
-                if (i < 0) -i-1 else i
-            }
+    kills += eventsEmitter().invoke { e ->
+        when (e) {
+            is ListEvent.Add -> {
+                Holder(e.item).apply {
+                    original.add(e.index, this)
+                    find()
+                    ordered.add(orderedIndex, this)
+                    sorted.add(orderedIndex, item)
+                    ordered.drop(orderedIndex+1).forEach { it.inc() }
+                    krx.forEachLater(this.kills) { kv ->
+                        keyValue = kv
+                        val from = orderedIndex
+                        ordered.removeAt(from)
+                        find()
+                        val to = orderedIndex
+                        ordered.add(to, this@apply)
+                        if (from != to) {
+                            sorted.move(from, to)
 
-            val ks = killables.killables()
-            val krx = key(item, ks)
-            var currentKey = krx.now
-            var sortedIndex = find(currentKey)
-
-            init {
-                holders.add(holdersIndex, this)
-                sorted.add(sortedIndex, this)
-                sorted.listIterator(sortedIndex+1).forEach { s ->
-                    s.sortedIndex ++
-                }
-                result.add(sortedIndex, item)
-
-                krx.forEachLater(ks.killSet) { k ->
-                    val from = sortedIndex
-                    sorted.removeAt(sortedIndex)
-                    val to = find(k)
-                    currentKey = k
-                    sorted.add(to, this@Holder)
-                    if (to != from) {
-                        val move = Move.of(from, to)
-                        move.range.map(sorted::get).forEach { it.sortedIndex += move.shift }
-                        result.move(from, to)
+                            if (from < to) {
+                                ordered.subList(from, to).forEach { it.dec() }
+                            } else if (to < from) {
+                                ordered.subList(to+1, from+1).forEach { it.inc() }
+                            }
+                        }
                     }
                 }
             }
-
-            fun move(from: Int, to: Int) {
-                holders.add(to, holders.removeAt(from))
+            is ListEvent.Move -> {
+                original.add(e.to, original.removeAt(e.from))
             }
-
-            fun remove(from: Int) {
-                holders.removeAt(from)
-                sorted.removeAt(sortedIndex)
-                sorted.listIterator(sortedIndex).forEach { h ->
-                    h.sortedIndex --
+            is ListEvent.Remove -> {
+                original.removeAt(e.index).apply {
+                    sorted.removeAt(orderedIndex)
+                    ordered.removeAt(orderedIndex)
+                    ordered.drop(orderedIndex).forEach { it.dec() }
+                    ks.kill()
                 }
-                ks.kill()
-                result.removeAt(sortedIndex)
             }
         }
-
-        val holders = mutableListOf<Holder>()
-        val sorted = mutableListOf<Holder>()
-
-        killables += list.addListener(
-            ListenableList.Listener(
-                added = { idx, item ->
-                    Holder(
-                        holders,
-                        sorted,
-                        item,
-                        idx
-                    )
-                },
-                removed = { idx, _ ->
-                    holders[idx].remove(idx)
-
-                },
-                moved = { from, to ->
-                    holders[from].move(from, to)
-                }
-
-            )
-        )
-
-        return result
     }
+
+    return sorted
 }
+
+//data class SortedListenableListConfig<T, C: Comparable<C>>(
+//    val list: ListenableList<T>,
+//    val killables: KillSet,
+//    val key: HasKillSet.(T) -> C
+//) {
+//    class Move(
+//        val forward: Boolean,
+//        val range: IntRange
+//    ) {
+//        val shift = if (forward) -1 else 1
+//
+//        companion object {
+//            fun of(from: Int, to: Int): Move {
+//                return if (from < to) {
+//                    Move(
+//                        true,
+//                        from until to
+//                    )
+//                } else {
+//                    Move(
+//                        false,
+//                        to+1 .. from
+//                    )
+//                }
+//            }
+//        }
+//    }
+//
+//    fun build(): ListenableList<T> {
+//
+//        val result = ListenableMutableList<T>()
+//
+//        class Holder(
+//            val holders: MutableList<Holder>,
+//            val sorted: MutableList<Holder>,
+//            item: T,
+//            holdersIndex: Int
+//        ) {
+//            fun find(k: C) = sorted.binarySearchBy(k) { it.currentKey }.let { i ->
+//                if (i < 0) -i-1 else i
+//            }
+//
+//            val ks = killables.killables()
+//            val krx = key(item, ks)
+//            var currentKey = krx.now
+//            var sortedIndex = find(currentKey)
+//
+//            init {
+//                holders.add(holdersIndex, this)
+//                sorted.add(sortedIndex, this)
+//                sorted.listIterator(sortedIndex+1).forEach { s ->
+//                    s.sortedIndex ++
+//                }
+//                result.add(sortedIndex, item)
+//
+//                krx.forEachLater(ks.killSet) { k ->
+//                    val from = sortedIndex
+//                    sorted.removeAt(sortedIndex)
+//                    val to = find(k)
+//                    currentKey = k
+//                    sorted.add(to, this@Holder)
+//                    if (to != from) {
+//                        val move = Move.of(from, to)
+//                        move.range.map(sorted::get).forEach { it.sortedIndex += move.shift }
+//                        result.move(from, to)
+//                    }
+//                }
+//            }
+//
+//            fun move(from: Int, to: Int) {
+//                holders.add(to, holders.removeAt(from))
+//            }
+//
+//            fun remove(from: Int) {
+//                holders.removeAt(from)
+//                sorted.removeAt(sortedIndex)
+//                sorted.listIterator(sortedIndex).forEach { h ->
+//                    h.sortedIndex --
+//                }
+//                ks.kill()
+//                result.removeAt(sortedIndex)
+//            }
+//        }
+//
+//        val holders = mutableListOf<Holder>()
+//        val sorted = mutableListOf<Holder>()
+//
+//        killables += list.addListener(
+//            ListenableList.Listener(
+//                added = { idx, item ->
+//                    Holder(
+//                        holders,
+//                        sorted,
+//                        item,
+//                        idx
+//                    )
+//                },
+//                removed = { idx, _ ->
+//                    holders[idx].remove(idx)
+//
+//                },
+//                moved = { from, to ->
+//                    holders[from].move(from, to)
+//                }
+//
+//            )
+//        )
+//
+//        return result
+//    }
+//}
 
 fun <T, U> ListenableList<T>.map(
     killables: KillSet,
