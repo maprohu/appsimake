@@ -70,21 +70,15 @@ fun <T> ReceiveChannel<SnapshotEvent>.wrapSnapshotEvents(
 fun <T: RxBase<*>> ReceiveChannel<SnapshotEvent>.listEvents(
     deps: CoroutineScope,
     collectionWrap: CollectionSource<T>,
-    ops: DynamicOps,
-    create: () -> T
+    ops: DynamicOps
 ): ReceiveChannel<ListEvent<FsDoc<T>>> {
-    fun createPersisted(id: String) = create().toFsDoc(collectionWrap, id)
-
     return wrapSnapshotEvents(
         deps,
         create = { id, data ->
-            createPersisted(id).apply {
-                doc.readDynamic(data, ops)
-            }
+            collectionWrap.factory(data, ops).toFsDoc(collectionWrap, id)
         },
         update = { data ->
-            doc.readDynamic(data, ops)
+            rxv %= collectionWrap.factory(data, ops)
         }
     )
-
 }

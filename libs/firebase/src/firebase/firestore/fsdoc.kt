@@ -36,7 +36,7 @@ fun <D: RxBase<*>> FsDoc<D>.save(deps: HasDb): Promise<Unit> {
         }
 
         dw.docRef(deps).set(
-            doc.writeDynamic(FsDynamicOps)
+            rxv.now.writeDynamic(FsDynamicOps)
         )
     }
 }
@@ -82,7 +82,7 @@ fun <D: RxBase<*>> FsDoc<D>.updateFrom(ds: DocumentSnapshot) {
     id.state %= ds.fsIdState
 
     if (ds.exists) {
-        doc.readDynamic(ds.data(), FsDynamicOps)
+        rxv.now = id.coll.factory(ds.data(), FsDynamicOps)
     }
 }
 

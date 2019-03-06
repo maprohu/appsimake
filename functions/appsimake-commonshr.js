@@ -105,6 +105,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   ListEvent$Move.prototype.constructor = ListEvent$Move;
   ListEvent$Remove.prototype = Object.create(ListEvent.prototype);
   ListEvent$Remove.prototype.constructor = ListEvent$Remove;
+  RWProp.prototype = Object.create(ROProp.prototype);
+  RWProp.prototype.constructor = RWProp;
   SnapshotEvent$Added.prototype = Object.create(SnapshotEvent.prototype);
   SnapshotEvent$Added.prototype.constructor = SnapshotEvent$Added;
   SnapshotEvent$Modified.prototype = Object.create(SnapshotEvent.prototype);
@@ -2104,7 +2106,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function coll$ObjectLiteral$getValue$lambda(closure$fn) {
     return function (d, ops) {
       var $receiver = closure$fn();
-      readDynamic_0($receiver, d, ops);
+      readDynamic($receiver, d, ops);
       return $receiver;
     };
   }
@@ -3666,6 +3668,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return properties.CompareEquals;
     };
   }));
+  function ReadWrite() {
+  }
+  ReadWrite.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'ReadWrite',
+    interfaces: []
+  };
   function PropertyType(copier, compare, writeDynamic, readDynamic) {
     if (copier === void 0) {
       copier = package$properties.Identity;
@@ -3681,13 +3690,23 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
     this.copier = copier;
     this.compare = compare;
-    this.writeDynamic = writeDynamic;
-    this.readDynamic = readDynamic;
+    this.writeDynamic_qq5p46$_0 = writeDynamic;
+    this.readDynamic_t2sno1$_0 = readDynamic;
   }
+  Object.defineProperty(PropertyType.prototype, 'writeDynamic', {
+    get: function () {
+      return this.writeDynamic_qq5p46$_0;
+    }
+  });
+  Object.defineProperty(PropertyType.prototype, 'readDynamic', {
+    get: function () {
+      return this.readDynamic_t2sno1$_0;
+    }
+  });
   PropertyType.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'PropertyType',
-    interfaces: []
+    interfaces: [ReadWrite]
   };
   var IdentityType;
   var identityType = defineInlineFunction('appsimake-commonshr.commonshr.properties.identityType_287e2$', wrapFunction(function () {
@@ -3696,62 +3715,50 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return properties.IdentityType;
     };
   }));
-  function ROProp() {
+  function ROProp(name, rxv, write) {
+    this.name = name;
+    this.rxv_b9riih$_0 = rxv;
+    this.write = write;
   }
+  Object.defineProperty(ROProp.prototype, 'rxv', {
+    get: function () {
+      return this.rxv_b9riih$_0;
+    }
+  });
   ROProp.$metadata$ = {
-    kind: Kind_INTERFACE,
+    kind: Kind_CLASS,
     simpleName: 'ROProp',
     interfaces: []
   };
-  function PropertyItem(index, name, defaultValue, type) {
-    this.index = index;
-    this.name_s9hwbs$_0 = name;
-    this.defaultValue = defaultValue;
-    this.type = type;
-    this.rxv_wzqcep$_0 = new Var(this.defaultValue);
+  function RWProp(name, rxv, write) {
+    ROProp.call(this, name, rxv, write);
+    this.rxv_eq87tb$_0 = rxv;
   }
-  Object.defineProperty(PropertyItem.prototype, 'name', {
+  Object.defineProperty(RWProp.prototype, 'rxv', {
     get: function () {
-      return this.name_s9hwbs$_0;
+      return this.rxv_eq87tb$_0;
     }
   });
-  Object.defineProperty(PropertyItem.prototype, 'rxv', {
-    get: function () {
-      return this.rxv_wzqcep$_0;
-    }
-  });
-  PropertyItem.prototype.invoke = function () {
-    return this.rxv.invoke();
-  };
-  PropertyItem.$metadata$ = {
+  RWProp.$metadata$ = {
     kind: Kind_CLASS,
-    simpleName: 'PropertyItem',
+    simpleName: 'RWProp',
     interfaces: [ROProp]
   };
-  function writeDynamic($receiver, ops) {
-    return $receiver.type.writeDynamic(get_now($receiver), ops);
+  function PropertyListItem(name, write, read, get, copy, set, reset, compare) {
+    this.name = name;
+    this.write = write;
+    this.read = read;
+    this.get = get;
+    this.copy = copy;
+    this.set = set;
+    this.reset = reset;
+    this.compare = compare;
   }
-  function readDynamic($receiver, d, ops) {
-    $receiver.rxv.remAssign_11rb$($receiver.type.readDynamic(d, ops));
-  }
-  function get_copy($receiver) {
-    return $receiver.type.copier(get_now($receiver));
-  }
-  function resetToDefault($receiver) {
-    $receiver.rxv.remAssign_11rb$($receiver.defaultValue);
-  }
-  function remAssign_1($receiver, v) {
-    $receiver.rxv.remAssign_11rb$(v);
-  }
-  function get_now($receiver) {
-    return $receiver.rxv.now;
-  }
-  function set_now($receiver, v) {
-    $receiver.rxv.now = v;
-  }
-  function invoke_1($receiver) {
-    return $receiver.rxv.invoke();
-  }
+  PropertyListItem.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PropertyListItem',
+    interfaces: []
+  };
   function PropertyList() {
     this.items = ArrayList_init();
   }
@@ -3761,33 +3768,150 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
     return this.prop_z4bjo6$(value, type);
   };
-  function PropertyList$prop$lambda(this$PropertyList, closure$value, closure$type) {
+  function PropertyList$prop$lambda$lambda(closure$type, closure$rxv) {
+    return function (ops) {
+      return closure$type.writeDynamic(closure$rxv.now, ops);
+    };
+  }
+  function PropertyList$prop$lambda$lambda_0(closure$rxv, closure$type) {
+    return function (d, ops) {
+      closure$rxv.remAssign_11rb$(closure$type.readDynamic(d, ops));
+      return Unit;
+    };
+  }
+  function PropertyList$prop$lambda$lambda_1(closure$rxv) {
+    return function () {
+      return closure$rxv.invoke();
+    };
+  }
+  function PropertyList$prop$lambda$lambda_2(closure$type, closure$rxv) {
+    return function () {
+      return closure$type.copier(closure$rxv.now);
+    };
+  }
+  function PropertyList$prop$lambda$lambda_3(closure$rxv) {
+    return function (v) {
+      closure$rxv.remAssign_11rb$(v);
+      return Unit;
+    };
+  }
+  function PropertyList$prop$lambda$lambda_4(closure$rxv, closure$value) {
+    return function () {
+      closure$rxv.remAssign_11rb$(closure$value);
+      return Unit;
+    };
+  }
+  function PropertyList$prop$lambda$lambda_5(closure$type, closure$rxv) {
+    return function (v) {
+      return closure$type.compare(closure$rxv.invoke(), v);
+    };
+  }
+  function PropertyList$prop$lambda(closure$value, this$PropertyList, closure$type) {
     return function (name) {
-      var $receiver = new PropertyItem(this$PropertyList.items.size, name, closure$value, closure$type);
-      this$PropertyList.items.add_11rb$($receiver);
-      return $receiver;
+      var rxv = new Var(closure$value);
+      var $receiver = this$PropertyList.items;
+      var element = new PropertyListItem(name, PropertyList$prop$lambda$lambda(closure$type, rxv), PropertyList$prop$lambda$lambda_0(rxv, closure$type), PropertyList$prop$lambda$lambda_1(rxv), PropertyList$prop$lambda$lambda_2(closure$type, rxv), PropertyList$prop$lambda$lambda_3(rxv), PropertyList$prop$lambda$lambda_4(rxv, closure$value), PropertyList$prop$lambda$lambda_5(closure$type, rxv));
+      $receiver.add_11rb$(element);
+      return new RWProp(name, rxv, closure$type.writeDynamic);
     };
   }
   PropertyList.prototype.prop_z4bjo6$ = function (value, type) {
     if (type === void 0) {
       type = package$properties.IdentityType;
     }
-    return named(PropertyList$prop$lambda(this, value, type));
+    return named(PropertyList$prop$lambda(value, this, type));
   };
   PropertyList.prototype.string = function () {
     return this.prop_z4bjo6$('');
   };
+  PropertyList.prototype.enum_wbfx10$ = defineInlineFunction('appsimake-commonshr.commonshr.properties.PropertyList.enum_wbfx10$', wrapFunction(function () {
+    var PropertyType_init = _.commonshr.properties.PropertyType;
+    function enumType$lambda(e, f) {
+      return e.name;
+    }
+    function enumType$lambda_0(typeClosure$E, isE) {
+      return function (d, f) {
+        return typeClosure$E.valueOf_61zpoe$(d);
+      };
+    }
+    return function (E_0, isE, v) {
+      return this.prop_z4bjo6$(v, new PropertyType_init(void 0, void 0, enumType$lambda, enumType$lambda_0(E_0, isE)));
+    };
+  }));
+  PropertyList.prototype.number = function () {
+    return this.prop_z4bjo6$(0);
+  };
   PropertyList.prototype.serverTimestamp = function () {
     return this.readOnlyProp_z4bjo6$(TS$Server_getInstance(), ServerTimestampPropertyType);
   };
-  PropertyList.prototype.list_287e2$ = function () {
-    return this.prop_z4bjo6$(emptyList());
+  PropertyList.prototype.array_itlr5c$ = function (type) {
+    if (type === void 0)
+      type = new PropertyType();
+    return this.prop_z4bjo6$(emptyList(), arrayOfScalarType(type));
   };
   PropertyList.prototype.rxlist_4okrys$ = function (create) {
     return this.prop_z4bjo6$(emptyList(), rxListType(create));
   };
   PropertyList.prototype.boolean = function () {
     return this.prop_z4bjo6$(false);
+  };
+  function PropertyList$calc$lambda$lambda(closure$fn) {
+    return function ($receiver) {
+      return closure$fn();
+    };
+  }
+  function PropertyList$calc$lambda$lambda_0(closure$write, closure$rxv) {
+    return function (ops) {
+      return closure$write(closure$rxv.now, ops);
+    };
+  }
+  function PropertyList$calc$lambda$lambda_1(f, f_0) {
+    return Unit;
+  }
+  function PropertyList$calc$lambda$lambda_2(closure$rxv) {
+    return function () {
+      return closure$rxv.invoke();
+    };
+  }
+  function PropertyList$calc$lambda$lambda_3(closure$rxv) {
+    return function () {
+      return closure$rxv.now;
+    };
+  }
+  function PropertyList$calc$lambda$lambda_4(it) {
+    return Unit;
+  }
+  function PropertyList$calc$lambda$lambda_5() {
+    return Unit;
+  }
+  function PropertyList$calc$lambda$lambda_6(it) {
+    return true;
+  }
+  function PropertyList$calc$lambda(closure$fn, this$PropertyList, closure$write) {
+    return function (name) {
+      var rxv = Rx_init_0(NoKill, PropertyList$calc$lambda$lambda(closure$fn));
+      var $receiver = this$PropertyList.items;
+      var element = new PropertyListItem(name, PropertyList$calc$lambda$lambda_0(closure$write, rxv), PropertyList$calc$lambda$lambda_1, PropertyList$calc$lambda$lambda_2(rxv), PropertyList$calc$lambda$lambda_3(rxv), PropertyList$calc$lambda$lambda_4, PropertyList$calc$lambda$lambda_5, PropertyList$calc$lambda$lambda_6);
+      $receiver.add_11rb$(element);
+      return new ROProp(name, rxv, closure$write);
+    };
+  }
+  PropertyList.prototype.calc_26ey0h$ = function (write, fn) {
+    if (write === void 0) {
+      write = package$properties.IdentityWriteDynamic;
+    }
+    return named(PropertyList$calc$lambda(fn, this, write));
+  };
+  function PropertyList$lazy$lambda(closure$write) {
+    return function (v, ops) {
+      return closure$write(v.value, ops);
+    };
+  }
+  PropertyList.prototype.lazy_x7a9rj$ = function (write, fn) {
+    if (write === void 0) {
+      write = package$properties.IdentityWriteDynamic;
+    }
+    return this.calc_26ey0h$(PropertyList$lazy$lambda(write), fn);
   };
   PropertyList.$metadata$ = {
     kind: Kind_CLASS,
@@ -3807,7 +3931,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
           var element = tmp$_1.next();
           var pa = element.component1()
           , pb = element.component2();
-          if (!pa.type.compare(pa.invoke(), pb.invoke())) {
+          if (!pa.compare(pb.get())) {
             all$result = false;
             break all$break;
           }
@@ -3840,37 +3964,37 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       var element = tmp$_0.next();
       var old = element.component1()
       , new_0 = element.component2();
-      set_now(new_0, get_copy(old));
+      new_0.set(old.copy());
     }
     return $receiver_0;
   }
-  function writeDynamic_0($receiver, ops) {
+  function writeDynamic($receiver, ops) {
     var d = {};
     var tmp$;
     tmp$ = $receiver.o.items.iterator();
     while (tmp$.hasNext()) {
       var element = tmp$.next();
-      d[element.name] = writeDynamic(element, ops);
+      d[element.name] = element.write(ops);
     }
     return d;
   }
-  function readDynamic_0($receiver, d, ops) {
+  function readDynamic($receiver, d, ops) {
     var tmp$;
     tmp$ = $receiver.o.items.iterator();
     while (tmp$.hasNext()) {
       var element = tmp$.next();
       if (hasOwnProperty(d, element.name)) {
-        readDynamic(element, d[element.name], ops);
+        element.read(d[element.name], ops);
       }
        else {
-        resetToDefault(element);
+        element.reset();
       }
     }
   }
   function rxListType$lambda(closure$create) {
     return function (d, ops) {
       var $receiver = closure$create();
-      readDynamic_0($receiver, d, ops);
+      readDynamic($receiver, d, ops);
       return $receiver;
     };
   }
@@ -3918,7 +4042,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     tmp$ = list.iterator();
     while (tmp$.hasNext()) {
       var item = tmp$.next();
-      destination.add_11rb$(writeDynamic_0(item, ops));
+      destination.add_11rb$(writeDynamic(item, ops));
     }
     return copyToArray(destination);
   }
@@ -3943,6 +4067,39 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     return ops.writeTimestamp_frv8pu$(TS$Server_getInstance());
   }
   var ServerTimestampPropertyType;
+  var enumType = defineInlineFunction('appsimake-commonshr.commonshr.properties.enumType_nxd2ia$', wrapFunction(function () {
+    var PropertyType_init = _.commonshr.properties.PropertyType;
+    function enumType$lambda(e, f) {
+      return e.name;
+    }
+    function enumType$lambda_0(typeClosure$E, isE) {
+      return function (d, f) {
+        return typeClosure$E.valueOf_61zpoe$(d);
+      };
+    }
+    return function (E_0, isE) {
+      return new PropertyType_init(void 0, void 0, enumType$lambda, enumType$lambda_0(E_0, isE));
+    };
+  }));
+  function arrayOfScalarType(type) {
+    return new PropertyType();
+  }
+  function calcType$lambda(f, f_0) {
+    return true;
+  }
+  function calcType$lambda_0(closure$write, closure$rxv) {
+    return function (f, ops) {
+      return closure$write(closure$rxv.now, ops);
+    };
+  }
+  function calcType$lambda_1(closure$rxv) {
+    return function (f, f_0) {
+      return closure$rxv.now;
+    };
+  }
+  function calcType(rxv, write) {
+    return new PropertyType(void 0, calcType$lambda, calcType$lambda_0(write, rxv), calcType$lambda_1(rxv));
+  }
   function SnapshotEvent() {
   }
   function SnapshotEvent$Added(id, index, data) {
@@ -4090,27 +4247,19 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     launch(deps, void 0, void 0, wrapSnapshotEvents$lambda($receiver, create, wrapped, channel, update));
     return channel;
   }
-  function listEvents$createPersisted(closure$create, closure$collectionWrap) {
-    return function (id) {
-      return toFsDoc_1(closure$create(), closure$collectionWrap, id);
-    };
-  }
-  function listEvents$lambda(closure$createPersisted, closure$ops) {
+  function listEvents$lambda(closure$collectionWrap, closure$ops) {
     return function (id, data) {
-      var $receiver = closure$createPersisted(id);
-      readDynamic_0($receiver.doc, data, closure$ops);
-      return $receiver;
+      return toFsDoc_1(closure$collectionWrap.factory(data, closure$ops), closure$collectionWrap, id);
     };
   }
-  function listEvents$lambda_0(closure$ops) {
+  function listEvents$lambda_0(closure$collectionWrap, closure$ops) {
     return function ($receiver, data) {
-      readDynamic_0($receiver.doc, data, closure$ops);
+      $receiver.rxv.remAssign_11rb$(closure$collectionWrap.factory(data, closure$ops));
       return Unit;
     };
   }
-  function listEvents($receiver, deps, collectionWrap, ops, create) {
-    var createPersisted = listEvents$createPersisted(create, collectionWrap);
-    return wrapSnapshotEvents($receiver, deps, listEvents$lambda(createPersisted, ops), listEvents$lambda_0(ops));
+  function listEvents($receiver, deps, collectionWrap, ops) {
+    return wrapSnapshotEvents($receiver, deps, listEvents$lambda(collectionWrap, ops), listEvents$lambda_0(collectionWrap, ops));
   }
   function TS() {
   }
@@ -4146,8 +4295,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function RefDoc(id, doc) {
     this.id = id;
-    this.doc = doc;
+    this.rxv = new Var(doc);
   }
+  RefDoc.prototype.invoke = function () {
+    return this.rxv.invoke();
+  };
   RefDoc.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'RefDoc',
@@ -6585,6 +6737,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$properties.identityWriteDynamic_287e2$ = identityWriteDynamic;
   package$properties.identityReadDynamic_287e2$ = identityReadDynamic;
   package$properties.compareEquals_287e2$ = compareEquals;
+  package$properties.ReadWrite = ReadWrite;
   package$properties.PropertyType = PropertyType;
   Object.defineProperty(package$properties, 'IdentityType', {
     get: function () {
@@ -6593,22 +6746,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   });
   package$properties.identityType_287e2$ = identityType;
   package$properties.ROProp = ROProp;
-  package$properties.PropertyItem = PropertyItem;
-  package$properties.writeDynamic_uvx324$ = writeDynamic;
-  package$properties.readDynamic_r4sz0x$ = readDynamic;
-  package$properties.get_copy_onaa3k$ = get_copy;
-  package$properties.resetToDefault_32q2wm$ = resetToDefault;
-  package$properties.remAssign_rwr88g$ = remAssign_1;
-  package$properties.get_now_onaa3k$ = get_now;
-  package$properties.set_now_6z2sje$ = set_now;
-  package$properties.invoke_32q2wm$ = invoke_1;
+  package$properties.RWProp = RWProp;
+  package$properties.PropertyListItem = PropertyListItem;
   package$properties.PropertyList = PropertyList;
   package$properties.rxCompare_kagv6q$ = rxCompare;
   package$properties.RxBase = RxBase;
   package$properties.zipItems_kagv6q$ = zipItems;
   package$properties.copy_szlj5h$ = copy;
-  package$properties.writeDynamic_y9dcxh$ = writeDynamic_0;
-  package$properties.readDynamic_121my8$ = readDynamic_0;
+  package$properties.writeDynamic_y9dcxh$ = writeDynamic;
+  package$properties.readDynamic_121my8$ = readDynamic;
   package$properties.rxListType_4okrys$ = rxListType;
   package$properties.rxListType_68r5d9$ = rxListType_0;
   Object.defineProperty(package$properties, 'ServerTimestampPropertyType', {
@@ -6616,13 +6762,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return ServerTimestampPropertyType;
     }
   });
+  package$properties.arrayOfScalarType_itlr5c$ = arrayOfScalarType;
+  package$properties.calcType_6hcemk$ = calcType;
   SnapshotEvent.Added = SnapshotEvent$Added;
   SnapshotEvent.Modified = SnapshotEvent$Modified;
   SnapshotEvent.Moved = SnapshotEvent$Moved;
   SnapshotEvent.Removed = SnapshotEvent$Removed;
   package$properties.SnapshotEvent = SnapshotEvent;
   package$properties.wrapSnapshotEvents_j0uhh8$ = wrapSnapshotEvents;
-  package$properties.listEvents_jx09cw$ = listEvents;
+  package$properties.listEvents_rcl6n2$ = listEvents;
   TS.Value = TS$Value;
   Object.defineProperty(TS, 'Server', {
     get: TS$Server_getInstance

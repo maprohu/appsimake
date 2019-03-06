@@ -5,17 +5,19 @@ import commonfb.loginbase.LoginOnly
 import commonui.widget.Body
 import commonui.widget.BodyPath
 import download.loggedin.LoggedIn
+import firebase.DbApi
+import firebase.HasDb
 import firebase.app.App
 import firebase.firestore.Firestore
 import kotlinx.coroutines.launch
 
-interface HomePath: BodyPath {
+interface HomePath: BodyPath, HasDb {
     val home: Home
 }
 class Home(
     body: Body,
     val app: App,
-    val db: Firestore
+    override val db: Firestore
 ): LoginOnly(body), HomePath, BodyPath by body {
     override val home = this
 

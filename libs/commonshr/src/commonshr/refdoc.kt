@@ -13,8 +13,11 @@ import rx.Var
 
 class RefDoc<I, D>(
     val id: I,
-    val doc: D
-)
+    doc: D
+) {
+    val rxv = Var(doc)
+    operator fun invoke() = rxv()
+}
 
 sealed class FsIdState {
     abstract val exists: Boolean

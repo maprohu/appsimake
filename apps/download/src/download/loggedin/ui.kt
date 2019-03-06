@@ -4,8 +4,11 @@ import bootstrap.*
 import commonshr.*
 import commonui.widget.*
 import domx.*
+import download.DownloadItem
+import download.DownloadProcess
 import fontawesome.*
 import styles.widthAuto
+import kotlin.browser.document
 
 fun LoggedIn.ui() = TopAndContent(
     topbar = factory.topbar {
@@ -26,9 +29,9 @@ fun LoggedIn.ui() = TopAndContent(
     content = factory.wraps.div {
         cls {
             column()
-            p1
         }
         form {
+            cls.m1
             resetForm = { reset() }
             cls {
                 flexFixedSize()
@@ -38,10 +41,12 @@ fun LoggedIn.ui() = TopAndContent(
                 cls {
                     inputGroup
                     widthAuto
+                    m1
                 }
                 insert.input {
                     node {
                         type = "url"
+                        placeholder = "paste url here..."
                     }
                     urlValue = { node.value }
                 }
@@ -70,6 +75,101 @@ fun LoggedIn.ui() = TopAndContent(
             }
         }
         insert.scrollPane {
+            cls.borderTop
+            pane {
+                cls {
+                    p1
+                }
+                h6 {
+                    cls.m1
+                    this %= "New"
+                }
+
+                insert.listGroup {
+                    cls.m1
+                    node.list(
+                        items.listEvents {
+                            DownloadItem.ts.desc
+                        }.map { i ->
+                            document.row {
+                                cls {
+                                    listGroupItem
+                                    p1
+                                }
+                                div {
+                                    cls {
+                                        flexGrow1
+                                        alignSelfCenter
+                                    }
+                                    this %= { i().url() }
+                                }
+                                insert.buttonGroup {
+                                    cls {
+                                        flexFixedSize()
+                                        m1
+                                    }
+                                    button {
+                                        cls.p2
+                                        secondary
+                                        fa.trashAlt
+                                        click {
+                                            i.delete()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
+
+                h6 {
+                    cls.m1
+                    this %= "Started"
+                }
+
+                insert.listGroup {
+                    cls.m1
+                    node.list(
+                        process.listEvents {
+                            DownloadProcess.ts.desc
+                        }.map { i ->
+                            document.row {
+                                cls {
+                                    listGroupItem
+                                    p1
+                                }
+                                div {
+                                    cls {
+                                        m1
+                                        flexGrow1
+                                        alignSelfCenter
+                                    }
+                                    this %= { i().title() }
+                                }
+                                div {
+                                    cls {
+                                        m1
+                                        flexFixedSize()
+                                        alignSelfCenter
+                                    }
+                                    this %= { i().progress().toString() }
+                                }
+                                insert.buttonGroup {
+                                    cls {
+                                        flexFixedSize()
+                                        m1
+                                    }
+                                    button {
+                                        cls.p2
+                                        secondary
+                                        fa.trashAlt
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
+            }
         }
 
     }.node

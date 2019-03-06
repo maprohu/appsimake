@@ -3,29 +3,40 @@ package tasks
 import bootstrap.*
 import common.*
 import commonfb.*
-import commonfb.ListUIConfig.Companion.standardEmptyDiv
 import commonlib.private
 import commonui.*
+import commonui.widget.Body
+import commonui.widget.Loading
+import commonui.widget.switchToView
 import domx.*
 import firebase.User
 import firebase.firestore.*
-import firebaseshr.dontCalculate
-import firebaseshr.withCollection
 import fontawesome.*
-import killable.Killable
 import killable.Killables
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import rx.Rx
 import rx.RxIface
 import rx.Var
-import rx.set
-import styles.*
 import taskslib.*
 import kotlin.browser.document
 
-fun main(args: Array<String>) {
+fun main() {
+    val loading = Loading()
+
+    if (isServiceWorkerSupported) {
+        APP.startRegisteringServiceWorker()
+    }
+
+    Body(loading.target).apply {
+        launchGlobal {
+            content.switchToView(Home(this@apply))
+        }
+    }
+
+    launchGlobal {
+        Boot.create(loading.target)
+    }
     TasksMain().let { tm ->
         GlobalScope.launch {
             try {
@@ -40,7 +51,7 @@ fun main(args: Array<String>) {
 }
 
 
-class TasksMain : LoggingInCtx(tasks, "Tasks") {
+class TasksMain : LoggingInCtx(tasksLib, "Tasks") {
 
     init {
         appCtx.registerServiceWorker()
@@ -52,7 +63,7 @@ class TasksMain : LoggingInCtx(tasks, "Tasks") {
 
 }
 
-class LoggedIn(
+class LoggedInx(
     val base: TasksMain,
     val user: User
 ) : HasDB by base.fbCtx {
@@ -60,7 +71,7 @@ class LoggedIn(
     val fbCtx = loggedInCtx.fbCtx
     val root = base.appCtx.root
 
-    val userPrivate = tasks.app.private.doc(user.uid)
+    val userPrivate = tasksLib.app.private.doc(user.uid)
     val userTasks = userPrivate.tasks
     val userTags = userPrivate.usertags
     val userHiddenTasks = userPrivate.hiddenTasks

@@ -56,9 +56,8 @@ interface CsDbKillsApi: HasCsDbKills, CsKillsApiFirebase, DbApi, KillsApiFirebas
     val <D : RxBase<*>> DocWrap<D>.snapshots get() = snapshots(api)
 
     fun <T: RxBase<*>> CollectionSource<T>.listEvents(
-        create: () -> T,
         query: QuerySettingsBuilder<T>.() -> Unit = {}
-    ) = listEvents(api, create, query)
+    ) = listEvents(api, query)
 
     val <D: RxBase<*>> FsDoc<D>.live get() = live(api)
 

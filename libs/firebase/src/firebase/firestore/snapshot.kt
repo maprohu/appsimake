@@ -75,11 +75,10 @@ fun <D> DocWrap<D>.snapshots(deps: HasCsDbKills) = docRef(deps).documentSnapshot
 
 fun <T: RxBase<*>> CollectionSource<T>.listEvents(
     deps: HasCsDbKills,
-    create: () -> T,
     query: QuerySettingsBuilder<T>.() -> Unit = {}
 ) =
     query(deps, query)
         .documentChanges(deps)
         .toSnapshotEvents(deps)
-        .listEvents(deps, this, FsDynamicOps, create)
+        .listEvents(deps, this, FsDynamicOps)
 

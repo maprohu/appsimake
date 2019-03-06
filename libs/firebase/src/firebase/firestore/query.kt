@@ -6,8 +6,15 @@ import firebase.DbApi
 import firebase.HasDb
 
 data class QuerySettings(
-    val order: List<OrderBy> = emptyList()
+    val order: List<OrderBy> = emptyList(),
+    val where: List<Where> = emptyList()
 ) {
+
+    class Where(
+        val path: String,
+        val op: WhereOp,
+        val param: dynamic
+    )
 
     class OrderBy(
         val path: String,
@@ -19,6 +26,10 @@ data class QuerySettings(
         Desc
     }
 
+    enum class WhereOp {
+        Eq
+    }
+
     fun asc(path: String) = copy(
         order = order + OrderBy(path)
     )
@@ -26,11 +37,24 @@ data class QuerySettings(
         order = order + OrderBy(path, OrderDirection.Desc)
     )
 
+    fun where(wh: Where) = copy(
+        where = where + wh
+    )
+
+    fun where(path: String, op: WhereOp, param: dynamic) = where(
+        Where(path, op, param)
+    )
+
+    fun eq(path: String, value: dynamic) = where(path, WhereOp.Eq, value)
+
 }
 
 interface QuerySettingsBuilder<T> {
     var settings: QuerySettings
 
+    infix fun <P> ROProp<T, P>.eq(v: P) {
+        settings = settings.eq(name, type.writeDynamic(v, FsDynamicOps))
+    }
     val ROProp<T, *>.asc: Unit get() { settings = settings.asc(name) }
     val ROProp<T, *>.desc: Unit get() { settings = settings.desc(name) }
 }

@@ -3,13 +3,16 @@ package taskslib
 import common.named
 import common.toOptional
 import commonlib.*
+import commonshr.properties.RxBase
 import commonshr.toLazy
 import firebaseshr.*
 import firebaseshr.firestore.Timestamp
+import killable.NoKill
+import rx.Rx
 
-val tasks by named { Lib(it) }
+val tasksLib = Lib("tasks")
 
-val DocWrap<Private>.tasks by coll<Task>()
+val DocWrap<Private>.tasks by coll { Task() }
 val DocWrap<Private>.usertags by coll<Tag>()
 val DocWrap<Private>.hiddenTasks by coll<HiddenTask>()
 val DocWrap<Task>.notes by coll<Note>()
@@ -49,53 +52,40 @@ fun <T> List<T>.subs(min: Int, max: Int): List<List<T>> {
 val MaxTagIndexSize = 4
 
 
-open class Task : Base<Task>() {
+open class Task : RxBase<Task>() {
 
-    val title by o
-        .scalar<String>()
-        .mandatory()
-        .ifPresent(ValidationError.mandatory) {it.isBlank()}
-        .prop()
+    val title by o.string()
+    val text by o.string()
+    val status by o.enum(TaskStatus.New)
 
-    val text by o.scalar<String>().prop()
-    val status by o
-        .enum<TaskStatus>()
-        .withDefault(TaskStatus.New)
-        .mandatory()
-        .prop()
+    val tags by o.array<String>()
 
-    val tags by o.array<String>().toSet().prop()
+    val ts by o.serverTimestamp()
 
-    val ts by o.scalar<Timestamp>().calculated { binderOps.serverTimestamp().toOptional().toLazy() }.prop()
-    val completed by o.scalar<Boolean>().calculated {
-        status.current().map { s -> s.completed }.let(::lazyOf)
-    }.prop()
+    val completed by o.calc {
+        status().completed
+    }
 
-    val tagsx by
-        o.array<String>().toSet()
-            .calculated {
-                val t = tags.current()
-                lazy {
-                    t.map {  ts ->
-                        ts
-                            .sorted()
-                            .subs(2, MaxTagIndexSize)
-                            .map { ids -> ids.multiTags }
-                            .toSet()
-                    }
-                }
-            }
-            .prop()
-
-    init {
-        with(props) {
-            onDeleted {
-                binderOps.deleteCollection(
-                    docWrapOrFail.notes
-                )
-            }
+    val tagsx by o.lazy {
+        val t = tags()
+        lazy {
+            t
+                .sorted()
+                .subs(2, MaxTagIndexSize)
+                .map { ids -> ids.multiTags }
+                .toSet()
         }
     }
+
+//    init {
+//        with(props) {
+//            onDeleted {
+//                binderOps.deleteCollection(
+//                    docWrapOrFail.notes
+//                )
+//            }
+//        }
+//    }
 
     companion object : Task()
 }
@@ -103,17 +93,17 @@ open class Task : Base<Task>() {
 val List<String>.multiTags
     get() = joinToString(";")
 
-open class Tag : Base<Tag>() {
-    val name by o.scalar<String>().prop()
+open class Tag : RxBase<Tag>() {
+    val name by o.string()
     companion object : Tag()
 }
 
-open class Note : Base<Note>() {
-    val text by o.scalar<String>().prop()
-    val ts by o.scalar<Timestamp>().calculated { binderOps.serverTimestamp().toOptional().toLazy() }.prop()
+open class Note : RxBase<Note>() {
+    val text by o.string()
+    val ts by o.serverTimestamp()
 
     companion object : Note()
 
 }
 
-open class HiddenTask : Base<HiddenTask>()
+open class HiddenTask : RxBase<HiddenTask>()
