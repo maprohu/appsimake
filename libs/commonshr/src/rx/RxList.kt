@@ -1,17 +1,17 @@
-package common
+package rx
 
+import common.*
 import commonshr.*
 import killable.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.map
 import kotlinx.coroutines.channels.produce
-import rx.Rx
-import rx.RxIface
-import rx.RxVal
-import rx.Var
+import kotlinx.coroutines.launch
 
-interface ListenableList<out T> : List<T> {
+interface RxList<out T> : List<T> {
 
     fun addListener(listener: Listener<T>) = addListener(listener, true)
     fun addListener(listener: Listener<T>, all: Boolean) : Trigger
@@ -23,6 +23,7 @@ interface ListenableList<out T> : List<T> {
     )
 
     val isEmptyRx: RxIface<Boolean>
+    val sizeRx : RxVal<Int>
 }
 
 interface Collector<T> {
@@ -39,7 +40,7 @@ fun <T> collector(fn: (T) -> Unit): Collector<T> {
 
 
 @UseExperimental(ExperimentalCoroutinesApi::class)
-fun <T> ListenableList<T>.events(deps: HasCsKills): ReceiveChannel<ListEvent<T>> = deps.produce(capacity = Channel.UNLIMITED) {
+fun <T> RxList<T>.events(deps: HasCsKills): ReceiveChannel<ListEvent<T>> = deps.produce(capacity = Channel.UNLIMITED) {
     deps.kills += events(
         collector {
             offer(it)
@@ -48,7 +49,7 @@ fun <T> ListenableList<T>.events(deps: HasCsKills): ReceiveChannel<ListEvent<T>>
     deps.kills.join()
 }
 
-fun <T> ListenableList<T>.eventsEmitter(all: Boolean = true): EmitterFn<ListEvent<T>> {
+fun <T> RxList<T>.eventsEmitter(all: Boolean = true): EmitterFn<ListEvent<T>> {
     return { cb ->
         events(
             collector {
@@ -59,35 +60,34 @@ fun <T> ListenableList<T>.eventsEmitter(all: Boolean = true): EmitterFn<ListEven
     }
 }
 
-fun <T> ListenableList<T>.events(channel: Collector<ListEvent<T>>, all: Boolean = true): Trigger {
+fun <T> RxList<T>.events(channel: Collector<ListEvent<T>>, all: Boolean = true): Trigger {
     return addListener(
-        ListenableList.Listener(
+        RxList.Listener(
             added = { i, t ->
                 channel += ListEvent.Add(i, t)
             },
             moved = { from, to ->
-                channel += ListEvent.Move(from, to)
+                channel += ListEvent.Move(from, to, this@events[to])
             },
-            removed = { i, _ ->
-                channel += ListEvent.Remove(i)
+            removed = { i, t ->
+                channel += ListEvent.Remove(i, t)
             }
         ),
         all
     )
 }
 
-class ListenableMutableList<T>(items: List<T>) : AbstractMutableList<T>(), ListenableList<T> {
+class RxMutableList<T>(items: List<T>) : AbstractMutableList<T>(), RxList<T> {
     constructor(): this(emptyList())
 
 
     private val sizeVar = Var(0)
 
-    val sizeRx : RxVal<Int>
-        get() = sizeVar
+    override val sizeRx : RxVal<Int> = sizeVar
 
     override val isEmptyRx = Rx(NoKill) { sizeVar() == 0 }
 
-    override fun addListener(listener: ListenableList.Listener<T>, all: Boolean): Trigger {
+    override fun addListener(listener: RxList.Listener<T>, all: Boolean): Trigger {
         listeners += listener
 
         if (all) forEachIndexed(listener.added)
@@ -99,7 +99,7 @@ class ListenableMutableList<T>(items: List<T>) : AbstractMutableList<T>(), Liste
 
     private val delegate = mutableListOf<T>()
 
-    private var listeners = listOf<ListenableList.Listener<T>>()
+    private var listeners = listOf<RxList.Listener<T>>()
 
     override val size: Int
         get() = delegate.size
@@ -148,7 +148,7 @@ class ListenableMutableList<T>(items: List<T>) : AbstractMutableList<T>(), Liste
         }
 
         addListener(
-            ListenableList.Listener(
+            RxList.Listener(
                 added = { _, item -> e.emit(SetAdded(item)) },
                 removed = { _, item -> e.emit(SetRemoved(item)) }
             )
@@ -160,11 +160,11 @@ class ListenableMutableList<T>(items: List<T>) : AbstractMutableList<T>(), Liste
     init { addAll(items) }
 }
 
-fun <T, C: Comparable<C>> ListenableList<T>.sorted(
+fun <T, C: Comparable<C>> RxList<T>.sorted(
     kills: KillSet,
     key: KillsApi.(T) -> C
-): ListenableList<T> {
-    val sorted = ListenableMutableList<T>()
+): RxList<T> {
+    val sorted = RxMutableList<T>()
 
     class Holder(
         val item: T
@@ -231,7 +231,7 @@ fun <T, C: Comparable<C>> ListenableList<T>.sorted(
 }
 
 //data class SortedListenableListConfig<T, C: Comparable<C>>(
-//    val list: ListenableList<T>,
+//    val list: RxList<T>,
 //    val killables: KillSet,
 //    val key: KillsApi.(T) -> C
 //) {
@@ -258,9 +258,9 @@ fun <T, C: Comparable<C>> ListenableList<T>.sorted(
 //        }
 //    }
 //
-//    fun build(): ListenableList<T> {
+//    fun build(): RxList<T> {
 //
-//        val result = ListenableMutableList<T>()
+//        val result = RxMutableList<T>()
 //
 //        class Holder(
 //            val holders: MutableList<Holder>,
@@ -318,7 +318,7 @@ fun <T, C: Comparable<C>> ListenableList<T>.sorted(
 //        val sorted = mutableListOf<Holder>()
 //
 //        killables += list.addListener(
-//            ListenableList.Listener(
+//            RxList.Listener(
 //                added = { idx, item ->
 //                    Holder(
 //                        holders,
@@ -342,10 +342,10 @@ fun <T, C: Comparable<C>> ListenableList<T>.sorted(
 //    }
 //}
 
-fun <T, U> ListenableList<T>.map(
+fun <T, U> RxList<T>.map(
     killables: KillSet,
     create: (T) -> KillableValue<U>
-): ListenableList<KillableValue<U>> {
+): RxList<KillableValue<U>> {
     return map(
         killables,
         create,
@@ -353,19 +353,19 @@ fun <T, U> ListenableList<T>.map(
     )
 }
 
-fun <T, U> ListenableList<T>.map(
+fun <T, U> RxList<T>.map(
     killables: KillSet,
     create: (T) -> U,
     destroy: (U) -> Unit
-): ListenableList<U> {
-    val result = ListenableMutableList<U>()
+): RxList<U> {
+    val result = RxMutableList<U>()
 
     killables += {
         result.forEach { destroy(it) }
     }
 
     killables += addListener(
-        ListenableList.Listener(
+        RxList.Listener(
             added = { index, element ->
                 result.add(index, create(element))
             },
@@ -381,18 +381,18 @@ fun <T, U> ListenableList<T>.map(
     return result
 
 }
-fun <T, U> ListenableList<T>.map(
+fun <T, U> RxList<T>.map(
     killables: KillSet,
     mapper: (T, KillSet) -> U
-): ListenableList<U> {
-    val result = ListenableMutableList<U>()
+): RxList<U> {
+    val result = RxMutableList<U>()
     class Holder(
         val kill: Trigger
     )
     val holders = mutableListOf<Holder>()
 
     killables += addListener(
-        ListenableList.Listener(
+        RxList.Listener(
             added = { index, element ->
                 val ks = killables.killables()
                 val node = mapper(element, ks.killSet)
@@ -416,26 +416,26 @@ fun <T, U> ListenableList<T>.map(
 }
 
 data class MappedListenableListConfig<T, U>(
-    val list: ListenableList<T>,
+    val list: RxList<T>,
     val killables: KillSet,
     val mapper: (T, KillSet) -> U
 ) {
-    fun build(): ListenableList<U> {
+    fun build(): RxList<U> {
         return list.map(killables, mapper)
     }
 }
 
 
 data class FilteredListenableListConfig<T, K, I>(
-    val list: ListenableList<T>,
+    val list: RxList<T>,
     val killables: KillSet,
     val filterKey: (T, KillSet) -> RxIface<K>,
     val input: RxIface<I>,
     val filter: (K, I) -> Boolean
 ) {
 
-    fun build(): ListenableList<T> {
-        val result = ListenableMutableList<T>()
+    fun build(): RxList<T> {
+        val result = RxMutableList<T>()
 
         class Holder(
             val holders: MutableList<Holder>,
@@ -564,7 +564,7 @@ data class FilteredListenableListConfig<T, K, I>(
         }
 
         killables += list.addListener(
-            ListenableList.Listener(
+            RxList.Listener(
                 added = { idx, t ->
                     Holder(
                         holders = holders,
@@ -587,3 +587,33 @@ data class FilteredListenableListConfig<T, K, I>(
 
 
 }
+
+fun <T> ListEvent<T>.applyTo(
+    list: RxMutableList<T>
+) {
+    when (this) {
+        is ListEvent.Add -> {
+            list.add(index, item)
+        }
+        is ListEvent.Remove -> {
+            list.removeAt(index)
+        }
+        is ListEvent.Move -> {
+            list.move(from, to)
+        }
+    }
+}
+
+fun <T> ReceiveChannel<ListEvent<T>>.applyTo(
+    deps: CoroutineScope,
+    list: RxMutableList<T>
+) {
+    deps.launch {
+        for (e in this@applyTo) {
+            e.applyTo(list)
+        }
+    }
+}
+
+
+fun <T> RxList<FsDoc<T>>.ids(deps: HasCsKills) = events(deps).mapEvents { it.idOrFail }.toRxSet(deps)

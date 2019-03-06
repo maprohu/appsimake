@@ -2,21 +2,16 @@ package commonfb
 
 import bootstrap.*
 import common.Optional
-import commonlib.DocWrap
 import commonshr.invoke
-import commonshr.plusAssign
 import commonui.RootPanel
 import commonui.ToolBar
 import commonui.faButton
 import commonui.screenLayout
 import domx.*
 import firebaseshr.HasFBProps
-import firebaseshr.HasProps
 import fontawesome.Fa
 import fontawesome.pen
 import killable.KillSet
-import killable.KillableSeq
-import killable.Killables
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLDivElement

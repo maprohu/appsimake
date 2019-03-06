@@ -1,7 +1,6 @@
 package checklist.loggedin
 
 import checklist.Checklist
-import checklist.ChecklistItem
 import checklist.checklistLib
 import checklist.checklists
 import checklist.edit.Edit
@@ -11,9 +10,8 @@ import checklist.view.ViewChecklist
 import commonfb.FBApi
 import commonfb.UserState
 import commonfb.loginbase.UserStateView
-import commonlib.private
+import commonshr.private
 import commonshr.FsDoc
-import commonshr.properties.remAssign
 import commonui.widget.ForwardBase
 import commonui.widget.TopAndContent
 import firebase.HasDb

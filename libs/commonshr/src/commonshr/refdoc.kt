@@ -1,14 +1,8 @@
 package commonshr
 
-import commonlib.CollectionSource
-import commonlib.CollectionWrap
-import commonlib.DocSource
-import commonlib.DocWrap
+import common.dyn
 import commonshr.properties.DynamicOps
 import commonshr.properties.RxBase
-import commonshr.properties.readDynamic
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.ReceiveChannel
 import rx.Var
 
 class RefDoc<I, D>(
@@ -38,7 +32,7 @@ class FsId<D>(
         dw: DocSource<D>,
         exists: Boolean
     ): this(
-        dw.parent!!,
+        dw.parent,
         FsIdState.HasId(
             dw.id,
             exists
@@ -67,7 +61,10 @@ val <D> FsDoc<D>.docWrap get() = id.docWrap
 fun <D> CollectionSource<D>.toFsId(state: FsIdState) = FsId(this, state)
 fun <D> DocSource<D>.toFsId(exists: Boolean) = parent.toFsId(FsIdState.HasId(id, exists))
 
-fun <D: RxBase<*>> D.toFsDoc(id: FsId<D>) = FsDoc(id, this)
-fun <D: RxBase<*>> D.toFsDoc(cw: CollectionSource<D>) = toFsDoc(cw.toFsId(FsIdState.NoId))
-fun <D: RxBase<*>> D.toFsDoc(cw: CollectionSource<D>, id: String) = toFsDoc(cw.toFsId(FsIdState.HasId(id, true)))
+fun <D> D.toFsDoc(id: FsId<D>) = FsDoc(id, this)
+fun <D> D.toFsDoc(cw: CollectionSource<D>) = toFsDoc(cw.toFsId(FsIdState.NoId))
+fun <D> D.toFsDoc(cw: CollectionSource<D>, id: String) = toFsDoc(cw.toFsId(FsIdState.HasId(id, true)))
 
+val <T> FsDoc<T>.idOrFail: String get() = (id.state.now as FsIdState.HasId).id
+
+fun <D> DocSource<D>.new(d: dynamic = dyn(), ops: DynamicOps) = parent.factory(d, ops).toFsDoc(toFsId(false))

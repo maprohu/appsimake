@@ -13,10 +13,11 @@ class Button(): ScreenWrap() {
         }
     }
 
-    private val slots = object {
+    inner class Slots {
         val icon = slot
         val text = slot
     }
+    val slots = Slots()
 
     val p2 by lazy {
         cls.p2

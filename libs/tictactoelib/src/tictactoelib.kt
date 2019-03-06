@@ -1,7 +1,9 @@
 package tictactoelib
 
-import common.named
-import commonlib.*
+import commonshr.AppDoc
+import commonshr.DocWrap
+import commonshr.coll
+import commonshr.lib
 import firebaseshr.Base
 import firebaseshr.BaseRoot
 import firebaseshr.initFrom

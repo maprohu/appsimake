@@ -1,17 +1,16 @@
 package firebase.firestore
 
 import common.dyn
-import commonlib.CollectionSource
-import commonlib.CollectionWrap
-import commonlib.DocSource
-import commonlib.DocWrap
+import commonshr.CollectionSource
+import commonshr.CollectionWrap
+import commonshr.DocSource
+import commonshr.DocWrap
 import commonshr.*
 import commonshr.properties.*
 import firebase.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.map
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.launch
 import kotlin.js.Promise
@@ -100,3 +99,5 @@ object FsDynamicOps: DynamicOps {
 
 }
 
+fun <D> DocSource<D>.new(d: dynamic = dyn()) = new(d, firebase.firestore.FsDynamicOps)
+val <D> DocSource<D>.new get() = new()

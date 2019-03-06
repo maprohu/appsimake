@@ -2,21 +2,14 @@ package music.boot
 
 import common.obj
 import commonfb.*
-import commonlib.private
 import commonshr.*
 import commonui.globalStatus
-import commonui.launchGlobal
 import commonui.usericon.UnknownUserSrc
 import commonui.widget.*
 import firebase.app.App
-import firebase.auth.UserCredential
 import firebase.firestore.Firestore
-import firebase.firestore.collectionRef
-import firebase.firestore.flushQueries
 import firebase.functions.Functions
 import firebase.storage.Storage
-import indexeddb.IDBDatabase
-import killable.*
 import kotlinx.coroutines.*
 import music.*
 import music.common.LocalSongs
@@ -27,9 +20,6 @@ import music.loggedin.LoggedIn
 import music.notloggedin.NotLoggedIn
 import music.player.Player
 import music.player.Visible
-import musiclib.musicLib
-import musiclib.songs
-import musiclib.usersongs
 import org.w3c.dom.HTMLElement
 import rx.*
 

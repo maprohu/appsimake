@@ -1,21 +1,16 @@
 package commonfb
 
 import bootstrap.*
-import commonfb.ListUIConfig.Companion.standardEmptyDiv
-import commonlib.CollectionWrap
+import commonshr.CollectionWrap
 import commonshr.invoke
-import commonshr.plusAssign
 import commonui.RootPanel
 import commonui.faButton
 import commonui.faTab
 import commonui.screenLayout
 import domx.*
 import firebase.firestore.Firestore
-import firebase.firestore.QueryBuilder
 import firebase.firestore.QueryWrap
-import firebase.firestore.wrap
 import firebaseshr.HasFBProps
-import firebaseshr.HasProps
 import fontawesome.Fa
 import fontawesome.filter
 import fontawesome.plus

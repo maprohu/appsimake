@@ -1,21 +1,14 @@
 package taskslib
 
-import common.named
-import common.toOptional
-import commonlib.*
+import commonshr.*
 import commonshr.properties.RxBase
-import commonshr.toLazy
-import firebaseshr.*
-import firebaseshr.firestore.Timestamp
-import killable.NoKill
-import rx.Rx
 
 val tasksLib = Lib("tasks")
 
 val DocWrap<Private>.tasks by coll { Task() }
 val DocWrap<Private>.usertags by coll<Tag>()
-val DocWrap<Private>.hiddenTasks by coll<HiddenTask>()
-val DocWrap<Task>.notes by coll<Note>()
+val DocWrap<Private>.hiddenTasks by coll { HiddenTask() }
+val DocWrap<Task>.notes by coll { Note() }
 
 enum class TaskStatus(val completed: Boolean) {
     New(false),

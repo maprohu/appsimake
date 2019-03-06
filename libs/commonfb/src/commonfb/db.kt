@@ -3,21 +3,18 @@ package commonfb
 import common.None
 import common.Optional
 import common.Some
-import commonlib.CollectionWrap
-import commonlib.DocWrap
+import commonshr.CollectionWrap
+import commonshr.DocWrap
 import commonshr.plusAssign
 import firebase.DbDeps
 import firebase.firestore.Firestore
 import firebase.firestore.docRef
 import firebase.firestore.listen
-import firebaseshr.Base
 import firebaseshr.HasFBProps
 import firebaseshr.initFrom
 import killable.KillSet
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
-import kotlinx.coroutines.launch
 import rx.RxIface
 import rx.Var
 

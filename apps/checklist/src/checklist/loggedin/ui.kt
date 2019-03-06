@@ -35,13 +35,10 @@ fun LoggedIn.ui() = TopAndContent(
                 cls.m1
                 node.list(
                     checklists
-                        .listEvents(
-                            { Checklist() },
-                            { Checklist.ts.desc }
-                        )
+                        .listEvents { Checklist.ts.desc }
                         .map { cl ->
                             factory.listGroupButton {
-                                middle %= { cl.doc.name.rxv() }
+                                middle %= { cl().name() }
                                 click {
                                     viewChecklist(cl)
                                 }

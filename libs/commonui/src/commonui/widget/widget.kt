@@ -261,7 +261,7 @@ val Slot.insert: Factory
         }
     }
 
-val Hole.factory get() = Factory() with prepare
+val Hole.factory get() = Factory() withElement prepare
 val Hole.insert: Factory
     get() {
         return factory with {

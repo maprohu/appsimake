@@ -1,8 +1,7 @@
 package musiclib
 
-import commonlib.*
+import commonshr.*
 import firebaseshr.*
-import rx.Rx
 
 val musicLib = Lib("music")
 

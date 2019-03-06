@@ -12,13 +12,22 @@ import rx.rxClass
 import styles.widthAuto
 import kotlin.browser.document
 
-class Input: ScreenWrap() {
-    override val node = document.input {
-        cls {
-            formControl
-            widthAuto
+abstract class AbstractInput: ScreenWrap() {
+
+    val changeListeners by lazy {
+        Listeners().apply {
+            node.listen("input") {
+                fire()
+            }
         }
     }
+
+    var value: String
+        get() = nodeValue
+        set(v) {
+            nodeValue = v
+            changeListeners.fire()
+        }
 
     val rxv by lazy {
         val rxv = Var(value)
@@ -34,29 +43,31 @@ class Input: ScreenWrap() {
         }
     }
 
-    val changeListeners = Listeners().apply {
-        node.listen("input") {
-            fire()
-        }
-    }
-
-    var value: String
-        get() = node.value
-        set(v) {
-            node.value = v
-            changeListeners.fire()
-        }
-
-    val required by lazy {
-        node.required = true
-    }
-
     fun KillsApi.bindTo(rxv: Var<String>) {
         value = rxv.now
 
         kills += changeListeners.add {
             rxv.now = value
         }
+    }
+
+    abstract var nodeValue: String
+
+}
+class Input: AbstractInput() {
+    override val node = document.input {
+        cls {
+            formControl
+            widthAuto
+        }
+    }
+
+    override var nodeValue
+        get() = node.value
+        set(v) { node.value = v }
+
+    val required by lazy {
+        node.required = true
     }
 
 }

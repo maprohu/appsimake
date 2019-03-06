@@ -2,7 +2,6 @@ package music.import
 
 import common.*
 import commonshr.discardExecutor
-import commonshr.executor
 import commonshr.plusAssign
 import commonshr.withCounter
 import commonui.widget.TopAndContent
@@ -12,7 +11,6 @@ import music.common.MusicApi
 import music.data.readAsArrayBuffer
 import music.database.Database
 import music.database.DatabasePath
-import musiclib.Mp3File
 import musiclib.UserSongState
 import org.w3c.dom.HTMLElement
 import org.w3c.files.File
@@ -30,7 +28,7 @@ class Import(
 
 
     val loadable = RxMutableSet<ImportFile>()
-    val loadList = ListenableMutableList<ImportFile>()
+    val loadList = RxMutableList<ImportFile>()
 
 
     private val loadIds: Set<String> = mutableSetOf<String>().apply {

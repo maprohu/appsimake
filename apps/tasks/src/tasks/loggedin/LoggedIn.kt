@@ -3,8 +3,9 @@ package tasks.loggedin
 import commonfb.FBApi
 import commonfb.UserState
 import commonfb.loginbase.UserStateView
-import commonlib.private
+import commonshr.private
 import commonshr.FsDoc
+import commonshr.idOrFail
 import commonui.widget.ForwardBase
 import commonui.widget.TopAndContent
 import firebase.HasDb
@@ -14,6 +15,9 @@ import firebase.firestore.*
 import kotlinx.coroutines.launch
 import tasks.home.Home
 import tasks.home.HomePath
+import tasks.viewtask.ViewTask
+import taskslib.Task
+import taskslib.hiddenTasks
 import taskslib.tasks
 import taskslib.tasksLib
 
@@ -32,7 +36,11 @@ class LoggedIn(
     override val loggedIn: LoggedIn = this
 
     val private = tasksLib.app.private.doc(user.uid)
-    val tasks = private.tasks
+    val tasksCollection = private.tasks
+    val hiddenTasks = private.hiddenTasks
+
+    val hiddenList = hiddenTasks.toList()
+    val hiddenIds = hiddenList.ids
 
     fun signOut() {
         launch {
@@ -40,6 +48,21 @@ class LoggedIn(
         }
     }
 
+    fun FsDoc<Task>.hide() {
+        hiddenTasks.doc(idOrFail).new.save()
+    }
+
+    fun FsDoc<Task>.view() {
+        exec {
+            forward.switchTo {
+                ViewTask(this@LoggedIn, this)
+            }
+        }
+    }
+
+    fun unhideAll() {
+        hiddenList.forEach { it.delete() }
+    }
 
     override val rawView: TopAndContent = ui()
 

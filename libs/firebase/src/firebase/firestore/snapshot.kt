@@ -1,13 +1,11 @@
 package firebase.firestore
 
-import commonlib.CollectionSource
-import commonlib.CollectionWrap
-import commonlib.DocWrap
+import rx.*
+import commonshr.CollectionSource
+import commonshr.DocWrap
 import commonshr.*
 import commonshr.properties.*
 import firebase.HasCsDbKills
-import firebase.HasDb
-import firebase.HasDbKills
 import killable.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -82,3 +80,11 @@ fun <T: RxBase<*>> CollectionSource<T>.listEvents(
         .toSnapshotEvents(deps)
         .listEvents(deps, this, FsDynamicOps)
 
+fun <T: RxBase<*>> CollectionSource<T>.toList(
+    deps: HasCsDbKills,
+    query: QuerySettingsBuilder<T>.() -> Unit = {}
+): RxList<FsDoc<T>> {
+    val list = RxMutableList<FsDoc<T>>()
+    listEvents(deps, query).applyTo(deps, list)
+    return list
+}

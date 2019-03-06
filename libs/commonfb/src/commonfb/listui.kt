@@ -1,10 +1,8 @@
 package commonfb
 
 import bootstrap.*
-import common.ListenableList
-import common.ListenableMutableList
-import common.map
-import commonlib.CollectionWrap
+import rx.*
+import commonshr.CollectionWrap
 import commonshr.Trigger
 import commonshr.invoke
 import commonshr.plusAssign
@@ -15,7 +13,6 @@ import firebase.DbDeps
 import firebase.firestore.*
 import firebase.firestore.ListenConfig.Companion.hasProps
 import firebaseshr.HasFBProps
-import firebaseshr.HasProps
 import killable.*
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLUListElement
@@ -43,7 +40,7 @@ data class ListUIConfig<T: HasFBProps<*>>(
     val query: RxIface<QueryWrap<T>>,
     val collectionWrap: CollectionWrap<T>,
     val create: () -> T,
-    val filter: (ListenableList<T>) -> ListenableList<T> = { it },
+    val filter: (RxList<T>) -> RxList<T> = { it },
     val hourglassDecor: HTMLDivElement.() -> Unit = { cls.m2 },
     val emptyDivDecor : HTMLDivElement.() -> Unit = standardEmptyDiv,
     val listDivDecor : HTMLDivElement.() -> Unit = { cls.scrollVertical; cls.flexGrow1 },
@@ -83,7 +80,7 @@ fun <T: HasFBProps<*>> listUI(
 
             val ks = killables.killables()
 
-            val list = ListenableMutableList<T>()
+            val list = RxMutableList<T>()
 
             val filtered = filter(list)
 
@@ -153,7 +150,7 @@ fun <T: HasFBProps<*>> T.listenToSnapshots(
     db: Firestore,
     onFirst: Trigger = {}
 ) {
-    props.docWrapOrFail.docRef(DbDeps(db)).listen(this, onFirst)
+    killables += props.docWrapOrFail.docRef(DbDeps(db)).listen(this, onFirst)
 }
 
 fun <T: HasFBProps<*>> T.keepAlive(
@@ -175,7 +172,7 @@ fun <T: HasFBProps<*>> T.keepAlive(
 
 fun <T> Node.listNodes(
     ks: KillSet,
-    list: ListenableList<T>,
+    list: RxList<T>,
     fn: (T, KillSet) -> Node
 ) {
     val ns = list.map(ks) { t ->

@@ -1,14 +1,12 @@
 package checklist.view
 
 import bootstrap.*
-import common.ListenableMutableList
-import common.events
+import rx.RxMutableList
 import common.sorted
 import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
-import rx.rxClass
 
 class ItemOrder(
     val checked: Boolean,
@@ -78,7 +76,7 @@ fun ViewChecklist.ui() = TopAndContent(
                         docs().let { cl ->
                             console.dir(cl)
                             cl.items().let { items ->
-                                ListenableMutableList(items)
+                                RxMutableList(items)
                                     .sorted(kills) { i ->
                                         ItemOrder(
                                             i.checked(),

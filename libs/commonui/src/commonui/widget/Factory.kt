@@ -60,7 +60,7 @@ class Factory(
     infix fun with(fn: HTMLElement?.() -> Unit) = Factory(
         after.withElement(fn)
     )
-    infix fun with(fn: HTMLElement.() -> Unit) = Factory(
+    infix fun withElement(fn: HTMLElement.() -> Unit) = Factory(
         after.withElement {
             after.element(this)
             if (this != null) fn()
@@ -99,11 +99,13 @@ class Factory(
     val badge get() = Badge().applied
     val status get() = Status().applied
     val input get() = Input().applied
+    val textArea get() = TextArea().applied
     val formGroup get() = FormGroup().applied
     val form get() = Form().applied
     val inputGroup get() = InputGroup().applied
     val listGroup get() = ListGroup().applied
     val listGroupButton get() = ListGroupButton().applied
+    val nestedListButton get() = NestedListButton().applied
 
 
 }

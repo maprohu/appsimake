@@ -1,7 +1,6 @@
 package commonshr.properties
 
-import commonlib.CollectionSource
-import commonlib.CollectionWrap
+import commonshr.CollectionSource
 import commonshr.FsDoc
 import commonshr.ListEvent
 import commonshr.plusAssign
@@ -51,14 +50,17 @@ fun <T> ReceiveChannel<SnapshotEvent>.wrapSnapshotEvents(
                     wrapped[e.index].update(e.data)
                 }
                 is SnapshotEvent.Moved -> {
-                    wrapped.add(e.to, wrapped.removeAt(e.from))
+                    val item = wrapped.removeAt(e.from)
+                    wrapped.add(e.to, item)
                     channel += ListEvent.Move(
                         from = e.from,
-                        to = e.to
+                        to = e.to,
+                        item = item
                     )
                 }
                 is SnapshotEvent.Removed -> {
-                    channel += ListEvent.Remove(e.index)
+                    val item = wrapped.removeAt(e.index)
+                    channel += ListEvent.Remove(e.index, item)
                 }
             }
         }

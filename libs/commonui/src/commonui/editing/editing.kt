@@ -64,7 +64,7 @@ fun <V> Binder<V>.parsed(fn: KillsApi.(V) -> Boolean) = validate { fn(parsedValu
 
 fun Binder<String>.required() = parsed { it.isNotBlank() }
 
-fun Input.bind(
+fun AbstractInput.bind(
     deps: HasEditKills,
     rxv: Var<String>
 ): Binder<String> {
@@ -76,7 +76,7 @@ fun Input.bind(
     )
 }
 
-fun <V> Input.bind(
+fun <V> AbstractInput.bind(
     deps: HasEditKills,
     modelValue: Var<V>,
     initial: (V) -> String,

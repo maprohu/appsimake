@@ -1,7 +1,7 @@
 package testapplib
 
 import common.named
-import commonlib.Lib
+import commonshr.Lib
 
 val testapp by named { Lib(it) }
 

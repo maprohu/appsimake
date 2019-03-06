@@ -1,9 +1,9 @@
 package checklist
 
-import commonlib.DocWrap
-import commonlib.Lib
-import commonlib.Private
-import commonlib.coll
+import commonshr.DocWrap
+import commonshr.Lib
+import commonshr.Private
+import commonshr.coll
 import commonshr.properties.RxBase
 
 val checklistLib = Lib("checklist")

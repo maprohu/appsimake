@@ -1,8 +1,7 @@
 package fns
 
-import common.obj
 import commonfns.implementAsync
-import commonlib.admin
+import commonshr.admin
 import commonlib.commonlib.*
 import firebaseadmin.admin
 import initFrom

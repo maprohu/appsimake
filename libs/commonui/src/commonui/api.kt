@@ -8,6 +8,7 @@ import commonui.editing.*
 import domx.KillsApiDomx
 import kotlinx.coroutines.channels.ReceiveChannel
 import org.w3c.dom.Node
+import org.w3c.dom.NodeList
 import org.w3c.dom.events.EventTarget
 import rx.Var
 
@@ -40,15 +41,19 @@ interface CsApiCommonui: CsApi {
         nodes: ReceiveChannel<ListEvent<Node>>
     ) = nodeList(api, nodes)
 
+    fun ListGroup.list(
+        nodes: ReceiveChannel<ListEvent<Node>>
+    ) = list(api, nodes)
+
 }
 
 interface EditKillsApi: HasEditKills, KillsApiCommonui {
 
-    fun Input.bind(
+    fun AbstractInput.bind(
         rxv: Var<String>
     ) = bind(api, rxv)
 
-    fun <V> Input.bind(
+    fun <V> AbstractInput.bind(
         modelValue: Var<V>,
         initial: (V) -> String,
         extract: (String) -> V
@@ -63,3 +68,5 @@ interface EditKillsUixApi: EditKillsApi, HasEditKillsUix {
 interface EditFromKillsUixApi: EditKillsUixApi, HasEditFromKillsUix {
     val SlotHoles.backSaveDiscard get() = BackSaveDiscard(api, this)
 }
+
+typealias Editor = EditFromKillsUixApi

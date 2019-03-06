@@ -12,7 +12,7 @@ import firebase.DbKillsApi
 
 
 interface DbKillsApiCommonfb: DbKillsApi {
-    fun <T: RxBase<*>> rxEditing(initial: FsDoc<T>, preSave: suspend (T) -> Unit) = rxEditing(api, initial, preSave)
+    fun <T: RxBase<*>> rxEditing(initial: FsDoc<T>, preSave: suspend (T) -> Unit = {}) = rxEditing(api, initial, preSave)
 
 }
 

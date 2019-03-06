@@ -1,7 +1,7 @@
 package music.loggedin
 
 import common.obj
-import commonlib.private
+import commonshr.private
 import commonshr.plusAssign
 import commonshr.report
 import commonui.globalStatus

@@ -1,8 +1,7 @@
 package firebase.firestore
 
-import commonlib.CollectionWrap
+import commonshr.CollectionWrap
 import commonshr.properties.ROProp
-import firebase.DbApi
 import firebase.HasDb
 
 data class QuerySettings(
@@ -53,7 +52,7 @@ interface QuerySettingsBuilder<T> {
     var settings: QuerySettings
 
     infix fun <P> ROProp<T, P>.eq(v: P) {
-        settings = settings.eq(name, type.writeDynamic(v, FsDynamicOps))
+        settings = settings.eq(name, write(v, FsDynamicOps))
     }
     val ROProp<T, *>.asc: Unit get() { settings = settings.asc(name) }
     val ROProp<T, *>.desc: Unit get() { settings = settings.desc(name) }
@@ -67,8 +66,8 @@ fun <T> querySettings(fn: QuerySettingsBuilder<T>.() -> Unit): QuerySettings {
     }
 }
 
-fun Query.apply(orderBy: QuerySettings.OrderBy) {
-    orderBy(
+fun Query.apply(orderBy: QuerySettings.OrderBy): Query {
+    return orderBy(
         orderBy.path,
         when (orderBy.dir) {
             QuerySettings.OrderDirection.Asc -> "asc"
@@ -77,9 +76,24 @@ fun Query.apply(orderBy: QuerySettings.OrderBy) {
     )
 }
 
-fun Query.apply(settings: QuerySettings) = apply {
-    settings.order.forEach { o -> this.apply(o) }
+fun Query.apply(where: QuerySettings.Where): Query {
+    return where(
+        where.path,
+        when (where.op) {
+            QuerySettings.WhereOp.Eq -> "=="
+        },
+        where.param
+    )
 }
+
+fun Query.apply(settings: QuerySettings) =
+    this
+        .let { t ->
+            settings.order.fold(t) { q, o -> q.apply(o) }
+        }
+        .let { t ->
+            settings.where.fold(t) { q, o -> q.apply(o) }
+        }
 
 typealias TypedQuery<T> = Query
 typealias TypedCollectionReference<T> = CollectionReference

@@ -4,7 +4,6 @@ import bootstrap.*
 import common.None
 import common.Some
 import common.orEmpty
-import commonlib.CollectionWrap
 import commonshr.invoke
 import commonshr.plusAssign
 import commonui.*
@@ -14,8 +13,6 @@ import firebase.firestore.*
 import firebaseshr.*
 import fontawesome.*
 import killable.KillSet
-import killable.Killables
-import killable.addedTo
 import killable.seq
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await

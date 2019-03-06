@@ -1,7 +1,7 @@
 //package firebase
 //
 //import common.*
-//import commonlib.CollectionWrap
+//import commonshr.CollectionWrap
 //import commonshr.SetAdded
 //import commonshr.SetDiff
 //import commonshr.SetMove
@@ -25,14 +25,14 @@
 ////    private val collectionReference: CollectionReference,
 //    private val write: (T) -> WriteData,
 //    private val extractId: (T) -> String,
-////    private val listenConfig: (ListenableMutableList<T>) -> ListenConfig<T>,
+////    private val listenConfig: (RxMutableList<T>) -> ListenConfig<T>,
 //    killables: Killables
 //) {
 //    private val map = mutableMapOf<String, CompletableDeferred<T>>()
 //
 //    private val rxMap = Var(emptyMap<String, Var<Optional<T>>>())
 //
-////    private val list = ListenableMutableList<T>()
+////    private val list = RxMutableList<T>()
 //
 //
 //    private fun getVar(id: String): Var<Optional<T>> {
@@ -53,7 +53,7 @@
 //
 //    init {
 //        list.addListener(
-//            ListenableList.Listener(
+//            RxList.Listener(
 //                added = { _, t ->
 //                    placeholder(extractId(t)).complete(t)
 //                },

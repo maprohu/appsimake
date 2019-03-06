@@ -1,8 +1,7 @@
 import common.obj
-import commonlib.DocWrap
+import commonshr.DocWrap
 import firebaseadmin.admin
 import firebaseadmin.firestore.Firestore
-import firebasefunctions.functions
 import firebaseshr.HasFBProps
 import fns.tokenImpl
 import kotlinx.coroutines.await

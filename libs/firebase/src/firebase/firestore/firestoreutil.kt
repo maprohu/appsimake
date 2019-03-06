@@ -1,7 +1,7 @@
 package firebase.firestore
 
 import common.*
-import commonlib.CollectionWrap
+import commonshr.CollectionWrap
 import commonshr.*
 import commonshr.properties.SnapshotEvent
 import commonshr.properties.wrapSnapshotEvents
@@ -81,10 +81,10 @@ fun <T> QueryWrap<T>.listen(
     killables: Killables,
     onFirst: () -> Unit = {},
     onError: (Throwable) -> Unit = { console.dir(it) }
-): ListenableList<RxVal<T>> {
+): RxList<RxVal<T>> {
     var first = true
 
-    val list = ListenableMutableList<Var<T>>()
+    val list = RxMutableList<Var<T>>()
 
     query.onSnapshot(
             { qs ->
@@ -146,7 +146,7 @@ fun DocumentReference.onSnapshotNext(
 ) : Trigger = onSnapshot(onNext, { report(it.unsafeCast<Throwable>()) })
 
 data class ListenConfig<T>(
-    val list: ListenableMutableList<T>,
+    val list: RxMutableList<T>,
     val create: (id: String, data: dynamic) -> T,
     val update: T.(dynamic) -> Unit,
     val remove: (T) -> Unit,
@@ -156,7 +156,7 @@ data class ListenConfig<T>(
     companion object {
 
         fun <T: HasFBProps<*>> hasProps(
-            list: ListenableMutableList<T>,
+            list: RxMutableList<T>,
             collectionWrap: CollectionWrap<T>,
             create: () -> T
         ) = ListenConfig(

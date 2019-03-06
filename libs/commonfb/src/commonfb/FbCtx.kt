@@ -1,15 +1,10 @@
 package commonfb
 
-import commonlib.CollectionWrap
-import commonlib.DocWrap
-import commonlib.Function
-import commonlib.Lib
+import commonshr.Function
 import commonui.APP
-import commonui.AppCtx
 import commonui.isFcmSupported
 import firebase.AppOptions
 import firebase.DbDeps
-import firebase.app.App
 import firebase.firestore.*
 import firebase.functions.Functions
 import firebase.functions.HttpsCallableResult
@@ -17,7 +12,6 @@ import firebase.messaging.Messaging
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
-import kotlinx.coroutines.launch
 import kotlin.js.Promise
 
 object FB {

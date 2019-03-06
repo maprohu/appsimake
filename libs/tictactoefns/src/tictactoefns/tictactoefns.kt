@@ -1,8 +1,8 @@
 package tictactoefns
 
 import common.obj
-import commonlib.fcmtokens
-import commonlib.private
+import commonshr.fcmtokens
+import commonshr.private
 import firebaseadmin.admin
 import kotlinx.coroutines.*
 import tictactoelib.*

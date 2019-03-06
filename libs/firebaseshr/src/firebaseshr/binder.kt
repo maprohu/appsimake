@@ -1,14 +1,13 @@
 package firebaseshr
 
 import common.*
-import commonlib.CollectionWrap
-import commonlib.DocWrap
+import commonshr.CollectionWrap
+import commonshr.DocWrap
 import commonshr.SetDiff
 import commonshr.SetMove
 import commonshr.opt
 import commonshr.toMoves
 import firebaseshr.firestore.Timestamp
-import killable.Killables
 import killable.NoKill
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred

@@ -5,6 +5,7 @@ import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
+import styles.leftRightTopBottom0
 import tasks.loggedin.LoggedIn
 import taskslib.Task
 import kotlin.browser.document
@@ -20,6 +21,22 @@ fun LoggedIn.ui() = TopAndContent(
                 }
             }
         }
+        right.button {
+            m1p2
+            fa.eye
+            cls.btnInfo
+            insert.badge {
+                cls.m1
+                warning
+                pill
+                node %= { hiddenList.sizeRx().toString() }
+            }
+            visible { !hiddenList.isEmptyRx() }
+            click {
+                unhideAll()
+            }
+        }
+
         right.buttonGroup {
             cls.m1
             button {
@@ -32,7 +49,9 @@ fun LoggedIn.ui() = TopAndContent(
                 fa.search
                 primary
             }
-            dropdownSplit
+            dropdownSplit {
+                primary
+            }
             menu {
                 right
                 item {
@@ -48,11 +67,26 @@ fun LoggedIn.ui() = TopAndContent(
             insert.listGroup {
                 cls.m1
                 node.list(
-                    tasks
-                        .listEvents { Task.ts.desc }
-                        .map { cl ->
-                            factory.listGroupButton {
-                                middle %= { cl.rxv().title() }
+                    tasksCollection
+                        .listEvents {
+                            Task.ts.desc
+                            Task.completed eq false
+                        }
+                        .filter { t -> !hiddenIds.containsRx(t.idOrFail)() }
+                        .mapLive { cl ->
+                            factory.nestedListButton {
+                                text %= { cl.rxv().title() }
+                                anchor.click {
+                                    cl.view()
+                                }
+                                right.button {
+                                    p2
+                                    secondary
+                                    fa.eyeSlash
+                                    click {
+                                        cl.hide()
+                                    }
+                                }
                             }.node
                         }
                 )

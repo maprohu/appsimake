@@ -1,8 +1,8 @@
 //package commonfb
 //
 //import common.obj
-//import commonlib.fcmtokens
-//import commonlib.private
+//import commonshr.getFcmtokens
+//import commonshr.getPrivate
 //import firebase.User
 //import firebase.firestore.*
 //import firebase.messaging

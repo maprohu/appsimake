@@ -1,7 +1,7 @@
 package commonfns
 
 import common.obj
-import commonlib.Function
+import commonshr.Function
 import firebaseadmin.admin
 import firebasefunctions.https.CallableContext
 import kotlinx.coroutines.GlobalScope

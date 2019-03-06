@@ -1,5 +1,6 @@
-package commonlib
+package commonshr
 
+import common.dyn
 import common.named
 import commonshr.properties.DynamicOps
 import commonshr.properties.RxBase
@@ -103,6 +104,7 @@ class Singleton
 class Private
 interface AdminDoc
 
-val <D: Private> DocWrap<D>.fcmtokens by coll<FcmToken>()
+val DocWrap<Private>.fcmtokens by coll<FcmToken>()
 
 class FcmToken
+

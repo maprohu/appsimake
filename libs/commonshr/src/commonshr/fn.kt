@@ -14,6 +14,7 @@ typealias AsyncSetter<T> = suspend (T) -> Unit
 suspend operator fun <T> AsyncSetter<T>.remAssign(v: T) { this(v) }
 
 class Funs<T> {
+    @Suppress("NOTHING_TO_INLINE")
     inline fun <P1> ignore1() = { _:P1 -> value }
 }
 inline val <T> T.funs get() = this.unsafeCast<Funs<T>>()

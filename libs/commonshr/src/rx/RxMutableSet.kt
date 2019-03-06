@@ -5,6 +5,8 @@ import commonshr.*
 import commonshr.KillsApi
 import killable.KillSet
 import killable.wrap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.ReceiveChannel
 
 interface RxSet<E>: Set<E> {
     val sizeRx: RxIface<Int>
@@ -243,5 +245,12 @@ fun <T, S> RxSet<T>.toMap(ks: KillSet, fn: KillsApi.(T) -> S): Map<T, S> {
 }
 fun <T> RxSet<T>.process(ks: KillSet, fn: KillsApi.(T) -> Unit) {
     diffsAll.toMoves().process(ks, fn)
+}
+
+
+fun <T> ReceiveChannel<ListEvent<T>>.toRxSet(
+    deps: CoroutineScope
+): RxSet<T> = RxMutableSet<T>().apply {
+    applyTo(deps, this)
 }
 

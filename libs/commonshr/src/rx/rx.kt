@@ -29,6 +29,7 @@ abstract class RxChild {
     }
 }
 
+
 typealias KillOrder = (process: Trigger, kill: Trigger) -> Unit
 
 class RxCalc<T>(
@@ -151,6 +152,11 @@ interface RxIface<out T> {
             )
         }
     }
+
+    fun forEachLater(
+        ks: KillSet,
+        fn: KillsApi.(T) -> Unit
+    ) = forEachLater(ks, {}, KillFirst, fn)
 
     fun forEachLater(
         ks: KillSet,
@@ -317,6 +323,7 @@ abstract class RxVal<T>(
         get() = currentValue
 
     override operator fun invoke(): T {
+        require(currentChild != null) { "RX invoked without a context!" }
         connect(this, currentChild!!)
         return currentValue
     }

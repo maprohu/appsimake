@@ -39,5 +39,20 @@ class ListGroupButton: ScreenWrap() {
         slots.right
     }
 
+    val p1 by lazy {
+        cls.p1
+    }
+
+    val text by lazy {
+        p1
+        middle {
+            cls {
+                m1
+                alignSelfCenter
+            }
+        }
+
+    }
+
 }
 

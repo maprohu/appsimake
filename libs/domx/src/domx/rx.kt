@@ -1,5 +1,6 @@
 package domx
 
+import rx.*
 import common.*
 import commonshr.*
 import killable.*
@@ -7,11 +8,11 @@ import org.w3c.dom.Node
 
 fun <T> Node.listenableList(
     ks: KillSet,
-    list: ListenableList<T>,
+    list: RxList<T>,
     create: (T) -> Node
 ) {
     ks += list.addListener(
-        ListenableList.Listener(
+        RxList.Listener(
             added = { index, element ->
                 insertAt(index, create(element))
             },
@@ -23,12 +24,12 @@ fun <T> Node.listenableList(
 
 fun <T> Node.listenableList(
     ks: KillSet,
-    list: ListenableList<T>,
+    list: RxList<T>,
     create: (T, KillSet) -> Node
 ) {
     val kills = mutableListOf<Trigger>()
     ks += list.addListener(
-        ListenableList.Listener(
+        RxList.Listener(
             added = { index, element ->
                 val iks = ks.killables()
                 val node = create(element, iks.killSet)

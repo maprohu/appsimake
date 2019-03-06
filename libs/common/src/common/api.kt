@@ -1,10 +1,10 @@
 package common
 
 import commonshr.CsKillsApi
-import commonshr.api
+import rx.RxList
+
 
 interface CsKillsApiCommon: CsKillsApi {
 
-    fun <T> ListenableList<T>.events() = events(api)
 
 }

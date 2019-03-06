@@ -59,6 +59,7 @@ class RWProp<T, V>(
     override var now: V
         get() = rxv.now
         set(v) { rxv.now = v }
+    operator fun remAssign(v: V) { rxv %= v }
 }
 
 //class PropertyItem<T, V>(
@@ -80,7 +81,6 @@ class RWProp<T, V>(
 //fun <V> PropertyItem<*, V>.resetToDefault() { rxv %= defaultValue }
 //
 //
-//operator fun <V> PropertyItem<*, V>.remAssign(v: V) { rxv %= v }
 //var <V> PropertyItem<*, V>.now
 //    get() = rxv.now
 //    set(v) { rxv.now = v }

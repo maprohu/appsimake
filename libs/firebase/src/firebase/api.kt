@@ -1,13 +1,11 @@
 package firebase
 
 import common.CsKillsApiCommon
-import commonlib.*
 import commonshr.*
 import commonshr.properties.RxBase
 import commonshr.properties.SnapshotEvent
 import firebase.firestore.*
 import firebaseshr.HasFBProps
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlin.js.Promise
 
@@ -62,6 +60,10 @@ interface CsDbKillsApi: HasCsDbKills, CsKillsApiFirebase, DbApi, KillsApiFirebas
     val <D: RxBase<*>> FsDoc<D>.live get() = live(api)
 
     fun <D> DocSource<D>.docs() = docs(api)
+
+    fun <T: RxBase<*>> CollectionSource<T>.toList(
+        query: QuerySettingsBuilder<T>.() -> Unit = {}
+    ) = toList(api, query)
 
 }
 

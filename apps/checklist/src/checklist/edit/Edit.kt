@@ -4,14 +4,13 @@ import checklist.Checklist
 import checklist.ChecklistItem
 import checklist.loggedin.LoggedIn
 import checklist.loggedin.LoggedInPath
-import common.ListenableMutableList
+import rx.RxMutableList
 import common.eventsEmitter
 import commonfb.FBApi
 import commonshr.*
 import commonshr.properties.now
 import commonshr.properties.remAssign
 import commonui.EditFromKillsUixApi
-import commonui.HasEditFrom
 import commonui.editing.RxEditing
 import commonui.widget.ForwardImpl
 import commonui.widget.TopAndContent
@@ -35,7 +34,7 @@ class Edit(
         }
     }
 
-    val items = ListenableMutableList<ChecklistItem>().apply {
+    val items = RxMutableList<ChecklistItem>().apply {
         addAll(editing.current.items.now)
         eventsEmitter(false).invoke {
             editing.current.items %= toList()

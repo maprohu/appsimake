@@ -4,8 +4,7 @@ import common.escape
 import commonfb.FBApi
 import commonfb.UserState
 import commonfb.loginbase.UserStateView
-import commonfb.save
-import commonlib.private
+import commonshr.private
 import commonshr.Trigger
 import commonshr.properties.now
 import commonshr.toFsDoc

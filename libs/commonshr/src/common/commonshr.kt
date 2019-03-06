@@ -211,12 +211,12 @@ fun <O, T> namedThis(fn: (O, String) -> T) = NamedThisDelegate(fn)
 
 
 
-@Suppress("UNUSED_PARAMETER", "SpellCheckingInspection")
+@Suppress("UNUSED_PARAMETER", "SpellCheckingInspection", "NOTHING_TO_INLINE")
 inline fun <T : Any> jsNew(
     constr: JsClass<T>
 ) : T = js("new constr()") as T
 
-@Suppress("UNUSED_PARAMETER", "SpellCheckingInspection")
+@Suppress("UNUSED_PARAMETER", "SpellCheckingInspection", "NOTHING_TO_INLINE")
 inline fun <T : Any> jsNew(
     constr: JsClass<T>,
     param: dynamic
