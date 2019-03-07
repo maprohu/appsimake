@@ -14,6 +14,8 @@ interface Editing {
     val dirty: RxIface<Boolean>
     val canSave: RxIface<Boolean>
     val save: Action
+    val delete: Action
+    val canDelete: RxIface<Boolean>
 }
 
 abstract class DefaultEditing(
@@ -27,8 +29,10 @@ abstract class DefaultEditing(
 
 }
 class RxEditing<T: RxBase<*>>(
-    val initial: T,
     kills: KillSet,
+    val initial: T,
+    override val canDelete: RxIface<Boolean>,
+    override val delete: Action,
     saveCurrent: suspend (T) -> Unit
 ): DefaultEditing(kills), KillsApi {
     val current = initial.copy()
@@ -63,6 +67,11 @@ fun Binder<*>.raw(fn: KillsApi.(String) -> Boolean) = validate { fn(rawValue()) 
 fun <V> Binder<V>.parsed(fn: KillsApi.(V) -> Boolean) = validate { fn(parsedValue()) }
 
 fun Binder<String>.required() = parsed { it.isNotBlank() }
+
+fun AbstractInput.bind(
+    deps: HasEditKills,
+    rxv: HasVar<String>
+): Binder<String> = bind(deps, rxv.rxv)
 
 fun AbstractInput.bind(
     deps: HasEditKills,
@@ -114,24 +123,48 @@ fun <V> AbstractInput.bind(
 }
 
 
-interface EditingApi : HasEdit, KillsApi, HasFrom, HasUix, KillsApiCommonui {
+//interface EditingApi : HasEdit, KillsApi, HasFrom, HasUix, KillsApiCommonui {
+//
+//    fun <T: RxBase<*>> rxEditing(initial: T, saveCurrent: suspend (T) -> Unit) = RxEditing(initial, kills, saveCurrent)
+//
+//
+//}
 
-    fun <T: RxBase<*>> rxEditing(initial: T, saveCurrent: suspend (T) -> Unit) = RxEditing(initial, kills, saveCurrent)
-
-
-
-
-}
-
-fun Factory.saveButton(deps: HasEditKillsUix) = button {
-    m1p2
+fun Factory.saveButton(
+    deps: HasEditKillsUix,
+    fn: Button.() -> Unit = { m1 }
+) = button {
+    p2
     primary
     fa.save
     enabled(deps) { deps.editing.dirty() && deps.editing.canSave() }
     click(deps) { deps.editing.save() }
+}.apply(fn)
+
+fun Factory.saveDeleteButton(deps: HasEditExitFromKillsUix) = buttonGroup {
+    m1
+    slots.buttons.slot.insert.saveButton(deps) {}
+    dropdownSplit {
+        primary
+        visible(deps) { deps.editing.canDelete() }
+        menu {
+            visible(deps) { deps.editing.canDelete() }
+            right
+            item {
+                enabled(deps) { deps.editing.canDelete() }
+                cls.textDanger
+                fa.trashAlt
+                text %= "Delete"
+                click(deps) {
+                    deps.editing.delete()
+                    deps.exit.redisplay()
+                }
+            }
+        }
+    }
 }
 
-class BackSaveDiscard(deps: HasEditFromKillsUix, holes: SlotHoles): HasEditFromKillsUix by deps, KillsApi, UixApi {
+class BackSaveDiscard(deps: HasEditFromKillsUix, holes: SlotHoles): HasEditFromKillsUix by deps, KillsApiCommonui, UixApi {
     val discard = holes.slot.insert.button {
         visible { editing.dirty() && !editing.canSave() }
         m1p2

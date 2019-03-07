@@ -3,9 +3,11 @@ package tasks.viewtask
 import commonfb.FBApi
 import commonshr.FsDoc
 import commonshr.docWrap
+import commonshr.toFsDoc
 import commonui.widget.ForwardBase
 import commonui.widget.TopAndContent
 import tasks.editnote.EditNote
+import tasks.edittask.EditTask
 import tasks.loggedin.LoggedIn
 import tasks.loggedin.LoggedInPath
 import taskslib.Note
@@ -27,6 +29,24 @@ class ViewTask(
         exec {
             forward.switchTo {
                 EditNote(this@ViewTask, this)
+            }
+        }
+    }
+
+    fun edit() {
+        exec {
+            forward.switchTo {
+                EditTask(this@ViewTask)
+            }
+        }
+    }
+
+    fun newComment() {
+        exec {
+            forward.switchTo {
+                EditNote(this@ViewTask, Note().toRandomFsDoc(notes)).apply {
+                    item.live
+                }
             }
         }
     }

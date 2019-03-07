@@ -16,6 +16,7 @@ import commonui.widget.ForwardImpl
 import commonui.widget.TopAndContent
 import commonui.widget.UIBase
 import rx.Var
+import rx.eventsEmitter
 
 interface EditPath: LoggedInPath {
     val edit: Edit

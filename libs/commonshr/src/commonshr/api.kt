@@ -20,8 +20,9 @@ interface KillsApi: Api, HasKills {
     fun <T, S> RxIface<T>.map(fn: KillsApi.(T) -> S) = map(kills, fn)
     fun <T> RxIface<T>.onChange(fn: KillsApi.(old: T /* old */, new: T /* new */) -> Unit) = onChange(kills, fn)
     fun Element.rxClass(fn: KillsApi.() -> String) = rxClass(kills, fn)
-    fun Element.rxClass(stl: String, fn: KillsApi.() -> Boolean) = rxClass(kills, stl, fn)
+    fun Element.rxClass(stl: String, fn: KillsApi.() -> Boolean) = rxClass(api, stl, fn)
     fun <E> RxSet<E>.filtered(fn: KillsApi.(E) -> Boolean) = filtered(kills, fn)
+    fun Var<Int>.incremented() = incremented(api)
 
     operator fun HTMLElement.remAssign(fn: () -> String) {
         rx { fn() }.forEach { this@remAssign.innerText = it }
@@ -53,6 +54,7 @@ interface CsKillsApi: HasCsKills, CsApi, KillsApi {
     val <T> RxList<FsDoc<T>>.ids get() = ids(api)
     fun <T> ReceiveChannel<ListEvent<T>>.filter(fn: KillsApi.(T) -> Boolean) = filter(api, fn)
 
+    fun <T> ReceiveChannel<ListEvent<T>>.process(fn: suspend KillsApi.(T) -> Unit) = process(api, fn)
 }
 
 

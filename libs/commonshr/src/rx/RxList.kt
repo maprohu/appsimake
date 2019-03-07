@@ -23,7 +23,8 @@ interface RxList<out T> : List<T> {
     )
 
     val isEmptyRx: RxIface<Boolean>
-    val sizeRx : RxVal<Int>
+    val sizeRx : RxIface<Int>
+    val allRx: RxIface<List<T>>
 }
 
 interface Collector<T> {
@@ -158,6 +159,14 @@ class RxMutableList<T>(items: List<T>) : AbstractMutableList<T>(), RxList<T> {
     }
 
     init { addAll(items) }
+
+    override val allRx by lazy {
+        val rxv = Var(toList())
+        eventsEmitter() += {
+            rxv %= toList()
+        }
+        rxv
+    }
 }
 
 fun <T, C: Comparable<C>> RxList<T>.sorted(

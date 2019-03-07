@@ -13,13 +13,14 @@ import firebase.User
 import firebase.app.App
 import firebase.firestore.*
 import kotlinx.coroutines.launch
+import rx.RxIface
+import rx.Var
+import rx.readOnly
+import tasks.data.tagsLookup
 import tasks.home.Home
 import tasks.home.HomePath
 import tasks.viewtask.ViewTask
-import taskslib.Task
-import taskslib.hiddenTasks
-import taskslib.tasks
-import taskslib.tasksLib
+import taskslib.*
 
 interface LoggedInPath: HomePath, HasDb {
     val loggedIn: LoggedIn
@@ -41,6 +42,16 @@ class LoggedIn(
 
     val hiddenList = hiddenTasks.toList()
     val hiddenIds = hiddenList.ids
+
+    val tags = private.usertags.listEvents {
+        Tag.name.asc
+    }.fsCache { id ->
+        Tag().apply { name %= id }
+    }
+
+    val tagNameSet = Var(emptySet<String>()).apply {
+        rx { tags.list.allRx().map { it().name() }.toSet() }.forEach { this@apply %= it }
+    }.readOnly
 
     fun signOut() {
         launch {

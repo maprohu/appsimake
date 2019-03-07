@@ -180,6 +180,7 @@ abstract class ScalarPropBase<in O, T>(
         )
 
         companion object {
+            @Suppress("NOTHING_TO_INLINE")
             inline fun <O, T> array(regsitry: PropRegsitry<O>) = ScalarPropBase.Ops<O, Array<T>>(regsitry).copy(
                 defaultValue = { Some(arrayOf()) }
             )

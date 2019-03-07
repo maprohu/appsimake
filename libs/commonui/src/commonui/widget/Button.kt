@@ -32,6 +32,9 @@ class Button(): ScreenWrap() {
     val primary by lazy {
         cls.btnPrimary
     }
+    val outlineSecondary by lazy {
+        cls.btnOutlineSecondary
+    }
     val secondary by lazy {
         cls.btnSecondary
     }
@@ -64,7 +67,7 @@ class Button(): ScreenWrap() {
         secondary
     }
 
-    fun enabled(deps: HasKills, fn: () -> Boolean) = node.rxEnabled(deps, fn)
+    fun enabled(deps: HasKills, fn: KillsApi.() -> Boolean) = node.rxEnabled(deps, fn)
 
 }
 

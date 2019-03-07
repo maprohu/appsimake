@@ -17,12 +17,13 @@ class ListGroup: ScreenWrap() {
         }
     }
 
-    fun list(
-        deps: CoroutineScope,
-        nodes: ReceiveChannel<ListEvent<Node>>
-    ) = node.nodeList(deps, nodes)
 
     val item = insert.with { cls.listGroupItem }
 
 }
+
+fun ListGroup.list(
+    deps: CoroutineScope,
+    nodes: ReceiveChannel<ListEvent<Node>>
+) = node.nodeList(deps, nodes)
 

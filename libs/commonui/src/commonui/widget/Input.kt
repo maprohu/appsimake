@@ -6,6 +6,7 @@ import common.listen
 import commonshr.*
 import domx.*
 import commonshr.KillsApi
+import killable.HasNoKill
 import killable.NoKill
 import rx.Var
 import rx.rxClass
@@ -39,21 +40,26 @@ abstract class AbstractInput: ScreenWrap() {
 
     val valid by lazy {
         Var(true).also { v ->
-            node.rxClass(NoKill, Cls.isInvalid) { !v() }
+            node.rxClass(HasNoKill, Cls.isInvalid) { !v() }
         }
     }
 
-    fun KillsApi.bindTo(rxv: Var<String>) {
-        value = rxv.now
-
-        kills += changeListeners.add {
-            rxv.now = value
-        }
-    }
 
     abstract var nodeValue: String
-
 }
+
+fun AbstractInput.bind(
+    deps: HasKills,
+    rxv: Var<String>
+) {
+    value = rxv.now
+
+    deps.kills += changeListeners.add {
+        rxv.now = value
+    }
+}
+
+
 class Input: AbstractInput() {
     override val node = document.input {
         cls {

@@ -13,6 +13,12 @@ fun <V: RxBase<*>> rxListType(
     }
 )
 
+fun <T> listCompare(a: List<T>, b: List<T>, compare: Compare<T>) =
+    a.size == b.size &&
+            a.asSequence().zip(b.asSequence()).all { (ba, bb) ->
+                compare(ba, bb)
+            }
+
 fun <V: RxBase<*>> rxListType(
     read: (dynamic, DynamicOps) -> V
 ) = PropertyType(
@@ -20,10 +26,7 @@ fun <V: RxBase<*>> rxListType(
         list.map { e -> e.copy() }
     },
     compare = { a, b ->
-        a.size == b.size &&
-                a.asSequence().zip(b.asSequence()).all { (ba, bb) ->
-                    rxCompare(ba, bb)
-                }
+        listCompare(a, b, ::rxCompare)
     },
     writeDynamic = { list, ops ->
         list.map { item ->
@@ -48,7 +51,19 @@ inline fun <reified E: Enum<E>> enumType() = PropertyType<E>(
     readDynamic = { d, _ -> enumValueOf(d.unsafeCast<String>()) }
 )
 
-fun <V> arrayOfScalarType(type: PropertyType<V>) = PropertyType<List<V>>()
+@Suppress("UnsafeCastFromDynamic")
+fun <V> arrayOfScalarType(type: PropertyType<V> = PropertyType()) = PropertyType(
+    copier = { l -> l.map { e -> type.copier(e) } },
+    compare = { a, b -> listCompare(a, b, type.compare) },
+    writeDynamic = { l, ops -> l.map { e -> type.writeDynamic(e, ops) }.toTypedArray() },
+    readDynamic = { d, ops -> d.unsafeCast<Array<dynamic>>().toList().map { e -> type.readDynamic(e, ops) } }
+)
+
+@Suppress("UnsafeCastFromDynamic")
+fun <V> setOfScalarType() = PropertyType(
+    writeDynamic = { l, ops -> l.toTypedArray() },
+    readDynamic = { d, ops -> d.unsafeCast<Array<V>>().toSet() }
+)
 
 fun <V> calcType(rxv: RxIface<V>, write: WriteDynamic<V>) = PropertyType(
     compare = { _, _ -> true },

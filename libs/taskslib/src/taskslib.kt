@@ -2,11 +2,12 @@ package taskslib
 
 import commonshr.*
 import commonshr.properties.RxBase
+import commonshr.properties.arrayOfScalarType
 
 val tasksLib = Lib("tasks")
 
 val DocWrap<Private>.tasks by coll { Task() }
-val DocWrap<Private>.usertags by coll<Tag>()
+val DocWrap<Private>.usertags by coll { Tag() }
 val DocWrap<Private>.hiddenTasks by coll { HiddenTask() }
 val DocWrap<Task>.notes by coll { Note() }
 
@@ -51,7 +52,7 @@ open class Task : RxBase<Task>() {
     val text by o.string()
     val status by o.enum(TaskStatus.New)
 
-    val tags by o.array<String>()
+    val tags by o.set<String>()
 
     val ts by o.serverTimestamp()
 
@@ -59,14 +60,14 @@ open class Task : RxBase<Task>() {
         status().completed
     }
 
-    val tagsx by o.lazy {
+    val tagsx by o.lazy(arrayOfScalarType<String>().writeDynamic) {
         val t = tags()
         lazy {
             t
                 .sorted()
                 .subs(2, MaxTagIndexSize)
                 .map { ids -> ids.multiTags }
-                .toSet()
+                .distinct()
         }
     }
 

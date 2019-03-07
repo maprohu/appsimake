@@ -5,10 +5,9 @@ import common.dyn
 import common.jsNew
 import common.named
 import commonshr.hasOwnProperty
+import killable.HasNoKill
 import killable.NoKill
-import rx.Rx
-import rx.RxIface
-import rx.Var
+import rx.*
 
 typealias Copier<V> = (V) -> V
 typealias Compare<V> = (V, V) -> Boolean
@@ -47,20 +46,28 @@ inline fun <V> identityType() = IdentityType.unsafeCast<PropertyType<V>>()
 
 open class ROProp<T, V>(
     val name: String,
-    open val rxv: RxIface<V>,
+    override val rxv: RxIface<V>,
     val write: WriteDynamic<V>
-): RxIface<V> by rxv
+): RxIface<V> by rxv, HasRx<V>
 
-class RWProp<T, V>(
+open class RWProp<T, V>(
     name: String,
     override val rxv: Var<V>,
     write: WriteDynamic<V>
-) : ROProp<T, V>(name, rxv, write) {
+) : ROProp<T, V>(name, rxv, write), HasVar<V> {
     override var now: V
         get() = rxv.now
         set(v) { rxv.now = v }
     operator fun remAssign(v: V) { rxv %= v }
 }
+
+class EnumProp<T, E: Enum<E>>(
+    name: String,
+    rxv: Var<E>,
+    write: WriteDynamic<E>,
+    val nameVar: Var<String>,
+    val values: List<E>
+) : RWProp<T, E>(name, rxv, write)
 
 //class PropertyItem<T, V>(
 //    val index: Int,
@@ -108,11 +115,7 @@ open class PropertyList<T> {
         type: PropertyType<V> = identityType()
     ) : NamedDelegate<ROProp<T, V>> = prop(value, type)
 
-
-    fun <V> prop(
-        value: V,
-        type: PropertyType<V> = identityType()
-    ) = named { name ->
+    fun <V> addProperty(name: String, value: V, type: PropertyType<V>): Var<V> {
         val rxv = Var(value)
         items += PropertyListItem(
             name = name,
@@ -124,6 +127,14 @@ open class PropertyList<T> {
             reset = { rxv %= value },
             compare = { v -> type.compare(rxv(), v) }
         )
+        return rxv
+    }
+
+    fun <V> prop(
+        value: V,
+        type: PropertyType<V> = identityType()
+    ) = named { name ->
+        val rxv = addProperty(name, value, type)
 
         RWProp<T, V>(
             name,
@@ -133,11 +144,23 @@ open class PropertyList<T> {
     }
 
     fun string() = prop("")
-    inline fun <reified E: Enum<E>> enum(v: E) = prop(v, enumType())
+    inline fun <reified E: Enum<E>> enum(v: E) = named { name ->
+        val type = enumType<E>()
+        val rxv = addProperty(name, v, type)
+
+        EnumProp<T, E>(
+            name,
+            rxv,
+            type.writeDynamic,
+            rxv.toName(HasNoKill),
+            enumValues<E>().toList()
+        )
+    }
     fun number() = prop<Number>(0)
     fun serverTimestamp() = readOnlyProp(TS.Server, ServerTimestampPropertyType)
 
     fun <V> array(type: PropertyType<V> = PropertyType()) = prop(emptyList(), arrayOfScalarType(type))
+    fun <V> set() = prop(emptySet<V>(), setOfScalarType())
 
     fun <B: RxBase<*>> rxlist(create: () -> B) = prop(
         emptyList(),

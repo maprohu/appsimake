@@ -259,6 +259,8 @@ interface RxIface<out T> {
 
 }
 
+fun <T> RxIface<T>.forEach(deps: HasKills, fn: KillsApi.(T) -> Unit) = forEach(deps.kills, fn)
+
 fun <T> RxIface<T>.feedTo(ks: KillSet, target: Var<T>) {
     forEach(ks) { target.now = it }
 }
@@ -302,11 +304,13 @@ fun RxIface<Double>.feedTo(ks: KillSet, rxv: Var<Double>) {
 
 fun <T> RxIface<Optional<T>>.orDefault(ks: KillSet, v: T) = Rx(ks) { this@orDefault().getOrDefault(v) }
 
-fun Var<Int>.incremented(): Trigger {
+fun Var<Int>.incremented(
+    deps: HasKills
+) {
     transform { it + 1 }
-    return {
+    deps.kills += {
         transform { it - 1 }
-    }.once()
+    }
 }
 
 
@@ -415,6 +419,16 @@ class Rx<T> private constructor(
     ) : this(ks, RxCalc(ks, fn, if (killFirst) KillFirst else KillLast))
 }
 
+fun <T> rx(deps: HasKills, fn: KillsApi.() -> T) = Rx(deps.kills, fn)
+
+interface HasRx<T> {
+    val rxv: RxIface<T>
+}
+interface HasVar<T>: HasRx<T> {
+    override val rxv: Var<T>
+}
+
+val <T> Var<T>.readOnly: RxIface<T> get() = this
 open class Var<T>(
     v: T
 ) : RxVal<T>(v) {
@@ -481,23 +495,23 @@ fun GlobalEventHandlers.rxHover(rx: Var<Boolean>) {
 }
 
 fun Element.rxClass(
-    ks: KillSet,
+    deps: HasKills,
     style: String,
     fn: RxIface<Boolean>
 ) {
-    fn.forEach(ks) {
+    fn.forEach(deps.kills) {
         if (it) addClass(style)
         else removeClass(style)
     }
 }
 
 fun Element.rxClass(
-    ks: KillSet,
+    deps: HasKills,
     style: String,
     fn: KillsApi.() -> Boolean
 )  {
-    val rxv = Rx(ks) { fn() }
-    rxClass(ks, style, rxv)
+    val rxv = rx(deps) { fn() }
+    rxClass(deps, style, rxv)
 }
 
 fun Element.rxClassOpt(
@@ -565,3 +579,8 @@ suspend fun <T, S> RxIface<T>.mapAsync(
 
 fun <T> KillSet.rx(fn: KillsApi.() -> T): RxIface<T> = Rx(this, fn)
 fun <T> T.toVar() = Var(this)
+
+inline fun <reified E: Enum<E>> Var<E>.toName(deps: HasKills) = Var(now.name).apply {
+    this@toName.forEach(deps) { this@apply %= it.name }
+    forEach(deps) { this@toName %= enumValueOf(it) }
+}

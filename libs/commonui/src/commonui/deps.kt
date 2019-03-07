@@ -19,11 +19,17 @@ class EditKillsDeps(
 
 operator fun DefaultEditing.plus(kills: KillSet) = EditKillsDeps(this, kills)
 
-interface HasEditFromKillsUix: HasEdit, HasFrom, HasKills, HasUix
+interface HasEditFromKillsUix: HasEdit, HasFrom, HasKills, HasUix, HasEditKillsUix
 
+interface HasEditExitFromKillsUix: HasEdit, HasExit, HasFrom, HasKills, HasUix, HasEditFromKillsUix {
+    override val exit get() = from
+}
 
 interface HasFrom {
     val from: HasRedisplay
+}
+interface HasExit {
+    val exit: HasRedisplay
 }
 
 interface HasEditFrom: HasEdit, HasFrom

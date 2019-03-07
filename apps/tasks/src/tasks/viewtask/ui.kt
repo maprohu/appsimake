@@ -5,6 +5,7 @@ import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
+import styles.fontSize100
 import styles.leftRightTopBottom0
 import tasks.loggedin.LoggedIn
 import taskslib.Note
@@ -26,11 +27,17 @@ fun ViewTask.ui() = TopAndContent(
                 p2
                 primary
                 fa.comment
+                click {
+                    newComment()
+                }
             }
             button {
                 p2
                 primary
                 fa.pen
+                click {
+                    edit()
+                }
             }
             dropdownSplit.primary
             menu {
@@ -62,7 +69,23 @@ fun ViewTask.ui() = TopAndContent(
                     dt %= "Status"
                     dd %= { item().status().name }
                     dt %= "Tags"
-                    dd
+                    dd {
+                        widget %= {
+                            document.div {
+                                item().tags().forEach { id ->
+                                    insert.badge {
+                                        cls {
+                                            m1
+                                            fontSize100
+                                        }
+                                        pill
+                                        secondary
+                                        text %= { loggedIn.tags.lookup.get(id)().name() }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     dt %= "Notes"
                 }
 

@@ -1,5 +1,6 @@
 package commonui.widget
 
+import bootstrap.btnOutlineSecondary
 import bootstrap.inputGroup
 import bootstrap.inputGroupAppend
 import commonshr.*
@@ -27,9 +28,13 @@ class InputGroup: ScreenWrap() {
 
     val input = slots.input.insert.input
 
-    val append get() = slots.append.slot.insert.wraps.div {
-        cls.inputGroupAppend
+    val append by lazy {
+        slots.append.slot.insert.wraps.div {
+            cls.inputGroupAppend
+        }
     }
+
+    val appendButton get() = append.insert.button
 
 
 

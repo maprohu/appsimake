@@ -4,7 +4,9 @@ import bootstrap.*
 import common.Emitter
 import commonshr.*
 import domx.*
+import killable.NoKill
 import org.w3c.dom.Element
+import rx.Var
 import kotlin.browser.document
 
 class FormGroup: ScreenWrap() {
@@ -21,13 +23,13 @@ class FormGroup: ScreenWrap() {
     }
     val slots = Slots()
 
-    private val inputEmitter = Emitter<Element>()
+    private val inputEmitter = Var<Element?>(null)
 
     val label by lazy {
         document.label {
             cls.m1
-            inputEmitter.add { e ->
-                htmlFor = e.ref
+            inputEmitter.forEach(NoKill) {
+                it?.let { e -> htmlFor = e.ref }
             }
         }.setTo(slots.label)
     }
@@ -35,7 +37,19 @@ class FormGroup: ScreenWrap() {
     val input by lazy {
         slots.input.insert.input.apply {
             cls.m1
-            inputEmitter.emit(node)
+            inputEmitter %= node
+        }
+    }
+    val textArea by lazy {
+        slots.input.insert.textArea.apply {
+            cls.m1
+            inputEmitter %= node
+        }
+    }
+    val select by lazy {
+        slots.input.insert.select.apply {
+            cls.m1
+            inputEmitter %= node
         }
     }
 

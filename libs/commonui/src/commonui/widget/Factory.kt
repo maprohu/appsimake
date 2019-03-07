@@ -1,14 +1,13 @@
 package commonui.widget
 
-import commonshr.InvokeApply
-import commonshr.invoke
-import commonshr.remAssign
+import commonshr.*
 import domx.*
-import commonshr.KillsApi
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
+import rx.Rx
 import rx.Var
+import rx.rx
 import kotlin.browser.document
 
 //data class FactoryAfter(
@@ -100,6 +99,7 @@ class Factory(
     val status get() = Status().applied
     val input get() = Input().applied
     val textArea get() = TextArea().applied
+    val select get() = Select().applied
     val formGroup get() = FormGroup().applied
     val form get() = Form().applied
     val inputGroup get() = InputGroup().applied
@@ -201,16 +201,15 @@ class SlotVar(
 abstract class ScreenWrap: HasHTMLElement, InvokeApply {
     val target = Var<Slot?>(null)
 
-    fun KillsApi.visible(fn: KillsApi.() -> Boolean) {
-        rx {
-            target()?.let { slot ->
-                slot.rx(this) { if (fn()) node else null }
-            }
+    val <T: HasHTMLElement> T.append: T get() = apply { this@ScreenWrap.node.widget %= this@apply.node }
+}
+
+fun ScreenWrap.visible(deps: HasKills, fn: KillsApi.() -> Boolean) {
+    rx(deps) {
+        target()?.let { slot ->
+            slot.rx(this) { if (fn()) node else null }
         }
     }
-
-    val <T: HasHTMLElement> T.append: T get() = apply { this@ScreenWrap.node.widget %= this@apply.node }
-
 }
 
 fun <T: ScreenWrap> T.setTo(slot: Slot): T = apply {

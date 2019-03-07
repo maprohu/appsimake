@@ -17,12 +17,17 @@ class Badge: ScreenWrap() {
     val primary by lazy {
         cls.badgePrimary
     }
+    val secondary by lazy {
+        cls.badgeSecondary
+    }
     val warning by lazy {
         cls.badgeWarning
     }
     val pill by lazy {
         cls.badgePill
     }
+
+    val text = node
 
 }
 

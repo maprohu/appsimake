@@ -79,6 +79,47 @@ fun <T, S> ReceiveChannel<ListEvent<T>>.mapLive(
     }
 }
 
+fun <T> listEventProcessor(
+    deps: HasCsKills,
+    fn: suspend KillsApi.(T) -> Unit
+): suspend ListEvent<T>.() -> Unit {
+    val itemKills = mutableListOf<Trigger>()
+
+    return {
+        when (this) {
+            is ListEvent.Add -> {
+                deps.kills.killables().apply {
+                    fn(item)
+                    itemKills.add(
+                        index,
+                        kill
+                    )
+                }
+            }
+            is ListEvent.Move -> {
+                itemKills.add(to, itemKills.removeAt(from))
+            }
+            is ListEvent.Remove -> {
+                itemKills.removeAt(index).invoke()
+            }
+        }
+
+    }
+}
+
+fun <T> ReceiveChannel<ListEvent<T>>.process(
+    deps: HasCsKills,
+    fn: suspend KillsApi.(T) -> Unit
+) {
+    val processor = listEventProcessor(deps, fn)
+
+    deps.launch {
+        for (e in this@process) {
+            processor(e)
+        }
+    }
+}
+
 fun <T> ListEvent<T>.applyTo(
     set: MutableSet<T>
 ) {

@@ -65,5 +65,14 @@ interface CsDbKillsApi: HasCsDbKills, CsKillsApiFirebase, DbApi, KillsApiFirebas
         query: QuerySettingsBuilder<T>.() -> Unit = {}
     ) = toList(api, query)
 
+    fun <B: RxBase<*>> CollectionSource<B>.fsCache(
+        query: QuerySettingsBuilder<B>.() -> Unit = {},
+        factory: (String) -> B
+    ) = fsCache(api, query, factory)
+
+    fun <B: RxBase<*>> ReceiveChannel<ListEvent<FsDoc<B>>>.fsCache(
+        factory: (String) -> B
+    ) = fsCache(api, factory)
+
 }
 

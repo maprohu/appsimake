@@ -163,16 +163,16 @@ fun HTMLInputElement.listenInput(fn: (String) -> Unit) {
 fun HTMLButtonElement.rxEnabled(ks: KillSet, rx: RxVal<Boolean>) {
     rx.forEach(ks) { disabled = !it }
 }
-fun HTMLButtonElement.rxEnabled(deps: HasKills, fn: () -> Boolean) {
+fun HTMLButtonElement.rxEnabled(deps: HasKills, fn: KillsApi.() -> Boolean) {
     Rx(deps.kills) { fn() }.also { rxEnabled(deps.kills, it) }
 }
 
-fun ElementCSSInlineStyle.rxVisible(ks: KillSet, rxv: RxVal<Boolean>) {
-    rxv.forEach(ks) { style.visibility = if (it) "visible" else "collapse" }
+fun ElementCSSInlineStyle.rxVisible(deps: HasKills, rxv: RxVal<Boolean>) {
+    rxv.forEach(deps.kills) { style.visibility = if (it) "visible" else "collapse" }
 }
 
-fun ElementCSSInlineStyle.rxVisible(ks: KillSet, fn: KillsApi.() -> Boolean): Rx<Boolean> {
-    return Rx(ks, fn).also { rxVisible(ks, it) }
+fun ElementCSSInlineStyle.rxVisible(deps: HasKills, fn: KillsApi.() -> Boolean): Rx<Boolean> {
+    return Rx(deps.kills, fn).also { rxVisible(HasNoKill, it) }
 }
 
 

@@ -1,13 +1,17 @@
 package commonui.widget
 
 import bootstrap.*
+import common.Listeners
 import commonshr.Action
 import commonshr.invoke
 import domx.*
 import commonshr.KillsApi
 import commonui.HasUix
 import killable.HasNoKill
+import killable.NoKill
 import rx.Var
+import rx.rx
+import rx.rxClass
 import kotlin.browser.document
 
 class Topbar(): ScreenWrap() {
@@ -80,14 +84,17 @@ class Tabs: ScreenWrap() {
         }
     }
 
-    val active = Var<Tab?>(null)
+    val active = Var<Tab?>(null).apply {
+        forEach(NoKill) { it?.let { t -> t.onActivate.fire() } }
+    }
     val tab get() = Tab(this).setTo(slot)
 }
 
 
-class Tab(val owner: Tabs): ScreenWrap(), KillsApi by HasNoKill {
+class Tab(val owner: Tabs): ScreenWrap() {
 
-    val isActive = rx { owner.active() == this@Tab }
+    val isActive = rx(HasNoKill) { owner.active() == this@Tab }
+    val onActivate = Listeners()
 
     override val node = document.div {
         cls {
@@ -101,7 +108,7 @@ class Tab(val owner: Tabs): ScreenWrap(), KillsApi by HasNoKill {
         cls {
             navLink
             px2
-            rxClass(active) { isActive() }
+            rxClass(HasNoKill, active) { isActive() }
         }
         href = "#"
     }
@@ -114,7 +121,10 @@ class Tab(val owner: Tabs): ScreenWrap(), KillsApi by HasNoKill {
 
     fun click(deps: HasUix, action: Action) = anchor.click(deps, action)
 
-    fun clickActivate(deps: HasUix) = click(deps) { activate() }
 
 }
+
+fun Tab.clickActivate(deps: HasUix) = click(deps) { activate() }
+
+
 

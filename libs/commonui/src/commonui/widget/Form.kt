@@ -10,7 +10,6 @@ import rx.Rx
 import rx.Var
 import kotlin.browser.document
 
-typealias FormElement = () -> Boolean
 
 class Form: ScreenWrap() {
 
@@ -34,10 +33,6 @@ class Form: ScreenWrap() {
         hiddenSubmit
         node.listen("submit", action)
     }
-
-    val elements = Var(emptyList<FormElement>())
-
-    val isDirty = Rx(NoKill) { elements().any { it() } }
 
     init {
         onsubmit {

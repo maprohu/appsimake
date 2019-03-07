@@ -276,7 +276,7 @@ fun Slot.toHole(prepare: HTMLElement.() -> Unit = {}) = Hole(
 val Slot.hole get() = toHole()
 
 
-fun Slot.visibility(deps: HasKills, fn: () -> Boolean) = Factory() with {
+fun Slot.visibility(deps: HasKills, fn: KillsApi.() -> Boolean) = Factory() with {
     val element = this
     Rx(deps.kills) { fn() }.forEach(deps.kills) { v ->
         this@visibility %= if (v) element else null

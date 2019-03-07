@@ -2,6 +2,7 @@ package tasks.editnote
 
 import bootstrap.*
 import commonshr.*
+import commonui.editing.saveDeleteButton
 import commonui.widget.*
 import domx.*
 import fontawesome.*
@@ -15,7 +16,7 @@ fun EditNote.ui() = TopAndContent(
     topbar = factory.topbar {
         slots.left.backSaveDiscard
         title %= "Note"
-        right.saveButton
+        right.saveDeleteButton
     }.node,
     content = document.column {
         cls {
