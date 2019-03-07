@@ -43,6 +43,13 @@ interface UixApi: Api, HasUix {
 
 }
 
+interface FromUixApi: Api, HasFromUix, UixApi {
+
+    val Topbar.backButton get() = backButton(api)
+    val Factory.backButton get() = backButton(api)
+
+}
+
 interface CsApiCommonui: CsApi {
 
     fun Node.list(

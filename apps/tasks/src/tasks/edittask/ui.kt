@@ -48,10 +48,21 @@ fun EditTask.ui(): TopAndContent {
         val filter = Var("")
         val visibleCount = Var(0)
         val clearFilter = Listeners()
+        val canCreate = rx { filter().isNotBlank() && filter() !in loggedIn.tagNameSet() }
+
+        fun create() {
+            if (canCreate.now) {
+                loggedIn.createTag(filter.now).idOrFail.let { id ->
+                    editing.current.tags.rxv.transform { it + id }
+                }
+                clearFilter.fire()
+            }
+        }
         cls {
             flexGrow1
         }
         insert.form {
+            onsubmit { create() }
             cls {
                 p1
                 borderBottom
@@ -78,7 +89,8 @@ fun EditTask.ui(): TopAndContent {
                 appendButton {
                     outlineSecondary
                     fa.plus
-                    enabled { filter().isNotBlank() && filter() !in loggedIn.tagNameSet() }
+                    enabled { canCreate() }
+                    click { create() }
                 }
             }
         }

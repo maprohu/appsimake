@@ -57,6 +57,9 @@ fun LoggedIn.ui() = TopAndContent(
                 item {
                     fa.tags
                     text %= "Tags"
+                    click {
+                        listTags()
+                    }
                 }
             }
         }

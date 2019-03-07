@@ -5,6 +5,7 @@ import commonshr.api
 import commonfb.editing.*
 import commonshr.properties.RxBase
 import commonui.CsApiCommonui
+import commonui.FromUixApi
 import commonui.KillsApiCommonui
 import commonui.UixApi
 import firebase.CsDbKillsApi
@@ -16,9 +17,15 @@ interface DbKillsApiCommonfb: DbKillsApi {
 
 }
 
-typealias FBApi = CsDbKillsApiCommonfb
+typealias FBApi = CsDbKillsUixApi
+typealias FBFromApi = CsDbFromKillsUixApi
 
-interface CsDbKillsApiCommonfb: CsDbKillsApi, DbKillsApiCommonfb, UixApi, CsApiCommonui, KillsApiCommonui {
+interface CsDbKillsUixApi: CsDbKillsApi, DbKillsApiCommonfb, UixApi, CsApiCommonui, KillsApiCommonui {
 
 }
+
+interface CsDbFromKillsUixApi: CsDbKillsUixApi, FromUixApi {
+
+}
+
 

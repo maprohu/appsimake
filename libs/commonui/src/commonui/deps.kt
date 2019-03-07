@@ -38,6 +38,10 @@ interface HasUix {
     val uix: Exec
 }
 
+interface HasFromUix: HasFrom, HasUix {
+
+}
+
 interface HasKillsUix: HasKills, HasUix
 
 interface HasEditKillsUix: HasEdit, HasKills, HasUix, HasKillsUix, HasEditKills

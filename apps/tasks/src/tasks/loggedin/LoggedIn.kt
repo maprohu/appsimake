@@ -19,6 +19,7 @@ import rx.readOnly
 import tasks.data.tagsLookup
 import tasks.home.Home
 import tasks.home.HomePath
+import tasks.listtags.ListTags
 import tasks.viewtask.ViewTask
 import taskslib.*
 
@@ -39,11 +40,12 @@ class LoggedIn(
     val private = tasksLib.app.private.doc(user.uid)
     val tasksCollection = private.tasks
     val hiddenTasks = private.hiddenTasks
+    val userTags = private.usertags
 
     val hiddenList = hiddenTasks.toList()
     val hiddenIds = hiddenList.ids
 
-    val tags = private.usertags.listEvents {
+    val tags = userTags.listEvents {
         Tag.name.asc
     }.fsCache { id ->
         Tag().apply { name %= id }
@@ -73,6 +75,22 @@ class LoggedIn(
 
     fun unhideAll() {
         hiddenList.forEach { it.delete() }
+    }
+
+    fun createTag(name: String): FsDoc<Tag> {
+        return Tag().apply {
+            this.name %= name
+        }.toRandomFsDoc(userTags).apply {
+            save()
+        }
+    }
+
+    fun listTags() {
+        exec {
+            forward.switchTo {
+                ListTags(this)
+            }
+        }
     }
 
     override val rawView: TopAndContent = ui()
