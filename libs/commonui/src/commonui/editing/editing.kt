@@ -30,18 +30,18 @@ abstract class DefaultEditing(
 }
 class RxEditing<T: RxBase<*>>(
     kills: KillSet,
-    val initial: T,
+    val initial: FsDoc<T>,
     override val canDelete: RxIface<Boolean>,
     override val delete: Action,
     saveCurrent: suspend (T) -> Unit
 ): DefaultEditing(kills), KillsApi {
-    val current = initial.copy()
+    val current = initial.rxv.now.copy()
     override val save: Action = {
         saveCurrent(current)
     }
     override val dirty = this.rx {
         extraDirty().any { it() } ||
-                !rxCompare(initial, current)
+                !rxCompare(initial(), current)
     }
 }
 
@@ -164,18 +164,29 @@ fun Factory.saveDeleteButton(deps: HasEditExitFromKillsUix) = buttonGroup {
     }
 }
 
-class BackSaveDiscard(deps: HasEditFromKillsUix, holes: SlotHoles): HasEditFromKillsUix by deps, KillsApiCommonui, UixApi {
+class BackSaveDiscard(deps: HasEditExitFromKillsUix, holes: SlotHoles): HasEditExitFromKillsUix by deps, KillsApiCommonui, UixApi {
+    private fun fromOrExit() {
+        if (editing.canDelete.now) {
+            from.redisplay()
+        } else {
+            exit.redisplay()
+        }
+    }
     val discard = holes.slot.insert.button {
         visible { editing.dirty() && !editing.canSave() }
         m1p2
         fa.backspace
         danger
-        click { from.redisplay() }
+        click {
+            fromOrExit()
+        }
     }
     val back = holes.slot.insert.button {
         visible { !editing.dirty() }
         back
-        click { from.redisplay() }
+        click {
+            fromOrExit()
+        }
     }
     val save = holes.slot.insert.buttonGroup {
         visible { editing.dirty() && editing.canSave() }
@@ -210,7 +221,9 @@ class BackSaveDiscard(deps: HasEditFromKillsUix, holes: SlotHoles): HasEditFromK
                 cls.textDanger
                 fa.backspace
                 text %= "Discard"
-                click { from.redisplay() }
+                click {
+                    fromOrExit()
+                }
             }
         }
     }

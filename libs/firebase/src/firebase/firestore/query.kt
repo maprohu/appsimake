@@ -2,6 +2,7 @@ package firebase.firestore
 
 import commonshr.CollectionWrap
 import commonshr.properties.ROProp
+import commonshr.properties.ScalarArrayProp
 import firebase.HasDb
 
 data class QuerySettings(
@@ -26,7 +27,8 @@ data class QuerySettings(
     }
 
     enum class WhereOp {
-        Eq
+        Eq,
+        ArrayContains,
     }
 
     fun asc(path: String) = copy(
@@ -45,12 +47,16 @@ data class QuerySettings(
     )
 
     fun eq(path: String, value: dynamic) = where(path, WhereOp.Eq, value)
+    fun arrayContains(path: String, value: dynamic) = where(path, WhereOp.ArrayContains, value)
 
 }
 
 interface QuerySettingsBuilder<T> {
     var settings: QuerySettings
 
+    infix fun <P> ScalarArrayProp<T, P>.arrayContains(v: P) {
+        settings = settings.arrayContains(name, writeElement(v, FsDynamicOps))
+    }
     infix fun <P> ROProp<T, P>.eq(v: P) {
         settings = settings.eq(name, write(v, FsDynamicOps))
     }
@@ -81,6 +87,7 @@ fun Query.apply(where: QuerySettings.Where): Query {
         where.path,
         when (where.op) {
             QuerySettings.WhereOp.Eq -> "=="
+            QuerySettings.WhereOp.ArrayContains -> "array-contains"
         },
         where.param
     )
@@ -98,6 +105,7 @@ fun Query.apply(settings: QuerySettings) =
 typealias TypedQuery<T> = Query
 typealias TypedCollectionReference<T> = CollectionReference
 typealias TypedDocumentReference<T> = DocumentReference
+typealias TypedQueryDocumentSnapshot<T> = QueryDocumentSnapshot
 
 fun <T> CollectionWrap<T>.query(
     deps: HasDb,

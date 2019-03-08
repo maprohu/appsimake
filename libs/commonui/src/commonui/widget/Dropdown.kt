@@ -16,10 +16,11 @@ class DropdownMenuItem(): ScreenWrap() {
             p1
         }
     }
-    val icon = Icon(node).apply {
+    val icon = insert.icon {
         node.cls.m1
-        fa.fw
+        fw
     }
+
     val fa = icon.fa
     val text = Text(node).apply {
         node.cls.m1

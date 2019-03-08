@@ -12,6 +12,7 @@ import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import org.w3c.dom.events.EventTarget
 import rx.HasVar
+import rx.RxIface
 import rx.Var
 
 interface KillsApiCommonui: KillsApiDomx {
@@ -20,21 +21,21 @@ interface KillsApiCommonui: KillsApiDomx {
 
     fun Button.enabled(fn: KillsApi.() -> Boolean) = enabled(api, fn)
 
-    operator fun Slot.remAssign(fn: KillsApi.() -> Node?) {
-        rx { fn() }.forEach { this@remAssign %= it }
-    }
 
-    fun HasElement.rxClass(stl: String, fn: KillsApi.() -> Boolean) = node.rxClass(stl, fn)
+    fun HasElement.rxClass(stl: String, fn: KillsApi.() -> Boolean) = rxClass(api, stl, fn)
+    fun HasElement.rxClass(stl: String, fn: RxIface<Boolean>) = rxClass(api, stl, fn)
 
     fun ScreenWrap.visible(fn: KillsApi.() -> Boolean) = visible(api, fn)
 
     fun <E: Enum<E>> Select.bind(prop: EnumProp<*, E>) = bind(api, prop)
+    fun Select.bind(prop: Var<String>) = bind(api, prop)
 
 }
 interface UixApi: Api, HasUix {
 
     fun EventTarget.click(action: Action) = click(api, action)
     fun Button.click(action: Action) = click(api, action)
+    fun BadgeAnchor.click(action: Action) = click(api, action)
     fun DropdownMenuItem.click(action: Action) = click(api, action)
     fun ListGroupButton.click(action: Action) = click(api, action)
     fun DropdownMenu.signOut(action: Action) = signOut(api, action)
@@ -82,11 +83,11 @@ interface EditKillsUixApi: EditKillsApi, HasEditKillsUix {
 }
 
 interface EditFromKillsUixApi: EditKillsUixApi, HasEditFromKillsUix {
-    val SlotHoles.backSaveDiscard get() = BackSaveDiscard(api, this)
 }
 
 interface EditExitFromKillsUixApi: EditFromKillsUixApi, HasEditExitFromKillsUix {
     val Factory.saveDeleteButton get() = saveDeleteButton(api)
+    val SlotHoles.backSaveDiscard get() = BackSaveDiscard(api, this)
 }
 
 typealias Editor = EditExitFromKillsUixApi

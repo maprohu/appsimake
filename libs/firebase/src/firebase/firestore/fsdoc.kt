@@ -9,6 +9,7 @@ import commonshr.*
 import commonshr.properties.*
 import firebase.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.await
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
@@ -101,3 +102,7 @@ object FsDynamicOps: DynamicOps {
 
 fun <D> DocSource<D>.new(d: dynamic = dyn()) = new(d, firebase.firestore.FsDynamicOps)
 val <D> DocSource<D>.new get() = new()
+
+
+
+

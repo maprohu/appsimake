@@ -86,16 +86,19 @@ class Factory(
     val wraps = Wraps()
 
     val screen get() = Screen().applied
+    val icon get() = Icon().applied
     val dropdown get() = Dropdown().applied
     val dropdownMenu get() = DropdownMenu().applied
     val topbar get() = Topbar().applied
     val button get() = Button().applied
     val buttonGroup get() = ButtonGroup().applied
     val scrollPane get() = ScrollPane().applied
+    val grid get() = Grid().applied
     val hourglass get() = Hourglass().applied
     val stack get() = Stack().applied
     val toasts get() = Toasts().applied
     val badge get() = Badge().applied
+    val badgeAnchor get() = BadgeAnchor().applied
     val status get() = Status().applied
     val input get() = Input().applied
     val textArea get() = TextArea().applied
@@ -109,6 +112,35 @@ class Factory(
 
 
 }
+
+//interface Widgets {
+//    val <T: ScreenWrap> T.applied: T
+//
+//    val screen get() = Screen().applied
+//    val dropdown get() = Dropdown().applied
+//    val dropdownMenu get() = DropdownMenu().applied
+//    val topbar get() = Topbar().applied
+//    val button get() = Button().applied
+//    val buttonGroup get() = ButtonGroup().applied
+//    val scrollPane get() = ScrollPane().applied
+//    val grid get() = Grid().applied
+//    val hourglass get() = Hourglass().applied
+//    val stack get() = Stack().applied
+//    val toasts get() = Toasts().applied
+//    val badge get() = Badge().applied
+//    val status get() = Status().applied
+//    val input get() = Input().applied
+//    val textArea get() = TextArea().applied
+//    val select get() = Select().applied
+//    val formGroup get() = FormGroup().applied
+//    val form get() = Form().applied
+//    val inputGroup get() = InputGroup().applied
+//    val listGroup get() = ListGroup().applied
+//    val listGroupButton get() = ListGroupButton().applied
+//    val nestedListButton get() = NestedListButton().applied
+//
+//}
+
 
 //interface HasVisibility {
 //    fun show()

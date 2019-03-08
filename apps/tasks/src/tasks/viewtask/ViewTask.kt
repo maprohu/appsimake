@@ -1,10 +1,12 @@
 package tasks.viewtask
 
-import commonfb.FBApi
+import commonfb.FBFromApi
 import commonshr.FsDoc
 import commonshr.docWrap
+import commonshr.properties.copy
 import commonshr.toFsDoc
 import commonui.widget.ForwardBase
+import commonui.widget.HasJobRedisplay
 import commonui.widget.TopAndContent
 import tasks.editnote.EditNote
 import tasks.edittask.EditTask
@@ -12,15 +14,17 @@ import tasks.loggedin.LoggedIn
 import tasks.loggedin.LoggedInPath
 import taskslib.Note
 import taskslib.Task
+import taskslib.TaskStatus
 import taskslib.notes
 
 interface ViewTaskPath: LoggedInPath {
     val viewTask: ViewTask
 }
 class ViewTask(
-    from: LoggedIn,
+    loggedIn: LoggedIn,
+    override val from: HasJobRedisplay,
     val item: FsDoc<Task>
-): ForwardBase<TopAndContent>(from), ViewTaskPath, LoggedInPath by from, FBApi {
+): ForwardBase<TopAndContent>(from), ViewTaskPath, LoggedInPath by loggedIn, FBFromApi {
     override val viewTask = this
 
     val notes = item.docWrap.notes
@@ -48,6 +52,14 @@ class ViewTask(
                     item.live
                 }
             }
+        }
+    }
+
+    fun markAsCompleted() {
+        item.rxv.now.copy().apply {
+            status %= TaskStatus.Completed
+            toFsDoc(item.id).save()
+            from.redisplay()
         }
     }
 

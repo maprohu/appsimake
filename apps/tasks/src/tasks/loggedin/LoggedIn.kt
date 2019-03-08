@@ -13,15 +13,13 @@ import firebase.User
 import firebase.app.App
 import firebase.firestore.*
 import kotlinx.coroutines.launch
-import rx.RxIface
 import rx.Var
 import rx.readOnly
-import tasks.data.tagsLookup
 import tasks.home.Home
 import tasks.home.HomePath
 import tasks.listtags.ListTags
 import tasks.listtasks.ListTasks
-import tasks.viewtask.ViewTask
+import tasks.viewtask.ViewTaskApi
 import taskslib.*
 
 interface LoggedInPath: HomePath, HasDb {
@@ -33,7 +31,7 @@ class LoggedIn(
     user: User,
     val app: App,
     override val db: Firestore
-): ForwardBase<TopAndContent>(home), UserStateView, LoggedInPath, HomePath by home, FBApi {
+): ForwardBase<TopAndContent>(home), UserStateView, LoggedInPath, HomePath by home, FBApi, ViewTaskApi {
 
     override val userState: UserState = UserState.LoggedIn(user)
     override val loggedIn: LoggedIn = this
@@ -62,16 +60,21 @@ class LoggedIn(
         }
     }
 
-    fun newTask() {
-        exec {
-            ListTasks(this).apply {
+//    fun newTask() {
+//        exec {
+//            forward.switchTo {
+//                Task().toRandomFsDoc(tasksCollection).run {
+//                    ViewTask(this@LoggedIn, this).apply {
+//                        item.live
+//                        forward.switchTo {
+//                            EditTask(this)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-            }
-            Task().toRandomFsDoc(tasksCollection)
-            forward.switchTo {
-            }
-        }
-    }
     fun listTasks() {
         exec {
             forward.switchTo {
@@ -84,13 +87,6 @@ class LoggedIn(
         hiddenTasks.doc(idOrFail).new.save()
     }
 
-    fun FsDoc<Task>.view() {
-        exec {
-            forward.switchTo {
-                ViewTask(this@LoggedIn, this)
-            }
-        }
-    }
 
     fun unhideAll() {
         hiddenList.forEach { it.delete() }

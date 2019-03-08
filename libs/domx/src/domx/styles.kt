@@ -43,6 +43,28 @@ private fun def(s: String, action: String? = null) = object : ReadOnlyProperty<C
 
 }
 
+val String.cssEscape get() = replace("[^a-zA-Z0-9-]]".toRegex(), "_")
+
+private fun <T> defParam(
+    action: String? = null,
+    paramString: (T) -> String = { it.toString().cssEscape },
+    css: (T) -> String
+) = object : ReadOnlyProperty<Cls, (T) -> String> {
+    var names = mutableMapOf<T, String>()
+    override fun getValue(thisRef: Cls, property: KProperty<*>): (T) -> String = { param ->
+        names.getOrPut(param) {
+            "${property.name.toCss()}--${paramString(param)}".apply {
+                addStyle(this, action, css(param))
+            }
+        }.apply {
+            thisRef.element {
+                this.classes += this@apply
+            }
+        }
+    }
+
+}
+
 val Cls.height0 by def(
     "height: 0px;"
 )
@@ -116,3 +138,7 @@ val Cls.objectFitContain by def(
 val Cls.objectFitScaleDown by def(
     "object-fit: scale-down;"
 )
+
+val Cls.gridTemplateColumnsAuto by defParam<Int> { count ->
+    "grid-template-columns: ${(1..count).joinToString(" ") { "auto" }};"
+}

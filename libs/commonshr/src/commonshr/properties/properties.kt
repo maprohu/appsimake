@@ -69,6 +69,25 @@ class EnumProp<T, E: Enum<E>>(
     val values: List<E>
 ) : RWProp<T, E>(name, rxv, write)
 
+interface ScalarArrayProp<T, E> {
+    val name: String
+    val writeElement: (E, DynamicOps) -> dynamic
+}
+
+class ROArrayProp<T, S, E>(
+    name: String,
+    rxv: RxIface<S>,
+    write: WriteDynamic<S>,
+    override val writeElement: (E, DynamicOps) -> dynamic
+) : ROProp<T, S>(name, rxv, write), ScalarArrayProp<T, E>
+
+class RWArrayProp<T, E>(
+    name: String,
+    rxv: Var<Set<E>>,
+    write: WriteDynamic<Set<E>>,
+    override val writeElement: (E, DynamicOps) -> dynamic
+) : RWProp<T, Set<E>>(name, rxv, write), ScalarArrayProp<T, E>
+
 //class PropertyItem<T, V>(
 //    val index: Int,
 //    override val name: String,
@@ -160,7 +179,20 @@ open class PropertyList<T> {
     fun serverTimestamp() = readOnlyProp(TS.Server, ServerTimestampPropertyType)
 
     fun <V> array(type: PropertyType<V> = PropertyType()) = prop(emptyList(), arrayOfScalarType(type))
-    fun <V> set() = prop(emptySet<V>(), setOfScalarType())
+
+    fun <V> set()= named { name ->
+        val value = emptySet<V>()
+        val elementType = PropertyType<V>()
+        val type = setOfScalarType<V>()
+        val rxv = addProperty(name, value, type)
+
+        RWArrayProp<T, V>(
+            name,
+            rxv,
+            type.writeDynamic,
+            elementType.writeDynamic
+        )
+    }
 
     fun <B: RxBase<*>> rxlist(create: () -> B) = prop(
         emptyList(),
@@ -169,19 +201,32 @@ open class PropertyList<T> {
 
     fun boolean() = prop(false)
 
-    fun <V> calc(write: WriteDynamic<V> = identityWriteDynamic(), fn: () -> V) =
+
+    fun <V> addCalc(
+        name: String,
+        write: WriteDynamic<V> = identityWriteDynamic(),
+        fn: () -> V
+    ): Rx<V> {
+        val rxv = Rx(NoKill) { fn() }
+        items += PropertyListItem(
+            name = name,
+            write = { ops -> write(rxv.now, ops) },
+            read = { _, _ -> },
+            get = { rxv() },
+            copy = { rxv.now },
+            set = {},
+            reset = {},
+            compare = { true }
+        )
+        return rxv
+    }
+
+    fun <V> calc(
+        write: WriteDynamic<V> = identityWriteDynamic(),
+        fn: () -> V
+    ) =
         named { name ->
-            val rxv = Rx(NoKill) { fn() }
-            items += PropertyListItem(
-                name = name,
-                write = { ops -> write(rxv.now, ops) },
-                read = { _, _ -> },
-                get = { rxv() },
-                copy = { rxv.now },
-                set = {},
-                reset = {},
-                compare = { true }
-            )
+            val rxv = addCalc(name, write, fn)
 
             ROProp<T, V>(
                 name,
@@ -189,6 +234,40 @@ open class PropertyList<T> {
                 write
             )
         }
+
+    fun <E> calcSet(
+        fn: () -> Set<E>
+    ) = calcSetGeneric<Set<E>, E>(
+        fn,
+        setOfScalarType<E>().writeDynamic,
+        identityWriteDynamic()
+    )
+
+    fun <S, E> calcSetGeneric(
+        fn: () -> S,
+        write: WriteDynamic<S>,
+        writeElement: WriteDynamic<E>
+    ) =
+        named { name ->
+            val rxv = addCalc(name, write, fn)
+
+            ROArrayProp<T, S, E>(
+                name,
+                rxv,
+                write,
+                writeElement
+            )
+        }
+
+    fun <E> lazySet(
+        write: WriteDynamic<Set<E>> = setOfScalarType<E>().writeDynamic,
+        writeElement: WriteDynamic<E> = identityWriteDynamic(),
+        fn: () -> Lazy<Set<E>>
+    ) = calcSetGeneric(
+        fn = fn,
+        write = { v, ops -> write(v.value, ops) },
+        writeElement = writeElement
+    )
 
     fun <V> lazy(write: WriteDynamic<V> = identityWriteDynamic(), fn: () -> Lazy<V>) =
             calc(

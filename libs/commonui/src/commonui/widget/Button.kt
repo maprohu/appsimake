@@ -44,6 +44,9 @@ class Button(): ScreenWrap() {
     val danger by lazy {
         cls.btnDanger
     }
+    val success by lazy {
+        cls.btnSuccess
+    }
 
     val submit: Unit get() { node.type = "submit" }
 

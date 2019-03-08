@@ -48,15 +48,20 @@ interface HasRedisplay {
     val redisplay: Trigger
 }
 
+interface HasJobRedisplay: HasRedisplay, JobScope
+
+interface HasForward<F: JobScopeWithView<*>> {
+    val forward : JobSwitch<F?>
+}
 
 abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
     coroutineContext: Job
-): ViewImplBase<V>(coroutineContext), HasKillsUix, HasRedisplay {
+): ViewImplBase<V>(coroutineContext), HasKillsUix, HasJobRedisplay, HasForward<F> {
     constructor(
         parent: JobScope
     ): this(Job(parent.coroutineContext))
 
-    val forward = JobSwitch.optional<F>()
+    override val forward = JobSwitch.optional<F>()
 
     override val uix: Exec = run {
         val ex = discardExecutor();

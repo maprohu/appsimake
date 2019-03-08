@@ -113,7 +113,7 @@ class Tab(val owner: Tabs): ScreenWrap() {
         href = "#"
     }
 
-    val icon = Icon(anchor).apply { fw }
+    val icon = anchor.insert.icon { fw }
 
     fun activate() {
         owner.active %= this

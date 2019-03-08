@@ -3,6 +3,7 @@ package taskslib
 import commonshr.*
 import commonshr.properties.RxBase
 import commonshr.properties.arrayOfScalarType
+import commonshr.properties.setOfScalarType
 
 val tasksLib = Lib("tasks")
 
@@ -60,14 +61,14 @@ open class Task : RxBase<Task>() {
         status().completed
     }
 
-    val tagsx by o.lazy(arrayOfScalarType<String>().writeDynamic) {
+    val tagsx by o.lazySet {
         val t = tags()
         lazy {
             t
                 .sorted()
                 .subs(2, MaxTagIndexSize)
                 .map { ids -> ids.multiTags }
-                .distinct()
+                .toSet()
         }
     }
 

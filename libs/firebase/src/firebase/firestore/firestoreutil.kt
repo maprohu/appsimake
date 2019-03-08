@@ -330,7 +330,6 @@ fun <T: HasFBProps<*>> DocumentReference.listen(
 }
 
 
-const val MaxBatchSize = 500
 
 fun deleteCollection(
     ref: CollectionReference,

@@ -23,6 +23,16 @@ interface KillsApi: Api, HasKills {
     fun Element.rxClass(stl: String, fn: KillsApi.() -> Boolean) = rxClass(api, stl, fn)
     fun <E> RxSet<E>.filtered(fn: KillsApi.(E) -> Boolean) = filtered(kills, fn)
     fun Var<Int>.incremented() = incremented(api)
+    fun <T> RxIface<T>.feedTo(target: Var<T>) = feedTo(api, target)
+    fun <T> Assign<T>.rx(fn: () -> T) = rx(api, fn)
+    operator fun <T> Assign<T>.remAssign(fn: () -> T) { rx(fn) }
+    fun <T> Assign<T>.rx(fn: RxIface<T>) = rx(api, fn)
+    operator fun <T> Assign<T>.remAssign(fn: RxIface<T>) { rx(fn) }
+
+    fun <T, S> Var<T>.linked(
+        read: (T) -> S,
+        write: (S) -> T
+    ) = linked(api, read, write)
 
     operator fun HTMLElement.remAssign(fn: () -> String) {
         rx { fn() }.forEach { this@remAssign.innerText = it }
@@ -40,6 +50,14 @@ interface KillsApi: Api, HasKills {
 
     fun <T> EmitterFn<T>.listen(callback: (T) -> Unit) = listen(api, callback)
     operator fun <T> EmitterFn<T>.plusAssign(fn: (T) -> Unit) { listen(fn) }
+
+
+//    operator fun Slot.remAssign(fn: RxIface<Node?>) {
+//        fn.forEach { this@remAssign %= it }
+//    }
+//    operator fun Slot.remAssign(fn: KillsApi.() -> Node?) {
+//        rx { fn() }.forEach { this@remAssign %= it }
+//    }
 }
 
 interface CsApi: Api, CoroutineScope {

@@ -1,5 +1,7 @@
 package tasks
 
+import taskslib.TaskStatus
+
 //import bootstrap.*
 //import common.orEmpty
 //import commonfb.*
@@ -21,83 +23,7 @@ package tasks
 //import taskslib.multiTags
 //import kotlin.browser.document
 //
-//sealed class StatusFilter {
-//    abstract val label: String
-//    abstract val key: String
 //
-//    object All: StatusFilter() {
-//        override val key = "all"
-//        override val label = "All"
-//    }
-//
-//    data class Single private constructor(val status: TaskStatus): StatusFilter() {
-//        override val label = status.name
-//        override val key = status.name
-//
-//        companion object {
-//            val values =
-//                TaskStatus.values().map { Single(it) }
-//
-//            val byEnum = values.associateBy { it.status }
-//        }
-//    }
-//
-//    data class Completed private constructor(
-//        val value: Boolean
-//    ): StatusFilter() {
-//        override val label = run {
-//            val list = TaskStatus.byCompleted.getValue(value)
-//
-//            "${if (value) "Finished" else "Not Finished"} (${list.joinToString(", ") { s -> s.name }})"
-//        }
-//        override val key = value.toString()
-//
-//        companion object {
-//            val values =
-//                TaskStatus.byCompleted.keys.sorted().map { Completed(it) }
-//
-//            val byValue = values.associateBy { it.value }
-//        }
-//    }
-//
-//    companion object {
-//
-//        val values =
-//            listOf(
-//                listOf(All),
-//                Single.values,
-//                Completed.values
-//            ).flatten()
-//
-//        val byKey = values.associateBy { it.key }
-//
-//        fun valueOf(key: String) = byKey.getValue(key)
-//
-//        fun completedOf(v: Boolean) =
-//            Completed.byValue.getValue(v)
-//
-//    }
-//}
-//
-//data class FilterValues(
-//    val status: StatusFilter,
-//    val tags: List<String>
-//)
-//
-//fun QueryBuilder<Task>.setup(fv: FilterValues) {
-//    when (fv.status) {
-//        is StatusFilter.Single -> Task.status eq fv.status.status
-//        is StatusFilter.Completed -> Task.completed eq fv.status.value
-//        else -> {}
-//    }
-//    if (fv.tags.isNotEmpty()) {
-//        if (fv.tags.size == 1) {
-//            Task.tags arrayContains fv.tags.first()
-//        } else {
-//            Task.tagsx arrayContains fv.tags.multiTags
-//        }
-//    }
-//}
 //
 //
 //fun LoggedIn.listTasks(killables: Killables, panel: RootPanel, after: () -> Unit)  {

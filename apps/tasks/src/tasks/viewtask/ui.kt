@@ -45,6 +45,9 @@ fun ViewTask.ui() = TopAndContent(
                 item {
                     fa.clipboardCheck
                     text %= "Mark as Completed"
+                    click {
+                        markAsCompleted()
+                    }
                 }
             }
 

@@ -43,13 +43,15 @@ fun LoggedIn.ui() = TopAndContent(
                 p2
                 fa.plus
                 primary
+                click {
+                    newTask()
+                }
             }
             button {
                 p2
                 fa.search
                 primary
                 click {
-
                     listTasks()
                 }
             }

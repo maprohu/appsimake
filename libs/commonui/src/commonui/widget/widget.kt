@@ -12,6 +12,8 @@ import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
 import rx.Rx
+import rx.RxIface
+import rx.rxClass
 
 typealias Inbox = SendChannel<Any>
 
@@ -40,9 +42,9 @@ val Node.slotholes : SlotHoles
             PrevRef.of(lastChild)
         ).also { asDynamic()[SlotsAttribute] = it }
 
-fun Slot.rx(deps: HasKills, fn: () -> Node?) {
-    Rx(deps.kills) { fn() }.forEach(deps.kills) { this@rx %= it }
-}
+//fun Slot.rx(deps: HasKills, fn: () -> Node?) {
+//    Rx(deps.kills) { fn() }.forEach(deps.kills) { this@rx %= it }
+//}
 
 val Node.append : Slot
     get() {
@@ -283,3 +285,14 @@ fun Slot.visibility(deps: HasKills, fn: KillsApi.() -> Boolean) = Factory() with
     }
 }
 
+fun HasElement.rxClass(
+    deps: HasKills,
+    style: String,
+    fn: KillsApi.() -> Boolean
+) = node.rxClass(deps, style, fn)
+
+fun HasElement.rxClass(
+    deps: HasKills,
+    style: String,
+    fn: RxIface<Boolean>
+) = node.rxClass(deps, style, fn)

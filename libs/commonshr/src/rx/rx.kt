@@ -261,8 +261,8 @@ interface RxIface<out T> {
 
 fun <T> RxIface<T>.forEach(deps: HasKills, fn: KillsApi.(T) -> Unit) = forEach(deps.kills, fn)
 
-fun <T> RxIface<T>.feedTo(ks: KillSet, target: Var<T>) {
-    forEach(ks) { target.now = it }
+fun <T> RxIface<T>.feedTo(deps: HasKills, target: Var<T>) {
+    forEach(deps) { target.now = it }
 }
 
 fun RxIface<Int>.feedTo(ks: KillSet, rxv: Var<Int>) {
@@ -583,4 +583,20 @@ fun <T> T.toVar() = Var(this)
 inline fun <reified E: Enum<E>> Var<E>.toName(deps: HasKills) = Var(now.name).apply {
     this@toName.forEach(deps) { this@apply %= it.name }
     forEach(deps) { this@toName %= enumValueOf(it) }
+}
+
+fun <T, S> Var<T>.linked(
+    deps: HasKills,
+    read: (T) -> S,
+    write: (S) -> T
+) = Var(read(now)).apply {
+    this@linked.forEach(deps) { this@apply %= read(it) }
+    forEach(deps) { this@linked %= write(it) }
+}
+
+fun <T> Assign<T>.rx(deps: HasKills, fn: () -> T) {
+    rx(deps, Rx(deps.kills) { fn() })
+}
+fun <T> Assign<T>.rx(deps: HasKills, fn: RxIface<T>) {
+    fn.forEach(deps.kills) { this@rx %= it }
 }

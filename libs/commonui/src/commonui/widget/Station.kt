@@ -179,19 +179,19 @@ class JobSwitch<T> private constructor(
         job
     )
 
-    suspend fun switchTo(item: T) {
+    suspend fun switchTo(item: @UnsafeVariance T) {
         current.now.job().let {
             current.now = item
             it?.cancelAndJoin()
         }
     }
 
-    suspend fun switchTo(fn: suspend () -> T) {
+    suspend fun switchTo(fn: suspend () -> @UnsafeVariance T) {
         current.now.job()?.cancelAndJoin()
         current.now = fn()
     }
 
-    fun <S> fromRx(kills: KillsApi, exec: Exec, source: RxIface<S>, fn: suspend (S) -> T) = with(kills) {
+    fun <S> fromRx(kills: KillsApi, exec: Exec, source: RxIface<S>, fn: suspend (S) -> @UnsafeVariance T) = with(kills) {
         source.forEach { s ->
             exec {
                 switchTo {
@@ -201,8 +201,8 @@ class JobSwitch<T> private constructor(
         }
     }
 
-    suspend operator fun remAssign(item: T) { switchTo(item) }
-    suspend operator fun remAssign(item: suspend () -> T) { switchTo(item) }
+    suspend operator fun remAssign(item: @UnsafeVariance T) { switchTo(item) }
+    suspend operator fun remAssign(item: suspend () -> @UnsafeVariance T) { switchTo(item) }
 
     companion object {
         fun <T: JobScope> of(initial: T) = JobSwitch(initial) { this.coroutineContext }

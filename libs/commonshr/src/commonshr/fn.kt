@@ -1,5 +1,7 @@
 package commonshr
 
+import rx.Rx
+
 typealias Assign<T> = (T) -> Unit
 typealias Callback<T> = (T) -> Unit
 typealias OptAssign<T> = Assign<T?>

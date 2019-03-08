@@ -1,5 +1,6 @@
 package commonfb.editing
 
+import commonshr.Action
 import commonshr.FsDoc
 import commonshr.properties.RxBase
 import commonui.editing.RxEditing
@@ -8,12 +9,17 @@ import firebase.firestore.delete
 import firebase.firestore.save
 import rx.rx
 
-fun <T: RxBase<*>> rxEditing(deps: HasDbKills, initial: FsDoc<T>, preSave: suspend (T) -> Unit): RxEditing<T> {
+fun <T: RxBase<*>> rxEditing(
+    deps: HasDbKills,
+    initial: FsDoc<T>,
+    delete: Action? = null,
+    preSave: suspend (T) -> Unit
+): RxEditing<T> {
     return RxEditing(
         deps.kills,
-        initial.rxv.now,
+        initial,
         canDelete = rx(deps) { initial.id.state().exists },
-        delete = { initial.delete(deps) }
+        delete = delete ?: { initial.delete(deps) }
     ) { current ->
         preSave(current)
         FsDoc(

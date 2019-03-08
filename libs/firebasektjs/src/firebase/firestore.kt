@@ -191,6 +191,9 @@ external interface DocumentData {
 // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentSnapshot?authuser=0
 external interface DocumentSnapshot {
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentSnapshot?authuser=0#~id
+    val id: String
+
     fun <T> data(
             options: SnapshotOptions = definedExternally
     ) : T
@@ -220,7 +223,6 @@ external interface SnapshotOptions {
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.QueryDocumentSnapshot?authuser=0
 external interface QueryDocumentSnapshot : DocumentSnapshot {
-    val id: String
 
 
 

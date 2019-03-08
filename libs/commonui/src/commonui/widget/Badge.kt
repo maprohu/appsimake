@@ -6,13 +6,7 @@ import domx.*
 import styles.scrollVertical
 import kotlin.browser.document
 
-class Badge: ScreenWrap() {
-
-    override val node = document.span {
-        cls {
-            badge
-        }
-    }
+abstract class AbstractBadge: ScreenWrap() {
 
     val primary by lazy {
         cls.badgePrimary
@@ -25,6 +19,30 @@ class Badge: ScreenWrap() {
     }
     val pill by lazy {
         cls.badgePill
+    }
+
+
+}
+
+class Badge: AbstractBadge() {
+
+    override val node = document.span {
+        cls {
+            badge
+        }
+    }
+
+    val text = node
+
+}
+
+class BadgeAnchor: AbstractBadge() {
+
+    override val node = document.a {
+        cls {
+            badge
+        }
+        href = "#"
     }
 
     val text = node

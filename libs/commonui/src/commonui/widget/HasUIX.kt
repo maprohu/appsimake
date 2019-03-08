@@ -16,6 +16,7 @@ fun EventTarget.click(deps: HasUix, action: Action) {
     }
 }
 
+fun BadgeAnchor.click(deps: HasUix, action: Action) = node.click(deps, action)
 fun Button.click(deps: HasUix, action: Action) = node.click(deps, action)
 fun DropdownMenuItem.click(deps: HasUix, action: Action) = node.click(deps, action)
 fun ListGroupButton.click(deps: HasUix, action: Action) = node.click(deps, action)
