@@ -22,7 +22,7 @@ define(['exports', 'kotlin', 'appsimake-testapplib', 'appsimake-functions', 'kot
   var Unit = Kotlin.kotlin.Unit;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
-  var implementAsync = $module$appsimake_functions.commonfns.implementAsync_1ba0c3$;
+  var implementAsync = $module$appsimake_functions.commonfns.implementAsync_4bti1h$;
   function init$lambda$lambda(closure$msg) {
     return function (qds) {
       var tmp$ = firebaseadmin.admin.messaging();

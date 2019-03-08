@@ -48,6 +48,10 @@ fun LoggedIn.ui() = TopAndContent(
                 p2
                 fa.search
                 primary
+                click {
+
+                    listTasks()
+                }
             }
             dropdownSplit {
                 primary

@@ -89,19 +89,25 @@ fun LoggedIn.ui() = TopAndContent(
                     cls.m1
                     node.list(
                         items.listEvents {
-                            DownloadItem.ts.desc
-                        }.map { i ->
+//                            DownloadItem.ts.desc
+                        }.mapLive { i ->
                             document.row {
                                 cls {
                                     listGroupItem
                                     p1
                                 }
-                                div {
+                                column {
                                     cls {
                                         flexGrow1
                                         alignSelfCenter
                                     }
-                                    this %= { i().url() }
+                                    div {
+                                        this %= { i().url() }
+                                    }
+                                    div {
+                                        cls.fontItalic
+                                        this %= { i().name() }
+                                    }
                                 }
                                 insert.buttonGroup {
                                     cls {
@@ -132,7 +138,7 @@ fun LoggedIn.ui() = TopAndContent(
                     node.list(
                         process.listEvents {
                             DownloadProcess.ts.desc
-                        }.map { i ->
+                        }.mapLive { i ->
                             document.row {
                                 cls {
                                     listGroupItem

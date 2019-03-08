@@ -20,6 +20,7 @@ import tasks.data.tagsLookup
 import tasks.home.Home
 import tasks.home.HomePath
 import tasks.listtags.ListTags
+import tasks.listtasks.ListTasks
 import tasks.viewtask.ViewTask
 import taskslib.*
 
@@ -58,6 +59,24 @@ class LoggedIn(
     fun signOut() {
         launch {
             app.auth().signOut()
+        }
+    }
+
+    fun newTask() {
+        exec {
+            ListTasks(this).apply {
+
+            }
+            Task().toRandomFsDoc(tasksCollection)
+            forward.switchTo {
+            }
+        }
+    }
+    fun listTasks() {
+        exec {
+            forward.switchTo {
+                ListTasks(this)
+            }
         }
     }
 

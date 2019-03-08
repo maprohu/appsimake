@@ -16,8 +16,8 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
   'use strict';
   var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var tictactoelib = $module$appsimake_tictactoelib.tictactoelib;
-  var get_games = $module$appsimake_tictactoelib.tictactoelib.get_games_6l3wi3$;
-  var get_moves = $module$appsimake_tictactoelib.tictactoelib.get_moves_wehbcf$;
+  var get_games = $module$appsimake_tictactoelib.tictactoelib.get_games_py8usb$;
+  var get_moves = $module$appsimake_tictactoelib.tictactoelib.get_moves_9zet87$;
   var document = $module$firebase_functions.firestore.document;
   var throwCCE = Kotlin.throwCCE;
   var Move = $module$appsimake_tictactoelib.tictactoelib.Move;
@@ -25,8 +25,8 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ko
   var await_0 = $module$kotlinx_coroutines_core.kotlinx.coroutines.await_t11jrl$;
   var Game = $module$appsimake_tictactoelib.tictactoelib.Game;
   var contains = Kotlin.kotlin.collections.contains_mjy6jw$;
-  var get_private = $module$appsimake_commonshr.commonlib.get_private_6l3wi3$;
-  var get_fcmtokens = $module$appsimake_commonshr.commonlib.get_fcmtokens_z8qup$;
+  var get_private = $module$appsimake_commonshr.commonshr.get_private_py8usb$;
+  var get_fcmtokens = $module$appsimake_commonshr.commonshr.get_fcmtokens_x4imip$;
   var firebaseadmin = $module$appsimake_functions.firebaseadmin;
   var Unit = Kotlin.kotlin.Unit;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;

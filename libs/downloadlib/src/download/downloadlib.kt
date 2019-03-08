@@ -14,6 +14,7 @@ val DocWrap<Private>.process by coll { DownloadProcess() }
 open class DownloadItem: RxBase<DownloadItem>() {
 
     val url by o.string()
+    val name by o.string()
     val ts by o.serverTimestamp()
 
     companion object: DownloadItem()

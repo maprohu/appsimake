@@ -40,6 +40,7 @@ interface UixApi: Api, HasUix {
     fun DropdownMenu.signOut(action: Action) = signOut(api, action)
 
     val Tab.clickActivate get() = clickActivate(api)
+    val Tab.clickToggle get() = clickToggle(api)
 
 }
 

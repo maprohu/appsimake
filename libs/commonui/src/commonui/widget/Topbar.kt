@@ -119,12 +119,17 @@ class Tab(val owner: Tabs): ScreenWrap() {
         owner.active %= this
     }
 
+    fun toggle() {
+        owner.active %= if (owner.active.now == this) null else this
+    }
+
     fun click(deps: HasUix, action: Action) = anchor.click(deps, action)
 
 
 }
 
 fun Tab.clickActivate(deps: HasUix) = click(deps) { activate() }
+fun Tab.clickToggle(deps: HasUix) = click(deps) { toggle() }
 
 
 

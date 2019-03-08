@@ -62,19 +62,28 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var numberToInt = Kotlin.numberToInt;
   var map = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.map_610k8f$;
+  var lazy = Kotlin.kotlin.lazy_klfg04$;
+  var get_lastIndex = Kotlin.kotlin.collections.get_lastIndex_55thoc$;
+  var drop = Kotlin.kotlin.collections.drop_ba2ldo$;
+  var produce = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.produce_f6xzli$;
   var asSequence = Kotlin.kotlin.collections.asSequence_7wnvza$;
   var zip = Kotlin.kotlin.sequences.zip_r7q3s9$;
   var get_js = Kotlin.kotlin.js.get_js_1yb8b7$;
+  var toSet_0 = Kotlin.kotlin.collections.toSet_us0mfu$;
   var Error_init = Kotlin.kotlin.Error_init_pdl1vj$;
   var throwUPAE = Kotlin.throwUPAE;
   var L0 = Kotlin.Long.ZERO;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
   var removeClass = Kotlin.kotlin.dom.removeClass_hhb33f$;
+  var List = Kotlin.kotlin.collections.List;
+  var AbstractMutableList = Kotlin.kotlin.collections.AbstractMutableList;
+  var toList_1 = Kotlin.kotlin.collections.toList_7wnvza$;
+  var until = Kotlin.kotlin.ranges.until_dqglrj$;
+  var IntRange = Kotlin.kotlin.ranges.IntRange;
   var listOf_0 = Kotlin.kotlin.collections.listOf_mh5how$;
   var Set = Kotlin.kotlin.collections.Set;
   var AbstractMutableSet = Kotlin.kotlin.collections.AbstractMutableSet;
   var Iterable = Kotlin.kotlin.collections.Iterable;
-  var lazy = Kotlin.kotlin.lazy_klfg04$;
   var MutableSet = Kotlin.kotlin.collections.MutableSet;
   var MutableIterator = Kotlin.kotlin.collections.MutableIterator;
   Success.prototype = Object.create(Try.prototype);
@@ -105,8 +114,16 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   ListEvent$Move.prototype.constructor = ListEvent$Move;
   ListEvent$Remove.prototype = Object.create(ListEvent.prototype);
   ListEvent$Remove.prototype.constructor = ListEvent$Remove;
+  filter$lambda$ObjectLiteral.prototype = Object.create(filter$lambda$Previous.prototype);
+  filter$lambda$ObjectLiteral.prototype.constructor = filter$lambda$ObjectLiteral;
+  filter$lambda$Item.prototype = Object.create(filter$lambda$Previous.prototype);
+  filter$lambda$Item.prototype.constructor = filter$lambda$Item;
+  filter$lambda$Holder.prototype = Object.create(filter$lambda$Item.prototype);
+  filter$lambda$Holder.prototype.constructor = filter$lambda$Holder;
   RWProp.prototype = Object.create(ROProp.prototype);
   RWProp.prototype.constructor = RWProp;
+  EnumProp.prototype = Object.create(RWProp.prototype);
+  EnumProp.prototype.constructor = EnumProp;
   SnapshotEvent$Added.prototype = Object.create(SnapshotEvent.prototype);
   SnapshotEvent$Added.prototype.constructor = SnapshotEvent$Added;
   SnapshotEvent$Modified.prototype = Object.create(SnapshotEvent.prototype);
@@ -131,6 +148,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Rx.prototype.constructor = Rx;
   Var.prototype = Object.create(RxVal.prototype);
   Var.prototype.constructor = Var;
+  RxMutableList.prototype = Object.create(AbstractMutableList.prototype);
+  RxMutableList.prototype.constructor = RxMutableList;
   RxMutableSet.prototype = Object.create(AbstractMutableSet.prototype);
   RxMutableSet.prototype.constructor = RxMutableSet;
   var dyn = defineInlineFunction('appsimake-commonshr.common.dyn', function () {
@@ -1918,6 +1937,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   KillsApi.prototype.forEach_xwzbbo$ = function ($receiver, fn) {
     $receiver.forEach_aaomyj$(this.kills, fn);
   };
+  KillsApi.prototype.forEachLater_xwzbbo$ = function ($receiver, fn) {
+    $receiver.forEachLater_aaomyj$(this.kills, fn);
+  };
   KillsApi.prototype.forEach_35q7bt$ = function ($receiver, killOrder, fn) {
     $receiver.forEach_vlp88o$(this.kills, killOrder, fn);
   };
@@ -1931,10 +1953,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     rxClass($receiver, this.kills, fn);
   };
   KillsApi.prototype.rxClass_6sflyw$ = function ($receiver, stl, fn) {
-    rxClass_2($receiver, this.kills, stl, fn);
+    rxClass_2($receiver, this, stl, fn);
   };
   KillsApi.prototype.filtered_tnde95$ = function ($receiver, fn) {
     return $receiver.filtered_760dx1$(this.kills, fn);
+  };
+  KillsApi.prototype.incremented_eoy9qo$ = function ($receiver) {
+    incremented($receiver, this);
   };
   function KillsApi$remAssign$lambda(closure$fn) {
     return function ($receiver) {
@@ -1954,7 +1979,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     return $receiver.containsRx_va0u9b$(this.kills, value);
   };
   KillsApi.prototype.process_7xi3v7$ = function ($receiver, fn) {
-    process_0($receiver, this.kills, fn);
+    process_1($receiver, this.kills, fn);
   };
   KillsApi.prototype.toRxSet_jr4bl4$ = function ($receiver) {
     return toRxSet($receiver, this.kills);
@@ -1962,8 +1987,14 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   KillsApi.prototype.toChannelLater_z5dyp2$ = function ($receiver) {
     return toChannelLater($receiver, this.kills);
   };
-  KillsApi.prototype.map_1mq1ue$ = function ($receiver, fn) {
-    return map_2($receiver, this, fn);
+  KillsApi.prototype.mapLive_1mq1ue$ = function ($receiver, fn) {
+    return mapLive($receiver, this, fn);
+  };
+  KillsApi.prototype.listen_ubid8w$ = function ($receiver, callback) {
+    listen($receiver, this, callback);
+  };
+  KillsApi.prototype.plusAssign_ubid8w$ = function ($receiver, fn) {
+    this.listen_ubid8w$($receiver, fn);
   };
   KillsApi.$metadata$ = {
     kind: Kind_INTERFACE,
@@ -1982,6 +2013,18 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function CsKillsApi() {
   }
+  CsKillsApi.prototype.events_9k4h2$ = function ($receiver) {
+    return events($receiver, this);
+  };
+  CsKillsApi.prototype.get_ids_qko62t$ = function ($receiver) {
+    return ids($receiver, this);
+  };
+  CsKillsApi.prototype.filter_hu0si9$ = function ($receiver, fn) {
+    return filter($receiver, this, fn);
+  };
+  CsKillsApi.prototype.process_y3juat$ = function ($receiver, fn) {
+    process_0($receiver, this, fn);
+  };
   CsKillsApi.$metadata$ = {
     kind: Kind_INTERFACE,
     simpleName: 'CsKillsApi',
@@ -2038,24 +2081,24 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     interfaces: [HasPath]
   };
   function DocWrapImpl(id, parent) {
-    this.id_ow5j4v$_0 = id;
-    this.parent_ihqhyo$_0 = parent;
+    this.id_hli9nb$_0 = id;
+    this.parent_vwa060$_0 = parent;
     var tmp$, tmp$_0;
-    this.path_ezgs6j$_0 = ((tmp$_0 = (tmp$ = this.parent) != null ? tmp$.path : null) != null ? tmp$_0 : '') + '/' + this.id;
+    this.path_5vodql$_0 = ((tmp$_0 = (tmp$ = this.parent) != null ? tmp$.path : null) != null ? tmp$_0 : '') + '/' + this.id;
   }
   Object.defineProperty(DocWrapImpl.prototype, 'id', {
     get: function () {
-      return this.id_ow5j4v$_0;
+      return this.id_hli9nb$_0;
     }
   });
   Object.defineProperty(DocWrapImpl.prototype, 'parent', {
     get: function () {
-      return this.parent_ihqhyo$_0;
+      return this.parent_vwa060$_0;
     }
   });
   Object.defineProperty(DocWrapImpl.prototype, 'path', {
     get: function () {
-      return this.path_ezgs6j$_0;
+      return this.path_5vodql$_0;
     }
   });
   DocWrapImpl.$metadata$ = {
@@ -2064,23 +2107,23 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     interfaces: [DocWrap]
   };
   function DocSource(id, parent) {
-    this.id_og9cr4$_0 = id;
-    this.parent_esqf3z$_0 = parent;
-    this.path_daemue$_0 = this.parent.path + '/' + this.id;
+    this.id_so7c0o$_0 = id;
+    this.parent_62eqt5$_0 = parent;
+    this.path_5zrdcu$_0 = this.parent.path + '/' + this.id;
   }
   Object.defineProperty(DocSource.prototype, 'id', {
     get: function () {
-      return this.id_og9cr4$_0;
+      return this.id_so7c0o$_0;
     }
   });
   Object.defineProperty(DocSource.prototype, 'parent', {
     get: function () {
-      return this.parent_esqf3z$_0;
+      return this.parent_62eqt5$_0;
     }
   });
   Object.defineProperty(DocSource.prototype, 'path', {
     get: function () {
-      return this.path_daemue$_0;
+      return this.path_5zrdcu$_0;
     }
   });
   DocSource.$metadata$ = {
@@ -2132,11 +2175,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       parent = null;
     this.id = id;
     var tmp$;
-    this.path_66n57n$_0 = ((tmp$ = parent != null ? parent.path : null) != null ? tmp$ : '') + '/' + this.id;
+    this.path_6soqnf$_0 = ((tmp$ = parent != null ? parent.path : null) != null ? tmp$ : '') + '/' + this.id;
   }
   Object.defineProperty(CollectionWrap.prototype, 'path', {
     get: function () {
-      return this.path_66n57n$_0;
+      return this.path_6soqnf$_0;
     }
   });
   CollectionWrap.prototype.doc_61zpoe$ = function (id) {
@@ -3126,53 +3169,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     launch($receiver, void 0, void 0, executor$lambda_0(channel, job));
     return executor$lambda_1(channel);
   }
-  function Counted(create) {
-    this.create_0 = create;
-    this.current_0 = None_getInstance();
-  }
-  function Counted$Holder($outer, value, killable) {
-    this.$outer = $outer;
-    this.value = value;
-    this.killable = killable;
-    this.count = 0;
-  }
-  Counted$Holder.prototype.release = function () {
-    this.count = this.count - 1 | 0;
-    if (this.count <= 0) {
-      this.$outer.current_0 = None_getInstance();
-      this.killable();
-    }
-  };
-  Counted$Holder.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'Holder',
-    interfaces: []
-  };
-  function Counted$get$lambda(this$Counted) {
-    return function () {
-      var k = new Killables();
-      var $receiver = new Counted$Holder(this$Counted, this$Counted.create_0(k.killSet), k.kill);
-      this$Counted.current_0 = new Some($receiver);
-      return $receiver;
-    };
-  }
-  function Counted$get$lambda$lambda(closure$holder) {
-    return function () {
-      closure$holder.release();
-      return Unit;
-    };
-  }
-  Counted.prototype.get_evkg98$ = function (ks) {
-    var holder = this.current_0.getOrElse_skz6lt$(Counted$get$lambda(this));
-    holder.count = holder.count + 1 | 0;
-    plusAssign_0(ks, once(Counted$get$lambda$lambda(holder)));
-    return holder.value;
-  };
-  Counted.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'Counted',
-    interfaces: []
-  };
   function RefCountMap(create) {
     this.create = create;
     this.map_0 = LinkedHashMap_init();
@@ -3323,6 +3319,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     return getCallableRef('add', function ($receiver, listener) {
       return $receiver.add_qlkmfe$(listener);
     }.bind(null, $receiver));
+  }
+  function listen($receiver, deps, callback) {
+    plusAssign_0(deps.kills, $receiver(callback));
   }
   function reportd(error) {
     report(error);
@@ -3497,20 +3496,20 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     var minString = numberToInt(minPart).toString();
     return minString + ':' + secString;
   }
-  function ListEvent() {
+  function ListEvent(item) {
+    this.item = item;
   }
   function ListEvent$Add(index, item) {
-    ListEvent.call(this);
+    ListEvent.call(this, item);
     this.index = index;
-    this.item = item;
   }
   ListEvent$Add.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Add',
     interfaces: [ListEvent]
   };
-  function ListEvent$Move(from, to) {
-    ListEvent.call(this);
+  function ListEvent$Move(from, to, item) {
+    ListEvent.call(this, item);
     this.from = from;
     this.to = to;
   }
@@ -3519,8 +3518,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'Move',
     interfaces: [ListEvent]
   };
-  function ListEvent$Remove(index) {
-    ListEvent.call(this);
+  function ListEvent$Remove(index, item) {
+    ListEvent.call(this, item);
     this.index = index;
   }
   ListEvent$Remove.$metadata$ = {
@@ -3533,46 +3532,114 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'ListEvent',
     interfaces: []
   };
-  function Coroutine$map$lambda(closure$deps_0, closure$itemKills_0, closure$fn_0, e_0, continuation_0) {
+  function map_2($receiver, fn) {
+    if (Kotlin.isType($receiver, ListEvent$Add))
+      return new ListEvent$Add($receiver.index, fn($receiver.item));
+    else if (Kotlin.isType($receiver, ListEvent$Move))
+      return new ListEvent$Move($receiver.from, $receiver.to, fn($receiver.item));
+    else if (Kotlin.isType($receiver, ListEvent$Remove))
+      return new ListEvent$Remove($receiver.index, fn($receiver.item));
+    else
+      return Kotlin.noWhenBranchMatched();
+  }
+  function Coroutine$mapEvents$lambda(closure$fn_0, it_0, continuation_0) {
     CoroutineImpl.call(this, continuation_0);
     this.exceptionState_0 = 1;
-    this.local$closure$deps = closure$deps_0;
-    this.local$closure$itemKills = closure$itemKills_0;
     this.local$closure$fn = closure$fn_0;
-    this.local$tmp$ = void 0;
-    this.local$e = e_0;
+    this.local$it = it_0;
   }
-  Coroutine$map$lambda.$metadata$ = {
+  Coroutine$mapEvents$lambda.$metadata$ = {
     kind: Kotlin.Kind.CLASS,
     simpleName: null,
     interfaces: [CoroutineImpl]
   };
-  Coroutine$map$lambda.prototype = Object.create(CoroutineImpl.prototype);
-  Coroutine$map$lambda.prototype.constructor = Coroutine$map$lambda;
-  Coroutine$map$lambda.prototype.doResume = function () {
+  Coroutine$mapEvents$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$mapEvents$lambda.prototype.constructor = Coroutine$mapEvents$lambda;
+  Coroutine$mapEvents$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            return map_2(this.local$it, this.local$closure$fn);
+          case 1:
+            throw this.exception_0;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function mapEvents$lambda(closure$fn_0) {
+    return function (it_0, continuation_0, suspended) {
+      var instance = new Coroutine$mapEvents$lambda(closure$fn_0, it_0, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function mapEvents($receiver, fn) {
+    return map($receiver, void 0, mapEvents$lambda(fn));
+  }
+  function mapLive$Holder(item, kill) {
+    this.item = item;
+    this.kill = kill;
+  }
+  mapLive$Holder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Holder',
+    interfaces: []
+  };
+  function Coroutine$mapLive$lambda(closure$deps_0, closure$fn_0, closure$itemKills_0, e_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$closure$deps = closure$deps_0;
+    this.local$closure$fn = closure$fn_0;
+    this.local$closure$itemKills = closure$itemKills_0;
+    this.local$ks = void 0;
+    this.local$e = e_0;
+  }
+  Coroutine$mapLive$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$mapLive$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$mapLive$lambda.prototype.constructor = Coroutine$mapLive$lambda;
+  Coroutine$mapLive$lambda.prototype.doResume = function () {
     do
       try {
         switch (this.state_0) {
           case 0:
             if (Kotlin.isType(this.local$e, ListEvent$Add)) {
-              var ks = killables(this.local$closure$deps.kills);
-              this.local$closure$itemKills.add_wxm5ur$(this.local$e.index, ks.kill);
-              this.local$tmp$ = this.local$e.index;
+              this.local$ks = killables(this.local$closure$deps.kills);
               this.state_0 = 4;
-              this.result_0 = this.local$closure$fn(ks, this.local$e.item, this);
+              this.result_0 = this.local$closure$fn(this.local$ks, this.local$e.item, this);
               if (this.result_0 === COROUTINE_SUSPENDED)
                 return COROUTINE_SUSPENDED;
               continue;
             }
              else {
               if (Kotlin.isType(this.local$e, ListEvent$Move)) {
-                this.local$closure$itemKills.add_wxm5ur$(this.local$e.to, this.local$closure$itemKills.removeAt_za3lpa$(this.local$e.from));
-                return this.local$e;
+                var holder = this.local$closure$itemKills.removeAt_za3lpa$(this.local$e.from);
+                this.local$closure$itemKills.add_wxm5ur$(this.local$e.to, holder);
+                return new ListEvent$Move(this.local$e.from, this.local$e.to, holder.item);
               }
                else {
                 if (Kotlin.isType(this.local$e, ListEvent$Remove)) {
-                  this.local$closure$itemKills.removeAt_za3lpa$(this.local$e.index)();
-                  return this.local$e;
+                  var holder_0 = this.local$closure$itemKills.removeAt_za3lpa$(this.local$e.index);
+                  holder_0.kill;
+                  return new ListEvent$Remove(this.local$e.index, holder_0.item);
                 }
                  else {
                   return Kotlin.noWhenBranchMatched();
@@ -3589,7 +3656,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
             this.state_0 = 5;
             continue;
           case 4:
-            return new ListEvent$Add(this.local$tmp$, this.result_0);
+            var mapped = this.result_0;
+            this.local$closure$itemKills.add_wxm5ur$(this.local$e.index, new mapLive$Holder(mapped, this.local$ks.kill));
+            return new ListEvent$Add(this.local$e.index, mapped);
           case 5:
             return;
           default:this.state_0 = 1;
@@ -3608,18 +3677,590 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       }
      while (true);
   };
-  function map$lambda(closure$deps_0, closure$itemKills_0, closure$fn_0) {
+  function mapLive$lambda(closure$deps_0, closure$fn_0, closure$itemKills_0) {
     return function (e_0, continuation_0, suspended) {
-      var instance = new Coroutine$map$lambda(closure$deps_0, closure$itemKills_0, closure$fn_0, e_0, continuation_0);
+      var instance = new Coroutine$mapLive$lambda(closure$deps_0, closure$fn_0, closure$itemKills_0, e_0, continuation_0);
       if (suspended)
         return instance;
       else
         return instance.doResume(null);
     };
   }
-  function map_2($receiver, deps, fn) {
+  function mapLive($receiver, deps, fn) {
     var itemKills = ArrayList_init();
-    return map($receiver, void 0, map$lambda(deps, itemKills, fn));
+    return map($receiver, void 0, mapLive$lambda(deps, fn, itemKills));
+  }
+  function Coroutine$listEventProcessor$lambda(closure$deps_0, closure$fn_0, closure$itemKills_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$deps = closure$deps_0;
+    this.local$closure$fn = closure$fn_0;
+    this.local$closure$itemKills = closure$itemKills_0;
+    this.local$$receiver_0 = void 0;
+    this.local$closure$itemKills_0 = void 0;
+    this.local$$receiver = $receiver_0;
+  }
+  Coroutine$listEventProcessor$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$listEventProcessor$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$listEventProcessor$lambda.prototype.constructor = Coroutine$listEventProcessor$lambda;
+  Coroutine$listEventProcessor$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            if (Kotlin.isType(this.local$$receiver, ListEvent$Add)) {
+              this.local$$receiver_0 = killables(this.local$closure$deps.kills);
+              var closure$fn = this.local$closure$fn;
+              this.local$closure$itemKills_0 = this.local$closure$itemKills;
+              this.state_0 = 4;
+              this.result_0 = closure$fn(this.local$$receiver_0, this.local$$receiver.item, this);
+              if (this.result_0 === COROUTINE_SUSPENDED)
+                return COROUTINE_SUSPENDED;
+              continue;
+            }
+             else {
+              if (Kotlin.isType(this.local$$receiver, ListEvent$Move)) {
+                return this.local$closure$itemKills.add_wxm5ur$(this.local$$receiver.to, this.local$closure$itemKills.removeAt_za3lpa$(this.local$$receiver.from)), Unit;
+              }
+               else {
+                if (Kotlin.isType(this.local$$receiver, ListEvent$Remove)) {
+                  return this.local$closure$itemKills.removeAt_za3lpa$(this.local$$receiver.index)();
+                }
+                 else {
+                  return Kotlin.noWhenBranchMatched();
+                }
+              }
+            }
+
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.state_0 = 3;
+            continue;
+          case 3:
+            this.state_0 = 5;
+            continue;
+          case 4:
+            this.local$closure$itemKills_0.add_wxm5ur$(this.local$$receiver.index, this.local$$receiver_0.kill);
+            return this.local$$receiver_0;
+          case 5:
+            return;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function listEventProcessor$lambda(closure$deps_0, closure$fn_0, closure$itemKills_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$listEventProcessor$lambda(closure$deps_0, closure$fn_0, closure$itemKills_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function listEventProcessor(deps, fn) {
+    var itemKills = ArrayList_init();
+    return listEventProcessor$lambda(deps, fn, itemKills);
+  }
+  function Coroutine$process$lambda(this$process_0, closure$processor_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$this$process = this$process_0;
+    this.local$closure$processor = closure$processor_0;
+    this.local$tmp$ = void 0;
+  }
+  Coroutine$process$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$process$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$process$lambda.prototype.constructor = Coroutine$process$lambda;
+  Coroutine$process$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$tmp$ = this.local$this$process.iterator();
+            this.state_0 = 2;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.state_0 = 3;
+            this.result_0 = this.local$tmp$.hasNext(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 3:
+            if (!this.result_0) {
+              this.state_0 = 7;
+              continue;
+            }
+             else {
+              this.state_0 = 4;
+              continue;
+            }
+
+          case 4:
+            this.state_0 = 5;
+            this.result_0 = this.local$tmp$.next(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 5:
+            var e_0 = this.result_0;
+            this.state_0 = 6;
+            this.result_0 = this.local$closure$processor(e_0, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 6:
+            this.state_0 = 2;
+            continue;
+          case 7:
+            return Unit;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function process$lambda_1(this$process_0, closure$processor_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$process$lambda(this$process_0, closure$processor_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function process_0($receiver, deps, fn) {
+    var processor = listEventProcessor(deps, fn);
+    launch(deps, void 0, void 0, process$lambda_1($receiver, processor));
+  }
+  function applyTo($receiver, set) {
+    if (Kotlin.isType($receiver, ListEvent$Add)) {
+      var element = $receiver.item;
+      set.add_11rb$(element);
+    }
+     else if (Kotlin.isType($receiver, ListEvent$Remove)) {
+      var element_0 = $receiver.item;
+      set.remove_11rb$(element_0);
+    }
+     else
+      Kotlin.isType($receiver, ListEvent$Move);
+  }
+  function Coroutine$applyTo$lambda(this$applyTo_0, closure$set_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$this$applyTo = this$applyTo_0;
+    this.local$closure$set = closure$set_0;
+    this.local$tmp$ = void 0;
+  }
+  Coroutine$applyTo$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$applyTo$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$applyTo$lambda.prototype.constructor = Coroutine$applyTo$lambda;
+  Coroutine$applyTo$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$tmp$ = this.local$this$applyTo.iterator();
+            this.state_0 = 2;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.state_0 = 3;
+            this.result_0 = this.local$tmp$.hasNext(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 3:
+            if (!this.result_0) {
+              this.state_0 = 6;
+              continue;
+            }
+             else {
+              this.state_0 = 4;
+              continue;
+            }
+
+          case 4:
+            this.state_0 = 5;
+            this.result_0 = this.local$tmp$.next(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 5:
+            var e_0 = this.result_0;
+            applyTo(e_0, this.local$closure$set);
+            this.state_0 = 2;
+            continue;
+          case 6:
+            return Unit;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function applyTo$lambda(this$applyTo_0, closure$set_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$applyTo$lambda(this$applyTo_0, closure$set_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function applyTo_0($receiver, deps, set) {
+    launch(deps, void 0, void 0, applyTo$lambda($receiver, set));
+  }
+  function filter$lambda$Previous() {
+  }
+  filter$lambda$Previous.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Previous',
+    interfaces: []
+  };
+  function filter$lambda$ObjectLiteral() {
+    filter$lambda$Previous.call(this);
+    this.filteredIndexAfter_8uwai9$_0 = new Var(0);
+  }
+  Object.defineProperty(filter$lambda$ObjectLiteral.prototype, 'filteredIndexAfter', {
+    get: function () {
+      return this.filteredIndexAfter_8uwai9$_0;
+    }
+  });
+  filter$lambda$ObjectLiteral.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [filter$lambda$Previous]
+  };
+  function filter$lambda$Item(closure$deps, initialIndex, initialPrevious) {
+    filter$lambda$Previous.call(this);
+    this.ks = killables(closure$deps.kills);
+    this.kills_n36f6t$_0 = this.ks.kills;
+    this.index = new Var(initialIndex);
+    this.previous = new Var(initialPrevious);
+    this.filteredIndex_dndpmp$_0 = lazy(filter$lambda$Item$filteredIndex$lambda(this));
+    this.filteredIndexAfter_aetvvr$_0 = lazy(filter$lambda$Item$filteredIndexAfter$lambda(this));
+  }
+  Object.defineProperty(filter$lambda$Item.prototype, 'kills', {
+    get: function () {
+      return this.kills_n36f6t$_0;
+    }
+  });
+  Object.defineProperty(filter$lambda$Item.prototype, 'filteredIndex', {
+    get: function () {
+      return this.filteredIndex_dndpmp$_0.value;
+    }
+  });
+  Object.defineProperty(filter$lambda$Item.prototype, 'filteredIndexAfter', {
+    get: function () {
+      return this.filteredIndexAfter_aetvvr$_0.value;
+    }
+  });
+  function filter$lambda$Item$filteredIndex$lambda$lambda(this$Item) {
+    return function ($receiver) {
+      return this$Item.previous.invoke().filteredIndexAfter.invoke();
+    };
+  }
+  function filter$lambda$Item$filteredIndex$lambda(this$Item) {
+    return function () {
+      return this$Item.rx_y6x17j$(filter$lambda$Item$filteredIndex$lambda$lambda(this$Item));
+    };
+  }
+  function filter$lambda$Item$filteredIndexAfter$lambda$lambda(this$Item) {
+    return function ($receiver) {
+      var $receiver_0 = this$Item.filteredIndex.invoke();
+      return this$Item.visible.invoke() ? $receiver_0 + 1 | 0 : $receiver_0;
+    };
+  }
+  function filter$lambda$Item$filteredIndexAfter$lambda(this$Item) {
+    return function () {
+      return this$Item.rx_y6x17j$(filter$lambda$Item$filteredIndexAfter$lambda$lambda(this$Item));
+    };
+  }
+  filter$lambda$Item.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Item',
+    interfaces: [KillsApi, filter$lambda$Previous]
+  };
+  function filter$lambda$Holder(closure$items, closure$First, this$, closure$deps, closure$fn, item, initialIndex) {
+    this.closure$items = closure$items;
+    this.closure$First = closure$First;
+    this.this$ = this$;
+    filter$lambda$Item.call(this, closure$deps, initialIndex, initialIndex === 0 ? closure$First : closure$items.get_za3lpa$(initialIndex - 1 | 0));
+    this.item = item;
+    this.alive = new Var(true);
+    this.visible_4j9w7l$_0 = this.rx_y6x17j$(filter$lambda$Holder$visible$lambda(this, closure$fn));
+    this.rxFilteredIndex = this.rx_y6x17j$(filter$lambda$Holder$rxFilteredIndex$lambda(this));
+    closure$items.add_wxm5ur$(this.index.now, this);
+    var tmp$;
+    tmp$ = drop(closure$items, this.index.now + 1 | 0).iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      increase(element.index);
+    }
+    this.next_q7cg24$(filter$lambda$filter$lambda$Holder_init$lambda);
+    var add = filter$lambda$filter$lambda$Holder_init$add(this);
+    if (this.visible.now) {
+      plusAssign(this$.channel, add());
+    }
+    this.forEachLater_xwzbbo$(this.visible, filter$lambda$filter$lambda$Holder_init$lambda_0(this$, add, this));
+  }
+  Object.defineProperty(filter$lambda$Holder.prototype, 'visible', {
+    get: function () {
+      return this.visible_4j9w7l$_0;
+    }
+  });
+  filter$lambda$Holder.prototype.next_q7cg24$ = function (fn) {
+    if (this.index.now < get_lastIndex(this.closure$items)) {
+      fn(this.closure$items.get_za3lpa$(this.index.now + 1 | 0));
+    }
+  };
+  filter$lambda$Holder.prototype.updatePrevious = function () {
+    this.previous.remAssign_11rb$(this.index.now === 0 ? this.closure$First : this.closure$items.get_za3lpa$(this.index.now - 1 | 0));
+  };
+  function filter$lambda$Holder$moveTo$lambda($receiver) {
+    $receiver.updatePrevious();
+    return Unit;
+  }
+  function filter$lambda$Holder$moveTo$lambda_0($receiver) {
+    $receiver.updatePrevious();
+    return Unit;
+  }
+  filter$lambda$Holder.prototype.moveTo_za3lpa$ = function (to) {
+    var from = this.index.now;
+    var fromFiltered = this.rxFilteredIndex.now;
+    if (from !== to) {
+      this.closure$items.add_wxm5ur$(to, this.closure$items.removeAt_za3lpa$(from));
+      this.index.remAssign_11rb$(to);
+      this.previous.remAssign_11rb$(this.closure$First);
+      if (from < to) {
+        var tmp$;
+        tmp$ = this.closure$items.subList_vux9f0$(from, to).iterator();
+        while (tmp$.hasNext()) {
+          var element = tmp$.next();
+          decrease(element.index);
+        }
+        this.closure$items.get_za3lpa$(from).updatePrevious();
+      }
+       else {
+        var tmp$_0;
+        tmp$_0 = this.closure$items.subList_vux9f0$(to + 1 | 0, from + 1 | 0).iterator();
+        while (tmp$_0.hasNext()) {
+          var element_0 = tmp$_0.next();
+          increase(element_0.index);
+        }
+        this.closure$items.get_za3lpa$(from).next_q7cg24$(filter$lambda$Holder$moveTo$lambda);
+      }
+      this.next_q7cg24$(filter$lambda$Holder$moveTo$lambda_0);
+      this.updatePrevious();
+      if (this.visible.now) {
+        var toFiltered = this.rxFilteredIndex.now;
+        if (fromFiltered !== toFiltered) {
+          plusAssign(this.this$.channel, new ListEvent$Move(fromFiltered, toFiltered, this.item));
+        }
+      }
+    }
+  };
+  function filter$lambda$Holder$remove$lambda(this$Holder) {
+    return function ($receiver) {
+      $receiver.previous.remAssign_11rb$(this$Holder.previous.now);
+      return Unit;
+    };
+  }
+  filter$lambda$Holder.prototype.remove = function () {
+    this.alive.remAssign_11rb$(false);
+    this.next_q7cg24$(filter$lambda$Holder$remove$lambda(this));
+    this.closure$items.removeAt_za3lpa$(this.index.now);
+    var tmp$;
+    tmp$ = drop(this.closure$items, this.index.now).iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      decrease(element.index);
+    }
+    this.ks.kill();
+  };
+  function filter$lambda$Holder$visible$lambda(this$Holder, closure$fn) {
+    return function ($receiver) {
+      return this$Holder.alive.invoke() && closure$fn($receiver, this$Holder.item);
+    };
+  }
+  function filter$lambda$Holder$rxFilteredIndex$lambda(this$Holder) {
+    return function ($receiver) {
+      return this$Holder.filteredIndex.invoke();
+    };
+  }
+  function filter$lambda$filter$lambda$Holder_init$lambda($receiver) {
+    $receiver.updatePrevious();
+    return Unit;
+  }
+  function filter$lambda$filter$lambda$Holder_init$add(this$Holder) {
+    return function () {
+      return new ListEvent$Add(this$Holder.rxFilteredIndex.now, this$Holder.item);
+    };
+  }
+  function filter$lambda$filter$lambda$Holder_init$lambda_0(this$, closure$add, this$Holder) {
+    return function ($receiver, v) {
+      var tmp$;
+      tmp$ = this$.channel;
+      var tmp$_0;
+      if (v) {
+        tmp$_0 = closure$add();
+      }
+       else {
+        tmp$_0 = new ListEvent$Remove(this$Holder.rxFilteredIndex.now, this$Holder.item);
+      }
+      plusAssign(tmp$, tmp$_0);
+      return Unit;
+    };
+  }
+  filter$lambda$Holder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Holder',
+    interfaces: [filter$lambda$Item]
+  };
+  function Coroutine$filter$lambda(closure$deps_0, closure$fn_0, this$filter_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$deps = closure$deps_0;
+    this.local$closure$fn = closure$fn_0;
+    this.local$this$filter = this$filter_0;
+    this.local$tmp$ = void 0;
+    this.local$First = void 0;
+    this.local$items = void 0;
+    this.local$$receiver = $receiver_0;
+  }
+  Coroutine$filter$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$filter$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$filter$lambda.prototype.constructor = Coroutine$filter$lambda;
+  Coroutine$filter$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$First = new filter$lambda$ObjectLiteral();
+            this.local$items = ArrayList_init();
+            this.local$tmp$ = this.local$this$filter.iterator();
+            this.state_0 = 2;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.state_0 = 3;
+            this.result_0 = this.local$tmp$.hasNext(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 3:
+            if (!this.result_0) {
+              this.state_0 = 6;
+              continue;
+            }
+             else {
+              this.state_0 = 4;
+              continue;
+            }
+
+          case 4:
+            this.state_0 = 5;
+            this.result_0 = this.local$tmp$.next(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 5:
+            var e_0 = this.result_0;
+            if (Kotlin.isType(e_0, ListEvent$Add))
+              new filter$lambda$Holder(this.local$items, this.local$First, this.local$$receiver, this.local$closure$deps, this.local$closure$fn, e_0.item, e_0.index);
+            else if (Kotlin.isType(e_0, ListEvent$Move))
+              this.local$items.get_za3lpa$(e_0.from).moveTo_za3lpa$(e_0.to);
+            else if (Kotlin.isType(e_0, ListEvent$Remove))
+              this.local$items.get_za3lpa$(e_0.index).remove();
+            else
+              Kotlin.noWhenBranchMatched();
+            this.state_0 = 2;
+            continue;
+          case 6:
+            return Unit;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function filter$lambda(closure$deps_0, closure$fn_0, this$filter_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$filter$lambda(closure$deps_0, closure$fn_0, this$filter_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function filter($receiver, deps, fn) {
+    return produce(deps, void 0, 2147483647, filter$lambda(deps, fn, $receiver));
   }
   function DynamicOps() {
   }
@@ -3725,10 +4366,57 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return this.rxv_b9riih$_0;
     }
   });
+  Object.defineProperty(ROProp.prototype, 'now', {
+    get: function () {
+      return this.rxv.now;
+    }
+  });
+  ROProp.prototype.fold_h2yxzx$ = function (ks, z0, fn) {
+    return this.rxv.fold_h2yxzx$(ks, z0, fn);
+  };
+  ROProp.prototype.foldKills_ooixq2$ = function (ks, fn) {
+    return this.rxv.foldKills_ooixq2$(ks, fn);
+  };
+  ROProp.prototype.foldKills_h4yiec$ = function (ks, z0, fn) {
+    return this.rxv.foldKills_h4yiec$(ks, z0, fn);
+  };
+  ROProp.prototype.foldKillsTrigger_ooixq2$ = function (ks, fn) {
+    return this.rxv.foldKillsTrigger_ooixq2$(ks, fn);
+  };
+  ROProp.prototype.foldLater_94stmo$ = function (ks, z0, fn) {
+    return this.rxv.foldLater_94stmo$(ks, z0, fn);
+  };
+  ROProp.prototype.forEach_aaomyj$ = function (ks, fn) {
+    return this.rxv.forEach_aaomyj$(ks, fn);
+  };
+  ROProp.prototype.forEach_vlp88o$ = function (ks, killOrder, fn) {
+    return this.rxv.forEach_vlp88o$(ks, killOrder, fn);
+  };
+  ROProp.prototype.forEachLater_aaomyj$ = function (ks, fn) {
+    return this.rxv.forEachLater_aaomyj$(ks, fn);
+  };
+  ROProp.prototype.forEachLater_cksb0z$$default = function (ks, killStart, killOrder, fn) {
+    return this.rxv.forEachLater_cksb0z$$default(ks, killStart, killOrder, fn);
+  };
+  ROProp.prototype.invoke = function () {
+    return this.rxv.invoke();
+  };
+  ROProp.prototype.map_492dlc$ = function (ks, fn) {
+    return this.rxv.map_492dlc$(ks, fn);
+  };
+  ROProp.prototype.off_sysl1e$ = function (ks, offFn) {
+    return this.rxv.off_sysl1e$(ks, offFn);
+  };
+  ROProp.prototype.onChange_naxq84$ = function (ks, fn) {
+    return this.rxv.onChange_naxq84$(ks, fn);
+  };
+  ROProp.prototype.onOff_nf0d6g$ = function (ks, on, off) {
+    return this.rxv.onOff_nf0d6g$(ks, on, off);
+  };
   ROProp.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'ROProp',
-    interfaces: []
+    interfaces: [HasRx, RxIface]
   };
   function RWProp(name, rxv, write) {
     ROProp.call(this, name, rxv, write);
@@ -3739,10 +4427,31 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return this.rxv_eq87tb$_0;
     }
   });
+  Object.defineProperty(RWProp.prototype, 'now', {
+    get: function () {
+      return this.rxv.now;
+    },
+    set: function (v) {
+      this.rxv.now = v;
+    }
+  });
+  RWProp.prototype.remAssign_11rc$ = function (v) {
+    this.rxv.remAssign_11rb$(v);
+  };
   RWProp.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'RWProp',
-    interfaces: [ROProp]
+    interfaces: [HasVar, ROProp]
+  };
+  function EnumProp(name, rxv, write, nameVar, values) {
+    RWProp.call(this, name, rxv, write);
+    this.nameVar = nameVar;
+    this.values = values;
+  }
+  EnumProp.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'EnumProp',
+    interfaces: [RWProp]
   };
   function PropertyListItem(name, write, read, get, copy, set, reset, compare) {
     this.name = name;
@@ -3768,50 +4477,54 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
     return this.prop_z4bjo6$(value, type);
   };
-  function PropertyList$prop$lambda$lambda(closure$type, closure$rxv) {
+  function PropertyList$addProperty$lambda(closure$type, closure$rxv) {
     return function (ops) {
       return closure$type.writeDynamic(closure$rxv.now, ops);
     };
   }
-  function PropertyList$prop$lambda$lambda_0(closure$rxv, closure$type) {
+  function PropertyList$addProperty$lambda_0(closure$rxv, closure$type) {
     return function (d, ops) {
       closure$rxv.remAssign_11rb$(closure$type.readDynamic(d, ops));
       return Unit;
     };
   }
-  function PropertyList$prop$lambda$lambda_1(closure$rxv) {
+  function PropertyList$addProperty$lambda_1(closure$rxv) {
     return function () {
       return closure$rxv.invoke();
     };
   }
-  function PropertyList$prop$lambda$lambda_2(closure$type, closure$rxv) {
+  function PropertyList$addProperty$lambda_2(closure$type, closure$rxv) {
     return function () {
       return closure$type.copier(closure$rxv.now);
     };
   }
-  function PropertyList$prop$lambda$lambda_3(closure$rxv) {
+  function PropertyList$addProperty$lambda_3(closure$rxv) {
     return function (v) {
       closure$rxv.remAssign_11rb$(v);
       return Unit;
     };
   }
-  function PropertyList$prop$lambda$lambda_4(closure$rxv, closure$value) {
+  function PropertyList$addProperty$lambda_4(closure$rxv, closure$value) {
     return function () {
       closure$rxv.remAssign_11rb$(closure$value);
       return Unit;
     };
   }
-  function PropertyList$prop$lambda$lambda_5(closure$type, closure$rxv) {
+  function PropertyList$addProperty$lambda_5(closure$type, closure$rxv) {
     return function (v) {
       return closure$type.compare(closure$rxv.invoke(), v);
     };
   }
-  function PropertyList$prop$lambda(closure$value, this$PropertyList, closure$type) {
+  PropertyList.prototype.addProperty_5wvcos$ = function (name, value, type) {
+    var rxv = new Var(value);
+    var $receiver = this.items;
+    var element = new PropertyListItem(name, PropertyList$addProperty$lambda(type, rxv), PropertyList$addProperty$lambda_0(rxv, type), PropertyList$addProperty$lambda_1(rxv), PropertyList$addProperty$lambda_2(type, rxv), PropertyList$addProperty$lambda_3(rxv), PropertyList$addProperty$lambda_4(rxv, value), PropertyList$addProperty$lambda_5(type, rxv));
+    $receiver.add_11rb$(element);
+    return rxv;
+  };
+  function PropertyList$prop$lambda(closure$value, closure$type, this$PropertyList) {
     return function (name) {
-      var rxv = new Var(closure$value);
-      var $receiver = this$PropertyList.items;
-      var element = new PropertyListItem(name, PropertyList$prop$lambda$lambda(closure$type, rxv), PropertyList$prop$lambda$lambda_0(rxv, closure$type), PropertyList$prop$lambda$lambda_1(rxv), PropertyList$prop$lambda$lambda_2(closure$type, rxv), PropertyList$prop$lambda$lambda_3(rxv), PropertyList$prop$lambda$lambda_4(rxv, closure$value), PropertyList$prop$lambda$lambda_5(closure$type, rxv));
-      $receiver.add_11rb$(element);
+      var rxv = this$PropertyList.addProperty_5wvcos$(name, closure$value, closure$type);
       return new RWProp(name, rxv, closure$type.writeDynamic);
     };
   }
@@ -3819,23 +4532,59 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     if (type === void 0) {
       type = package$properties.IdentityType;
     }
-    return named(PropertyList$prop$lambda(value, this, type));
+    return named(PropertyList$prop$lambda(value, type, this));
   };
   PropertyList.prototype.string = function () {
     return this.prop_z4bjo6$('');
   };
   PropertyList.prototype.enum_wbfx10$ = defineInlineFunction('appsimake-commonshr.commonshr.properties.PropertyList.enum_wbfx10$', wrapFunction(function () {
-    var PropertyType_init = _.commonshr.properties.PropertyType;
-    function enumType$lambda(e, f) {
-      return e.name;
-    }
-    function enumType$lambda_0(typeClosure$E, isE) {
-      return function (d, f) {
-        return typeClosure$E.valueOf_61zpoe$(d);
+    var killable = _.killable;
+    var toList = Kotlin.kotlin.collections.toList_us0mfu$;
+    var EnumProp_init = _.commonshr.properties.EnumProp;
+    var wrapFunction = Kotlin.wrapFunction;
+    var named = _.common.named_cq6yhu$;
+    var PropertyList$enum$lambda = wrapFunction(function () {
+      var PropertyType_init = _.commonshr.properties.PropertyType;
+      function enumType$lambda(e, f) {
+        return e.name;
+      }
+      function enumType$lambda_0(typeClosure$E, isE) {
+        return function (d, f) {
+          return typeClosure$E.valueOf_61zpoe$(d);
+        };
+      }
+      var Var_init = _.rx.Var;
+      var Unit = Kotlin.kotlin.Unit;
+      var forEach = _.rx.forEach_yaias7$;
+      function toName$lambda$lambda(this$) {
+        return function ($receiver, it) {
+          this$.remAssign_11rb$(it.name);
+          return Unit;
+        };
+      }
+      function toName$lambda$lambda_0(this$toName, typeClosure$E, isE) {
+        return function ($receiver, it) {
+          this$toName.remAssign_11rb$(typeClosure$E.valueOf_61zpoe$(it));
+          return Unit;
+        };
+      }
+      return function (typeClosure$E, isE, closure$v, this$PropertyList) {
+        return function (name) {
+          var type = new PropertyType_init(void 0, void 0, enumType$lambda, enumType$lambda_0(typeClosure$E, isE));
+          var rxv = this$PropertyList.addProperty_5wvcos$(name, closure$v, type);
+          var tmp$ = type.writeDynamic;
+          var E_0 = typeClosure$E;
+          var isE_0 = isE;
+          var deps = killable.HasNoKill;
+          var $receiver = new Var_init(rxv.now.name);
+          forEach(rxv, deps, toName$lambda$lambda($receiver));
+          forEach($receiver, deps, toName$lambda$lambda_0(rxv, E_0, isE_0));
+          return new EnumProp_init(name, rxv, tmp$, $receiver, toList(typeClosure$E.values()));
+        };
       };
-    }
+    });
     return function (E_0, isE, v) {
-      return this.prop_z4bjo6$(v, new PropertyType_init(void 0, void 0, enumType$lambda, enumType$lambda_0(E_0, isE)));
+      return named(PropertyList$enum$lambda(E_0, isE, v, this));
     };
   }));
   PropertyList.prototype.number = function () {
@@ -3848,6 +4597,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     if (type === void 0)
       type = new PropertyType();
     return this.prop_z4bjo6$(emptyList(), arrayOfScalarType(type));
+  };
+  PropertyList.prototype.set_287e2$ = function () {
+    return this.prop_z4bjo6$(emptySet(), setOfScalarType());
   };
   PropertyList.prototype.rxlist_4okrys$ = function (create) {
     return this.prop_z4bjo6$(emptyList(), rxListType(create));
@@ -4001,17 +4753,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function rxListType(create) {
     return rxListType_0(rxListType$lambda(create));
   }
-  function rxListType$lambda_0(list) {
-    var destination = ArrayList_init_0(collectionSizeOrDefault(list, 10));
-    var tmp$;
-    tmp$ = list.iterator();
-    while (tmp$.hasNext()) {
-      var item = tmp$.next();
-      destination.add_11rb$(copy(item));
-    }
-    return destination;
-  }
-  function rxListType$lambda_1(a, b) {
+  function listCompare(a, b, compare) {
     var tmp$ = a.size === b.size;
     if (tmp$) {
       var $receiver = zip(asSequence(a), asSequence(b));
@@ -4023,7 +4765,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
           var element = tmp$_0.next();
           var ba = element.component1()
           , bb = element.component2();
-          if (!rxCompare(ba, bb)) {
+          if (!compare(ba, bb)) {
             all$result = false;
             break all$break;
           }
@@ -4034,6 +4776,21 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       tmp$ = all$result;
     }
     return tmp$;
+  }
+  function rxListType$lambda_0(list) {
+    var destination = ArrayList_init_0(collectionSizeOrDefault(list, 10));
+    var tmp$;
+    tmp$ = list.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      destination.add_11rb$(copy(item));
+    }
+    return destination;
+  }
+  function rxListType$lambda_1(a, b) {
+    return listCompare(a, b, getCallableRef('rxCompare', function (a, b) {
+      return rxCompare(a, b);
+    }));
   }
   var copyToArray = Kotlin.kotlin.collections.copyToArray;
   function rxListType$lambda_2(list, ops) {
@@ -4081,8 +4838,61 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return new PropertyType_init(void 0, void 0, enumType$lambda, enumType$lambda_0(E_0, isE));
     };
   }));
+  function arrayOfScalarType$lambda(closure$type) {
+    return function (l) {
+      var destination = ArrayList_init_0(collectionSizeOrDefault(l, 10));
+      var tmp$;
+      tmp$ = l.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        destination.add_11rb$(closure$type.copier(item));
+      }
+      return destination;
+    };
+  }
+  function arrayOfScalarType$lambda_0(closure$type) {
+    return function (a, b) {
+      return listCompare(a, b, closure$type.compare);
+    };
+  }
+  function arrayOfScalarType$lambda_1(closure$type) {
+    return function (l, ops) {
+      var destination = ArrayList_init_0(collectionSizeOrDefault(l, 10));
+      var tmp$;
+      tmp$ = l.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        destination.add_11rb$(closure$type.writeDynamic(item, ops));
+      }
+      return copyToArray(destination);
+    };
+  }
+  function arrayOfScalarType$lambda_2(closure$type) {
+    return function (d, ops) {
+      var $receiver = toList(d);
+      var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        destination.add_11rb$(closure$type.readDynamic(item, ops));
+      }
+      return destination;
+    };
+  }
   function arrayOfScalarType(type) {
-    return new PropertyType();
+    if (type === void 0)
+      type = new PropertyType();
+    return new PropertyType(arrayOfScalarType$lambda(type), arrayOfScalarType$lambda_0(type), arrayOfScalarType$lambda_1(type), arrayOfScalarType$lambda_2(type));
+  }
+  function setOfScalarType$lambda(l, ops) {
+    return copyToArray(l);
+  }
+  function setOfScalarType$lambda_0(d, ops) {
+    return toSet_0(d);
+  }
+  function setOfScalarType() {
+    return new PropertyType(void 0, void 0, setOfScalarType$lambda, setOfScalarType$lambda_0);
   }
   function calcType$lambda(f, f_0) {
     return true;
@@ -4207,11 +5017,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
              else if (Kotlin.isType(e_0, SnapshotEvent$Modified))
               this.local$closure$update(this.local$closure$wrapped.get_za3lpa$(e_0.index), e_0.data);
             else if (Kotlin.isType(e_0, SnapshotEvent$Moved)) {
-              this.local$closure$wrapped.add_wxm5ur$(e_0.to, this.local$closure$wrapped.removeAt_za3lpa$(e_0.from));
-              plusAssign(this.local$closure$channel, new ListEvent$Move(e_0.from, e_0.to));
+              var item_0 = this.local$closure$wrapped.removeAt_za3lpa$(e_0.from);
+              this.local$closure$wrapped.add_wxm5ur$(e_0.to, item_0);
+              plusAssign(this.local$closure$channel, new ListEvent$Move(e_0.from, e_0.to, item_0));
             }
-             else if (Kotlin.isType(e_0, SnapshotEvent$Removed))
-              plusAssign(this.local$closure$channel, new ListEvent$Remove(e_0.index));
+             else if (Kotlin.isType(e_0, SnapshotEvent$Removed)) {
+              var item_1 = this.local$closure$wrapped.removeAt_za3lpa$(e_0.index);
+              plusAssign(this.local$closure$channel, new ListEvent$Remove(e_0.index, item_1));
+            }
+
             this.state_0 = 2;
             continue;
           case 6:
@@ -4381,7 +5195,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function FsId_init(dw, exists, $this) {
     $this = $this || Object.create(FsId.prototype);
-    FsId.call($this, ensureNotNull(dw.parent), new FsIdState$HasId(dw.id, exists));
+    FsId.call($this, dw.parent, new FsIdState$HasId(dw.id, exists));
     return $this;
   }
   function get_docWrap($receiver) {
@@ -4414,6 +5228,16 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function toFsDoc_1($receiver, cw, id) {
     return toFsDoc($receiver, toFsId(cw, new FsIdState$HasId(id, true)));
+  }
+  function get_idOrFail($receiver) {
+    var tmp$;
+    return (Kotlin.isType(tmp$ = $receiver.id.state.now, FsIdState$HasId) ? tmp$ : throwCCE()).id;
+  }
+  function new_0($receiver, d, ops) {
+    if (d === void 0) {
+      d = {};
+    }
+    return toFsDoc($receiver.parent.factory(d, ops), toFsId_0($receiver, false));
   }
   function asyncKills$State(value, kill) {
     this.value = value;
@@ -4648,21 +5472,21 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }
   function addedTo($receiver, ks) {
-    var remove = add(ks, addedTo$lambda($receiver));
+    var remove = add_0(ks, addedTo$lambda($receiver));
     $receiver.invokeOnCompletion_f05bi3$(addedTo$lambda_0(remove));
     return $receiver;
   }
-  function add($receiver, killable) {
+  function add_0($receiver, killable) {
     return $receiver(killable);
   }
   function killables($receiver) {
     var $receiver_0 = new Killables();
-    $receiver_0.plusAssign_o14v8n$(add($receiver, $receiver_0.kill));
+    $receiver_0.plusAssign_o14v8n$(add_0($receiver, $receiver_0.kill));
     return $receiver_0;
   }
   function seq($receiver) {
     var $receiver_0 = KillableSeq_init();
-    $receiver_0.onKill_8be2vx$.plusAssign_o14v8n$(add($receiver, $receiver_0.kill));
+    $receiver_0.onKill_8be2vx$.plusAssign_o14v8n$(add_0($receiver, $receiver_0.kill));
     return $receiver_0;
   }
   function addedTo_0($receiver, ks) {
@@ -5168,9 +5992,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function RxIface$forEachLater$lambda() {
     return Unit;
   }
+  RxIface.prototype.forEachLater_aaomyj$ = function (ks, fn) {
+    this.forEachLater_cksb0z$(ks, RxIface$forEachLater$lambda, RxCalc$Companion_getInstance().KillFirst, fn);
+  };
+  function RxIface$forEachLater$lambda_0() {
+    return Unit;
+  }
   RxIface.prototype.forEachLater_cksb0z$ = function (ks, killStart, killOrder, fn, callback$default) {
     if (killStart === void 0)
-      killStart = RxIface$forEachLater$lambda;
+      killStart = RxIface$forEachLater$lambda_0;
     if (killOrder === void 0)
       killOrder = RxCalc$Companion_getInstance().KillFirst;
     callback$default ? callback$default(ks, killStart, killOrder, fn) : this.forEachLater_cksb0z$$default(ks, killStart, killOrder, fn);
@@ -5249,7 +6079,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   RxIface.prototype.foldLater_94stmo$ = function (ks, z0, fn) {
     var z = {v: z0};
-    this.forEachLater_cksb0z$(ks, void 0, void 0, RxIface$foldLater$lambda(fn, z));
+    this.forEachLater_aaomyj$(ks, RxIface$foldLater$lambda(fn, z));
   };
   function RxIface$onChange$lambda(closure$fn) {
     return function ($receiver, old, new_0) {
@@ -5285,6 +6115,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'RxIface',
     interfaces: []
   };
+  function forEach($receiver, deps, fn) {
+    $receiver.forEach_aaomyj$(deps.kills, fn);
+  }
   function feedTo$lambda_2(closure$target) {
     return function ($receiver, it) {
       closure$target.now = it;
@@ -5418,9 +6251,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return Unit;
     };
   }
-  function incremented($receiver) {
+  function incremented($receiver, deps) {
     $receiver.transform_ru8m0w$(incremented$lambda);
-    return once(incremented$lambda_0($receiver));
+    plusAssign_0(deps.kills, incremented$lambda_0($receiver));
   }
   function RxVal(currentValue) {
     RxParent.call(this);
@@ -5433,7 +6266,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return this.currentValue;
     }
   });
+  var IllegalArgumentException_init = Kotlin.kotlin.IllegalArgumentException_init_pdl1vj$;
   RxVal.prototype.invoke = function () {
+    if (!(currentChild != null)) {
+      var message = 'RX invoked without a context!';
+      throw IllegalArgumentException_init(message.toString());
+    }
     connect(this, ensureNotNull(currentChild));
     return this.currentValue;
   };
@@ -5483,7 +6321,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return c.map_2o04qz$(add$lambda$lambda(closure$v)).orElse_isaiq7$(add$lambda$lambda_0(closure$v));
     };
   }
-  function add_0($receiver, v) {
+  function add_1($receiver, v) {
     $receiver.transform_ru8m0w$(add$lambda(v));
   }
   function remove$lambda$lambda(closure$v) {
@@ -5542,6 +6380,26 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     $this = $this || Object.create(Rx.prototype);
     Rx_init(ks, new RxCalc(ks, fn, killFirst ? RxCalc$Companion_getInstance().KillFirst : RxCalc$Companion_getInstance().KillLast), $this);
     return $this;
+  }
+  function rx(deps, fn) {
+    return Rx_init_0(deps.kills, fn);
+  }
+  function HasRx() {
+  }
+  HasRx.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'HasRx',
+    interfaces: []
+  };
+  function HasVar() {
+  }
+  HasVar.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'HasVar',
+    interfaces: [HasRx]
+  };
+  function get_readOnly($receiver) {
+    return $receiver;
   }
   function Var(v) {
     RxVal.call(this, v);
@@ -5652,17 +6510,17 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return Unit;
     };
   }
-  function rxClass_1($receiver, ks, style, fn) {
-    fn.forEach_aaomyj$(ks, rxClass$lambda_1(style, $receiver));
+  function rxClass_1($receiver, deps, style, fn) {
+    fn.forEach_aaomyj$(deps.kills, rxClass$lambda_1(style, $receiver));
   }
   function rxClass$lambda_2(closure$fn) {
     return function ($receiver) {
       return closure$fn($receiver);
     };
   }
-  function rxClass_2($receiver, ks, style, fn) {
-    var rxv = Rx_init_0(ks, rxClass$lambda_2(fn));
-    rxClass_1($receiver, ks, style, rxv);
+  function rxClass_2($receiver, deps, style, fn) {
+    var rxv = rx(deps, rxClass$lambda_2(fn));
+    rxClass_1($receiver, deps, style, rxv);
   }
   function rxClassOpt$lambda(this$rxClassOpt) {
     return function (it) {
@@ -5737,7 +6595,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function toChannelLater($receiver, ks) {
     var ch = Channel(2147483647);
     plusAssign_0(ks, toChannelLater$lambda(ch));
-    $receiver.forEachLater_cksb0z$(ks, void 0, void 0, toChannelLater$lambda_0(ch));
+    $receiver.forEachLater_aaomyj$(ks, toChannelLater$lambda_0(ch));
     return ch;
   }
   function Coroutine$mapAsync$calc(closure$kseq_0, closure$fn_0, t_0, continuation_0) {
@@ -5938,12 +6796,1102 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     else
       return instance.doResume(null);
   }
-  function rx($receiver, fn) {
+  function rx_0($receiver, fn) {
     return Rx_init_0($receiver, fn);
   }
   function toVar($receiver) {
     return new Var($receiver);
   }
+  var toName = defineInlineFunction('appsimake-commonshr.rx.toName_ojcv29$', wrapFunction(function () {
+    var Var_init = _.rx.Var;
+    var Unit = Kotlin.kotlin.Unit;
+    var forEach = _.rx.forEach_yaias7$;
+    function toName$lambda$lambda(this$) {
+      return function ($receiver, it) {
+        this$.remAssign_11rb$(it.name);
+        return Unit;
+      };
+    }
+    function toName$lambda$lambda_0(this$toName, typeClosure$E, isE) {
+      return function ($receiver, it) {
+        this$toName.remAssign_11rb$(typeClosure$E.valueOf_61zpoe$(it));
+        return Unit;
+      };
+    }
+    return function (E_0, isE, $receiver, deps) {
+      var $receiver_0 = new Var_init($receiver.now.name);
+      forEach($receiver, deps, toName$lambda$lambda($receiver_0));
+      forEach($receiver_0, deps, toName$lambda$lambda_0($receiver, E_0, isE));
+      return $receiver_0;
+    };
+  }));
+  function RxList() {
+  }
+  RxList.prototype.addListener_6zudpe$ = function (listener) {
+    return this.addListener_icpdhz$(listener, true);
+  };
+  function RxList$Listener(added, removed, moved) {
+    if (added === void 0)
+      added = RxList$RxList$Listener_init$lambda;
+    if (removed === void 0)
+      removed = RxList$RxList$Listener_init$lambda_0;
+    if (moved === void 0)
+      moved = RxList$RxList$Listener_init$lambda_1;
+    this.added = added;
+    this.removed = removed;
+    this.moved = moved;
+  }
+  function RxList$RxList$Listener_init$lambda(f, f_0) {
+    return Unit;
+  }
+  function RxList$RxList$Listener_init$lambda_0(f, f_0) {
+    return Unit;
+  }
+  function RxList$RxList$Listener_init$lambda_1(f, f_0) {
+    return Unit;
+  }
+  RxList$Listener.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Listener',
+    interfaces: []
+  };
+  RxList$Listener.prototype.component1 = function () {
+    return this.added;
+  };
+  RxList$Listener.prototype.component2 = function () {
+    return this.removed;
+  };
+  RxList$Listener.prototype.component3 = function () {
+    return this.moved;
+  };
+  RxList$Listener.prototype.copy_byo1lv$ = function (added, removed, moved) {
+    return new RxList$Listener(added === void 0 ? this.added : added, removed === void 0 ? this.removed : removed, moved === void 0 ? this.moved : moved);
+  };
+  RxList$Listener.prototype.toString = function () {
+    return 'Listener(added=' + Kotlin.toString(this.added) + (', removed=' + Kotlin.toString(this.removed)) + (', moved=' + Kotlin.toString(this.moved)) + ')';
+  };
+  RxList$Listener.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.added) | 0;
+    result = result * 31 + Kotlin.hashCode(this.removed) | 0;
+    result = result * 31 + Kotlin.hashCode(this.moved) | 0;
+    return result;
+  };
+  RxList$Listener.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.added, other.added) && Kotlin.equals(this.removed, other.removed) && Kotlin.equals(this.moved, other.moved)))));
+  };
+  RxList.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'RxList',
+    interfaces: [List]
+  };
+  function Collector() {
+  }
+  Collector.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'Collector',
+    interfaces: []
+  };
+  function collector$ObjectLiteral(closure$fn) {
+    this.closure$fn = closure$fn;
+  }
+  collector$ObjectLiteral.prototype.plusAssign_11rb$ = function (t) {
+    this.closure$fn(t);
+  };
+  collector$ObjectLiteral.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [Collector]
+  };
+  function collector(fn) {
+    return new collector$ObjectLiteral(fn);
+  }
+  function events$lambda$lambda(this$) {
+    return function (it) {
+      this$.offer_11rb$(it);
+      return Unit;
+    };
+  }
+  function Coroutine$events$lambda(closure$deps_0, this$events_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$deps = closure$deps_0;
+    this.local$this$events = this$events_0;
+    this.local$$receiver = $receiver_0;
+  }
+  Coroutine$events$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$events$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$events$lambda.prototype.constructor = Coroutine$events$lambda;
+  Coroutine$events$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            plusAssign_0(this.local$closure$deps.kills, events_0(this.local$this$events, collector(events$lambda$lambda(this.local$$receiver))));
+            this.state_0 = 2;
+            this.result_0 = join(this.local$closure$deps.kills, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return this.result_0;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function events$lambda(closure$deps_0, this$events_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$events$lambda(closure$deps_0, this$events_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function events($receiver, deps) {
+    return produce(deps, void 0, 2147483647, events$lambda(deps, $receiver));
+  }
+  function eventsEmitter$lambda$lambda(closure$cb) {
+    return function (it) {
+      closure$cb(it);
+      return Unit;
+    };
+  }
+  function eventsEmitter$lambda(closure$all, this$eventsEmitter) {
+    return function (cb) {
+      return events_0(this$eventsEmitter, collector(eventsEmitter$lambda$lambda(cb)), closure$all);
+    };
+  }
+  function eventsEmitter($receiver, all) {
+    if (all === void 0)
+      all = true;
+    return eventsEmitter$lambda(all, $receiver);
+  }
+  function events$lambda_0(closure$channel) {
+    return function (i, t) {
+      closure$channel.plusAssign_11rb$(new ListEvent$Add(i, t));
+      return Unit;
+    };
+  }
+  function events$lambda_1(closure$channel, this$events) {
+    return function (from, to) {
+      closure$channel.plusAssign_11rb$(new ListEvent$Move(from, to, this$events.get_za3lpa$(to)));
+      return Unit;
+    };
+  }
+  function events$lambda_2(closure$channel) {
+    return function (i, t) {
+      closure$channel.plusAssign_11rb$(new ListEvent$Remove(i, t));
+      return Unit;
+    };
+  }
+  function events_0($receiver, channel, all) {
+    if (all === void 0)
+      all = true;
+    return $receiver.addListener_icpdhz$(new RxList$Listener(events$lambda_0(channel), events$lambda_2(channel), events$lambda_1(channel, $receiver)), all);
+  }
+  function RxMutableList(items) {
+    AbstractMutableList.call(this);
+    this.sizeVar_0 = new Var(0);
+    this.sizeRx_jrq41x$_0 = this.sizeVar_0;
+    this.isEmptyRx_cy1uhj$_0 = Rx_init_0(NoKill, RxMutableList$isEmptyRx$lambda(this));
+    this.delegate_0 = ArrayList_init();
+    this.listeners_0 = emptyList();
+    this.emitter_sy0h38$_0 = lazy(RxMutableList$emitter$lambda(this));
+    this.addAll_brywnq$(items);
+    this.allRx_tqrlbp$_0 = lazy(RxMutableList$allRx$lambda(this));
+  }
+  Object.defineProperty(RxMutableList.prototype, 'sizeRx', {
+    get: function () {
+      return this.sizeRx_jrq41x$_0;
+    }
+  });
+  Object.defineProperty(RxMutableList.prototype, 'isEmptyRx', {
+    get: function () {
+      return this.isEmptyRx_cy1uhj$_0;
+    }
+  });
+  function RxMutableList$addListener$lambda(this$RxMutableList, closure$listener) {
+    return function () {
+      this$RxMutableList.listeners_0 = minus(this$RxMutableList.listeners_0, closure$listener);
+      return Unit;
+    };
+  }
+  var checkIndexOverflow = Kotlin.kotlin.collections.checkIndexOverflow_za3lpa$;
+  RxMutableList.prototype.addListener_icpdhz$ = function (listener, all) {
+    this.listeners_0 = plus(this.listeners_0, listener);
+    if (all) {
+      var action = listener.added;
+      var tmp$, tmp$_0;
+      var index = 0;
+      tmp$ = this.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        action(checkIndexOverflow((tmp$_0 = index, index = tmp$_0 + 1 | 0, tmp$_0)), item);
+      }
+    }
+    return once(RxMutableList$addListener$lambda(this, listener));
+  };
+  Object.defineProperty(RxMutableList.prototype, 'size', {
+    get: function () {
+      return this.delegate_0.size;
+    }
+  });
+  RxMutableList.prototype.add_wxm5ur$ = function (index, element) {
+    this.delegate_0.add_wxm5ur$(index, element);
+    this.sizeVar_0.now = this.size;
+    var tmp$;
+    tmp$ = this.listeners_0.iterator();
+    while (tmp$.hasNext()) {
+      var element_0 = tmp$.next();
+      element_0.added(index, element);
+    }
+  };
+  RxMutableList.prototype.removeAt_za3lpa$ = function (index) {
+    var v = this.delegate_0.removeAt_za3lpa$(index);
+    this.sizeVar_0.now = this.size;
+    var tmp$;
+    tmp$ = this.listeners_0.iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      element.removed(index, v);
+    }
+    return v;
+  };
+  RxMutableList.prototype.set_wxm5ur$ = function (index, element) {
+    var v = this.delegate_0.set_wxm5ur$(index, element);
+    var tmp$;
+    tmp$ = this.listeners_0.iterator();
+    while (tmp$.hasNext()) {
+      var element_0 = tmp$.next();
+      element_0.removed(index, v);
+      element_0.added(index, element);
+    }
+    return v;
+  };
+  RxMutableList.prototype.get_za3lpa$ = function (index) {
+    return this.delegate_0.get_za3lpa$(index);
+  };
+  RxMutableList.prototype.move_vux9f0$ = function (from, to) {
+    var v = this.delegate_0.removeAt_za3lpa$(from);
+    this.delegate_0.add_wxm5ur$(to, v);
+    var tmp$;
+    tmp$ = this.listeners_0.iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      element.moved(from, to);
+    }
+  };
+  Object.defineProperty(RxMutableList.prototype, 'emitter', {
+    get: function () {
+      return this.emitter_sy0h38$_0.value;
+    }
+  });
+  Object.defineProperty(RxMutableList.prototype, 'allRx', {
+    get: function () {
+      return this.allRx_tqrlbp$_0.value;
+    }
+  });
+  function RxMutableList$isEmptyRx$lambda(this$RxMutableList) {
+    return function ($receiver) {
+      return this$RxMutableList.sizeVar_0.invoke() === 0;
+    };
+  }
+  function RxMutableList$emitter$lambda$lambda(this$RxMutableList) {
+    return function () {
+      var $receiver = this$RxMutableList;
+      var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        destination.add_11rb$(new SetAdded(item));
+      }
+      return destination;
+    };
+  }
+  function RxMutableList$emitter$lambda$lambda_0(closure$e) {
+    return function (f, item) {
+      closure$e.emit_11rb$(new SetAdded(item));
+      return Unit;
+    };
+  }
+  function RxMutableList$emitter$lambda$lambda_1(closure$e) {
+    return function (f, item) {
+      closure$e.emit_11rb$(new SetRemoved(item));
+      return Unit;
+    };
+  }
+  function RxMutableList$emitter$lambda(this$RxMutableList) {
+    return function () {
+      var e = new Emitter(RxMutableList$emitter$lambda$lambda(this$RxMutableList));
+      this$RxMutableList.addListener_6zudpe$(new RxList$Listener(RxMutableList$emitter$lambda$lambda_0(e), RxMutableList$emitter$lambda$lambda_1(e)));
+      return e;
+    };
+  }
+  function RxMutableList$allRx$lambda$lambda(closure$rxv, this$RxMutableList) {
+    return function (it) {
+      closure$rxv.remAssign_11rb$(toList_1(this$RxMutableList));
+      return Unit;
+    };
+  }
+  function RxMutableList$allRx$lambda(this$RxMutableList) {
+    return function () {
+      var rxv = new Var(toList_1(this$RxMutableList));
+      plusAssign_0(eventsEmitter(this$RxMutableList), RxMutableList$allRx$lambda$lambda(rxv, this$RxMutableList));
+      return rxv;
+    };
+  }
+  RxMutableList.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RxMutableList',
+    interfaces: [RxList, AbstractMutableList]
+  };
+  function RxMutableList_init($this) {
+    $this = $this || Object.create(RxMutableList.prototype);
+    RxMutableList.call($this, emptyList());
+    return $this;
+  }
+  function sorted$Holder(closure$kills, closure$key, item) {
+    this.item = item;
+    this.ks = killables(closure$kills);
+    this.kills_lbq1q$_0 = this.ks.kills;
+    this.krx = this.rx_y6x17j$(sorted$Holder$krx$lambda(closure$key, this));
+    this.keyValue = this.krx.now;
+    this.orderedIndex = 0;
+  }
+  Object.defineProperty(sorted$Holder.prototype, 'kills', {
+    get: function () {
+      return this.kills_lbq1q$_0;
+    }
+  });
+  sorted$Holder.prototype.dec = function () {
+    this.orderedIndex = this.orderedIndex - 1 | 0;
+  };
+  sorted$Holder.prototype.inc = function () {
+    this.orderedIndex = this.orderedIndex + 1 | 0;
+  };
+  function sorted$Holder$krx$lambda(closure$key, this$Holder) {
+    return function ($receiver) {
+      return closure$key($receiver, this$Holder.item);
+    };
+  }
+  sorted$Holder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Holder',
+    interfaces: [KillsApi]
+  };
+  function sorted$find$lambda(it) {
+    return it.keyValue;
+  }
+  var compareValues = Kotlin.kotlin.comparisons.compareValues_s00gnj$;
+  var binarySearch = Kotlin.kotlin.collections.binarySearch_sr7qim$;
+  function binarySearchBy$lambda(closure$selector, closure$key) {
+    return function (it) {
+      return compareValues(closure$selector(it), closure$key);
+    };
+  }
+  function sorted$find(closure$ordered) {
+    return function ($receiver) {
+      var $receiver_0 = closure$ordered;
+      var key = $receiver.keyValue;
+      var i = binarySearch($receiver_0, 0, $receiver_0.size, binarySearchBy$lambda(sorted$find$lambda, key));
+      var $receiver_1 = i < 0 ? (-i | 0) - 1 | 0 : i;
+      $receiver.orderedIndex = $receiver_1;
+      return $receiver_1;
+    };
+  }
+  function sorted$lambda$lambda$lambda(this$, closure$ordered, closure$find, closure$sorted) {
+    return function ($receiver, kv) {
+      this$.keyValue = kv;
+      var from = this$.orderedIndex;
+      closure$ordered.removeAt_za3lpa$(from);
+      closure$find(this$);
+      var to = this$.orderedIndex;
+      closure$ordered.add_wxm5ur$(to, this$);
+      if (from !== to) {
+        closure$sorted.move_vux9f0$(from, to);
+        if (from < to) {
+          var tmp$;
+          tmp$ = closure$ordered.subList_vux9f0$(from, to).iterator();
+          while (tmp$.hasNext()) {
+            var element = tmp$.next();
+            element.dec();
+          }
+        }
+         else if (to < from) {
+          var tmp$_0;
+          tmp$_0 = closure$ordered.subList_vux9f0$(to + 1 | 0, from + 1 | 0).iterator();
+          while (tmp$_0.hasNext()) {
+            var element_0 = tmp$_0.next();
+            element_0.inc();
+          }
+        }
+      }
+      return Unit;
+    };
+  }
+  function sorted$lambda(closure$kills, closure$key, closure$original, closure$find, closure$ordered, closure$sorted) {
+    return function (e) {
+      if (Kotlin.isType(e, ListEvent$Add)) {
+        var $receiver = new sorted$Holder(closure$kills, closure$key, e.item);
+        var closure$original_0 = closure$original;
+        var closure$find_0 = closure$find;
+        var closure$ordered_0 = closure$ordered;
+        var closure$sorted_0 = closure$sorted;
+        closure$original_0.add_wxm5ur$(e.index, $receiver);
+        closure$find_0($receiver);
+        closure$ordered_0.add_wxm5ur$($receiver.orderedIndex, $receiver);
+        closure$sorted_0.add_wxm5ur$($receiver.orderedIndex, $receiver.item);
+        var tmp$;
+        tmp$ = drop(closure$ordered_0, $receiver.orderedIndex + 1 | 0).iterator();
+        while (tmp$.hasNext()) {
+          var element = tmp$.next();
+          element.inc();
+        }
+        $receiver.krx.forEachLater_aaomyj$($receiver.kills, sorted$lambda$lambda$lambda($receiver, closure$ordered_0, closure$find_0, closure$sorted_0));
+      }
+       else if (Kotlin.isType(e, ListEvent$Move))
+        closure$original.add_wxm5ur$(e.to, closure$original.removeAt_za3lpa$(e.from));
+      else if (Kotlin.isType(e, ListEvent$Remove)) {
+        var $receiver_0 = closure$original.removeAt_za3lpa$(e.index);
+        var closure$sorted_1 = closure$sorted;
+        var closure$ordered_1 = closure$ordered;
+        closure$sorted_1.removeAt_za3lpa$($receiver_0.orderedIndex);
+        closure$ordered_1.removeAt_za3lpa$($receiver_0.orderedIndex);
+        var tmp$_0;
+        tmp$_0 = drop(closure$ordered_1, $receiver_0.orderedIndex).iterator();
+        while (tmp$_0.hasNext()) {
+          var element_0 = tmp$_0.next();
+          element_0.dec();
+        }
+        $receiver_0.ks.kill();
+      }
+       else
+        Kotlin.noWhenBranchMatched();
+      return Unit;
+    };
+  }
+  function sorted($receiver, kills, key) {
+    var sorted = RxMutableList_init();
+    var original = ArrayList_init();
+    var ordered = ArrayList_init();
+    var find = sorted$find(ordered);
+    plusAssign_0(kills, eventsEmitter($receiver)(sorted$lambda(kills, key, original, find, ordered, sorted)));
+    return sorted;
+  }
+  function map$lambda(k) {
+    k.kill();
+    return Unit;
+  }
+  function map_3($receiver, killables, create) {
+    return map_4($receiver, killables, create, map$lambda);
+  }
+  function map$lambda_0(closure$result, closure$destroy) {
+    return function () {
+      var $receiver = closure$result;
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        closure$destroy(element);
+      }
+      return Unit;
+    };
+  }
+  function map$lambda_1(closure$result, closure$create) {
+    return function (index, element) {
+      closure$result.add_wxm5ur$(index, closure$create(element));
+      return Unit;
+    };
+  }
+  function map$lambda_2(closure$destroy, closure$result) {
+    return function (index, f) {
+      closure$destroy(closure$result.removeAt_za3lpa$(index));
+      return Unit;
+    };
+  }
+  function map$lambda_3(closure$result) {
+    return function (from, to) {
+      closure$result.move_vux9f0$(from, to);
+      return Unit;
+    };
+  }
+  function map_4($receiver, killables, create, destroy) {
+    var result = RxMutableList_init();
+    plusAssign_0(killables, map$lambda_0(result, destroy));
+    plusAssign_0(killables, $receiver.addListener_6zudpe$(new RxList$Listener(map$lambda_1(result, create), map$lambda_2(destroy, result), map$lambda_3(result))));
+    return result;
+  }
+  function map$Holder(kill) {
+    this.kill = kill;
+  }
+  map$Holder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Holder',
+    interfaces: []
+  };
+  function map$lambda_4(closure$killables, closure$mapper, closure$result, closure$holders) {
+    return function (index, element) {
+      var ks = killables(closure$killables);
+      var node = closure$mapper(element, ks.killSet);
+      closure$result.add_wxm5ur$(index, node);
+      closure$holders.add_wxm5ur$(index, new map$Holder(ks.kill));
+      return Unit;
+    };
+  }
+  function map$lambda_5(closure$result, closure$holders) {
+    return function (index, f) {
+      closure$result.removeAt_za3lpa$(index);
+      var holder = closure$holders.removeAt_za3lpa$(index);
+      holder.kill();
+      return Unit;
+    };
+  }
+  function map$lambda_6(closure$result, closure$holders) {
+    return function (from, to) {
+      closure$result.move_vux9f0$(from, to);
+      closure$holders.add_wxm5ur$(to, closure$holders.removeAt_za3lpa$(from));
+      return Unit;
+    };
+  }
+  function map_5($receiver, killables, mapper) {
+    var result = RxMutableList_init();
+    var holders = ArrayList_init();
+    plusAssign_0(killables, $receiver.addListener_6zudpe$(new RxList$Listener(map$lambda_4(killables, mapper, result, holders), map$lambda_5(result, holders), map$lambda_6(result, holders))));
+    return result;
+  }
+  function MappedListenableListConfig(list, killables, mapper) {
+    this.list = list;
+    this.killables = killables;
+    this.mapper = mapper;
+  }
+  MappedListenableListConfig.prototype.build = function () {
+    return map_5(this.list, this.killables, this.mapper);
+  };
+  MappedListenableListConfig.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'MappedListenableListConfig',
+    interfaces: []
+  };
+  MappedListenableListConfig.prototype.component1 = function () {
+    return this.list;
+  };
+  MappedListenableListConfig.prototype.component2 = function () {
+    return this.killables;
+  };
+  MappedListenableListConfig.prototype.component3 = function () {
+    return this.mapper;
+  };
+  MappedListenableListConfig.prototype.copy_uccwnl$ = function (list, killables, mapper) {
+    return new MappedListenableListConfig(list === void 0 ? this.list : list, killables === void 0 ? this.killables : killables, mapper === void 0 ? this.mapper : mapper);
+  };
+  MappedListenableListConfig.prototype.toString = function () {
+    return 'MappedListenableListConfig(list=' + Kotlin.toString(this.list) + (', killables=' + Kotlin.toString(this.killables)) + (', mapper=' + Kotlin.toString(this.mapper)) + ')';
+  };
+  MappedListenableListConfig.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.list) | 0;
+    result = result * 31 + Kotlin.hashCode(this.killables) | 0;
+    result = result * 31 + Kotlin.hashCode(this.mapper) | 0;
+    return result;
+  };
+  MappedListenableListConfig.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.list, other.list) && Kotlin.equals(this.killables, other.killables) && Kotlin.equals(this.mapper, other.mapper)))));
+  };
+  function FilteredListenableListConfig(list, killables, filterKey, input, filter) {
+    this.list = list;
+    this.killables = killables;
+    this.filterKey = filterKey;
+    this.input = input;
+    this.filter = filter;
+  }
+  function FilteredListenableListConfig$build$Holder(closure$result, this$FilteredListenableListConfig, holders, item, holdersIndex) {
+    this.closure$result = closure$result;
+    this.this$FilteredListenableListConfig = this$FilteredListenableListConfig;
+    this.holders = holders;
+    this.item = item;
+    this.holdersIndex = holdersIndex;
+    this.resultIndex = None_getInstance();
+    this.resultsBefore = 0;
+    this.ks = killables(this$FilteredListenableListConfig.killables);
+    this.key = this$FilteredListenableListConfig.filterKey(this.item, this.ks.killSet);
+    this.holders.add_wxm5ur$(this.holdersIndex, this);
+    var $receiver = this.holders.listIterator_za3lpa$(this.holdersIndex + 1 | 0);
+    while ($receiver.hasNext()) {
+      var element = $receiver.next();
+      element.holdersIndex = element.holdersIndex + 1 | 0;
+    }
+    this.recalcResultsBefore();
+    this.key.forEach_aaomyj$(this.ks.killSet, FilteredListenableListConfig$build$FilteredListenableListConfig$build$Holder_init$lambda(this));
+  }
+  function FilteredListenableListConfig$build$Holder$resultsIndexAfter$lambda(it) {
+    return it + 1 | 0;
+  }
+  FilteredListenableListConfig$build$Holder.prototype.resultsIndexAfter = function () {
+    return this.resultIndex.map_2o04qz$(FilteredListenableListConfig$build$Holder$resultsIndexAfter$lambda).getOrDefault_11rb$(this.resultsBefore);
+  };
+  FilteredListenableListConfig$build$Holder.prototype.recalcResultsBefore = function () {
+    this.resultsBefore = this.holdersIndex === 0 ? 0 : this.holders.get_za3lpa$(this.holdersIndex - 1 | 0).resultsIndexAfter();
+  };
+  function FilteredListenableListConfig$build$Holder$move$forRange(closure$range, this$Holder) {
+    return function (fn) {
+      var $receiver = closure$range;
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        fn(this$Holder.holders.get_za3lpa$(element));
+      }
+    };
+  }
+  function FilteredListenableListConfig$build$Holder$move$lambda(h) {
+    h.holdersIndex = h.holdersIndex - 1 | 0;
+    return Unit;
+  }
+  function FilteredListenableListConfig$build$Holder$move$lambda_0(h) {
+    h.holdersIndex = h.holdersIndex + 1 | 0;
+    return Unit;
+  }
+  function FilteredListenableListConfig$build$Holder$move$lambda$lambda(h) {
+    h.shift_6taknv$(true);
+    return Unit;
+  }
+  function FilteredListenableListConfig$build$Holder$move$lambda$lambda_0(h) {
+    h.shift_6taknv$(false);
+    return Unit;
+  }
+  function FilteredListenableListConfig$build$Holder$move$lambda_1(closure$fwd, closure$forRange, this$Holder, closure$result) {
+    return function (ri) {
+      if (closure$fwd) {
+        closure$forRange(FilteredListenableListConfig$build$Holder$move$lambda$lambda);
+        this$Holder.recalcResultsBefore();
+      }
+       else {
+        this$Holder.recalcResultsBefore();
+        closure$forRange(FilteredListenableListConfig$build$Holder$move$lambda$lambda_0);
+      }
+      closure$result.move_vux9f0$(ri, this$Holder.resultIndex.get());
+      return Unit;
+    };
+  }
+  FilteredListenableListConfig$build$Holder.prototype.move_za3lpa$ = function (to) {
+    var from = this.holdersIndex;
+    this.holders.add_wxm5ur$(to, this.holders.removeAt_za3lpa$(from));
+    this.holdersIndex = to;
+    var fwd = from < to;
+    var range = fwd ? until(from, to) : new IntRange(to + 1 | 0, from);
+    var forRange = FilteredListenableListConfig$build$Holder$move$forRange(range, this);
+    if (fwd)
+      forRange(FilteredListenableListConfig$build$Holder$move$lambda);
+    else
+      forRange(FilteredListenableListConfig$build$Holder$move$lambda_0);
+    this.resultIndex.forEach_qlkmfe$(FilteredListenableListConfig$build$Holder$move$lambda_1(fwd, forRange, this, this.closure$result));
+  };
+  function FilteredListenableListConfig$build$Holder$shift$lambda(it) {
+    return it - 1 | 0;
+  }
+  function FilteredListenableListConfig$build$Holder$shift$lambda_0(it) {
+    return it + 1 | 0;
+  }
+  FilteredListenableListConfig$build$Holder.prototype.shift_6taknv$ = function (down) {
+    if (down) {
+      this.resultsBefore = this.resultsBefore - 1 | 0;
+      this.resultIndex = this.resultIndex.map_2o04qz$(FilteredListenableListConfig$build$Holder$shift$lambda);
+    }
+     else {
+      this.resultsBefore = this.resultsBefore + 1 | 0;
+      this.resultIndex = this.resultIndex.map_2o04qz$(FilteredListenableListConfig$build$Holder$shift$lambda_0);
+    }
+  };
+  function FilteredListenableListConfig$build$Holder$updateVisibility$lambda(closure$newVisible, closure$result, this$Holder) {
+    return function (ri) {
+      if (!closure$newVisible) {
+        closure$result.removeAt_za3lpa$(ri);
+        this$Holder.resultIndex = None_getInstance();
+        var $receiver = this$Holder.holders.listIterator_za3lpa$(this$Holder.holdersIndex + 1 | 0);
+        while ($receiver.hasNext()) {
+          var element = $receiver.next();
+          element.shift_6taknv$(true);
+        }
+      }
+      return Unit;
+    };
+  }
+  function FilteredListenableListConfig$build$Holder$updateVisibility$lambda_0(closure$newVisible, closure$result, this$Holder) {
+    return function () {
+      if (closure$newVisible) {
+        closure$result.add_wxm5ur$(this$Holder.resultsBefore, this$Holder.item);
+        this$Holder.resultIndex = new Some(this$Holder.resultsBefore);
+        var $receiver = this$Holder.holders.listIterator_za3lpa$(this$Holder.holdersIndex + 1 | 0);
+        while ($receiver.hasNext()) {
+          var element = $receiver.next();
+          element.shift_6taknv$(false);
+        }
+      }
+      return Unit;
+    };
+  }
+  FilteredListenableListConfig$build$Holder.prototype.updateVisibility_6taknv$ = function (newVisible) {
+    this.resultIndex.map_2o04qz$(FilteredListenableListConfig$build$Holder$updateVisibility$lambda(newVisible, this.closure$result, this)).getOrElse_skz6lt$(FilteredListenableListConfig$build$Holder$updateVisibility$lambda_0(newVisible, this.closure$result, this));
+  };
+  FilteredListenableListConfig$build$Holder.prototype.updateInput_138r$ = function (i) {
+    this.updateVisibility_6taknv$(this.this$FilteredListenableListConfig.filter(this.key.now, i));
+  };
+  FilteredListenableListConfig$build$Holder.prototype.updateKey_138q$ = function (k) {
+    this.updateVisibility_6taknv$(this.this$FilteredListenableListConfig.filter(k, this.this$FilteredListenableListConfig.input.now));
+  };
+  FilteredListenableListConfig$build$Holder.prototype.remove = function () {
+    this.updateVisibility_6taknv$(false);
+    this.holders.removeAt_za3lpa$(this.holdersIndex);
+    var $receiver = this.holders.listIterator_za3lpa$(this.holdersIndex);
+    while ($receiver.hasNext()) {
+      var element = $receiver.next();
+      element.holdersIndex = element.holdersIndex - 1 | 0;
+    }
+  };
+  function FilteredListenableListConfig$build$FilteredListenableListConfig$build$Holder_init$lambda(this$Holder) {
+    return function ($receiver, k) {
+      this$Holder.updateKey_138q$(k);
+      return Unit;
+    };
+  }
+  FilteredListenableListConfig$build$Holder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Holder',
+    interfaces: []
+  };
+  function FilteredListenableListConfig$build$lambda(closure$holders) {
+    return function ($receiver, i) {
+      var tmp$;
+      tmp$ = closure$holders.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        element.updateInput_138r$(i);
+      }
+      return Unit;
+    };
+  }
+  function FilteredListenableListConfig$build$lambda_0(closure$holders, closure$result, this$FilteredListenableListConfig) {
+    return function (idx, t) {
+      new FilteredListenableListConfig$build$Holder(closure$result, this$FilteredListenableListConfig, closure$holders, t, idx);
+      return Unit;
+    };
+  }
+  function FilteredListenableListConfig$build$lambda_1(closure$holders) {
+    return function (idx, f) {
+      closure$holders.get_za3lpa$(idx).remove();
+      return Unit;
+    };
+  }
+  function FilteredListenableListConfig$build$lambda_2(closure$holders) {
+    return function (from, to) {
+      closure$holders.get_za3lpa$(from).move_za3lpa$(to);
+      return Unit;
+    };
+  }
+  FilteredListenableListConfig.prototype.build = function () {
+    var result = RxMutableList_init();
+    var holders = ArrayList_init();
+    this.input.forEachLater_aaomyj$(this.killables, FilteredListenableListConfig$build$lambda(holders));
+    plusAssign_0(this.killables, this.list.addListener_6zudpe$(new RxList$Listener(FilteredListenableListConfig$build$lambda_0(holders, result, this), FilteredListenableListConfig$build$lambda_1(holders), FilteredListenableListConfig$build$lambda_2(holders))));
+    return result;
+  };
+  FilteredListenableListConfig.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FilteredListenableListConfig',
+    interfaces: []
+  };
+  FilteredListenableListConfig.prototype.component1 = function () {
+    return this.list;
+  };
+  FilteredListenableListConfig.prototype.component2 = function () {
+    return this.killables;
+  };
+  FilteredListenableListConfig.prototype.component3 = function () {
+    return this.filterKey;
+  };
+  FilteredListenableListConfig.prototype.component4 = function () {
+    return this.input;
+  };
+  FilteredListenableListConfig.prototype.component5 = function () {
+    return this.filter;
+  };
+  FilteredListenableListConfig.prototype.copy_twqsro$ = function (list, killables, filterKey, input, filter) {
+    return new FilteredListenableListConfig(list === void 0 ? this.list : list, killables === void 0 ? this.killables : killables, filterKey === void 0 ? this.filterKey : filterKey, input === void 0 ? this.input : input, filter === void 0 ? this.filter : filter);
+  };
+  FilteredListenableListConfig.prototype.toString = function () {
+    return 'FilteredListenableListConfig(list=' + Kotlin.toString(this.list) + (', killables=' + Kotlin.toString(this.killables)) + (', filterKey=' + Kotlin.toString(this.filterKey)) + (', input=' + Kotlin.toString(this.input)) + (', filter=' + Kotlin.toString(this.filter)) + ')';
+  };
+  FilteredListenableListConfig.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.list) | 0;
+    result = result * 31 + Kotlin.hashCode(this.killables) | 0;
+    result = result * 31 + Kotlin.hashCode(this.filterKey) | 0;
+    result = result * 31 + Kotlin.hashCode(this.input) | 0;
+    result = result * 31 + Kotlin.hashCode(this.filter) | 0;
+    return result;
+  };
+  FilteredListenableListConfig.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.list, other.list) && Kotlin.equals(this.killables, other.killables) && Kotlin.equals(this.filterKey, other.filterKey) && Kotlin.equals(this.input, other.input) && Kotlin.equals(this.filter, other.filter)))));
+  };
+  function applyTo_1($receiver, list) {
+    if (Kotlin.isType($receiver, ListEvent$Add))
+      list.add_wxm5ur$($receiver.index, $receiver.item);
+    else if (Kotlin.isType($receiver, ListEvent$Remove))
+      list.removeAt_za3lpa$($receiver.index);
+    else if (Kotlin.isType($receiver, ListEvent$Move))
+      list.move_vux9f0$($receiver.from, $receiver.to);
+    else
+      Kotlin.noWhenBranchMatched();
+  }
+  function Coroutine$applyTo$lambda_0(this$applyTo_0, closure$list_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$this$applyTo = this$applyTo_0;
+    this.local$closure$list = closure$list_0;
+    this.local$tmp$ = void 0;
+  }
+  Coroutine$applyTo$lambda_0.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$applyTo$lambda_0.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$applyTo$lambda_0.prototype.constructor = Coroutine$applyTo$lambda_0;
+  Coroutine$applyTo$lambda_0.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$tmp$ = this.local$this$applyTo.iterator();
+            this.state_0 = 2;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.state_0 = 3;
+            this.result_0 = this.local$tmp$.hasNext(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 3:
+            if (!this.result_0) {
+              this.state_0 = 6;
+              continue;
+            }
+             else {
+              this.state_0 = 4;
+              continue;
+            }
+
+          case 4:
+            this.state_0 = 5;
+            this.result_0 = this.local$tmp$.next(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 5:
+            var e_0 = this.result_0;
+            applyTo_1(e_0, this.local$closure$list);
+            this.state_0 = 2;
+            continue;
+          case 6:
+            return Unit;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function applyTo$lambda_0(this$applyTo_0, closure$list_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$applyTo$lambda_0(this$applyTo_0, closure$list_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function applyTo_2($receiver, deps, list) {
+    launch(deps, void 0, void 0, applyTo$lambda_0($receiver, list));
+  }
+  function ids$lambda(it) {
+    return get_idOrFail(it);
+  }
+  function ids($receiver, deps) {
+    return toRxSet_0(mapEvents(events($receiver, deps), ids$lambda), deps);
+  }
+  function RxLookup() {
+  }
+  RxLookup.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'RxLookup',
+    interfaces: []
+  };
+  function RxLookupKills(deps, factory) {
+    this.factory_c1uhm9$_0 = factory;
+    this.ks_jn6sr3$_0 = killables(deps.kills);
+    this.map_ub6of3$_0 = LinkedHashMap_init();
+  }
+  function RxLookupKills$Holder($outer, kseq, rxv) {
+    this.$outer = $outer;
+    this.kseq = kseq;
+    this.rxv = rxv;
+  }
+  RxLookupKills$Holder.prototype.set_y2q2u0$ = function (value) {
+    this.rxv.remAssign_11rb$(value(this.kseq.killables()));
+  };
+  Object.defineProperty(RxLookupKills$Holder.prototype, 'now', {
+    get: function () {
+      return this.rxv.now;
+    }
+  });
+  RxLookupKills$Holder.prototype.fold_h2yxzx$ = function (ks, z0, fn) {
+    return this.rxv.fold_h2yxzx$(ks, z0, fn);
+  };
+  RxLookupKills$Holder.prototype.foldKills_ooixq2$ = function (ks, fn) {
+    return this.rxv.foldKills_ooixq2$(ks, fn);
+  };
+  RxLookupKills$Holder.prototype.foldKills_h4yiec$ = function (ks, z0, fn) {
+    return this.rxv.foldKills_h4yiec$(ks, z0, fn);
+  };
+  RxLookupKills$Holder.prototype.foldKillsTrigger_ooixq2$ = function (ks, fn) {
+    return this.rxv.foldKillsTrigger_ooixq2$(ks, fn);
+  };
+  RxLookupKills$Holder.prototype.foldLater_94stmo$ = function (ks, z0, fn) {
+    return this.rxv.foldLater_94stmo$(ks, z0, fn);
+  };
+  RxLookupKills$Holder.prototype.forEach_aaomyj$ = function (ks, fn) {
+    return this.rxv.forEach_aaomyj$(ks, fn);
+  };
+  RxLookupKills$Holder.prototype.forEach_vlp88o$ = function (ks, killOrder, fn) {
+    return this.rxv.forEach_vlp88o$(ks, killOrder, fn);
+  };
+  RxLookupKills$Holder.prototype.forEachLater_aaomyj$ = function (ks, fn) {
+    return this.rxv.forEachLater_aaomyj$(ks, fn);
+  };
+  RxLookupKills$Holder.prototype.forEachLater_cksb0z$$default = function (ks, killStart, killOrder, fn) {
+    return this.rxv.forEachLater_cksb0z$$default(ks, killStart, killOrder, fn);
+  };
+  RxLookupKills$Holder.prototype.invoke = function () {
+    return this.rxv.invoke();
+  };
+  RxLookupKills$Holder.prototype.map_492dlc$ = function (ks, fn) {
+    return this.rxv.map_492dlc$(ks, fn);
+  };
+  RxLookupKills$Holder.prototype.off_sysl1e$ = function (ks, offFn) {
+    return this.rxv.off_sysl1e$(ks, offFn);
+  };
+  RxLookupKills$Holder.prototype.onChange_naxq84$ = function (ks, fn) {
+    return this.rxv.onChange_naxq84$(ks, fn);
+  };
+  RxLookupKills$Holder.prototype.onOff_nf0d6g$ = function (ks, on, off) {
+    return this.rxv.onOff_nf0d6g$(ks, on, off);
+  };
+  RxLookupKills$Holder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Holder',
+    interfaces: [RxIface]
+  };
+  RxLookupKills.prototype.getInternal_ue3h1b$_0 = function (key) {
+    var $receiver = this.map_ub6of3$_0;
+    var tmp$;
+    var value = $receiver.get_11rb$(key);
+    if (value == null) {
+      var $receiver_0 = this.ks_jn6sr3$_0.seq();
+      var answer = new RxLookupKills$Holder(this, $receiver_0, new Var(this.factory_c1uhm9$_0($receiver_0.killables(), key)));
+      $receiver.put_xwzc9p$(key, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return tmp$;
+  };
+  RxLookupKills.prototype.get_11rb$ = function (key) {
+    return this.getInternal_ue3h1b$_0(key);
+  };
+  RxLookupKills.prototype.put_ancdq$ = function (key, value) {
+    this.getInternal_ue3h1b$_0(key).set_y2q2u0$(value);
+  };
+  RxLookupKills.prototype.remove_11rb$ = function (key) {
+    var tmp$;
+    var tmp$_0;
+    if ((tmp$ = this.map_ub6of3$_0.remove_11rb$(key)) != null) {
+      tmp$.kseq.kill();
+      tmp$_0 = tmp$;
+    }
+     else
+      tmp$_0 = null;
+    return tmp$_0;
+  };
+  RxLookupKills.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RxLookupKills',
+    interfaces: [RxLookup]
+  };
+  function SimpleRxLookup(factory) {
+    this.factory = factory;
+    this.map_vi484u$_0 = LinkedHashMap_init();
+  }
+  SimpleRxLookup.prototype.getInternal_ofduhg$_0 = function (key) {
+    var $receiver = this.map_vi484u$_0;
+    var tmp$;
+    var value = $receiver.get_11rb$(key);
+    if (value == null) {
+      var answer = new Var(this.factory(key));
+      $receiver.put_xwzc9p$(key, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return tmp$;
+  };
+  SimpleRxLookup.prototype.get_11rb$ = function (key) {
+    return this.getInternal_ofduhg$_0(key);
+  };
+  SimpleRxLookup.prototype.put_xwzc9p$ = function (key, value) {
+    this.getInternal_ofduhg$_0(key).remAssign_11rb$(value);
+  };
+  SimpleRxLookup.prototype.remove_11rb$ = function (key) {
+    return this.map_vi484u$_0.remove_11rb$(key);
+  };
+  SimpleRxLookup.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SimpleRxLookup',
+    interfaces: [RxLookup]
+  };
   function RxSet() {
   }
   var Collection = Kotlin.kotlin.collections.Collection;
@@ -6140,7 +8088,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   RxMutableSet.prototype.filtered_760dx1$ = function (ks, fn) {
     var fset = new RxMutableSet();
-    process_0(this, ks, RxMutableSet$filtered$lambda(fn, fset));
+    process_1(this, ks, RxMutableSet$filtered$lambda(fn, fset));
     return fset;
   };
   Object.defineProperty(RxMutableSet.prototype, 'size', {
@@ -6548,8 +8496,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function toMap_0($receiver, ks, fn) {
     return toMap(toMoves($receiver.diffsAll), ks, fn);
   }
-  function process_0($receiver, ks, fn) {
+  function process_1($receiver, ks, fn) {
     process(toMoves($receiver.diffsAll), ks, fn);
+  }
+  function toRxSet_0($receiver, deps) {
+    var $receiver_0 = new RxMutableSet();
+    applyTo_0($receiver, deps, $receiver_0);
+    return $receiver_0;
   }
   var package$common = _.common || (_.common = {});
   package$common.dyn = dyn;
@@ -6630,31 +8583,30 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.CsApi = CsApi;
   package$commonshr.CsKillsApi = CsKillsApi;
   package$commonshr.JobScope = JobScope;
-  var package$commonlib = _.commonlib || (_.commonlib = {});
-  package$commonlib.lib = lib;
-  package$commonlib.Lib = Lib;
-  package$commonlib.Function = Function;
-  package$commonlib.DocWrap = DocWrap;
-  package$commonlib.DocWrapImpl = DocWrapImpl;
-  package$commonlib.DocSource = DocSource;
-  package$commonlib.coll_287e2$ = coll;
-  package$commonlib.coll_4okrys$ = coll_0;
-  package$commonlib.HasPath = HasPath;
-  package$commonlib.CollectionWrap = CollectionWrap;
-  package$commonlib.CollectionSource = CollectionSource;
-  package$commonlib.doc_287e2$ = doc;
-  Object.defineProperty(package$commonlib, 'apps', {
+  package$commonshr.lib = lib;
+  package$commonshr.Lib = Lib;
+  package$commonshr.Function = Function;
+  package$commonshr.DocWrap = DocWrap;
+  package$commonshr.DocWrapImpl = DocWrapImpl;
+  package$commonshr.DocSource = DocSource;
+  package$commonshr.coll_287e2$ = coll;
+  package$commonshr.coll_4okrys$ = coll_0;
+  package$commonshr.HasPath = HasPath;
+  package$commonshr.CollectionWrap = CollectionWrap;
+  package$commonshr.CollectionSource = CollectionSource;
+  package$commonshr.doc_287e2$ = doc;
+  Object.defineProperty(package$commonshr, 'apps', {
     get: apps_getInstance
   });
-  package$commonlib.AppDoc = AppDoc;
-  package$commonlib.get_admin_6l3wi3$ = get_admin;
-  package$commonlib.get_private_6l3wi3$ = get_private;
-  package$commonlib.get_singletons_6l3wi3$ = get_singletons;
-  package$commonlib.Singleton = Singleton;
-  package$commonlib.Private = Private;
-  package$commonlib.AdminDoc = AdminDoc;
-  package$commonlib.get_fcmtokens_z8qup$ = get_fcmtokens;
-  package$commonlib.FcmToken = FcmToken;
+  package$commonshr.AppDoc = AppDoc;
+  package$commonshr.get_admin_py8usb$ = get_admin;
+  package$commonshr.get_private_py8usb$ = get_private;
+  package$commonshr.get_singletons_py8usb$ = get_singletons;
+  package$commonshr.Singleton = Singleton;
+  package$commonshr.Private = Private;
+  package$commonshr.AdminDoc = AdminDoc;
+  package$commonshr.get_fcmtokens_x4imip$ = get_fcmtokens;
+  package$commonshr.FcmToken = FcmToken;
   package$commonshr.hasOwnProperty_hwpqgh$ = hasOwnProperty;
   package$commonshr.opt_h8phid$ = opt;
   Object.defineProperty(SetDiff, 'Companion', {
@@ -6680,7 +8632,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.get_withCounter_sb3j39$ = get_withCounter;
   package$commonshr.discardExecutor_e9pf1l$ = discardExecutor;
   package$commonshr.executor_e9pf1l$ = executor;
-  package$commonshr.Counted = Counted;
   package$commonshr.RefCountMap = RefCountMap;
   package$commonshr.RefCount = RefCount;
   package$commonshr.HasKills = HasKills;
@@ -6688,6 +8639,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.HasCsKills = HasCsKills;
   package$commonshr.CsKillsDeps = CsKillsDeps;
   package$commonshr.get_fn_4b7k9i$ = get_fn;
+  package$commonshr.listen_5ge9y1$ = listen;
   package$commonshr.reportd_za3rmp$ = reportd;
   package$commonshr.report_s8jyv4$ = report;
   package$commonshr.remAssign_t3h96y$ = remAssign;
@@ -6710,7 +8662,14 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   ListEvent.Move = ListEvent$Move;
   ListEvent.Remove = ListEvent$Remove;
   package$commonshr.ListEvent = ListEvent;
-  package$commonshr.map_hpw2sv$ = map_2;
+  package$commonshr.map_tu4qsk$ = map_2;
+  package$commonshr.mapEvents_xx1ylf$ = mapEvents;
+  package$commonshr.mapLive_hpw2sv$ = mapLive;
+  package$commonshr.listEventProcessor_xveuzn$ = listEventProcessor;
+  package$commonshr.process_pjyot8$ = process_0;
+  package$commonshr.applyTo_vxpj7g$ = applyTo;
+  package$commonshr.applyTo_6bwryh$ = applyTo_0;
+  package$commonshr.filter_g39gwq$ = filter;
   var package$properties = package$commonshr.properties || (package$commonshr.properties = {});
   package$properties.DynamicOps = DynamicOps;
   Object.defineProperty(package$properties, 'Identity', {
@@ -6747,7 +8706,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$properties.identityType_287e2$ = identityType;
   package$properties.ROProp = ROProp;
   package$properties.RWProp = RWProp;
+  package$properties.EnumProp = EnumProp;
   package$properties.PropertyListItem = PropertyListItem;
+  var package$killable = _.killable || (_.killable = {});
   package$properties.PropertyList = PropertyList;
   package$properties.rxCompare_kagv6q$ = rxCompare;
   package$properties.RxBase = RxBase;
@@ -6756,6 +8717,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$properties.writeDynamic_y9dcxh$ = writeDynamic;
   package$properties.readDynamic_121my8$ = readDynamic;
   package$properties.rxListType_4okrys$ = rxListType;
+  package$properties.listCompare_wct1zj$ = listCompare;
   package$properties.rxListType_68r5d9$ = rxListType_0;
   Object.defineProperty(package$properties, 'ServerTimestampPropertyType', {
     get: function () {
@@ -6763,6 +8725,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
   });
   package$properties.arrayOfScalarType_itlr5c$ = arrayOfScalarType;
+  package$properties.setOfScalarType_287e2$ = setOfScalarType;
   package$properties.calcType_6hcemk$ = calcType;
   SnapshotEvent.Added = SnapshotEvent$Added;
   SnapshotEvent.Modified = SnapshotEvent$Modified;
@@ -6770,7 +8733,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   SnapshotEvent.Removed = SnapshotEvent$Removed;
   package$properties.SnapshotEvent = SnapshotEvent;
   package$properties.wrapSnapshotEvents_j0uhh8$ = wrapSnapshotEvents;
-  package$properties.listEvents_rcl6n2$ = listEvents;
+  package$properties.listEvents_k5exqy$ = listEvents;
   TS.Value = TS$Value;
   Object.defineProperty(TS, 'Server', {
     get: TS$Server_getInstance
@@ -6782,16 +8745,17 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   });
   FsIdState.HasId = FsIdState$HasId;
   package$commonshr.FsIdState = FsIdState;
-  package$commonshr.FsId_init_isyo70$ = FsId_init;
+  package$commonshr.FsId_init_fwqjf0$ = FsId_init;
   package$commonshr.FsId = FsId;
   package$commonshr.get_docWrap_axmc3l$ = get_docWrap;
   package$commonshr.get_docWrap_2s00w$ = get_docWrap_0;
-  package$commonshr.toFsId_cpr0ep$ = toFsId;
-  package$commonshr.toFsId_n3d7sx$ = toFsId_0;
-  package$commonshr.toFsDoc_9d6cjt$ = toFsDoc;
-  package$commonshr.toFsDoc_t7liao$ = toFsDoc_0;
-  package$commonshr.toFsDoc_h408zy$ = toFsDoc_1;
-  var package$killable = _.killable || (_.killable = {});
+  package$commonshr.toFsId_5bzvyx$ = toFsId;
+  package$commonshr.toFsId_d81mk7$ = toFsId_0;
+  package$commonshr.toFsDoc_ved7zl$ = toFsDoc;
+  package$commonshr.toFsDoc_s7qlz4$ = toFsDoc_0;
+  package$commonshr.toFsDoc_e53g6m$ = toFsDoc_1;
+  package$commonshr.get_idOrFail_2s00w$ = get_idOrFail;
+  package$commonshr.new_kizxdt$ = new_0;
   package$killable.asyncKills_9scqh$ = asyncKills;
   package$killable.KillableValue = KillableValue;
   Object.defineProperty(package$killable, 'Noop', {
@@ -6808,7 +8772,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     get: HasNoKill_getInstance
   });
   package$killable.addedTo_tjw9ba$ = addedTo;
-  package$killable.add_1wvaoy$ = add;
+  package$killable.add_1wvaoy$ = add_0;
   package$killable.killables_yzxo1x$ = killables;
   package$killable.seq_yzxo1x$ = seq;
   package$killable.addedTo_wvpfik$ = addedTo_0;
@@ -6829,22 +8793,27 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.connect_xonuym$ = connect;
   package$rx.Obs = Obs;
   package$rx.RxIface = RxIface;
+  package$rx.forEach_yaias7$ = forEach;
   package$rx.feedTo_v090q1$ = feedTo_2;
   package$rx.feedTo_uiixe9$ = feedTo_3;
   package$rx.feedTo_mlhyxs$ = feedTo_4;
   package$rx.feedTo_pp0vfr$ = feedTo_5;
   package$rx.feedTo_i9r8cj$ = feedTo_6;
   package$rx.orDefault_t83rac$ = orDefault;
-  package$rx.incremented_eoy9qo$ = incremented;
+  package$rx.incremented_xubefb$ = incremented;
   package$rx.RxVal = RxVal;
   package$rx.killOld_mkuk0r$ = killOld;
-  package$rx.add_gcz0w7$ = add_0;
+  package$rx.add_gcz0w7$ = add_1;
   package$rx.remove_gcz0w7$ = remove;
   package$rx.diffs_x22hzp$ = diffs;
   package$rx.Rx_init_y3u4fh$ = Rx_init;
   package$rx.Rx_init_lqp1nt$ = Rx_init_0;
   package$rx.Rx_init_nmn2eg$ = Rx_init_1;
   package$rx.Rx = Rx;
+  package$rx.rx_m71pkk$ = rx;
+  package$rx.HasRx = HasRx;
+  package$rx.HasVar = HasVar;
+  package$rx.get_readOnly_hw0zcq$ = get_readOnly;
   package$rx.Var = Var;
   package$rx.increase_eoy9qo$ = increase;
   package$rx.decrease_eoy9qo$ = decrease;
@@ -6853,8 +8822,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.rxClass_z9szj9$ = rxClass;
   package$rx.rxClass_xqwy5d$ = rxClass_0;
   package$rx.rxHover_st2z1u$ = rxHover;
-  package$rx.rxClass_4zvhqy$ = rxClass_1;
-  package$rx.rxClass_6yki6o$ = rxClass_2;
+  package$rx.rxClass_53u32h$ = rxClass_1;
+  package$rx.rxClass_9rzgmr$ = rxClass_2;
   package$rx.rxClassOpt_jabexw$ = rxClassOpt;
   package$rx.toRx_56vwuc$ = toRx_1;
   package$rx.rxClasses_8gfcz4$ = rxClasses;
@@ -6862,8 +8831,29 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.toChannel_tgu8ha$ = toChannel;
   package$rx.toChannelLater_tgu8ha$ = toChannelLater;
   package$rx.mapAsync_8pmq1h$ = mapAsync;
-  package$rx.rx_50j47u$ = rx;
+  package$rx.rx_50j47u$ = rx_0;
   package$rx.toVar_eoe559$ = toVar;
+  RxList.Listener = RxList$Listener;
+  package$rx.RxList = RxList;
+  package$rx.Collector = Collector;
+  package$rx.collector_7qq44f$ = collector;
+  package$rx.events_ceeeb7$ = events;
+  package$rx.eventsEmitter_2us9mn$ = eventsEmitter;
+  package$rx.events_gvkzwh$ = events_0;
+  package$rx.RxMutableList_init_287e2$ = RxMutableList_init;
+  package$rx.RxMutableList = RxMutableList;
+  package$rx.sorted_ev4lgc$ = sorted;
+  package$rx.map_xbmg4n$ = map_3;
+  package$rx.map_chs0my$ = map_4;
+  package$rx.map_ape3t2$ = map_5;
+  package$rx.MappedListenableListConfig = MappedListenableListConfig;
+  package$rx.FilteredListenableListConfig = FilteredListenableListConfig;
+  package$rx.applyTo_vym8$ = applyTo_1;
+  package$rx.applyTo_5k7i6r$ = applyTo_2;
+  package$rx.ids_lvfhii$ = ids;
+  package$rx.RxLookup = RxLookup;
+  package$rx.RxLookupKills = RxLookupKills;
+  package$rx.SimpleRxLookup = SimpleRxLookup;
   package$rx.RxSet = RxSet;
   package$rx.RxMutableSet = RxMutableSet;
   package$rx.RxMutableIterator = RxMutableIterator;
@@ -6872,73 +8862,111 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.FunChain1 = FunChain1;
   package$rx.chain_7h29gk$ = chain_0;
   package$rx.toMap_ph3why$ = toMap_0;
-  package$rx.process_d62qid$ = process_0;
+  package$rx.process_d62qid$ = process_1;
+  package$rx.toRxSet_dftzi3$ = toRxSet_0;
   withInitial$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
   Emitter.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
   MappedEmitter.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
   toEmitter$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  CsKillsApi.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
   CsKillsApi.prototype.toRx_on0lyu$ = CsApi.prototype.toRx_on0lyu$;
   CsKillsApi.prototype.rx_y6x17j$ = KillsApi.prototype.rx_y6x17j$;
   CsKillsApi.prototype.rx_46ic4w$ = KillsApi.prototype.rx_46ic4w$;
   CsKillsApi.prototype.forEach_xwzbbo$ = KillsApi.prototype.forEach_xwzbbo$;
   CsKillsApi.prototype.forEach_35q7bt$ = KillsApi.prototype.forEach_35q7bt$;
+  CsKillsApi.prototype.forEachLater_xwzbbo$ = KillsApi.prototype.forEachLater_xwzbbo$;
   CsKillsApi.prototype.map_jtxi0h$ = KillsApi.prototype.map_jtxi0h$;
-  CsKillsApi.prototype.map_1mq1ue$ = KillsApi.prototype.map_1mq1ue$;
   CsKillsApi.prototype.onChange_rlu5c6$ = KillsApi.prototype.onChange_rlu5c6$;
   CsKillsApi.prototype.rxClass_c5yvvx$ = KillsApi.prototype.rxClass_c5yvvx$;
   CsKillsApi.prototype.rxClass_6sflyw$ = KillsApi.prototype.rxClass_6sflyw$;
   CsKillsApi.prototype.filtered_tnde95$ = KillsApi.prototype.filtered_tnde95$;
+  CsKillsApi.prototype.incremented_eoy9qo$ = KillsApi.prototype.incremented_eoy9qo$;
   CsKillsApi.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
   CsKillsApi.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
-  CsKillsApi.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
   CsKillsApi.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
   CsKillsApi.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  CsKillsApi.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
+  CsKillsApi.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
+  CsKillsApi.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;
   toMoves$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  filter$lambda$Item.prototype.rx_y6x17j$ = KillsApi.prototype.rx_y6x17j$;
+  filter$lambda$Item.prototype.rx_46ic4w$ = KillsApi.prototype.rx_46ic4w$;
+  filter$lambda$Item.prototype.forEach_xwzbbo$ = KillsApi.prototype.forEach_xwzbbo$;
+  filter$lambda$Item.prototype.forEach_35q7bt$ = KillsApi.prototype.forEach_35q7bt$;
+  filter$lambda$Item.prototype.forEachLater_xwzbbo$ = KillsApi.prototype.forEachLater_xwzbbo$;
+  filter$lambda$Item.prototype.map_jtxi0h$ = KillsApi.prototype.map_jtxi0h$;
+  filter$lambda$Item.prototype.onChange_rlu5c6$ = KillsApi.prototype.onChange_rlu5c6$;
+  filter$lambda$Item.prototype.rxClass_c5yvvx$ = KillsApi.prototype.rxClass_c5yvvx$;
+  filter$lambda$Item.prototype.rxClass_6sflyw$ = KillsApi.prototype.rxClass_6sflyw$;
+  filter$lambda$Item.prototype.filtered_tnde95$ = KillsApi.prototype.filtered_tnde95$;
+  filter$lambda$Item.prototype.incremented_eoy9qo$ = KillsApi.prototype.incremented_eoy9qo$;
+  filter$lambda$Item.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
+  filter$lambda$Item.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
+  filter$lambda$Item.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
+  filter$lambda$Item.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
+  filter$lambda$Item.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  filter$lambda$Item.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
+  filter$lambda$Item.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
+  filter$lambda$Item.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;
+  ROProp.prototype.forEachLater_cksb0z$ = RxIface.prototype.forEachLater_cksb0z$;
   HasNoKill.prototype.rx_y6x17j$ = KillsApi.prototype.rx_y6x17j$;
   HasNoKill.prototype.rx_46ic4w$ = KillsApi.prototype.rx_46ic4w$;
   HasNoKill.prototype.forEach_xwzbbo$ = KillsApi.prototype.forEach_xwzbbo$;
   HasNoKill.prototype.forEach_35q7bt$ = KillsApi.prototype.forEach_35q7bt$;
+  HasNoKill.prototype.forEachLater_xwzbbo$ = KillsApi.prototype.forEachLater_xwzbbo$;
   HasNoKill.prototype.map_jtxi0h$ = KillsApi.prototype.map_jtxi0h$;
-  HasNoKill.prototype.map_1mq1ue$ = KillsApi.prototype.map_1mq1ue$;
   HasNoKill.prototype.onChange_rlu5c6$ = KillsApi.prototype.onChange_rlu5c6$;
   HasNoKill.prototype.rxClass_c5yvvx$ = KillsApi.prototype.rxClass_c5yvvx$;
   HasNoKill.prototype.rxClass_6sflyw$ = KillsApi.prototype.rxClass_6sflyw$;
   HasNoKill.prototype.filtered_tnde95$ = KillsApi.prototype.filtered_tnde95$;
+  HasNoKill.prototype.incremented_eoy9qo$ = KillsApi.prototype.incremented_eoy9qo$;
   HasNoKill.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
   HasNoKill.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
   HasNoKill.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
   HasNoKill.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
   HasNoKill.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  HasNoKill.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
+  HasNoKill.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
+  HasNoKill.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;
+  Killables.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;
   Killables.prototype.rx_y6x17j$ = KillsApi.prototype.rx_y6x17j$;
   Killables.prototype.rx_46ic4w$ = KillsApi.prototype.rx_46ic4w$;
   Killables.prototype.forEach_xwzbbo$ = KillsApi.prototype.forEach_xwzbbo$;
   Killables.prototype.forEach_35q7bt$ = KillsApi.prototype.forEach_35q7bt$;
+  Killables.prototype.forEachLater_xwzbbo$ = KillsApi.prototype.forEachLater_xwzbbo$;
   Killables.prototype.map_jtxi0h$ = KillsApi.prototype.map_jtxi0h$;
-  Killables.prototype.map_1mq1ue$ = KillsApi.prototype.map_1mq1ue$;
   Killables.prototype.onChange_rlu5c6$ = KillsApi.prototype.onChange_rlu5c6$;
   Killables.prototype.rxClass_c5yvvx$ = KillsApi.prototype.rxClass_c5yvvx$;
   Killables.prototype.rxClass_6sflyw$ = KillsApi.prototype.rxClass_6sflyw$;
   Killables.prototype.filtered_tnde95$ = KillsApi.prototype.filtered_tnde95$;
+  Killables.prototype.incremented_eoy9qo$ = KillsApi.prototype.incremented_eoy9qo$;
   Killables.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
   Killables.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
   Killables.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
   Killables.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
   Killables.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  Killables.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
+  Killables.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
   WrapKillSet.prototype.rx_y6x17j$ = KillsApi.prototype.rx_y6x17j$;
   WrapKillSet.prototype.rx_46ic4w$ = KillsApi.prototype.rx_46ic4w$;
   WrapKillSet.prototype.forEach_xwzbbo$ = KillsApi.prototype.forEach_xwzbbo$;
   WrapKillSet.prototype.forEach_35q7bt$ = KillsApi.prototype.forEach_35q7bt$;
+  WrapKillSet.prototype.forEachLater_xwzbbo$ = KillsApi.prototype.forEachLater_xwzbbo$;
   WrapKillSet.prototype.map_jtxi0h$ = KillsApi.prototype.map_jtxi0h$;
-  WrapKillSet.prototype.map_1mq1ue$ = KillsApi.prototype.map_1mq1ue$;
   WrapKillSet.prototype.onChange_rlu5c6$ = KillsApi.prototype.onChange_rlu5c6$;
   WrapKillSet.prototype.rxClass_c5yvvx$ = KillsApi.prototype.rxClass_c5yvvx$;
   WrapKillSet.prototype.rxClass_6sflyw$ = KillsApi.prototype.rxClass_6sflyw$;
   WrapKillSet.prototype.filtered_tnde95$ = KillsApi.prototype.filtered_tnde95$;
+  WrapKillSet.prototype.incremented_eoy9qo$ = KillsApi.prototype.incremented_eoy9qo$;
   WrapKillSet.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
   WrapKillSet.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
   WrapKillSet.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
   WrapKillSet.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
   WrapKillSet.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  WrapKillSet.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
+  WrapKillSet.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
+  WrapKillSet.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;
+  RxVal.prototype.forEachLater_aaomyj$ = RxIface.prototype.forEachLater_aaomyj$;
   RxVal.prototype.map_492dlc$ = RxIface.prototype.map_492dlc$;
   RxVal.prototype.forEach_aaomyj$ = RxIface.prototype.forEach_aaomyj$;
   RxVal.prototype.forEach_vlp88o$ = RxIface.prototype.forEach_vlp88o$;
@@ -6951,6 +8979,27 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   RxVal.prototype.onOff_nf0d6g$ = RxIface.prototype.onOff_nf0d6g$;
   RxVal.prototype.off_sysl1e$ = RxIface.prototype.off_sysl1e$;
   RxVal.prototype.forEachLater_cksb0z$ = RxIface.prototype.forEachLater_cksb0z$;
+  RxMutableList.prototype.addListener_6zudpe$ = RxList.prototype.addListener_6zudpe$;
+  sorted$Holder.prototype.rx_y6x17j$ = KillsApi.prototype.rx_y6x17j$;
+  sorted$Holder.prototype.rx_46ic4w$ = KillsApi.prototype.rx_46ic4w$;
+  sorted$Holder.prototype.forEach_xwzbbo$ = KillsApi.prototype.forEach_xwzbbo$;
+  sorted$Holder.prototype.forEach_35q7bt$ = KillsApi.prototype.forEach_35q7bt$;
+  sorted$Holder.prototype.forEachLater_xwzbbo$ = KillsApi.prototype.forEachLater_xwzbbo$;
+  sorted$Holder.prototype.map_jtxi0h$ = KillsApi.prototype.map_jtxi0h$;
+  sorted$Holder.prototype.onChange_rlu5c6$ = KillsApi.prototype.onChange_rlu5c6$;
+  sorted$Holder.prototype.rxClass_c5yvvx$ = KillsApi.prototype.rxClass_c5yvvx$;
+  sorted$Holder.prototype.rxClass_6sflyw$ = KillsApi.prototype.rxClass_6sflyw$;
+  sorted$Holder.prototype.filtered_tnde95$ = KillsApi.prototype.filtered_tnde95$;
+  sorted$Holder.prototype.incremented_eoy9qo$ = KillsApi.prototype.incremented_eoy9qo$;
+  sorted$Holder.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
+  sorted$Holder.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
+  sorted$Holder.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
+  sorted$Holder.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
+  sorted$Holder.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  sorted$Holder.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
+  sorted$Holder.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
+  sorted$Holder.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;
+  RxLookupKills$Holder.prototype.forEachLater_cksb0z$ = RxIface.prototype.forEachLater_cksb0z$;
   RxMutableSet.prototype.anyRx_760dx1$ = RxSet.prototype.anyRx_760dx1$;
   Object.defineProperty(RxMutableSet.prototype, 'diffsAll', Object.getOwnPropertyDescriptor(RxSet.prototype, 'diffsAll'));
   admin = coll();

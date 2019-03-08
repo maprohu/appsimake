@@ -14,9 +14,9 @@ function define(args, fn) {
 
 define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], function (_, Kotlin, $module$appsimake_commonshr, $module$appsimake_firebaseshr) {
   'use strict';
-  var lib = $module$appsimake_commonshr.commonlib.lib;
+  var lib = $module$appsimake_commonshr.commonshr.lib;
   var PropertyMetadata = Kotlin.PropertyMetadata;
-  var coll = $module$appsimake_commonshr.commonlib.coll_287e2$;
+  var coll = $module$appsimake_commonshr.commonshr.coll_287e2$;
   var Base = $module$appsimake_firebaseshr.firebaseshr.Base;
   var Kind_CLASS = Kotlin.Kind.CLASS;
   var initFrom = $module$appsimake_firebaseshr.firebaseshr.initFrom_bruz9y$;
@@ -202,9 +202,9 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
   Object.defineProperty(package$tictactoelib, 'tictactoe', {
     get: get_tictactoe
   });
-  package$tictactoelib.get_games_6l3wi3$ = get_games;
-  package$tictactoelib.get_players_6l3wi3$ = get_players;
-  package$tictactoelib.get_moves_wehbcf$ = get_moves;
+  package$tictactoelib.get_games_py8usb$ = get_games;
+  package$tictactoelib.get_players_py8usb$ = get_players;
+  package$tictactoelib.get_moves_9zet87$ = get_moves;
   package$tictactoelib.Player = Player;
   package$tictactoelib.Game = Game;
   Object.defineProperty(Move, 'Companion', {

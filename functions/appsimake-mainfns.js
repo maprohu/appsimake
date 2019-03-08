@@ -22,11 +22,11 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'apps
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var await_0 = $module$kotlinx_coroutines_core.kotlinx.coroutines.await_t11jrl$;
   var commonlib = $module$appsimake_commonlib.commonlib.commonlib;
-  var get_admin = $module$appsimake_commonshr.commonlib.get_admin_6l3wi3$;
-  var get_users = $module$appsimake_commonlib.commonlib.commonlib.get_users_cmfbet$;
-  var get_tokens = $module$appsimake_commonlib.commonlib.commonlib.get_tokens_vfr2h5$;
+  var get_admin = $module$appsimake_commonshr.commonshr.get_admin_py8usb$;
+  var get_users = $module$appsimake_commonlib.commonlib.commonlib.get_users_g4qqrv$;
+  var get_tokens = $module$appsimake_commonlib.commonlib.commonlib.get_tokens_b1xqfl$;
   var TokenDeveloperClaims = $module$appsimake_commonlib.commonlib.commonlib.TokenDeveloperClaims;
-  var implementAsync = $module$appsimake_functions.commonfns.implementAsync_1ba0c3$;
+  var implementAsync = $module$appsimake_functions.commonfns.implementAsync_4bti1h$;
   function init_1(exports) {
     firebaseadmin.admin.initializeApp();
     var tmp$ = firebaseadmin.admin.firestore();
@@ -174,8 +174,8 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'apps
   $$importsForInline$$['appsimake-commonshr'] = $module$appsimake_commonshr;
   _.init = init_1;
   _.initialize_za3rmp$ = initialize;
-  _.docRef_uv400c$ = docRef;
-  _.initFrom_s99jh5$ = initFrom;
+  _.docRef_tv37zg$ = docRef;
+  _.initFrom_cxt3fl$ = initFrom;
   var package$fns = _.fns || (_.fns = {});
   package$fns.tokenImpl_za3rmp$ = tokenImpl;
   Kotlin.defineModule('appsimake-mainfns', _);

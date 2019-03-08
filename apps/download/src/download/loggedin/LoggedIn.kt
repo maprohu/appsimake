@@ -6,7 +6,6 @@ import commonfb.UserState
 import commonfb.loginbase.UserStateView
 import commonshr.private
 import commonshr.Trigger
-import commonshr.properties.now
 import commonshr.toFsDoc
 import commonui.globalStatus
 import commonui.widget.TopAndContent

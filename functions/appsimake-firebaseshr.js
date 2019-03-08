@@ -52,7 +52,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var Listeners = $module$appsimake_commonshr.common.Listeners;
   var CompletableDeferred = $module$kotlinx_coroutines_core.kotlinx.coroutines.CompletableDeferred_xptg6w$;
-  var CollectionWrap = $module$appsimake_commonshr.commonlib.CollectionWrap;
+  var CollectionWrap = $module$appsimake_commonshr.commonshr.CollectionWrap;
   var get_js = Kotlin.kotlin.js.get_js_1yb8b7$;
   var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var getValue = Kotlin.kotlin.collections.getValue_t9ocha$;
@@ -243,7 +243,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
   PropOps.prototype.component8 = function () {
     return this.arrayRemove;
   };
-  PropOps.prototype.copy_eiw8pb$ = function (delete_0, serverTimestamp, deleteCollection, createId, write, merge, arrayUnion, arrayRemove) {
+  PropOps.prototype.copy_9y8rjz$ = function (delete_0, serverTimestamp, deleteCollection, createId, write, merge, arrayUnion, arrayRemove) {
     return new PropOps(delete_0 === void 0 ? this.delete : delete_0, serverTimestamp === void 0 ? this.serverTimestamp : serverTimestamp, deleteCollection === void 0 ? this.deleteCollection : deleteCollection, createId === void 0 ? this.createId : createId, write === void 0 ? this.write : write, merge === void 0 ? this.merge : merge, arrayUnion === void 0 ? this.arrayUnion : arrayUnion, arrayRemove === void 0 ? this.arrayRemove : arrayRemove);
   };
   PropOps.prototype.toString = function () {
@@ -1579,7 +1579,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'kotlinx-coroutines-core'], 
   package$firebaseshr.currentFrom_d5knkn$ = currentFrom;
   package$firebaseshr.initFrom_bruz9y$ = initFrom;
   package$firebaseshr.wrapper_c00y0o$ = wrapper;
-  package$firebaseshr.withCollection_qmn23v$ = withCollection;
+  package$firebaseshr.withCollection_zg8zil$ = withCollection;
   package$firebaseshr.FBPropFactory = FBPropFactory;
   package$firebaseshr.PropFactory = PropFactory;
   package$firebaseshr.BasePropFactory = BasePropFactory;

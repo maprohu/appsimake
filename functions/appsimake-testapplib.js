@@ -14,7 +14,7 @@ function define(args, fn) {
 
 define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_commonshr) {
   'use strict';
-  var Lib = $module$appsimake_commonshr.commonlib.Lib;
+  var Lib = $module$appsimake_commonshr.commonshr.Lib;
   var named = $module$appsimake_commonshr.common.named_cq6yhu$;
   var PropertyMetadata = Kotlin.PropertyMetadata;
   function testapp$lambda(it) {
