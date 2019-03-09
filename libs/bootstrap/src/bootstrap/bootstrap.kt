@@ -24,102 +24,102 @@ import styles.*
 //    }
 //}
 
-class ClickItemButtons(node: Node) {
-    val element = node.div {
-        cls {
-            listGroupItem
-            positionRelative
-            p0
-        }
-    }
+//class ClickItemButtons(node: Node) {
+//    val element = node.div {
+//        cls {
+//            listGroupItem
+//            positionRelative
+//            p0
+//        }
+//    }
+//
+//    val anchor = element.a {
+//        cls {
+//            positionAbsolute
+//            leftRightTopBottom0
+//            listGroupItemAction
+//        }
+//        href = "#"
+//    }
+//
+//    private val rel = element.div {
+//        cls {
+//            p1
+//            flexGrow1
+//            dFlex
+//            flexRow
+//            alignItemsCenter
+//            positionRelative
+//            pointerEventsNone
+//            zIndex1
+//        }
+//    }
+//
+//    val text = rel.span {
+//        cls {
+//            m1
+//            flexGrow1
+//        }
+//    }
+//
+//    val buttons = rel.div {
+//        cls {
+//            flexFixedSize()
+//            pointerEventsAll
+//        }
+//    }
+//}
 
-    val anchor = element.a {
-        cls {
-            positionAbsolute
-            leftRightTopBottom0
-            listGroupItemAction
-        }
-        href = "#"
-    }
+//fun Node.clickItemButtons(fn: ClickItemButtons.() -> Unit) = ClickItemButtons(this).apply(fn)
 
-    private val rel = element.div {
-        cls {
-            p1
-            flexGrow1
-            dFlex
-            flexRow
-            alignItemsCenter
-            positionRelative
-            pointerEventsNone
-            zIndex1
-        }
-    }
+//fun Node.breadcrumb(
+//    block : HTMLOListElement.() -> Unit = {}
+//): HTMLOListElement {
+//    return ol {
+//        cls.flexGrow1
+//        classes += "breadcrumb mb-0 bg-transparent"
+//        block()
+//    }
+//}
 
-    val text = rel.span {
-        cls {
-            m1
-            flexGrow1
-        }
-    }
-
-    val buttons = rel.div {
-        cls {
-            flexFixedSize()
-            pointerEventsAll
-        }
-    }
-}
-
-fun Node.clickItemButtons(fn: ClickItemButtons.() -> Unit) = ClickItemButtons(this).apply(fn)
-
-fun Node.breadcrumb(
-    block : HTMLOListElement.() -> Unit = {}
-): HTMLOListElement {
-    return ol {
-        cls.flexGrow1
-        classes += "breadcrumb mb-0 bg-transparent"
-        block()
-    }
-}
-
-fun Node.dropdownToggleButton(fn: HTMLButtonElement.() -> Unit = {}): HTMLButtonElement {
-    return btnButton {
-        btnSecondary()
-        classes += "dropdown-toggle"
-        attributes["data-toggle"] = "dropdown"
-        fn()
-    }
-}
-
-fun Element.dropdownToggle() {
-    classes += "dropdown-toggle"
-}
-
-class DropdownGroup(
-    node: HTMLElement,
-    btnStyle: String? = null
-) {
-    val element = node.div {
-        cls {
-            dropdown
-        }
-    }
-
-    val drop  = element.button {
-        cls {
-            btn
-            dropdownToggle
-        }
-        classes += btnStyle
-        dataToggleDropdown()
-    }
-
-    val menu = element.div {
-        cls {
-            dropdownMenu
-        }
-    }
-}
+//fun Node.dropdownToggleButton(fn: HTMLButtonElement.() -> Unit = {}): HTMLButtonElement {
+//    return btnButton {
+//        btnSecondary()
+//        classes += "dropdown-toggle"
+//        attributes["data-toggle"] = "dropdown"
+//        fn()
+//    }
+//}
+//
+//fun Element.dropdownToggle() {
+//    classes += "dropdown-toggle"
+//}
+//
+//class DropdownGroup(
+//    node: HTMLElement,
+//    btnStyle: String? = null
+//) {
+//    val element = node.div {
+//        cls {
+//            dropdown
+//        }
+//    }
+//
+//    val drop  = element.button {
+//        cls {
+//            btn
+//            dropdownToggle
+//        }
+//        classes += btnStyle
+//        dataToggleDropdown()
+//    }
+//
+//    val menu = element.div {
+//        cls {
+//            dropdownMenu
+//        }
+//    }
+//}
 
 fun HTMLButtonElement.dataToggleDropdown() {
     attr["data-toggle"] = "dropdown"
@@ -128,22 +128,22 @@ fun HTMLButtonElement.dataReferenceParent() {
     attr["data-reference"] = "parent"
 }
 
-val Node.dropdownSplit: HTMLButtonElement
-    get() = button {
-        cls {
-            btn
-            dropdownToggle
-            dropdownToggleSplit
-        }
-        dataToggleDropdown()
-        attr["data-reference"] = "parent"
-    }
-
-fun HTMLElement.dropdownGroup(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply {
-    element.cls.btnGroup
-    fn()
-}
-fun HTMLElement.dropdownDiv(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply(fn)
+//val Node.dropdownSplit: HTMLButtonElement
+//    get() = button {
+//        cls {
+//            btn
+//            dropdownToggle
+//            dropdownToggleSplit
+//        }
+//        dataToggleDropdown()
+//        attr["data-reference"] = "parent"
+//    }
+//
+//fun HTMLElement.dropdownGroup(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply {
+//    element.cls.btnGroup
+//    fn()
+//}
+//fun HTMLElement.dropdownDiv(btnStyle: String? = null, fn: DropdownGroup.() -> Unit) = DropdownGroup(this, btnStyle).apply(fn)
 
 //fun Node.dropdownDiv(
 //    block : HTMLDivElement.() -> Unit = {}
@@ -158,102 +158,102 @@ fun HTMLElement.dropdownDiv(btnStyle: String? = null, fn: DropdownGroup.() -> Un
 //    }
 //}
 
-class DropdownItemAnchor(node: Node) {
-    val anchor = node.a {
-        cls {
-            dropdownItem
-        }
-        href = "#"
-    }
+//class DropdownItemAnchor(node: Node) {
+//    val anchor = node.a {
+//        cls {
+//            dropdownItem
+//        }
+//        href = "#"
+//    }
+//
+//    private val iconSpan = anchor.span
+//
+//    val icon by lazy {
+//        iconSpan {
+//            cls {
+//                mr2
+//            }
+//        }
+//    }
+//
+//    val text = anchor.span
+//
+//}
+//
+//fun Node.dropdownItemAnchor(block : DropdownItemAnchor.() -> Unit = {}) = DropdownItemAnchor(this).apply(block)
+//
+//fun Node.listAction(
+//    content: HTMLAnchorElement.() -> Unit
+//): HTMLAnchorElement {
+//    return a {
+//        href = "#"
+//        cls {
+//            listGroupItem
+//            listGroupItemAction
+//        }
+//        content()
+//    }
+//}
+//
+//
+//fun Node.listButton(
+//        fn: () -> Unit = {},
+//        content: HTMLAnchorElement.() -> Unit
+//): HTMLAnchorElement {
+//    return listAction {
+//        clickEvent {
+//            fn()
+//        }
+//        content()
+//    }
+//}
+//
+//fun Node.listGroup(
+//    content: HTMLUListElement.() -> Unit
+//): HTMLElement {
+//    return ul {
+//        cls {
+//            listGroup
+//        }
+//        content()
+//    }
+//}
+//
+//fun Node.listGroupItem(
+//    content: HTMLLIElement.() -> Unit
+//): HTMLElement {
+//    return li {
+//        cls.listGroupItem
+//        content()
+//    }
+//}
+//
+//
+//fun Node.commandButton(label: String, fn: () -> Unit): HTMLAnchorElement {
+//    return listButton(fn) {
+//        innerText = label
+//    }
+//}
+//
+//fun Node.centerDiv(block : HTMLDivElement.() -> Unit): HTMLDivElement {
+//    return div {
+//        cls {
+//            flexCenter()
+//        }
+//        block()
+//    }
+//}
 
-    private val iconSpan = anchor.span
-
-    val icon by lazy {
-        iconSpan {
-            cls {
-                mr2
-            }
-        }
-    }
-
-    val text = anchor.span
-
-}
-
-fun Node.dropdownItemAnchor(block : DropdownItemAnchor.() -> Unit = {}) = DropdownItemAnchor(this).apply(block)
-
-fun Node.listAction(
-    content: HTMLAnchorElement.() -> Unit
-): HTMLAnchorElement {
-    return a {
-        href = "#"
-        cls {
-            listGroupItem
-            listGroupItemAction
-        }
-        content()
-    }
-}
-
-
-fun Node.listButton(
-        fn: () -> Unit = {},
-        content: HTMLAnchorElement.() -> Unit
-): HTMLAnchorElement {
-    return listAction {
-        clickEvent {
-            fn()
-        }
-        content()
-    }
-}
-
-fun Node.listGroup(
-    content: HTMLUListElement.() -> Unit
-): HTMLElement {
-    return ul {
-        cls {
-            listGroup
-        }
-        content()
-    }
-}
-
-fun Node.listGroupItem(
-    content: HTMLLIElement.() -> Unit
-): HTMLElement {
-    return li {
-        cls.listGroupItem
-        content()
-    }
-}
-
-
-fun Node.commandButton(label: String, fn: () -> Unit): HTMLAnchorElement {
-    return listButton(fn) {
-        innerText = label
-    }
-}
-
-fun Node.centerDiv(block : HTMLDivElement.() -> Unit): HTMLDivElement {
-    return div {
-        cls {
-            flexCenter()
-        }
-        block()
-    }
-}
-
-fun Element.flexJustifyContentCenter() {
-    flex()
-    classes += "justify-content-center"
-}
-
-
-fun Element.flexAlignItemsCenter() {
-    flex()
-    classes += "align-items-center"
-}
+//fun Element.flexJustifyContentCenter() {
+//    flex()
+//    classes += "justify-content-center"
+//}
+//
+//
+//fun Element.flexAlignItemsCenter() {
+//    flex()
+//    classes += "align-items-center"
+//}
 
 //fun Element.flexCenter() {
 //    flex()
@@ -261,29 +261,29 @@ fun Element.flexAlignItemsCenter() {
 //    flexAlignItemsCenter()
 //}
 
-fun HTMLElement.rxDisplay(ks: KillSet, rxVal: () ->Boolean) {
-    val rxv = Rx(ks) { rxVal() }
-    rxDisplay(ks, rxv)
-}
-fun HTMLElement.rxDisplay(ks: KillSet, rxVal: RxVal<Boolean>) {
-    rxVal.forEach(ks) {
-        style.cssText = if (it) "" else "display: none !important;"
-    }
-}
-
-fun Element.rxAnchorEnabled(ks: KillSet, rxVal: RxVal<Boolean>) {
-    val stl = Rx(ks) { if (rxVal()) null else "disabled" }
-    rxClassOpt(ks, stl)
-}
-
-fun HTMLElement.rxAnchorClick(ks: KillSet, rxVal: RxVal<Boolean>, fn: (MouseEvent) -> Unit) {
-    rxAnchorEnabled(ks, rxVal)
-    clickEvent {
-        if (rxVal.now) {
-            fn(it)
-        }
-    }
-}
+//fun HTMLElement.rxDisplay(ks: KillSet, rxVal: () ->Boolean) {
+//    val rxv = Rx(ks) { rxVal() }
+//    rxDisplay(ks, rxv)
+//}
+//fun HTMLElement.rxDisplay(ks: KillSet, rxVal: RxVal<Boolean>) {
+//    rxVal.forEach(ks) {
+//        style.cssText = if (it) "" else "display: none !important;"
+//    }
+//}
+//
+//fun Element.rxAnchorEnabled(ks: KillSet, rxVal: RxVal<Boolean>) {
+//    val stl = Rx(ks) { if (rxVal()) null else "disabled" }
+//    rxClassOpt(ks, stl)
+//}
+//
+//fun HTMLElement.rxAnchorClick(ks: KillSet, rxVal: RxVal<Boolean>, fn: (MouseEvent) -> Unit) {
+//    rxAnchorEnabled(ks, rxVal)
+//    clickEvent {
+//        if (rxVal.now) {
+//            fn(it)
+//        }
+//    }
+//}
 
 fun HTMLElement.rxText(ks: KillSet, rxVal: RxVal<String>) {
     rxVal.forEach(ks) {
@@ -319,180 +319,174 @@ fun setupFullScreen() {
     }
 }
 
-class Panel(private val root: org.w3c.dom.Node) {
-
-    private var current = Content(wrapper())
-
-    inner class Content(
-        val tab : HTMLElement
-    ) {
-        init {
-            root.appendChild(tab)
-        }
-
-        val killables = Killables()
-
-        internal fun kill() {
-            tab.removeFromParent()
-            killables.kill()
-        }
-    }
-
-    private fun wrapper() = document.div { fullSize() }
-
-    fun new(wrapper : HTMLElement = wrapper()): Content {
-        current.kill()
-        current = Content(wrapper)
-        return current
-    }
-
-}
+//class Panel(private val root: org.w3c.dom.Node) {
+//
+//    private var current = Content(wrapper())
+//
+//    inner class Content(
+//        val tab : HTMLElement
+//    ) {
+//        init {
+//            root.appendChild(tab)
+//        }
+//
+//        val killables = Killables()
+//
+//        internal fun kill() {
+//            tab.removeFromParent()
+//            killables.kill()
+//        }
+//    }
+//
+//    private fun wrapper() = document.div { fullSize() }
+//
+//    fun new(wrapper : HTMLElement = wrapper()): Content {
+//        current.kill()
+//        current = Content(wrapper)
+//        return current
+//    }
+//
+//}
 
 fun Node.column(fn: HTMLDivElement.() -> Unit): HTMLDivElement {
     return div {
-        cls {
-            dFlex
-            flexColumn
-        }
+        cls.column()
         fn()
     }
 }
 
 fun Node.row(fn: HTMLDivElement.() -> Unit): HTMLDivElement {
     return div {
-        cls {
-            dFlex
-            flexRow
-        }
+        cls.row()
         fn()
     }
 }
 
-fun Node.btnButton(fn: HTMLButtonElement.() -> Unit): HTMLButtonElement {
-    return button {
-        type = "button"
-        cls {
-            btn
-        }
-        fn()
-    }
-}
-
-
-fun Element.fullSize() {
-    classes += "w-100 h-100"
-}
-fun Element.flex() {
-    classes += "d-flex"
-}
-fun Element.margin1() {
-    classes += "m-1"
-}
-fun Element.marginRight2() {
-    classes += "mr-2"
-}
-fun Element.marginBottom1() {
-    classes += "mb-1"
-}
-fun Element.margin2() {
-    classes += "m-2"
-}
-fun Element.displayBlock() {
-    classes += "d-block"
-}
-fun Element.padding1() {
-    classes += "p-1"
-}
-fun Element.card() {
-    classes += "card"
-}
-fun Element.padding2() {
-    classes += "p-2"
-}
-fun Element.paddingRight2() {
-    classes += "pr-2"
-}
-fun Element.paddingLeft2() {
-    classes += "pl-2"
-}
-fun Element.flexGrow0() {
-    classes += "flex-grow-0"
-}
-fun Element.flexShrink0() {
-    classes += "flex-shrink-0"
-}
-fun Element.bgLight() {
-    classes += "bg-light"
-}
-fun Element.bgDark() {
-    classes += "bg-dark"
-}
-fun Element.bgWhite() {
-    classes += "bg-white"
-}
+//fun Node.btnButton(fn: HTMLButtonElement.() -> Unit): HTMLButtonElement {
+//    return button {
+//        type = "button"
+//        cls {
+//            btn
+//        }
+//        fn()
+//    }
+//}
+//
+//
+//fun Element.fullSize() {
+//    classes += "w-100 h-100"
+//}
+//fun Element.flex() {
+//    classes += "d-flex"
+//}
+//fun Element.margin1() {
+//    classes += "m-1"
+//}
+//fun Element.marginRight2() {
+//    classes += "mr-2"
+//}
+//fun Element.marginBottom1() {
+//    classes += "mb-1"
+//}
+//fun Element.margin2() {
+//    classes += "m-2"
+//}
+//fun Element.displayBlock() {
+//    classes += "d-block"
+//}
+//fun Element.padding1() {
+//    classes += "p-1"
+//}
+//fun Element.card() {
+//    classes += "card"
+//}
+//fun Element.padding2() {
+//    classes += "p-2"
+//}
+//fun Element.paddingRight2() {
+//    classes += "pr-2"
+//}
+//fun Element.paddingLeft2() {
+//    classes += "pl-2"
+//}
+//fun Element.flexGrow0() {
+//    classes += "flex-grow-0"
+//}
+//fun Element.flexShrink0() {
+//    classes += "flex-shrink-0"
+//}
+//fun Element.bgLight() {
+//    classes += "bg-light"
+//}
+//fun Element.bgDark() {
+//    classes += "bg-dark"
+//}
+//fun Element.bgWhite() {
+//    classes += "bg-white"
+//}
 //fun Element.flexFixedSize() {
 //    flexShrink0()
 //    flexGrow0()
 //}
-fun Element.alignItemsCenter() {
-    classes += "align-items-center"
-}
-
-fun Element.border() {
-    classes += "border"
-}
-fun Element.borderBottom() {
-    classes += "border-bottom"
-}
-fun Element.borderTop() {
-    classes += "border-top"
-}
-fun Element.btn() {
-    classes += "btn"
-}
-fun Element.btnPrimary() {
-    classes += "btn-primary"
-}
-fun Element.btnSecondary() {
-    classes += "btn-secondary"
-}
-fun Element.formGroup() {
-    classes += "form-group"
-}
-fun Element.formControl() {
-    classes += "form-control"
-}
-fun Element.formCheck() {
-    classes += "form-check"
-}
-fun Element.formCheckInput() {
-    classes += "form-check-input"
-}
-fun Element.dropdownMenuRight() {
-    classes += "dropdown-menu-right"
-}
-fun Element.dropdownItem() {
-    classes += "dropdown-item"
-}
-fun Element.alert() {
-    classes += "alert"
-}
-fun Element.alertWarning() {
-    classes += "alert-warning"
-}
-fun Element.spinnerBorder() {
-    classes += "spinner-border"
-}
-fun Element.spinnerBorderSm() {
-    spinnerBorder()
-    classes += "spinner-border-sm"
-}
-fun Element.positionAbsolute() {
-    classes += "position-absolute"
-}
-fun Element.positionRelative() {
-    classes += "position-relative"
-}
+//fun Element.alignItemsCenter() {
+//    classes += "align-items-center"
+//}
+//
+//fun Element.border() {
+//    classes += "border"
+//}
+//fun Element.borderBottom() {
+//    classes += "border-bottom"
+//}
+//fun Element.borderTop() {
+//    classes += "border-top"
+//}
+//fun Element.btn() {
+//    classes += "btn"
+//}
+//fun Element.btnPrimary() {
+//    classes += "btn-primary"
+//}
+//fun Element.btnSecondary() {
+//    classes += "btn-secondary"
+//}
+//fun Element.formGroup() {
+//    classes += "form-group"
+//}
+//fun Element.formControl() {
+//    classes += "form-control"
+//}
+//fun Element.formCheck() {
+//    classes += "form-check"
+//}
+//fun Element.formCheckInput() {
+//    classes += "form-check-input"
+//}
+//fun Element.dropdownMenuRight() {
+//    classes += "dropdown-menu-right"
+//}
+//fun Element.dropdownItem() {
+//    classes += "dropdown-item"
+//}
+//fun Element.alert() {
+//    classes += "alert"
+//}
+//fun Element.alertWarning() {
+//    classes += "alert-warning"
+//}
+//fun Element.spinnerBorder() {
+//    classes += "spinner-border"
+//}
+//fun Element.spinnerBorderSm() {
+//    spinnerBorder()
+//    classes += "spinner-border-sm"
+//}
+//fun Element.positionAbsolute() {
+//    classes += "position-absolute"
+//}
+//fun Element.positionRelative() {
+//    classes += "position-relative"
+//}
 
 
 

@@ -85,43 +85,43 @@ fun Node.replaceWith(node: Node) {
 
 
 
-fun HTMLAnchorElement.attachEnabler(ks: KillSet, enabled: Rx<Boolean>) {
-    enabled.forEach(ks) { en ->
-        if (en) {
-            removeClass("disabled")
-            style.cursor = "pointer"
-        } else {
-            addClass("disabled")
-            style.cursor = "default"
-        }
-    }
-}
+//fun HTMLAnchorElement.attachEnabler(ks: KillSet, enabled: Rx<Boolean>) {
+//    enabled.forEach(ks) { en ->
+//        if (en) {
+//            removeClass("disabled")
+//            style.cursor = "pointer"
+//        } else {
+//            addClass("disabled")
+//            style.cursor = "default"
+//        }
+//    }
+//}
 
 
 
-fun <T> linkedIterable(first: T?, next: (T) -> T?) : Iterable<T> {
-    return object : Iterable<T> {
-        override fun iterator(): Iterator<T> {
-            return object : Iterator<T> {
-                var current = first
-
-                override fun next(): T {
-                    val tmp = current
-                    if (tmp == null) {
-                        throw NoSuchElementException()
-                    } else {
-                        current = next(tmp)
-                        return tmp
-                    }
-                }
-
-                override fun hasNext(): Boolean {
-                    return current != null
-                }
-            }
-        }
-    }
-}
+//fun <T> linkedIterable(first: T?, next: (T) -> T?) : Iterable<T> {
+//    return object : Iterable<T> {
+//        override fun iterator(): Iterator<T> {
+//            return object : Iterator<T> {
+//                var current = first
+//
+//                override fun next(): T {
+//                    val tmp = current
+//                    if (tmp == null) {
+//                        throw NoSuchElementException()
+//                    } else {
+//                        current = next(tmp)
+//                        return tmp
+//                    }
+//                }
+//
+//                override fun hasNext(): Boolean {
+//                    return current != null
+//                }
+//            }
+//        }
+//    }
+//}
 
 
 fun EventTarget.listen(type: String, fn: (Event) -> Unit): Trigger {

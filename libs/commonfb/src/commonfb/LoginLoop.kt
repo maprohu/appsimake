@@ -11,9 +11,9 @@ import rx.RxIface
 import rx.Var
 
 
-interface HasUserState {
-    val userState: UserState
-}
+//interface HasUserState {
+//    val userState: UserState
+//}
 sealed class UserState {
     object Unknown: UserState()
     object NotLoggedIn: UserState()
@@ -59,7 +59,7 @@ fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx(ks) {
     }
 }
 
-fun RxIface<User?>.toUid(ks: KillSet) = Rx(ks) { this@toUid()?.uid }
+//fun RxIface<User?>.toUid(ks: KillSet) = Rx(ks) { this@toUid()?.uid }
 
 
 //object NotLoggedIn
