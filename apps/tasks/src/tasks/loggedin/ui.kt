@@ -21,15 +21,17 @@ fun LoggedIn.ui() = TopAndContent(
                 }
             }
         }
-        right.button {
-            m1p2
-            fa.eye
-            cls.btnInfo
-            insert.badge {
+        right.badgeAnchor {
+            cls.alignSelfCenter
+            info
+            pill
+            insert.icon {
                 cls.m1
-                warning
-                pill
-                node %= { hiddenList.sizeRx().toString() }
+                fa.eye
+            }
+            node.span {
+                cls.m1
+                this %= { hiddenList.sizeRx().toString() }
             }
             visible { !hiddenList.isEmptyRx() }
             click {

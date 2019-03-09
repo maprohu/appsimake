@@ -580,10 +580,11 @@ suspend fun <T, S> RxIface<T>.mapAsync(
 fun <T> KillSet.rx(fn: KillsApi.() -> T): RxIface<T> = Rx(this, fn)
 fun <T> T.toVar() = Var(this)
 
-inline fun <reified E: Enum<E>> Var<E>.toName(deps: HasKills) = Var(now.name).apply {
-    this@toName.forEach(deps) { this@apply %= it.name }
-    forEach(deps) { this@toName %= enumValueOf(it) }
-}
+inline fun <reified E: Enum<E>> Var<E>.toName(deps: HasKills) = linked(
+    deps,
+    { it.name },
+    { enumValueOf(it) }
+)
 
 fun <T, S> Var<T>.linked(
     deps: HasKills,

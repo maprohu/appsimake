@@ -40,11 +40,11 @@ fun <E: Enum<E>> Select.bind(
     deps: HasKills,
     prop: EnumProp<*, E>
 ) {
-    bind(deps, prop.nameVar)
     prop.values.forEach { e -> // TODO rx value list?
         option {
             value = e.name
             this %= e.name // TODO proper label?
         }
     }
+    bind(deps, prop.nameVar)
 }

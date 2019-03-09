@@ -14,6 +14,9 @@ abstract class AbstractBadge: ScreenWrap() {
     val secondary by lazy {
         cls.badgeSecondary
     }
+    val info by lazy {
+        cls.badgeInfo
+    }
     val warning by lazy {
         cls.badgeWarning
     }
