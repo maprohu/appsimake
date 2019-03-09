@@ -1,14 +1,17 @@
 package firebase.firestore
 
 import firebase.HasDb
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.await
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 const val MaxBatchSize = 500
 
 class FsBatch(
-    val db: Firestore,
+    override val db: Firestore,
     val batchSize: Int = MaxBatchSize
-) {
+): HasDb {
     var counter = 0
 
     var batch: WriteBatch? = null
@@ -56,16 +59,40 @@ inline fun Firestore.batch(batchSize: Int = MaxBatchSize, fn: FsBatch.() -> Unit
     }
 }
 
+suspend fun DocumentReference.waitUntilDeleted() {
+    val cd = CompletableDeferred<Unit>()
+
+    val cancelSnapshots = onSnapshotNext {ds ->
+        if (!ds.exists) cd.complete(Unit)
+    }
+
+    cd.await()
+
+    cancelSnapshots()
+}
 
 
 suspend fun FsBatch.delete(query: Query, deleteCollections: suspend (QueryDocumentSnapshot) -> Unit = {}) {
-    var count = 0
     val ql = query.limit(batchSize)
-    do {
-        ql.get().await().also { count = it.size }.docs.forEach { qds ->
-            deleteCollections(qds)
-            delete(qds.ref)
+    suspend fun QueryDocumentSnapshot.deleteCollectionsAndSelf() {
+        deleteCollections(this)
+        delete(ref)
+    }
+    while (true) {
+        ql.get().await().also { qs ->
+            if (qs.size == batchSize) {
+                coroutineScope {
+                    qs.docs.forEach { qds ->
+                        qds.deleteCollectionsAndSelf()
+                        launch { qds.ref.waitUntilDeleted() }
+                    }
+                    commit()
+                }
+            } else {
+                qs.docs.forEach { it.deleteCollectionsAndSelf() }
+                return
+            }
         }
-    } while (count > 0)
+    }
 }
 

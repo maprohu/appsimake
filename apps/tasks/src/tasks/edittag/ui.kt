@@ -2,6 +2,7 @@ package tasks.edittag
 
 import bootstrap.*
 import commonshr.*
+import commonui.editing.required
 import commonui.editing.saveDeleteButton
 import commonui.widget.*
 import domx.*
@@ -26,7 +27,7 @@ fun EditTag.ui() = TopAndContent(
             cls {
                 m1
             }
-            bind(editing.current.name)
+            bind(editing.current.name).required()
         }
     }
 )

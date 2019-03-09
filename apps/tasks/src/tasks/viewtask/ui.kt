@@ -14,12 +14,7 @@ import kotlin.browser.document
 
 fun ViewTask.ui() = TopAndContent(
     topbar = factory.topbar {
-        left.button {
-            back
-            click {
-                loggedIn.redisplay()
-            }
-        }
+        backButton
         title %= "Task"
         right.buttonGroup {
             m1

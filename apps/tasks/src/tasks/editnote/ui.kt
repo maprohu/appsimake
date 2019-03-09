@@ -2,6 +2,7 @@ package tasks.editnote
 
 import bootstrap.*
 import commonshr.*
+import commonui.editing.required
 import commonui.editing.saveDeleteButton
 import commonui.widget.*
 import domx.*
@@ -27,7 +28,7 @@ fun EditNote.ui() = TopAndContent(
                 m1
                 flexGrow1
             }
-            bind(editing.current.text.rxv)
+            bind(editing.current.text.rxv).required()
         }
     }
 )

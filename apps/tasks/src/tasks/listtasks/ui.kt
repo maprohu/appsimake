@@ -11,7 +11,7 @@ import taskslib.Task
 import kotlin.browser.document
 
 fun ListTasks.ui(): TopAndContent {
-    val statusFilter = Var<StatusFilter>(StatusFilter.Completed(true))
+    val statusFilter = Var<StatusFilter>(StatusFilter.Completed(false))
 
     val filter = document.div {
         cls {
@@ -115,7 +115,7 @@ fun ListTasks.ui(): TopAndContent {
     return TopAndContent(
         topbar = factory.topbar {
             backButton
-            title %= "Tags"
+            title %= "Search Task"
             tabs {
                 tab {
                     icon.fa.filter

@@ -3,6 +3,7 @@ package tasks.edittask
 import bootstrap.*
 import common.Listeners
 import commonshr.*
+import commonui.editing.required
 import commonui.editing.saveDeleteButton
 import commonui.widget.*
 import domx.*
@@ -25,7 +26,7 @@ fun EditTask.ui(): TopAndContent {
             insert.formGroup {
                 label %= "Title"
                 input {
-                    bind(editing.current.title)
+                    bind(editing.current.title).required()
                 }
             }
             insert.formGroup {

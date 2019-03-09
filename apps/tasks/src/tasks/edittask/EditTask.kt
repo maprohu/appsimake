@@ -6,7 +6,8 @@ import commonui.Editor
 import commonui.widget.ForwardBase
 import commonui.widget.HasRedisplay
 import commonui.widget.TopAndContent
-import tasks.data.deleteRecursive
+import kotlinx.coroutines.launch
+import tasks.data.deleteCollections
 import tasks.viewtask.ViewTask
 import tasks.viewtask.ViewTaskPath
 import taskslib.Note
@@ -23,10 +24,9 @@ class EditTask(
     override val editing = rxEditing(
         viewTask.item,
         delete = {
-            // TODO create executor that cannot be cancelled
-            // that is, user cannot log out until this task is finished
-            loggedIn.exec {
-                viewTask.item.deleteRecursive(this)
+            viewTask.item.delete()
+            loggedIn.launch {
+                viewTask.item.deleteCollections(this@EditTask)
             }
         }
     )
