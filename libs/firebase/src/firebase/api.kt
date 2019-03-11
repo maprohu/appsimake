@@ -5,7 +5,6 @@ import commonshr.*
 import commonshr.properties.RxBase
 import commonshr.properties.SnapshotEvent
 import firebase.firestore.*
-import firebaseshr.HasFBProps
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlin.js.Promise
 
@@ -39,15 +38,15 @@ interface CsApiFirebase: CsApi {
 
     fun ReceiveChannel<DocumentChange>.toSnapshotEvents() = toSnapshotEvents(api)
 
-    fun <T: HasFBProps<*>> ReceiveChannel<SnapshotEvent>.listEvents(
-        collectionWrap: CollectionWrap<T>,
-        create: () -> T
-    )= listEvents(api, collectionWrap, create)
+//    fun <T: HasFBProps<*>> ReceiveChannel<SnapshotEvent>.listEvents(
+//        collectionWrap: CollectionWrap<T>,
+//        create: () -> T
+//    )= listEvents(api, collectionWrap, create)
 
 }
 
 interface CsKillsApiFirebase: CsKillsApiCommon, CsApiFirebase {
-    fun <T: HasFBProps<*>> QueryWrap<T>.listEvents(create: () -> T) = listEvents(api, create)
+//    fun <T: HasFBProps<*>> QueryWrap<T>.listEvents(create: () -> T) = listEvents(api, create)
 }
 
 interface CsDbKillsApi: HasCsDbKills, CsKillsApiFirebase, DbApi, KillsApiFirebase, CsKillsApiCommon, DbKillsApi {

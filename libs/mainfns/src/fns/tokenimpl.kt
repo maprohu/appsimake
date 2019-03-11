@@ -1,22 +1,25 @@
 package fns
 
+import commonfns.FnsDynamicOps
 import commonfns.implementAsync
 import commonshr.admin
 import commonlib.commonlib.*
+import commonshr.properties.readDynamic
+import commonshr.properties.writeDynamic
+import docRef
 import firebaseadmin.admin
-import initFrom
+import kotlinx.coroutines.await
 
 fun tokenImpl(exports: dynamic) {
 
     customToken.implementAsync(exports) { _, ctx ->
         val db = admin.firestore()
         ctx.auth?.let { cca ->
-            val dw = shared.app.admin.users.tokens.doc(cca.uid)
+            val d = shared.app.admin.users.tokens.doc(cca.uid).docRef(db).get().await().data()
             val tdc = TokenDeveloperClaims().apply {
-                initFrom(dw, db)
-                props.rollback()
+                readDynamic(d, FnsDynamicOps)
             }
-            admin.auth().createCustomToken(cca.uid, tdc.props.write())
+            admin.auth().createCustomToken(cca.uid, tdc.writeDynamic(FnsDynamicOps))
         }
     }
 

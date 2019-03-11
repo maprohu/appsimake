@@ -200,6 +200,7 @@ open class PropertyList<T> {
     )
 
     fun boolean() = prop(false)
+    fun int() = prop(0)
 
 
     fun <V> addCalc(
@@ -286,6 +287,35 @@ fun <B: RxBase<*>> rxCompare(a: B, b: B): Boolean {
 
 open class RxBase<T> {
     val o = PropertyList<T>()
+}
+
+open class RxRoot<T>: RxBase<T>() {
+    val type by o.string()
+
+    companion object: RxRoot<Nothing>()
+
+}
+
+// waiting for KClass.sealedSubclasses to be implemented in KotlinJS
+fun <T: RxRoot<*>> wrapper(
+    vararg classes: () -> T
+) : ReadDynamic<T> {
+    val typeMap =
+        classes
+            .map { cl ->
+                cl()::class.simpleName!! to cl
+            }
+            .toMap()
+
+    return { d, ops ->
+        RxRoot.apply {
+            readDynamic(d, ops)
+        }.let { ch ->
+            typeMap.getValue(ch.type.now)().apply {
+                readDynamic(d, ops)
+            }
+        }
+    }
 }
 
 fun <B: RxBase<*>> zipItems(a: B, b: B) =

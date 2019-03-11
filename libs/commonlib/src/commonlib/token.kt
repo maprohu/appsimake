@@ -2,15 +2,15 @@ package commonlib.commonlib
 
 import common.named
 import commonshr.*
-import firebaseshr.Base
+import commonshr.properties.RxBase
 
 
 val shared by named { Lib(it) }
 
 interface AdminUsersDoc : AdminDoc
-class TokenDeveloperClaims: Base<TokenDeveloperClaims>() {
-    val adminRight by o.scalar<Boolean>().prop()
-    val musicRight by o.scalar<Boolean>().prop()
+class TokenDeveloperClaims: RxBase<TokenDeveloperClaims>() {
+    val adminRight by o.prop(false)
+    val musicRight by o.prop(false)
 }
 
 val CollectionWrap<AdminDoc>.users by doc<AdminUsersDoc>()

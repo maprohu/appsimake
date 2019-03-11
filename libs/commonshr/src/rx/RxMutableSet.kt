@@ -4,7 +4,7 @@ import common.*
 import commonshr.*
 import commonshr.KillsApi
 import killable.KillSet
-import killable.wrap
+//import killable.wrap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
 
@@ -16,9 +16,8 @@ interface RxSet<E>: Set<E> {
     val diffs: EmitterIface<SetDiff<E>>
     fun containsRx(ks: KillSet, value: E): RxIface<Boolean>
 
-    fun anyRx(ks: KillSet, fn: KillsApi.(E) -> Boolean): RxIface<Boolean> = with(ks.wrap) {
-        rx { iterableRx().any { fn(it) } }
-    }
+    fun anyRx(ks: KillSet, fn: KillsApi.(E) -> Boolean): RxIface<Boolean> =
+        Rx(ks) { iterableRx().any { fn(it) } }
 
     val diffsAll get() = diffs.withInitial { listOf(SetDiff(added = this)) }
 

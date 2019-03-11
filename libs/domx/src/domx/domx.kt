@@ -38,7 +38,7 @@ fun <T: Element> Node.tagNS(ns: String, name: String, fn: T.() -> Unit = {}): T 
 }
 
 
-val Element.classes
+inline val Element.classes
     get() = Classes(this)
 
 class Classes(private val element: Element) {
@@ -70,119 +70,119 @@ operator fun NamedNodeMap.set(key: String, value: String) {
         }
 }
 
-fun EventTarget.clickEvent(fn: (MouseEvent) -> Unit) {
-    addEventListener(
-        "click",
-        {
-            it.preventDefault()
-            fn(it as MouseEvent)
-        }
-    )
-}
-
-fun GlobalEventHandlers.longClick(fn: () -> Unit) {
-    var timer: Int? = null
-    fun cancel() {
-        timer?.let { t ->
-            window.clearTimeout(t)
-            timer = null
-        }
-    }
-    onmouseleave = {
-        it.preventDefault()
-        it.stopPropagation()
-        cancel()
-        Unit
-    }
-    onmousedown = {
-        it.preventDefault()
-        it.stopPropagation()
-        cancel()
-        timer = window.setTimeout(
-            {
-                timer = null
-                fn()
-            },
-            1000
-        )
-        Unit
-    }
-    onmouseup = {
-        it.preventDefault()
-        it.stopPropagation()
-        cancel()
-    }
-}
-
-fun GlobalEventHandlers.clickEventSeq(ks: KillSet, fn: (KillSet, MouseEvent) -> Unit)  {
-    val seq = ks.seq()
-    onclick = {
-        it.preventDefault()
-        fn(seq.killSet(), it)
-    }
-}
-
-fun GlobalEventHandlers.inputEvent(fn: (InputEvent) -> Unit) {
-    oninput = {
-        it.preventDefault()
-        fn(it)
-    }
-}
-
-fun GlobalEventHandlers.changeEvent(fn: (Event) -> Unit) {
-    onchange = {
-        it.preventDefault()
-        fn(it)
-    }
-}
-
-fun HTMLTextAreaElement.rxInput(rx: Var<String>) {
-    inputEvent {
-        rx.now = value
-    }
-}
-
-
-fun HTMLInputElement.rxInput(rx: Var<String>) {
-    inputEvent {
-        rx.now = value
-    }
-}
-
-fun HTMLTextAreaElement.listenInput(fn: (String) -> Unit) {
-    inputEvent {
-        fn(value)
-    }
-}
-fun HTMLInputElement.listenInput(fn: (String) -> Unit) {
-    inputEvent {
-        fn(value)
-    }
-}
-
-fun HTMLButtonElement.rxEnabled(ks: KillSet, rx: RxVal<Boolean>) {
-    rx.forEach(ks) { disabled = !it }
-}
-fun HTMLButtonElement.rxEnabled(deps: HasKills, fn: KillsApi.() -> Boolean) {
-    Rx(deps.kills) { fn() }.also { rxEnabled(deps.kills, it) }
-}
-
-fun ElementCSSInlineStyle.rxVisible(deps: HasKills, rxv: RxVal<Boolean>) {
-    rxv.forEach(deps.kills) { style.visibility = if (it) "visible" else "collapse" }
-}
-
-fun ElementCSSInlineStyle.rxVisible(deps: HasKills, fn: KillsApi.() -> Boolean): Rx<Boolean> {
-    return Rx(deps.kills, fn).also { rxVisible(HasNoKill, it) }
-}
-
-
-
-val String.textNode
-    get() = document.createTextNode(this)
-
-operator fun Node.plus(string: String) {
-    appendChild(string.textNode)
-}
+//fun EventTarget.clickEvent(fn: (MouseEvent) -> Unit) {
+//    addEventListener(
+//        "click",
+//        {
+//            it.preventDefault()
+//            fn(it as MouseEvent)
+//        }
+//    )
+//}
+//
+//fun GlobalEventHandlers.longClick(fn: () -> Unit) {
+//    var timer: Int? = null
+//    fun cancel() {
+//        timer?.let { t ->
+//            window.clearTimeout(t)
+//            timer = null
+//        }
+//    }
+//    onmouseleave = {
+//        it.preventDefault()
+//        it.stopPropagation()
+//        cancel()
+//        Unit
+//    }
+//    onmousedown = {
+//        it.preventDefault()
+//        it.stopPropagation()
+//        cancel()
+//        timer = window.setTimeout(
+//            {
+//                timer = null
+//                fn()
+//            },
+//            1000
+//        )
+//        Unit
+//    }
+//    onmouseup = {
+//        it.preventDefault()
+//        it.stopPropagation()
+//        cancel()
+//    }
+//}
+//
+//fun GlobalEventHandlers.clickEventSeq(ks: KillSet, fn: (KillSet, MouseEvent) -> Unit)  {
+//    val seq = ks.seq()
+//    onclick = {
+//        it.preventDefault()
+//        fn(seq.killSet(), it)
+//    }
+//}
+//
+//fun GlobalEventHandlers.inputEvent(fn: (InputEvent) -> Unit) {
+//    oninput = {
+//        it.preventDefault()
+//        fn(it)
+//    }
+//}
+//
+//fun GlobalEventHandlers.changeEvent(fn: (Event) -> Unit) {
+//    onchange = {
+//        it.preventDefault()
+//        fn(it)
+//    }
+//}
+//
+//fun HTMLTextAreaElement.rxInput(rx: Var<String>) {
+//    inputEvent {
+//        rx.now = value
+//    }
+//}
+//
+//
+//fun HTMLInputElement.rxInput(rx: Var<String>) {
+//    inputEvent {
+//        rx.now = value
+//    }
+//}
+//
+//fun HTMLTextAreaElement.listenInput(fn: (String) -> Unit) {
+//    inputEvent {
+//        fn(value)
+//    }
+//}
+//fun HTMLInputElement.listenInput(fn: (String) -> Unit) {
+//    inputEvent {
+//        fn(value)
+//    }
+//}
+//
+//fun HTMLButtonElement.rxEnabled(ks: KillSet, rx: RxVal<Boolean>) {
+//    rx.forEach(ks) { disabled = !it }
+//}
+//fun HTMLButtonElement.rxEnabled(deps: HasKills, fn: KillsApi.() -> Boolean) {
+//    Rx(deps.kills) { fn() }.also { rxEnabled(deps.kills, it) }
+//}
+//
+//fun ElementCSSInlineStyle.rxVisible(deps: HasKills, rxv: RxVal<Boolean>) {
+//    rxv.forEach(deps.kills) { style.visibility = if (it) "visible" else "collapse" }
+//}
+//
+//fun ElementCSSInlineStyle.rxVisible(deps: HasKills, fn: KillsApi.() -> Boolean): Rx<Boolean> {
+//    return Rx(deps.kills, fn).also { rxVisible(HasNoKill, it) }
+//}
+//
+//
+//
+//val String.textNode
+//    get() = document.createTextNode(this)
+//
+//operator fun Node.plus(string: String) {
+//    appendChild(string.textNode)
+//}
 
 class Attrs(val element: Element) {
     operator fun set(key: String, value: String) {
@@ -196,19 +196,19 @@ class Attrs(val element: Element) {
 val Element.attr
     get() = Attrs(this)
 
-class Attr : ReadWriteProperty<Element, String?> {
-    override fun getValue(thisRef: Element, property: KProperty<*>): String? {
-        return thisRef.getAttribute(property.name)
-    }
-
-    override fun setValue(thisRef: Element, property: KProperty<*>, value: String?) {
-        if (value == null) {
-            thisRef.removeAttribute(property.name)
-        } else {
-            thisRef.setAttribute(property.name, value)
-        }
-    }
-}
+//class Attr : ReadWriteProperty<Element, String?> {
+//    override fun getValue(thisRef: Element, property: KProperty<*>): String? {
+//        return thisRef.getAttribute(property.name)
+//    }
+//
+//    override fun setValue(thisRef: Element, property: KProperty<*>, value: String?) {
+//        if (value == null) {
+//            thisRef.removeAttribute(property.name)
+//        } else {
+//            thisRef.setAttribute(property.name, value)
+//        }
+//    }
+//}
 
 private var nextId = 0
 
@@ -221,10 +221,10 @@ val Element.ref
         "$id"
     }
 
-fun Node.checkbox(fn: HTMLInputElement.() -> Unit) = input {
-    type = "checkbox"
-    fn()
-}
+//fun Node.checkbox(fn: HTMLInputElement.() -> Unit) = input {
+//    type = "checkbox"
+//    fn()
+//}
 
 //fun Element.pointerEventsNone() {
 //    classes += styles.pointerEventsNone
@@ -267,112 +267,111 @@ val Element.cls
 
 fun css(name: String) = CssClass(name)
 fun css() = CssClassProvider()
-class TagDelegate<T : Element> : ReadOnlyProperty<Node, T> {
-    override fun getValue(thisRef: Node, property: KProperty<*>): T = thisRef.tag(property.name)
+class TagDelegate<T : Element>(val name: String? = null) : ReadOnlyProperty<Node, T> {
+    override fun getValue(thisRef: Node, property: KProperty<*>): T = thisRef.tag(name ?: property.name)
 }
 
 fun <T: Element> elem() = TagDelegate<T>()
+fun <T: Element> elem(name: String) = TagDelegate<T>(name)
 
 operator fun <T: Node> T.invoke(fn: T.() -> Unit): T {
     return apply(fn)
 }
 
-private const val domxNodesAttributeName = "domxNodeExt"
-
-class NodeExt(
-    val owner: Node
-) {
-
-    inner class ChildRole(
-        val parent: NodeExt,
-        val previous: ChildRole?
-    ) {
-        val owner
-            get() = this@NodeExt.owner
-
-        val isDisplayed
-            get() = owner.isDisplayed
-    }
-
-    private var lastKnownChild: ChildRole? = null
-
-    fun updateChildren(): ChildRole? {
-        val lastKnownVisibleChildExt = lastKnownChild.previousChain().find { it.isDisplayed }
-        val firstUnknownChild = lastKnownVisibleChildExt?.owner?.nextSibling ?: owner.firstChild
-
-        firstUnknownChild.nextSeq().forEach {
-            lastKnownChild = it.nodeExt.makeChild(this, lastKnownChild)
-        }
-
-        return lastKnownChild
-    }
-
-    var childRole: ChildRole? = null
-    fun asChild() = childRole!!
-    fun makeChild(parent: NodeExt, previous: ChildRole?): ChildRole? {
-        require(childRole == null)
-        childRole = ChildRole(parent, previous)
-        return childRole
-    }
-
-}
-
-val Node.isDisplayed : Boolean
-    get() = parentNode != null
-
-fun NodeExt.ChildRole?.previousChain() = generateSequence(this) { it.previous }
-fun Node?.nextSeq() = generateSequence(this) { it.nextSibling }
-
-internal val Node.nodeExt
-    get() =
-        this.asDynamic()[domxNodesAttributeName].unsafeCast<NodeExt?>() ?:
-        NodeExt(this)
-            .also { this.asDynamic()[domxNodesAttributeName] = it }
-
-
-fun Node.rxDisplayed(ks: KillSet, fn: () -> Boolean) {
-    val rxv = Rx(ks) { fn() }
-    rxDisplayed(ks, rxv)
-}
-
-fun Node.rxDisplayed(ks: KillSet, rxv: RxVal<Boolean>) {
-    val parent = parentNode!!
-    val parentNodeExt = parent.nodeExt
-    parentNodeExt.updateChildren()
-    val childRole = nodeExt.asChild()
-    require(childRole.parent.owner == parent)
-    rxv.forEach(ks) {  v ->
-        if (v) {
-            if (!isDisplayed) {
-                val previousDisplayed = childRole.previousChain().drop(1).find { it.isDisplayed }
-                val nextDisplayed = if (previousDisplayed == null) {
-                    parent.firstChild
-                } else {
-                    previousDisplayed.owner.nextSibling
-                }
-                parent.insertBefore(
-                    this@rxDisplayed,
-                    nextDisplayed
-                )
-
-            }
-        } else {
-            removeFromParent()
-        }
-    }
-}
+//private const val domxNodesAttributeName = "domxNodeExt"
+//
+//class NodeExt(
+//    val owner: Node
+//) {
+//
+//    inner class ChildRole(
+//        val parent: NodeExt,
+//        val previous: ChildRole?
+//    ) {
+//        val owner
+//            get() = this@NodeExt.owner
+//
+//        val isDisplayed
+//            get() = owner.isDisplayed
+//    }
+//
+//    private var lastKnownChild: ChildRole? = null
+//
+//    fun updateChildren(): ChildRole? {
+//        val lastKnownVisibleChildExt = lastKnownChild.previousChain().find { it.isDisplayed }
+//        val firstUnknownChild = lastKnownVisibleChildExt?.owner?.nextSibling ?: owner.firstChild
+//
+//        firstUnknownChild.nextSeq().forEach {
+//            lastKnownChild = it.nodeExt.makeChild(this, lastKnownChild)
+//        }
+//
+//        return lastKnownChild
+//    }
+//
+//    var childRole: ChildRole? = null
+//    fun asChild() = childRole!!
+//    fun makeChild(parent: NodeExt, previous: ChildRole?): ChildRole? {
+//        require(childRole == null)
+//        childRole = ChildRole(parent, previous)
+//        return childRole
+//    }
+//
+//}
+//
+//val Node.isDisplayed : Boolean
+//    get() = parentNode != null
+//
+//fun NodeExt.ChildRole?.previousChain() = generateSequence(this) { it.previous }
+//fun Node?.nextSeq() = generateSequence(this) { it.nextSibling }
+//
+//internal val Node.nodeExt
+//    get() =
+//        this.asDynamic()[domxNodesAttributeName].unsafeCast<NodeExt?>() ?:
+//        NodeExt(this)
+//            .also { this.asDynamic()[domxNodesAttributeName] = it }
+//
+//
+//fun Node.rxDisplayed(ks: KillSet, fn: () -> Boolean) {
+//    val rxv = Rx(ks) { fn() }
+//    rxDisplayed(ks, rxv)
+//}
+//
+//fun Node.rxDisplayed(ks: KillSet, rxv: RxVal<Boolean>) {
+//    val parent = parentNode!!
+//    val parentNodeExt = parent.nodeExt
+//    parentNodeExt.updateChildren()
+//    val childRole = nodeExt.asChild()
+//    require(childRole.parent.owner == parent)
+//    rxv.forEach(ks) {  v ->
+//        if (v) {
+//            if (!isDisplayed) {
+//                val previousDisplayed = childRole.previousChain().drop(1).find { it.isDisplayed }
+//                val nextDisplayed = if (previousDisplayed == null) {
+//                    parent.firstChild
+//                } else {
+//                    previousDisplayed.owner.nextSibling
+//                }
+//                parent.insertBefore(
+//                    this@rxDisplayed,
+//                    nextDisplayed
+//                )
+//
+//            }
+//        } else {
+//            removeFromParent()
+//        }
+//    }
+//}
 
 operator fun HTMLElement.remAssign(text: String) { innerText = text }
 
-fun Node.nav(fn: HTMLElement.() -> Unit = {}) : HTMLElement = tag("nav", fn)
-//fun Node.span(fn: HTMLSpanElement.() -> Unit = {}) : HTMLSpanElement = tag("span", fn)
-fun Node.styleTag(fn: HTMLStyleElement.() -> Unit = {}) : HTMLStyleElement = tag("style", fn)
-fun Node.ul(fn: HTMLUListElement.() -> Unit = {}) : HTMLUListElement = tag("ul", fn)
-//fun Node.a(fn: HTMLAnchorElement.() -> Unit = {}) : HTMLAnchorElement = tag("a", fn)
-fun Node.ol(fn: HTMLOListElement.() -> Unit = {}) : HTMLOListElement = tag("ol", fn)
-fun Node.li(fn: HTMLLIElement.() -> Unit = {}) : HTMLLIElement = tag("li", fn)
-fun Node.video(fn: HTMLVideoElement.() -> Unit = {})  = tag("video", fn)
 val Node.div by elem<HTMLDivElement>()
+val Node.styleTag by elem<HTMLStyleElement>("style")
+val Node.nav by elem<HTMLElement>()
+val Node.video by elem<HTMLVideoElement>()
+val Node.li by elem<HTMLLIElement>()
+val Node.ol by elem<HTMLOListElement>()
+val Node.ul by elem<HTMLUListElement>()
 val Node.img by elem<HTMLImageElement>()
 val Node.strong by elem<HTMLElement>()
 val Node.pre by elem<HTMLDivElement>()

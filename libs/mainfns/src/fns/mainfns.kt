@@ -2,7 +2,7 @@ import common.obj
 import commonshr.DocWrap
 import firebaseadmin.admin
 import firebaseadmin.firestore.Firestore
-import firebaseshr.HasFBProps
+//import firebaseshr.HasFBProps
 import fns.tokenImpl
 import kotlinx.coroutines.await
 
@@ -34,10 +34,10 @@ fun initialize(exports: dynamic) {
 }
 
 fun <T> DocWrap<T>.docRef(db: Firestore) = db.doc(path)
-suspend fun <T: HasFBProps<T>> T.initFrom(docWrap: DocWrap<T>, db: Firestore) {
-    val ds = docWrap.docRef(db).get().await()
-    if (ds.exists) {
-        props.extractInitial(ds.data())
-    }
-}
+//suspend fun <T: HasFBProps<T>> T.initFrom(docWrap: DocWrap<T>, db: Firestore) {
+//    val ds = docWrap.docRef(db).get().await()
+//    if (ds.exists) {
+//        props.extractInitial(ds.data())
+//    }
+//}
 

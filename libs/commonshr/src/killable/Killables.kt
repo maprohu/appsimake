@@ -78,10 +78,11 @@ class Killables: KillsApi {
 }
 
 
-class WrapKillSet(
-    override val kills: KillSet
-): KillsApi, InvokeApply
-val KillSet.wrap get() = WrapKillSet(this)
+//class WrapKillSet(
+//    override val kills: KillSet
+//): KillsApi, InvokeApply
+
+//val KillSet.wrap get() = WrapKillSet(this)
 
 suspend fun KillSet.join() {
     val cd = CompletableDeferred<Unit>()

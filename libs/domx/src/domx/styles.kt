@@ -10,7 +10,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 private val styleElement by lazy {
-    document.head!!.styleTag()
+    document.head!!.styleTag
 }
 
 private val styleSheet by lazy {

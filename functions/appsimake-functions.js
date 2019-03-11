@@ -22,6 +22,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
   var async = $module$kotlinx_coroutines_core.kotlinx.coroutines.async_pda6u4$;
   var asPromise = $module$kotlinx_coroutines_core.kotlinx.coroutines.asPromise_ge6odz$;
   var onCall = $module$firebase_functions.https.onCall;
+  var TS = $module$appsimake_commonshr.commonshr.properties.TS;
+  var equals = Kotlin.equals;
+  var TS$Value = $module$appsimake_commonshr.commonshr.properties.TS.Value;
+  var Kind_OBJECT = Kotlin.Kind.OBJECT;
+  var DynamicOps = $module$appsimake_commonshr.commonshr.properties.DynamicOps;
   function admin$lambda() {
     return require('firebase-admin');
   }
@@ -111,6 +116,34 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
   function get_firestore() {
     return firestore.value;
   }
+  function FnsDynamicOps() {
+    FnsDynamicOps_instance = this;
+  }
+  FnsDynamicOps.prototype.writeTimestamp_frv8pu$ = function (ts) {
+    var tmp$;
+    if (equals(ts, TS.Server))
+      tmp$ = get_admin().FieldValue.serverTimestamp();
+    else if (Kotlin.isType(ts, TS$Value))
+      tmp$ = get_admin().Timestamp.fromDate(ts.date);
+    else
+      tmp$ = Kotlin.noWhenBranchMatched();
+    return tmp$;
+  };
+  FnsDynamicOps.prototype.readTimestamp_za3rmp$ = function (d) {
+    return new TS$Value(d.toDate());
+  };
+  FnsDynamicOps.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'FnsDynamicOps',
+    interfaces: [DynamicOps]
+  };
+  var FnsDynamicOps_instance = null;
+  function FnsDynamicOps_getInstance() {
+    if (FnsDynamicOps_instance === null) {
+      new FnsDynamicOps();
+    }
+    return FnsDynamicOps_instance;
+  }
   function functions$lambda() {
     return require('firebase-functions');
   }
@@ -130,6 +163,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
   $$importsForInline$$['appsimake-commonshr'] = $module$appsimake_commonshr;
   Object.defineProperty(package$commonfns, 'firestore', {
     get: get_firestore
+  });
+  Object.defineProperty(package$commonfns, 'FnsDynamicOps', {
+    get: FnsDynamicOps_getInstance
   });
   var package$firebasefunctions = _.firebasefunctions || (_.firebasefunctions = {});
   Object.defineProperty(package$firebasefunctions, 'functions', {

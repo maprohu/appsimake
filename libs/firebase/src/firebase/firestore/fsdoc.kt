@@ -100,8 +100,10 @@ object FsDynamicOps: DynamicOps {
 
 }
 
-fun <D> DocSource<D>.new(d: dynamic = dyn()) = new(d, firebase.firestore.FsDynamicOps)
 val <D> DocSource<D>.new get() = new()
+fun <D> DocSource<D>.new(d: dynamic = dyn()) = new(d, firebase.firestore.FsDynamicOps)
+
+
 
 
 

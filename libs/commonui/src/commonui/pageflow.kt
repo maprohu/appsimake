@@ -1,32 +1,32 @@
 package commonui
 
-import commonshr.Assign
-import commonshr.Trigger
-import commonui.widget.AssignProcOrElse
-import commonui.widget.Inbox
-import commonui.widget.ProcOrElse
-import commonui.widget.procOrElse
-import domx.div
-import org.w3c.dom.Node
-import kotlin.browser.document
+//import commonshr.Assign
+//import commonshr.Trigger
+//import commonui.widget.AssignProcOrElse
+//import commonui.widget.Inbox
+//import commonui.widget.ProcOrElse
+//import commonui.widget.procOrElse
+//import domx.div
+//import org.w3c.dom.Node
+//import kotlin.browser.document
 
 
-class PageOut(
-    val node: Node,
-    val kill: Trigger = {},
-    val proc: ProcOrElse = procOrElse()
-)
-
-class PageIn(
-    val inbox: Inbox,
-    val back: Trigger
-)
-
-typealias SetPageOut = Assign<PageOut>
-
-class NodeSlot(
-    val node: SetPageOut
-)
+//class PageOut(
+//    val node: Node,
+//    val kill: Trigger = {},
+//    val proc: ProcOrElse = procOrElse()
+//)
+//
+//class PageIn(
+//    val inbox: Inbox,
+//    val back: Trigger
+//)
+//
+//typealias SetPageOut = Assign<PageOut>
+//
+//class NodeSlot(
+//    val node: SetPageOut
+//)
 //fun runNode(
 //    node: Node,
 //    proc: AssignProcOrElse

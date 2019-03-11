@@ -2,8 +2,11 @@ package commonfns
 
 import common.obj
 import commonshr.Function
+import commonshr.properties.DynamicOps
+import commonshr.properties.TS
 import firebaseadmin.admin
 import firebasefunctions.https.CallableContext
+import firebaseshr.firestore.Timestamp
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asPromise
 import kotlinx.coroutines.async
@@ -36,4 +39,19 @@ val firestore by lazy {
                 }
             )
         }
+}
+
+object FnsDynamicOps: DynamicOps {
+    override fun writeTimestamp(ts: TS): dynamic {
+        return when (ts) {
+            TS.Server -> admin.FieldValue.serverTimestamp()
+            is TS.Value -> admin.Timestamp.fromDate(ts.date)
+        }
+    }
+
+
+    override fun readTimestamp(d: dynamic): TS {
+        return TS.Value(d.unsafeCast<Timestamp>().toDate())
+    }
+
 }

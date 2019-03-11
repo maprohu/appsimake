@@ -29,7 +29,6 @@ fun main() {
         firebaseMessagingSw,
         testappsw,
         tictactoesw,
-        gymclocksw,
 
         firebaseshr,
         commonlib,

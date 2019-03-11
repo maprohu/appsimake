@@ -14,9 +14,9 @@ suspend operator fun <T> SendChannel<T>.timesAssign(msg: T) { this.send(msg) }
 
 typealias Action = suspend () -> Unit
 typealias Exec = (Action) -> Unit
-interface ExecT {
-    operator fun <T> invoke(action: suspend () -> T): Deferred<T>
-}
+//interface ExecT {
+//    operator fun <T> invoke(action: suspend () -> T): Deferred<T>
+//}
 interface HasExec {
     val exec: Exec
 }

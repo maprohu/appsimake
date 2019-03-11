@@ -5,7 +5,9 @@ package firebaseadmin
 import firebaseadmin.app.App
 import firebaseadmin.app.AppOptions
 import firebaseadmin.auth.Auth
+import firebaseadmin.firestore.FieldValueStatic
 import firebaseadmin.firestore.Firestore
+import firebaseadmin.firestore.TimestampStatic
 import firebaseadmin.messaging.Messaging
 
 
@@ -29,5 +31,10 @@ external interface AdminModule {
         name: String = definedExternally
     ): App
 
+    val FieldValue : FieldValueStatic
+
+    val Timestamp: TimestampStatic
+
 }
+
 

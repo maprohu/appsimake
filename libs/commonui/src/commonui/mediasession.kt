@@ -27,9 +27,9 @@ external interface MediaSession {
 external interface PlaybackState {
     companion object
 }
-inline val PlaybackState.none get() = "none".unsafeCast<PlaybackState>()
-inline val PlaybackState.paused get() = "paused".unsafeCast<PlaybackState>()
-inline val PlaybackState.playing get() = "playing".unsafeCast<PlaybackState>()
+inline val PlaybackState.Companion.none get() = "none".unsafeCast<PlaybackState>()
+inline val PlaybackState.Companion.paused get() = "paused".unsafeCast<PlaybackState>()
+inline val PlaybackState.Companion.playing get() = "playing".unsafeCast<PlaybackState>()
 
 external class MediaMetadata(
     props: MediaMetadataProps

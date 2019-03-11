@@ -4,10 +4,9 @@ import commonshr.AppDoc
 import commonshr.DocWrap
 import commonshr.coll
 import commonshr.lib
-import firebaseshr.Base
-import firebaseshr.BaseRoot
-import firebaseshr.initFrom
-import firebaseshr.wrapper
+import commonshr.properties.RxBase
+import commonshr.properties.RxRoot
+import commonshr.properties.wrapper
 
 val tictactoe by lib()
 
@@ -20,38 +19,37 @@ external interface MoveData {
     var fcmToken: String
 }
 
-open class Player: Base<Player>() {
-    val active by o.scalar<Boolean>().prop()
-    val game by o.scalar<String?>().prop()
+open class Player: RxBase<Player>() {
+    val active by o.boolean()
+    val game by o.prop<String?>(null)
 }
-class Game: Base<Game>() {
-    val players by o.array<String>().prop()
-    val originalPlayers by o.array<String>().prop()
-    val isOver by o.scalar<Boolean>().prop()
+class Game: RxBase<Game>() {
+    val players by o.set<String>()
+    val originalPlayers by o.set<String>()
+    val isOver by o.boolean()
 //    var firstPlayer: Int
 //    var lastSequence: Int?
 }
 
 
-sealed class Move<T: Move<T>>: BaseRoot<T>() {
-    val sequence by o.scalar<Int>().prop()
-    val player by o.scalar<Int>().prop()
+sealed class Move<T: Move<T>>: RxRoot<T>() {
+    val sequence by o.int()
+    val player by o.int()
 
     companion object : Move<Nothing>() {
-        val emptyOf = wrapper(
+        val of = wrapper(
             { Start() },
             { Placement() },
             { Leave() }
         )
-        fun of(d: dynamic) = emptyOf(d).initFrom(d)
     }
 }
 
 class Start : Move<Start>()
 
 class Placement : Move<Placement>() {
-    val x by o.scalar<Int>().prop()
-    val y by o.scalar<Int>().prop()
+    val x by o.int()
+    val y by o.int()
 }
 
 class Leave : Move<Leave>()

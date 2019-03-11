@@ -1,37 +1,37 @@
 package commonui
 
-import bootstrap.*
-import common.resizeEvent
-import commonshr.invoke
-import domx.classes
-import domx.cls
-import domx.div
-import domx.invoke
-import killable.Killables
-import org.w3c.dom.Element
-import org.w3c.dom.HTMLDivElement
-import org.w3c.dom.HTMLElement
-import org.w3c.dom.Node
-import rx.Rx
-import rx.Var
-import rx.rxClass
-import styles.flexBasis0
-import kotlin.browser.window
-
-enum class Orientation {
-    Horizontal,
-    Vertical
-}
-data class Size(
-    val width: Int,
-    val height: Int
-) {
-    val orientation =
-        if (width >= height) Orientation.Horizontal
-        else Orientation.Vertical
-
-    val ratio = if (height==0) 1.0 else width.toDouble() / height
-}
+//import bootstrap.*
+//import common.resizeEvent
+//import commonshr.invoke
+//import domx.classes
+//import domx.cls
+//import domx.div
+//import domx.invoke
+//import killable.Killables
+//import org.w3c.dom.Element
+//import org.w3c.dom.HTMLDivElement
+//import org.w3c.dom.HTMLElement
+//import org.w3c.dom.Node
+//import rx.Rx
+//import rx.Var
+//import rx.rxClass
+//import styles.flexBasis0
+//import kotlin.browser.window
+//
+//enum class Orientation {
+//    Horizontal,
+//    Vertical
+//}
+//data class Size(
+//    val width: Int,
+//    val height: Int
+//) {
+//    val orientation =
+//        if (width >= height) Orientation.Horizontal
+//        else Orientation.Vertical
+//
+//    val ratio = if (height==0) 1.0 else width.toDouble() / height
+//}
 
 //fun HTMLElement.aspectRatio(
 //    killables: Killables,

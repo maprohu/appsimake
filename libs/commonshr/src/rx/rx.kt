@@ -255,8 +255,6 @@ interface RxIface<out T> {
             offFn(old)
         }
     }
-
-
 }
 
 fun <T> RxIface<T>.forEach(deps: HasKills, fn: KillsApi.(T) -> Unit) = forEach(deps.kills, fn)
@@ -265,44 +263,44 @@ fun <T> RxIface<T>.feedTo(deps: HasKills, target: Var<T>) {
     forEach(deps) { target.now = it }
 }
 
-fun RxIface<Int>.feedTo(ks: KillSet, rxv: Var<Int>) {
-    fold(ks, 0) { old, new ->
-        rxv.transform { it + new - old }
-        new
-    }
-    ks += {
-        rxv.transform { it - now }
-    }
-}
-fun RxIface<Int>.feedTo(ks: KillSet, rxv: Var<Long>) {
-    fold(ks, 0) { old, new ->
-        rxv.transform { it + new - old }
-        new
-    }
-    ks += {
-        rxv.transform { it - now }
-    }
-}
-fun RxIface<Long>.feedTo(ks: KillSet, rxv: Var<Long>) {
-    fold(ks, 0L) { old, new ->
-        rxv.transform { it + new - old }
-        new
-    }
-    ks += {
-        rxv.transform { it - now }
-    }
-}
-fun RxIface<Double>.feedTo(ks: KillSet, rxv: Var<Double>) {
-    fold(ks, 0.0) { old, new ->
-        rxv.transform { it + new - old }
-        new
-    }
-    ks += {
-        rxv.transform { it - now }
-    }
-}
-
-fun <T> RxIface<Optional<T>>.orDefault(ks: KillSet, v: T) = Rx(ks) { this@orDefault().getOrDefault(v) }
+//fun RxIface<Int>.feedTo(ks: KillSet, rxv: Var<Int>) {
+//    fold(ks, 0) { old, new ->
+//        rxv.transform { it + new - old }
+//        new
+//    }
+//    ks += {
+//        rxv.transform { it - now }
+//    }
+//}
+//fun RxIface<Int>.feedTo(ks: KillSet, rxv: Var<Long>) {
+//    fold(ks, 0) { old, new ->
+//        rxv.transform { it + new - old }
+//        new
+//    }
+//    ks += {
+//        rxv.transform { it - now }
+//    }
+//}
+//fun RxIface<Long>.feedTo(ks: KillSet, rxv: Var<Long>) {
+//    fold(ks, 0L) { old, new ->
+//        rxv.transform { it + new - old }
+//        new
+//    }
+//    ks += {
+//        rxv.transform { it - now }
+//    }
+//}
+//fun RxIface<Double>.feedTo(ks: KillSet, rxv: Var<Double>) {
+//    fold(ks, 0.0) { old, new ->
+//        rxv.transform { it + new - old }
+//        new
+//    }
+//    ks += {
+//        rxv.transform { it - now }
+//    }
+//}
+//
+//fun <T> RxIface<Optional<T>>.orDefault(ks: KillSet, v: T) = Rx(ks) { this@orDefault().getOrDefault(v) }
 
 fun Var<Int>.incremented(
     deps: HasKills
@@ -365,9 +363,9 @@ abstract class RxVal<T>(
 
 
 
-fun <T> RxVal<KillableValue<T>>.killOld(ks: KillSet){
-    return off(ks) { it.kill() }
-}
+//fun <T> RxVal<KillableValue<T>>.killOld(ks: KillSet){
+//    return off(ks) { it.kill() }
+//}
 
 fun <T> Var<Optional<Set<T>>>.add(v: T) {
     transform { c -> c.map { it + v }.orElse { Some(setOf(v)) } }
@@ -464,11 +462,11 @@ fun Var<Int>.increase() = transform { it + 1 }
 fun Var<Int>.decrease() = transform { it - 1 }
 
 
-fun <T> RxIface<Optional<T>>.get() = now.get()
-fun <T> Var<Optional<T>>.set(v: T) {
-    now = Some(v)
-}
-
+//fun <T> RxIface<Optional<T>>.get() = now.get()
+//fun <T> Var<Optional<T>>.set(v: T) {
+//    now = Some(v)
+//}
+//
 fun Element.rxClass(
     ks: KillSet,
     style: KillsApi.() -> String
@@ -488,11 +486,11 @@ fun Element.rxClass(
         { removeClass(it) }
     )
 }
-
-fun GlobalEventHandlers.rxHover(rx: Var<Boolean>) {
-    onmouseenter = { rx.now = true; null }
-    onmouseleave = { rx.now = false; null }
-}
+//
+//fun GlobalEventHandlers.rxHover(rx: Var<Boolean>) {
+//    onmouseenter = { rx.now = true; null }
+//    onmouseleave = { rx.now = false; null }
+//}
 
 fun Element.rxClass(
     deps: HasKills,
@@ -514,41 +512,42 @@ fun Element.rxClass(
     rxClass(deps, style, rxv)
 }
 
-fun Element.rxClassOpt(
-    ks: KillSet,
-    style: RxVal<String?>
-) {
-    style.onOff(
-        ks,
-        { it?.let { c -> addClass(c) } },
-        { it?.let { c -> removeClass(c) } }
-    )
-}
+//fun Element.rxClassOpt(
+//    ks: KillSet,
+//    style: RxVal<String?>
+//) {
+//    style.onOff(
+//        ks,
+//        { it?.let { c -> addClass(c) } },
+//        { it?.let { c -> removeClass(c) } }
+//    )
+//}
 
 fun <T> (KillsApi.() -> T).toRx(ks: KillSet) = Rx(ks, this)
 
-fun Element.rxClasses(
-    ks: KillSet,
-    style: KillsApi.() -> Collection<String>
-) = rxClasses(ks, style.toRx(ks))
+//fun Element.rxClasses(
+//    ks: KillSet,
+//    style: KillsApi.() -> Collection<String>
+//) = rxClasses(ks, style.toRx(ks))
+//
+//fun Element.rxClasses(
+//    ks: KillSet,
+//    style: RxIface<Collection<String>>
+//) {
+//    style.onOff(
+//        ks,
+//        { addClass(*it.toTypedArray()) },
+//        { removeClass(*it.toTypedArray()) }
+//    )
+//}
+//
+//fun <T> RxIface<T>.toChannel(ks: KillSet): ReceiveChannel<T> {
+//    val ch = Channel<T>(Channel.UNLIMITED)
+//    ks += { ch.close() }
+//    forEach(ks) { t -> ch.offer(t) }
+//    return ch
+//}
 
-fun Element.rxClasses(
-    ks: KillSet,
-    style: RxIface<Collection<String>>
-) {
-    style.onOff(
-        ks,
-        { addClass(*it.toTypedArray()) },
-        { removeClass(*it.toTypedArray()) }
-    )
-}
-
-fun <T> RxIface<T>.toChannel(ks: KillSet): ReceiveChannel<T> {
-    val ch = Channel<T>(Channel.UNLIMITED)
-    ks += { ch.close() }
-    forEach(ks) { t -> ch.offer(t) }
-    return ch
-}
 fun <T> RxIface<T>.toChannelLater(ks: KillSet): ReceiveChannel<T> {
     val ch = Channel<T>(Channel.UNLIMITED)
     ks += { ch.close() }
@@ -556,29 +555,29 @@ fun <T> RxIface<T>.toChannelLater(ks: KillSet): ReceiveChannel<T> {
     return ch
 }
 
-suspend fun <T, S> RxIface<T>.mapAsync(
-    ks: KillSet,
-    fn: suspend KillsApi.(T) -> S
-): RxIface<S> {
-    val kseq = ks.seq()
-
-    suspend fun calc(t: T): S = kseq.killables().fn(t)
-
-    val rxv = Var(calc(now))
-    val ch = toChannelLater(ks)
-
-    GlobalScope.launch {
-        for (t in ch) {
-            rxv.now = calc(t)
-        }
-    }.addedTo(ks)
-
-    return rxv
-}
+//suspend fun <T, S> RxIface<T>.mapAsync(
+//    ks: KillSet,
+//    fn: suspend KillsApi.(T) -> S
+//): RxIface<S> {
+//    val kseq = ks.seq()
+//
+//    suspend fun calc(t: T): S = kseq.killables().fn(t)
+//
+//    val rxv = Var(calc(now))
+//    val ch = toChannelLater(ks)
+//
+//    GlobalScope.launch {
+//        for (t in ch) {
+//            rxv.now = calc(t)
+//        }
+//    }.addedTo(ks)
+//
+//    return rxv
+//}
 
 
 fun <T> KillSet.rx(fn: KillsApi.() -> T): RxIface<T> = Rx(this, fn)
-fun <T> T.toVar() = Var(this)
+val <T> T.asVar get() = Var(this)
 
 inline fun <reified E: Enum<E>> Var<E>.toName(deps: HasKills) = linked(
     deps,

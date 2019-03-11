@@ -1,5 +1,6 @@
 package firebaseadmin.firestore
 
+import kotlin.js.Date
 import kotlin.js.Promise
 
 // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/Firestore
@@ -72,5 +73,18 @@ external interface QueryDocumentSnapshot : DocumentSnapshot {
 
     // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/QueryDocumentSnapshot#data
     override fun data() : dynamic
+
+}
+
+external interface FieldValueStatic {
+
+    fun serverTimestamp() : dynamic
+
+}
+
+external interface TimestampStatic {
+
+    // https://cloud.google.com/nodejs/docs/reference/firestore/0.19.x/Timestamp#.fromDate
+    fun fromDate(date: Date) : dynamic
 
 }

@@ -202,15 +202,15 @@ object cachingsw : JsModule(
     )
 )
 
-object gymclocksw : JsModule(
-    JsModuleConfig(
-        "libs/gymclocksw"
-    ).copy(
-        deps = listOf(
-            cachingsw
-        )
-    )
-)
+//object gymclocksw : JsModule(
+//    JsModuleConfig(
+//        "libs/gymclocksw"
+//    ).copy(
+//        deps = listOf(
+//            cachingsw
+//        )
+//    )
+//)
 
 object gymclock : JsApp(
     JsAppConfig(
@@ -220,7 +220,7 @@ object gymclock : JsApp(
             webAnimationsJs,
             commonui
         ),
-        serviceWorker = gymclocksw
+        serviceWorker = cachingsw
     ).copy(
         icon192 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADABAMAAACg8nE0AAAAKlBMVEUAAAAdHR06OjpISEhubm6QkJCgoKC2trbKysrb29vv7+/6+vr7+/v///+25UbwAAAA3ElEQVR42u3aMQrCMABA0YKLBd08gEfwDnZ18yAexUkoLh7JtYh3EUqtEYOt1bj0/amQkDclQ5PsmrgMAAAAAAAAAAAAAADjBk5Z0KZjgX04GQAIgGlZ1w/I67mHj4BZM9oLmNcfFQAA6AYu5b3dYKBd4hgBqvBQGQi05YDxAr/ZB2cAAAAAAAAAAACQBNgWTes4sCjet4oCk3Y8W77+sXoCehQBggAjAOxkAAAAAAAAAAAA4KIOkABIfuX+yLMHAOA/QPJncJ4iAr4EfhoAAAAAAAAAAAAAAEYE3ACG9BYki+NpjQAAAABJRU5ErkJggg==",
         icon512 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIAAQMAAADOtka5AAAABlBMVEUAAAD///+l2Z/dAAAA20lEQVR42u3cMQ7CMBBFQSOKlByJq3E0jkRJgfgUwUVQLIUkyBTzWltTrqt1ycYKAAAAAAAAAAAAAAAAAAAAAAAAAAAAoDPwLO9Oc1cf9fQMAAAAS4AkubaAQ5JcAAAAAAD4PXCrz9YSYOwIAAAADWD4biLdAQAAAAAAAAAAAAAAAAAAAAAAsAKoTYBGE+AzAAAA2AyYygAAAAAAAAAAAAAAAAAAAAAA0AGwvwAAAHYCxqxoAgAAAODvAL/SAACAfYA1AQAAAAAAAAAAAAAAAAAAAAAAAAAAADoAL6TzNF65IIK3AAAAAElFTkSuQmCC"
