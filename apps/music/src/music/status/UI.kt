@@ -16,12 +16,7 @@ import music.loggedin.upload
 
 fun Status.ui() = TopAndContent(
     topbar = factory.topbar {
-        left.button {
-            back
-            click {
-                from.redisplay()
-            }
-        }
+        left.backButton
         right.tasksUi()
         slots.right.slots.syncUi()
         right.buttonGroup {

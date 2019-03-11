@@ -1,5 +1,6 @@
 package commonfb
 
+import common.obj
 import commonshr.Function
 import commonui.APP
 import commonui.isFcmSupported
@@ -18,7 +19,7 @@ object FB {
 
     val app by lazy {
         firebase.initializeApp(
-            AppOptions().apply {
+            obj<AppOptions>().apply {
                 apiKey = "AIzaSyDuHunYFDxjJVSvhk_3POXORpN8M49ubgU"
                 authDomain = "appsimake.firebaseapp.com"
                 databaseURL = "https://appsimake.firebaseio.com"
@@ -30,9 +31,7 @@ object FB {
     }
 
     val db by lazy {
-        app.firestore().withDefaultSettings().also { db ->
-            initBinder(DbDeps(db))
-        }
+        app.firestore().withDefaultSettings()
     }
 
     suspend fun functions(): Functions {

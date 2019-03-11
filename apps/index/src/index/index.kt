@@ -1,9 +1,7 @@
 package index
 
 import bootstrap.flexColumn
-import bootstrap.listAction
 import bootstrap.listGroup
-import bootstrap.padding2
 import commonui.*
 import commonui.widget.Body
 import commonui.widget.switchToView

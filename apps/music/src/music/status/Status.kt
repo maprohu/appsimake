@@ -1,6 +1,7 @@
 package music.status
 
-import commonfb.CommonFbApi
+import commonfb.FBFromApi
+import commonui.HasKillsUix
 import commonui.widget.*
 import music.common.MusicApi
 import music.database.Database
@@ -11,12 +12,12 @@ interface StatusPath: DatabasePath {
 }
 
 class Status(
-    val from: ForwardBase<*>,
+    override val from: HasJobRedisplay,
     database: Database,
     val stat: Database.Status,
     val title: String,
-    val bgfn: HasKillSetAndUIX.(ButtonGroup) -> Unit
-): UIBase<TopAndContent>(from), CommonFbApi, MusicApi, StatusPath, DatabasePath by database {
+    val bgfn: HasKillsUix.(ButtonGroup) -> Unit
+): ForwardBase<TopAndContent>(from), MusicApi, StatusPath, DatabasePath by database, FBFromApi {
     override val status = this
 
     override val rawView = ui()

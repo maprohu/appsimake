@@ -12,6 +12,7 @@ import org.w3c.dom.events.MouseEvent
 import rx.Rx
 import rx.RxVal
 import rx.Var
+import rx.forEach
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.dom.addClass
@@ -160,12 +161,6 @@ operator fun NamedNodeMap.set(key: String, value: String) {
 //    }
 //}
 //
-//fun HTMLButtonElement.rxEnabled(ks: KillSet, rx: RxVal<Boolean>) {
-//    rx.forEach(ks) { disabled = !it }
-//}
-//fun HTMLButtonElement.rxEnabled(deps: HasKills, fn: KillsApi.() -> Boolean) {
-//    Rx(deps.kills) { fn() }.also { rxEnabled(deps.kills, it) }
-//}
 //
 //fun ElementCSSInlineStyle.rxVisible(deps: HasKills, rxv: RxVal<Boolean>) {
 //    rxv.forEach(deps.kills) { style.visibility = if (it) "visible" else "collapse" }
@@ -362,6 +357,13 @@ operator fun <T: Node> T.invoke(fn: T.() -> Unit): T {
 //        }
 //    }
 //}
+
+fun HTMLButtonElement.rxEnabled(deps: HasKills, rx: RxVal<Boolean>) {
+    rx.forEach(deps) { disabled = !it }
+}
+fun HTMLButtonElement.rxEnabled(deps: HasKills, fn: KillsApi.() -> Boolean) {
+    Rx(deps.kills) { fn() }.also { rxEnabled(HasNoKill, it) }
+}
 
 operator fun HTMLElement.remAssign(text: String) { innerText = text }
 

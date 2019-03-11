@@ -16,12 +16,8 @@ import kotlin.math.min
 fun Clock.ui() = factory.screen {
 
     topbar {
-        left.button {
-            back
+        left.backButton {
             fa.x3
-            click {
-                form.redisplay()
-            }
         }
         title %= "Workout"
         right {
@@ -38,7 +34,7 @@ fun Clock.ui() = factory.screen {
                 }
 
                 click {
-                    model.sounds.transform { !it }
+                    model.sounds.rxv.transform { !it }
                 }
             }
         }

@@ -2,13 +2,21 @@ package commonui
 
 import commonshr.Exec
 import commonshr.HasKills
+import commonui.editing.Bindings
 import commonui.editing.DefaultEditing
 import commonui.widget.HasRedisplay
 import killable.KillSet
 
+interface HasBind {
+    val editing: Bindings
+}
+
 interface HasEdit {
     val editing: DefaultEditing
 }
+
+
+interface HasBindKills: HasBind, HasKills
 
 interface HasEditKills: HasEdit, HasKills
 
@@ -24,6 +32,12 @@ interface HasEditFromKillsUix: HasEdit, HasFrom, HasKills, HasUix, HasEditKillsU
 interface HasEditExitFromKillsUix: HasEdit, HasExit, HasFrom, HasKills, HasUix, HasEditFromKillsUix {
     override val exit get() = from
 }
+
+interface HasHistory {
+    val history: BrowserHistory
+}
+
+interface HasHistoryKillsRedisplay: HasHistory, HasKills, HasRedisplay
 
 interface HasFrom {
     val from: HasRedisplay
@@ -43,5 +57,7 @@ interface HasFromUix: HasFrom, HasUix {
 }
 
 interface HasKillsUix: HasKills, HasUix
+
+interface HasFromKillsUix: HasFromUix, HasKillsUix
 
 interface HasEditKillsUix: HasEdit, HasKills, HasUix, HasKillsUix, HasEditKills

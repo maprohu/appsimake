@@ -1,11 +1,11 @@
 package music.loggedin
 
 import common.Some
-import commonfb.save
 import commonshr.Action
 import commonshr.reportd
+import commonshr.toFsDoc
 import firebase.firestore.docRef
-import firebaseshr.waitExtracted
+import firebase.firestore.save
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.await
 import music.boot.Boot
@@ -30,23 +30,15 @@ fun LoggedIn.upload(id: String) {
         loggedIn.privileged {
             val file = boot.localSongs.load(id)
             if (file != null) {
-                val store = StoreState().apply {
-                    props.persisted(
-                        musicLib.app.storage.doc(id)
-                    )
-
-                    uploaded.cv = false
-                    save(loggedIn.db)
-                    props.clearDirty()
-                }
+                val store = StoreState()
+                val storeDoc = store.toFsDoc(musicLib.app.storage, id)
+                storeDoc.save()
 
                 val ref = loggedIn.storageRef.child(id)
                 ref.put(file).await()
-                store.apply {
-                    uploaded.cv = true
-                    save(loggedIn.db)
-                    props.clearDirty()
-                }
+
+                store.uploaded.now = true
+                storeDoc.save()
             }
         }
     }

@@ -3,15 +3,12 @@ package music.notloggedin
 import bootstrap.m1
 import commonui.usericon.userIcon
 import commonshr.invoke
-import commonshr.plusAssign
-import commonui.widget.Factory
 import commonui.widget.TopAndContent
 import commonui.widget.factory
 import domx.invoke
 import domx.remAssign
 import fontawesome.bars
 import fontawesome.signInAlt
-import killable.KillSet
 
 fun NotLoggedIn.ui() = TopAndContent(
     topbar = factory.topbar {

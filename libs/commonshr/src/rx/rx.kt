@@ -600,3 +600,8 @@ fun <T> Assign<T>.rx(deps: HasKills, fn: () -> T) {
 fun <T> Assign<T>.rx(deps: HasKills, fn: RxIface<T>) {
     fn.forEach(deps.kills) { this@rx %= it }
 }
+
+fun <T> Var<List<T>>.add(deps: HasKills, item: T) {
+    transform { it + item }
+    deps.kills += { transform { it - item } }
+}

@@ -3,14 +3,13 @@ package commonui.widget
 import bootstrap.*
 import common.removeFromParent
 import commonshr.*
-import commonui.faButtonSpan
 import domx.*
 import fontawesome.*
-import org.w3c.dom.*
+import killable.HasNoKill
 import styles.*
 import kotlin.browser.document
 
-class Toasts(): ScreenWrap() {
+class Toasts: ScreenWrap() {
     override val node = document.div {
         cls {
             dFlex
@@ -28,7 +27,7 @@ class Toasts(): ScreenWrap() {
 
 
 typealias ToastFn = Toast.() -> Unit
-class Toast(): ScreenWrap() {
+class Toast: ScreenWrap() {
     override val node = document.a {
         cls {
             alert
@@ -39,7 +38,7 @@ class Toast(): ScreenWrap() {
             p1
         }
         href = "#"
-        clickEvent {
+        onClick(HasNoKill) {
             removeFromParent()
         }
     }

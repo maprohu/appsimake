@@ -6,6 +6,7 @@ import commonshr.Action
 import commonshr.invoke
 import domx.*
 import commonshr.KillsApi
+import commonui.HasKillsUix
 import commonui.HasUix
 import killable.HasNoKill
 import killable.NoKill
@@ -123,13 +124,13 @@ class Tab(val owner: Tabs): ScreenWrap() {
         owner.active %= if (owner.active.now == this) null else this
     }
 
-    fun click(deps: HasUix, action: Action) = anchor.click(deps, action)
+    fun click(deps: HasKillsUix, action: Action) = anchor.click(deps, action)
 
 
 }
 
-fun Tab.clickActivate(deps: HasUix) = click(deps) { activate() }
-fun Tab.clickToggle(deps: HasUix) = click(deps) { toggle() }
+fun Tab.clickActivate(deps: HasKillsUix) = click(deps) { activate() }
+fun Tab.clickToggle(deps: HasKillsUix) = click(deps) { toggle() }
 
 
 

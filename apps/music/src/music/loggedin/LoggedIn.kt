@@ -1,8 +1,10 @@
 package music.loggedin
 
+import commonfb.FBApi
 import commonshr.private
 import commonui.globalStatus
 import commonui.widget.*
+import firebase.HasDb
 import firebase.User
 import firebase.app.App
 import firebase.firestore.*
@@ -18,7 +20,7 @@ import music.data.SongInfoSource
 import music.database.Database
 import musiclib.*
 
-interface LoggedInPath: BootPath {
+interface LoggedInPath: BootPath, HasDb {
     val loggedIn: LoggedIn
 }
 
@@ -26,22 +28,22 @@ class LoggedIn(
     val from: Boot,
     val user: User,
     val app: App,
-    val db: Firestore,
+    override val db: Firestore,
     functions: Functions,
     val storage: Storage,
     override val songInfoSource: SongInfoSource,
     override val userSongs: UserSongs
-): ForwardBase<TopAndContent>(from), Content, MusicApi, LoggedInPath, BootPath by from {
+): ForwardBase<TopAndContent>(from), Content, MusicApi, LoggedInPath, BootPath by from, FBApi {
     override val loggedIn = this
 
     val storageRef = storage.ref("music/files")
 
     val userSongSet by lazy {
-        musicLib.app.private.doc(user.uid).usersongs.query(db).toRxSetWithLookup(kills) { UserSong() }
+        musicLib.app.private.doc(user.uid).usersongs.fsCache { UserSong() }
     }
 
     val storageSet by lazy {
-        musicLib.app.storage.query(db).toRxSetWithLookup(kills) { StoreState() }
+        musicLib.app.storage.fsCache { StoreState() }
     }
 
     val uploadedSet by lazy {

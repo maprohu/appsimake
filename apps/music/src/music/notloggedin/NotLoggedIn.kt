@@ -6,6 +6,7 @@ import commonfb.login.Login
 import commonlib.commonlib.customToken
 import commonui.widget.*
 import commonshr.*
+import commonui.KillsUixApi
 import commonui.globalStatus
 import firebase.app.App
 import kotlinx.coroutines.CompletableDeferred
@@ -18,7 +19,7 @@ import music.data.SongInfoSource
 class NotLoggedIn(
     val boot: Boot,
     val app: App
-): ForwardBase<TopAndContent>(boot), Content {
+): ForwardBase<TopAndContent>(boot), Content, KillsUixApi {
     val path = boot.path
     override val userSongs: UserSongs? = null
     override val songInfoSource: SongInfoSource = boot.localSongInfoSource

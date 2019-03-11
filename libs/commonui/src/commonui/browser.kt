@@ -1,12 +1,16 @@
 package commonui
 
+import common.Emitter
 import common.named
 import commonshr.plusAssign
 import domx.base64
 import domx.source
 import domx.video
 import commonshr.KillsApi
+import commonshr.fn
+import domx.invoke
 import killable.NoKill
+import org.w3c.dom.PopStateEvent
 import org.w3c.dom.events.Event
 import rx.Rx
 import rx.RxIface
@@ -92,4 +96,15 @@ fun KillsApi.keepScreenAwake() {
             keepAwakeVideo.pause()
         }
     }
+}
+
+val popstates by lazy {
+    val emitter = Emitter<PopStateEvent>()
+
+    window.addEventListener(
+        "popstate",
+        { emitter.emit(it as PopStateEvent)}
+    )
+
+    emitter.fn
 }

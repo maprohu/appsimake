@@ -1,9 +1,6 @@
 package index.home
 
-import bootstrap.listAction
-import bootstrap.m2
-import bootstrap.p1
-import bootstrap.p2
+import bootstrap.*
 import commonshr.*
 import commonui.widget.*
 import domx.*
@@ -20,24 +17,33 @@ fun Home.ui() = factory.screen {
             cls {
                 p2
             }
+            insert.listGroup {
 
-            fun app(
-                id: String,
-                title: String
-            ) {
-                listAction {
-                    href = "../$id/"
-                    innerText = title
+                fun app(
+                    id: String,
+                    title: String
+                ) {
+                    node.a {
+                        cls {
+                            listGroupItem
+                            listGroupItemAction
+                        }
+                        href = "../$id/"
+                        innerText = title
+                    }
                 }
+
+                app("tasks", "Tasks")
+                app("tictactoe", "Tic Tac Toe")
+                app("gymclock", "Gym Clock")
+                app("music", "Music Player")
+                app("download", "Download")
+                app("testapp", "Test App")
+                app("checklist", "Checklist")
+
             }
 
-            app("tasks", "Tasks")
-            app("tictactoe", "Tic Tac Toe")
-            app("gymclock", "Gym Clock")
-            app("music", "Music Player")
-            app("download", "Download")
-            app("testapp", "Test App")
-            app("checklist", "Checklist")
+
 
         }
     }

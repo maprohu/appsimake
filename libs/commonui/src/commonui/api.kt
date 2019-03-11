@@ -2,14 +2,12 @@ package commonui
 
 import commonshr.*
 import commonui.widget.*
-import domx.rxEnabled
 import commonshr.KillsApi
 import commonshr.properties.EnumProp
 import commonui.editing.*
 import domx.KillsApiDomx
 import kotlinx.coroutines.channels.ReceiveChannel
 import org.w3c.dom.Node
-import org.w3c.dom.NodeList
 import org.w3c.dom.events.EventTarget
 import rx.HasVar
 import rx.RxIface
@@ -31,7 +29,7 @@ interface KillsApiCommonui: KillsApiDomx {
     fun Select.bind(prop: Var<String>) = bind(api, prop)
 
 }
-interface UixApi: Api, HasUix {
+interface KillsUixApi: Api, HasKillsUix, KillsApiCommonui {
 
     fun EventTarget.click(action: Action) = click(api, action)
     fun Button.click(action: Action) = click(api, action)
@@ -45,7 +43,7 @@ interface UixApi: Api, HasUix {
 
 }
 
-interface FromUixApi: Api, HasFromUix, UixApi {
+interface FromKillsUixApi: Api, HasFromKillsUix, KillsUixApi {
 
     val Topbar.backButton get() = backButton(api)
     val Factory.backButton get() = backButton(api)
@@ -64,7 +62,7 @@ interface CsApiCommonui: CsApi {
 
 }
 
-interface EditKillsApi: HasEditKills, KillsApiCommonui {
+interface BindKillsApi: HasBindKills, KillsApiCommonui {
 
     fun AbstractInput.bind(rxv: HasVar<String>) = bind(api, rxv)
 
@@ -78,12 +76,21 @@ interface EditKillsApi: HasEditKills, KillsApiCommonui {
 
 }
 
+interface EditKillsApi: BindKillsApi, HasEditKills {
+
+}
+
 interface EditKillsUixApi: EditKillsApi, HasEditKillsUix {
     val Factory.saveButton get() = saveButton(api)
 }
 
 interface EditFromKillsUixApi: EditKillsUixApi, HasEditFromKillsUix {
 }
+
+//interface HistoryKillsRedisplayApi: Api, KillsApiCommonui, HasHistoryKillsRedisplay {
+//}
+val HasHistoryKillsRedisplay.historyItem get() = historyItem(this)
+val HasHistoryKillsRedisplay.historyRoot get() = historyRoot(this)
 
 interface EditExitFromKillsUixApi: EditFromKillsUixApi, HasEditExitFromKillsUix {
     val Factory.saveDeleteButton get() = saveDeleteButton(api)

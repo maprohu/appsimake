@@ -1,19 +1,23 @@
 package gymclock.form
 
+import commonshr.properties.RxBase
+import commonui.*
+import commonui.editing.DefaultBindings
+import commonui.editing.DefaultEditing
 import commonui.widget.*
 import gymclock.clock.Clock
-import gymclock.data.Model
+import gymclock.data.loadModel
 import org.w3c.dom.HTMLElement
 
-interface FormPath: BodyPath {
+interface FormPath: BodyPath, HasHistory {
     val form: Form
 }
 
 class Form(
     body: Body
-): ForwardBase<HTMLElement>(body), FormPath, BodyPath by body {
-    override val form = this
+): ForwardBase<HTMLElement>(body), FormPath, BodyPath by body, KillsUixApi, BindKillsApi, HasHistoryKillsRedisplay  {
 
+    override val form = this
 
     val sounds by lazy { Sounds() }
 
@@ -25,13 +29,21 @@ class Form(
         }
     }
 
-    suspend fun start() {
+    suspend fun startWorkout() {
         forward.switchTo { Clock(this) }
     }
 
-    val model = Model(kills)
+    val model = loadModel()
+
+    override val editing = DefaultBindings(kills)
+
+    override val history = BrowserHistory()
+
+
+    init { historyRoot }
 
     override val rawView = ui()
 
 
 }
+

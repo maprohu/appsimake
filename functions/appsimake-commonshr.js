@@ -65,6 +65,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var get_lastIndex = Kotlin.kotlin.collections.get_lastIndex_55thoc$;
   var drop = Kotlin.kotlin.collections.drop_ba2ldo$;
   var produce = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.produce_f6xzli$;
+  var to = Kotlin.kotlin.to_ujzrz7$;
+  var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var asSequence = Kotlin.kotlin.collections.asSequence_7wnvza$;
   var zip = Kotlin.kotlin.sequences.zip_r7q3s9$;
   var get_js = Kotlin.kotlin.js.get_js_1yb8b7$;
@@ -126,6 +128,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   ROArrayProp.prototype.constructor = ROArrayProp;
   RWArrayProp.prototype = Object.create(RWProp.prototype);
   RWArrayProp.prototype.constructor = RWArrayProp;
+  RxRoot.prototype = Object.create(RxBase.prototype);
+  RxRoot.prototype.constructor = RxRoot;
+  RxRoot$Companion.prototype = Object.create(RxRoot.prototype);
+  RxRoot$Companion.prototype.constructor = RxRoot$Companion;
   SnapshotEvent$Added.prototype = Object.create(SnapshotEvent.prototype);
   SnapshotEvent$Added.prototype.constructor = SnapshotEvent$Added;
   SnapshotEvent$Modified.prototype = Object.create(SnapshotEvent.prototype);
@@ -2205,7 +2211,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     kind: Kind_CLASS,
     interfaces: [AbstractMap]
   };
-  function toMap($receiver, ks, fn) {
+  function toMap_0($receiver, ks, fn) {
     var map = LinkedHashMap_init();
     plusAssign_0(ks, toMap$lambda(map));
     $receiver.add_qlkmfe$(toMap$lambda_0(ks, map, fn));
@@ -4171,6 +4177,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   PropertyList.prototype.boolean = function () {
     return this.prop_z4bjo6$(false);
   };
+  PropertyList.prototype.int = function () {
+    return this.prop_z4bjo6$(0);
+  };
+  PropertyList.prototype.double = function () {
+    return this.prop_z4bjo6$(0.0);
+  };
   function PropertyList$addCalc$lambda(closure$fn) {
     return function ($receiver) {
       return closure$fn();
@@ -4299,6 +4311,57 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'RxBase',
     interfaces: []
   };
+  function RxRoot() {
+    RxRoot$Companion_getInstance();
+    RxBase.call(this);
+    this.type_gtc63r$_0 = this.o.string().provideDelegate_n5byny$(this, RxRoot$type_metadata);
+  }
+  var RxRoot$type_metadata = new PropertyMetadata('type');
+  Object.defineProperty(RxRoot.prototype, 'type', {
+    get: function () {
+      return this.type_gtc63r$_0.getValue_lrcp0p$(this, RxRoot$type_metadata);
+    }
+  });
+  function RxRoot$Companion() {
+    RxRoot$Companion_instance = this;
+    RxRoot.call(this);
+  }
+  RxRoot$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: [RxRoot]
+  };
+  var RxRoot$Companion_instance = null;
+  function RxRoot$Companion_getInstance() {
+    if (RxRoot$Companion_instance === null) {
+      new RxRoot$Companion();
+    }
+    return RxRoot$Companion_instance;
+  }
+  RxRoot.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RxRoot',
+    interfaces: [RxBase]
+  };
+  function wrapper$lambda(closure$typeMap) {
+    return function (d, ops) {
+      var $receiver = RxRoot$Companion_getInstance();
+      readDynamic($receiver, d, ops);
+      var $receiver_0 = getValue(closure$typeMap, $receiver.type.now)();
+      readDynamic($receiver_0, d, ops);
+      return $receiver_0;
+    };
+  }
+  function wrapper(classes) {
+    var destination = ArrayList_init(classes.length);
+    var tmp$;
+    for (tmp$ = 0; tmp$ !== classes.length; ++tmp$) {
+      var item = classes[tmp$];
+      destination.add_11rb$(to(ensureNotNull(Kotlin.getKClassFromExpression(item()).simpleName), item));
+    }
+    var typeMap = toMap(destination);
+    return wrapper$lambda(typeMap);
+  }
   function zipItems(a, b) {
     return zip(asSequence(a.o.items), asSequence(b.o.items));
   }
@@ -7523,8 +7586,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function chain_0(delegate) {
     return new FunChain1(delegate);
   }
-  function toMap_0($receiver, ks, fn) {
-    return toMap(toMoves($receiver.diffsAll), ks, fn);
+  function toMap_1($receiver, ks, fn) {
+    return toMap_0(toMoves($receiver.diffsAll), ks, fn);
   }
   function process_1($receiver, ks, fn) {
     process(toMoves($receiver.diffsAll), ks, fn);
@@ -7635,7 +7698,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.invoke_3lzs1f$ = invoke_0;
   package$commonshr.toMoves_k2zy3$ = toMoves;
   package$commonshr.process_a8xqq2$ = process;
-  package$commonshr.toMap_m2zz0l$ = toMap;
+  package$commonshr.toMap_m2zz0l$ = toMap_0;
   package$commonshr.plusAssign_rmur43$ = plusAssign;
   package$commonshr.timesAssign_rmur43$ = timesAssign;
   package$commonshr.HasExec = HasExec;
@@ -7726,6 +7789,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$properties.PropertyList = PropertyList;
   package$properties.rxCompare_kagv6q$ = rxCompare;
   package$properties.RxBase = RxBase;
+  Object.defineProperty(RxRoot, 'Companion', {
+    get: RxRoot$Companion_getInstance
+  });
+  package$properties.RxRoot = RxRoot;
+  package$properties.wrapper_3yfn2g$ = wrapper;
   package$properties.zipItems_kagv6q$ = zipItems;
   package$properties.copy_szlj5h$ = copy;
   package$properties.writeDynamic_y9dcxh$ = writeDynamic;
@@ -7861,7 +7929,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.chain_klfg04$ = chain;
   package$rx.FunChain1 = FunChain1;
   package$rx.chain_7h29gk$ = chain_0;
-  package$rx.toMap_ph3why$ = toMap_0;
+  package$rx.toMap_ph3why$ = toMap_1;
   package$rx.process_d62qid$ = process_1;
   package$rx.toRxSet_dftzi3$ = toRxSet_0;
   withInitial$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;

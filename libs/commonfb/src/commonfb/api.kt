@@ -6,9 +6,9 @@ import commonfb.editing.*
 import commonshr.Action
 import commonshr.properties.RxBase
 import commonui.CsApiCommonui
-import commonui.FromUixApi
+import commonui.FromKillsUixApi
 import commonui.KillsApiCommonui
-import commonui.UixApi
+import commonui.KillsUixApi
 import commonui.widget.HasJobRedisplay
 import firebase.CsDbKillsApi
 import firebase.DbKillsApi
@@ -26,11 +26,11 @@ interface DbKillsApiCommonfb: DbKillsApi {
 interface FBApi: CsDbKillsUixApi, HasJobRedisplay
 interface FBFromApi: FBApi, CsDbFromKillsUixApi
 
-interface CsDbKillsUixApi: CsDbKillsApi, DbKillsApiCommonfb, UixApi, CsApiCommonui, KillsApiCommonui {
+interface CsDbKillsUixApi: CsDbKillsApi, DbKillsApiCommonfb, KillsUixApi, CsApiCommonui, KillsApiCommonui {
 
 }
 
-interface CsDbFromKillsUixApi: CsDbKillsUixApi, FromUixApi {
+interface CsDbFromKillsUixApi: CsDbKillsUixApi, FromKillsUixApi {
 
 }
 

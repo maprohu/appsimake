@@ -12,22 +12,21 @@ function define(args, fn) {
     );
 }
 
-define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], function (_, Kotlin, $module$appsimake_commonshr, $module$appsimake_firebaseshr) {
+define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_commonshr) {
   'use strict';
   var lib = $module$appsimake_commonshr.commonshr.lib;
   var PropertyMetadata = Kotlin.PropertyMetadata;
   var coll = $module$appsimake_commonshr.commonshr.coll_287e2$;
-  var Base = $module$appsimake_firebaseshr.firebaseshr.Base;
+  var RxBase = $module$appsimake_commonshr.commonshr.properties.RxBase;
   var Kind_CLASS = Kotlin.Kind.CLASS;
-  var initFrom = $module$appsimake_firebaseshr.firebaseshr.initFrom_bruz9y$;
-  var wrapper = $module$appsimake_firebaseshr.firebaseshr.wrapper_c00y0o$;
+  var wrapper = $module$appsimake_commonshr.commonshr.properties.wrapper_3yfn2g$;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
-  var BaseRoot = $module$appsimake_firebaseshr.firebaseshr.BaseRoot;
-  Player.prototype = Object.create(Base.prototype);
+  var RxRoot = $module$appsimake_commonshr.commonshr.properties.RxRoot;
+  Player.prototype = Object.create(RxBase.prototype);
   Player.prototype.constructor = Player;
-  Game.prototype = Object.create(Base.prototype);
+  Game.prototype = Object.create(RxBase.prototype);
   Game.prototype.constructor = Game;
-  Move.prototype = Object.create(BaseRoot.prototype);
+  Move.prototype = Object.create(RxRoot.prototype);
   Move.prototype.constructor = Move;
   Move$Companion.prototype = Object.create(Move.prototype);
   Move$Companion.prototype.constructor = Move$Companion;
@@ -58,9 +57,9 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
     return moves.getValue_lrcp0p$($receiver, moves_metadata);
   }
   function Player() {
-    Base.call(this);
-    this.active_ir98gi$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Player$active_metadata);
-    this.game_u70256$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Player$game_metadata);
+    RxBase.call(this);
+    this.active_ir98gi$_0 = this.o.boolean().provideDelegate_n5byny$(this, Player$active_metadata);
+    this.game_u70256$_0 = this.o.prop_z4bjo6$(null).provideDelegate_n5byny$(this, Player$game_metadata);
   }
   var Player$active_metadata = new PropertyMetadata('active');
   Object.defineProperty(Player.prototype, 'active', {
@@ -77,13 +76,13 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
   Player.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Player',
-    interfaces: [Base]
+    interfaces: [RxBase]
   };
   function Game() {
-    Base.call(this);
-    this.players_7xo8u1$_0 = this.o.array_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Game$players_metadata);
-    this.originalPlayers_6ak8tm$_0 = this.o.array_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Game$originalPlayers_metadata);
-    this.isOver_3nqnrf$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Game$isOver_metadata);
+    RxBase.call(this);
+    this.players_7xo8u1$_0 = this.o.set_287e2$().provideDelegate_n5byny$(this, Game$players_metadata);
+    this.originalPlayers_6ak8tm$_0 = this.o.set_287e2$().provideDelegate_n5byny$(this, Game$originalPlayers_metadata);
+    this.isOver_3nqnrf$_0 = this.o.boolean().provideDelegate_n5byny$(this, Game$isOver_metadata);
   }
   var Game$players_metadata = new PropertyMetadata('players');
   Object.defineProperty(Game.prototype, 'players', {
@@ -106,13 +105,13 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
   Game.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Game',
-    interfaces: [Base]
+    interfaces: [RxBase]
   };
   function Move() {
     Move$Companion_getInstance();
-    BaseRoot.call(this);
-    this.sequence_hl9azr$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Move$sequence_metadata);
-    this.player_q0tkjr$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Move$player_metadata);
+    RxRoot.call(this);
+    this.sequence_hl9azr$_0 = this.o.int().provideDelegate_n5byny$(this, Move$sequence_metadata);
+    this.player_q0tkjr$_0 = this.o.int().provideDelegate_n5byny$(this, Move$player_metadata);
   }
   var Move$sequence_metadata = new PropertyMetadata('sequence');
   Object.defineProperty(Move.prototype, 'sequence', {
@@ -129,18 +128,15 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
   function Move$Companion() {
     Move$Companion_instance = this;
     Move.call(this);
-    this.emptyOf = wrapper([Move$Companion$emptyOf$lambda, Move$Companion$emptyOf$lambda_0, Move$Companion$emptyOf$lambda_1]);
+    this.of = wrapper([Move$Companion$of$lambda, Move$Companion$of$lambda_0, Move$Companion$of$lambda_1]);
   }
-  Move$Companion.prototype.of_za3rmp$ = function (d) {
-    return initFrom(this.emptyOf(d), d);
-  };
-  function Move$Companion$emptyOf$lambda() {
+  function Move$Companion$of$lambda() {
     return new Start();
   }
-  function Move$Companion$emptyOf$lambda_0() {
+  function Move$Companion$of$lambda_0() {
     return new Placement();
   }
-  function Move$Companion$emptyOf$lambda_1() {
+  function Move$Companion$of$lambda_1() {
     return new Leave();
   }
   Move$Companion.$metadata$ = {
@@ -158,7 +154,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
   Move.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Move',
-    interfaces: [BaseRoot]
+    interfaces: [RxRoot]
   };
   function Start() {
     Move.call(this);
@@ -170,8 +166,8 @@ define(['exports', 'kotlin', 'appsimake-commonshr', 'appsimake-firebaseshr'], fu
   };
   function Placement() {
     Move.call(this);
-    this.x_by76mu$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Placement$x_metadata);
-    this.y_by76np$_0 = this.o.scalar_287e2$().prop_aspey6$().provideDelegate_lrcp0p$(this, Placement$y_metadata);
+    this.x_by76mu$_0 = this.o.int().provideDelegate_n5byny$(this, Placement$x_metadata);
+    this.y_by76np$_0 = this.o.int().provideDelegate_n5byny$(this, Placement$y_metadata);
   }
   var Placement$x_metadata = new PropertyMetadata('x');
   Object.defineProperty(Placement.prototype, 'x', {

@@ -1,7 +1,6 @@
 package commonfb.loginbase
 
 import common.obj
-import commonfb.HasUserState
 import commonfb.UserState
 import commonfb.runUserState
 import commonshr.JobScope

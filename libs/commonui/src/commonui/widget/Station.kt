@@ -2,8 +2,7 @@ package commonui.widget
 
 import commonshr.*
 import commonshr.KillsApi
-import commonui.HasUix
-import commonui.UixApi
+import commonui.KillsUixApi
 import killable.Killables
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -146,7 +145,7 @@ abstract class ViewImpl<V: Any>(
 
 abstract class UIBase<V: Any>(
     coroutineContext: Job
-): ViewImpl<V>(coroutineContext), UixApi {
+): ViewImpl<V>(coroutineContext), KillsUixApi {
     constructor(
         parent: JobScope
     ): this(Job(parent.coroutineContext))

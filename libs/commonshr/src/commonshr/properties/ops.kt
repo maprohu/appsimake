@@ -6,3 +6,13 @@ interface DynamicOps {
     fun readTimestamp(d: dynamic): TS
 
 }
+
+object NoDynamicOps: DynamicOps {
+    override fun writeTimestamp(ts: TS): dynamic {
+        TODO("not implemented")
+    }
+
+    override fun readTimestamp(d: dynamic): TS {
+        TODO("not implemented")
+    }
+}

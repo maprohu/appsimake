@@ -1,18 +1,19 @@
 package musiclib
 
 import commonshr.*
+import commonshr.properties.RxBase
 import firebaseshr.*
 
 val musicLib = Lib("music")
 
-val DocWrap<AppDoc>.songs by coll<Mp3File>()
-val DocWrap<AppDoc>.storage by coll<StoreState>()
-val DocWrap<Private>.usersongs by coll<UserSong>()
+val DocWrap<AppDoc>.songs by coll { Mp3File() }
+val DocWrap<AppDoc>.storage by coll { StoreState() }
+val DocWrap<Private>.usersongs by coll { UserSong() }
 
-class StoreState: Base<StoreState>() {
+class StoreState: RxBase<StoreState>() {
 
-    val uploaded by o.scalar<Boolean>().prop()
-    val count by o.scalar<Int>().prop()
+    val uploaded by o.boolean()
+    val count by o.int()
 
 }
 
@@ -22,47 +23,23 @@ enum class UserSongState {
     DontLike
 }
 
-class UserSong: Base<UserSong>() {
+class UserSong: RxBase<UserSong>() {
 
-    val state by o.enum<UserSongState>().prop()
-
-}
-
-class Mp3File: Base<Mp3File>() {
-
-    val artist by o.scalar<String>().prop()
-    val title by o.scalar<String>().prop()
-    val bytes by o.scalar<Int>().prop()
-    val secs by o.scalar<Double>().prop()
-    val artistfix by o.scalar<String>().prop()
-    val titlefix by o.scalar<String>().prop()
+    val state by o.enum(UserSongState.New)
 
 }
 
-fun Mp3File.fixedArtist() = artistfix.initial().orElse { artist.initial() }
-fun Mp3File.fixedTitle() = titlefix.initial().orElse { title.initial() }
+class Mp3File: RxBase<Mp3File>() {
 
-//abstract class ActivePlaylist<T: ActivePlaylist<T>>: BaseRootVal<T>() {
-//    val position by o.scalar<Double>().prop()
-//
-//    companion object : ActivePlaylist<Nothing>() {
-//        val emptyOf = wrapper(
-//            { LocalPlaylist() },
-//            { CloudPlaylist() },
-//            { CustomPlaylist() }
-//        )
-//        fun of(d: dynamic) = emptyOf(d).initFrom(d)
-//    }
-//}
-//class LocalPlaylist: ActivePlaylist<LocalPlaylist>()
-//class CloudPlaylist: ActivePlaylist<CloudPlaylist>()
-//class CustomPlaylist: ActivePlaylist<CustomPlaylist>() {
-//    val songs by o.array<String>().prop()
-//}
-//
-//class PlayerSettings: Base<PlayerSettings>() {
-//
-//    val activePlaylist by
-//        o.scalar<ActivePlaylist<*>>().baseProp(ActivePlaylist.emptyOf)
-//
-//}
+    val artist by o.string()
+    val title by o.string()
+    val bytes by o.int()
+    val secs by o.double()
+    val artistfix by o.prop<String?>(null)
+    val titlefix by o.prop<String?>(null)
+
+}
+
+fun Mp3File.fixedArtist() = artistfix() ?: artist()
+fun Mp3File.fixedTitle() = titlefix() ?: title()
+

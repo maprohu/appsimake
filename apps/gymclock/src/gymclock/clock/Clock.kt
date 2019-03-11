@@ -22,16 +22,17 @@ import kotlin.js.Date
 import kotlin.math.floor
 import kotlin.math.min
 import animate.*
+import commonshr.Trigger
 import commonui.*
 
-open class ClockPath(
+interface ClockPath: FormPath {
     val clock: Clock
-): FormPath(clock.form)
+}
 
 class Clock(
-    val form: Form
-): UIBase<HTMLElement>(form) {
-    val path = ClockPath(this)
+    override val from: Form
+): UIBase<HTMLElement>(from), ClockPath, FormPath by from, FromKillsUixApi, HasHistoryKillsRedisplay {
+    override val clock = this
 
     val sounds = form.sounds
     val model = form.model
@@ -71,7 +72,10 @@ class Clock(
 
     override val rawView = ui()
 
+    override val redisplay = {} // TODO
+
     init {
+        historyItem
 
         fun List<Phase>.nonZeroes() = filter { it.length > 0 }
         fun List<Phase>.toPhaseList(): PhaseList {

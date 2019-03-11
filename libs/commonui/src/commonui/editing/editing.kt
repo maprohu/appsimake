@@ -10,38 +10,71 @@ import fontawesome.*
 import killable.*
 import rx.*
 
-interface Editing {
+interface Bindings {
     val dirty: RxIface<Boolean>
     val canSave: RxIface<Boolean>
-    val save: Action
-    val delete: Action
-    val canDelete: RxIface<Boolean>
-}
 
-abstract class DefaultEditing(
-    final override val kills: KillSet
-): Editing, KillsApi {
+    fun addValidation(deps: HasKills, rxv: RxIface<Boolean>)
+    fun addDirty(deps: HasKills, rxv: RxIface<Boolean>)
+}
+open class DefaultBindings(
+    final override val kills: KillSet,
+    defaultDirty: () -> Boolean = { false }
+): Bindings, KillsApi {
+
 
     val extraDirty = Var(emptyList<RxIface<Boolean>>())
     val validations = Var(emptyList<RxIface<Boolean>>())
 
     final override val canSave = this.rx { validations().all { it() } }
 
+    final override val dirty = this.rx {
+        extraDirty().any { it() } || defaultDirty()
+    }
+
+    override fun addValidation(deps: HasKills, rxv: RxIface<Boolean>) = validations.add(deps, rxv)
+    override fun addDirty(deps: HasKills, rxv: RxIface<Boolean>) = extraDirty.add(deps, rxv)
+
 }
+interface Editing: Bindings {
+    val save: Action
+    val delete: Action
+    val canDelete: RxIface<Boolean>
+}
+
+abstract class DefaultEditing(
+    kills: KillSet,
+    defaultDirty: () -> Boolean
+): DefaultBindings(kills, defaultDirty), Editing
+
 class RxEditing<T: RxBase<*>>(
     kills: KillSet,
     val initial: FsDoc<T>,
+    val current: T,
     override val canDelete: RxIface<Boolean>,
     override val delete: Action,
     saveCurrent: suspend (T) -> Unit
-): DefaultEditing(kills), KillsApi {
-    val current = initial.rxv.now.copy()
+): DefaultEditing(
+    kills,
+    { !rxCompare(initial(), current) }
+), KillsApi {
+    constructor(
+        kills: KillSet,
+        initial: FsDoc<T>,
+        canDelete: RxIface<Boolean>,
+        delete: Action,
+        saveCurrent: suspend (T) -> Unit
+    ): this(
+        kills,
+        initial,
+        initial.rxv.now.copy(),
+        canDelete,
+        delete,
+        saveCurrent
+    )
+
     override val save: Action = {
         saveCurrent(current)
-    }
-    override val dirty = this.rx {
-        extraDirty().any { it() } ||
-                !rxCompare(initial(), current)
     }
 }
 
@@ -58,9 +91,7 @@ class Binder<V>(
 }
 
 fun Binder<*>.validate(fn: KillsApi.() -> Boolean) {
-    val rxv = rx { fn() }
-    validations.transform { it + rxv }
-    kills += { validations.transform { it - rxv } }
+    validations.add(this, rx { fn() } )
 }
 
 fun Binder<*>.raw(fn: KillsApi.(String) -> Boolean) = validate { fn(rawValue()) }
@@ -69,12 +100,12 @@ fun <V> Binder<V>.parsed(fn: KillsApi.(V) -> Boolean) = validate { fn(parsedValu
 fun Binder<String>.required() = parsed { it.isNotBlank() }
 
 fun AbstractInput.bind(
-    deps: HasEditKills,
+    deps: HasBindKills,
     rxv: HasVar<String>
 ): Binder<String> = bind(deps, rxv.rxv)
 
 fun AbstractInput.bind(
-    deps: HasEditKills,
+    deps: HasBindKills,
     rxv: Var<String>
 ): Binder<String> {
     return bind(
@@ -86,7 +117,7 @@ fun AbstractInput.bind(
 }
 
 fun <V> AbstractInput.bind(
-    deps: HasEditKills,
+    deps: HasBindKills,
     modelValue: Var<V>,
     initial: (V) -> String,
     extract: (String) -> V
@@ -112,11 +143,8 @@ fun <V> AbstractInput.bind(
         b.validations.transform { it + extractValid }
         b.dirties.transform { it + Rx(deps.kills) { !extractValid() } }
 
-        deps.editing.validations.transform { it + b.valid }
-        deps.kills += { deps.editing.validations.transform { it - b.valid } }
-
-        deps.editing.extraDirty.transform { it + b.dirty }
-        deps.kills += { deps.editing.extraDirty.transform { it - b.dirty } }
+        deps.editing.addValidation(deps, b.valid)
+        deps.editing.addDirty(deps, b.dirty)
 
         b.valid.forEach(deps.kills) { valid %= it }
     }
@@ -164,7 +192,7 @@ fun Factory.saveDeleteButton(deps: HasEditExitFromKillsUix) = buttonGroup {
     }
 }
 
-class BackSaveDiscard(deps: HasEditExitFromKillsUix, holes: SlotHoles): HasEditExitFromKillsUix by deps, KillsApiCommonui, UixApi {
+class BackSaveDiscard(deps: HasEditExitFromKillsUix, holes: SlotHoles): HasEditExitFromKillsUix by deps, KillsApiCommonui, KillsUixApi {
     private fun fromOrExit() {
         if (editing.canDelete.now) {
             from.redisplay()

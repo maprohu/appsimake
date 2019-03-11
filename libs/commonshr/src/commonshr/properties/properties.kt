@@ -199,8 +199,9 @@ open class PropertyList<T> {
         rxListType(create)
     )
 
-    fun boolean() = prop(false)
-    fun int() = prop(0)
+    fun boolean(default: Boolean = false) = prop(default)
+    fun int(default: Int = 0) = prop(default)
+    fun double() = prop(0.0)
 
 
     fun <V> addCalc(

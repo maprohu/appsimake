@@ -50,76 +50,76 @@ object APP {
     }
 }
 
-class AppCtx(
-    val title: String
-) {
-
-    val killables = Killables()
-
-
-
-    val root by lazy {
-        RootPanel(document.body!!).also { it.setHourglass() }
-    }
-
-    init {
-        setupFullScreen()
-    }
-
-    fun hourglass() {
-        root.setHourglass()
-    }
-
-    val isServiceWorkerSupported by lazy {
-        window.navigator.serviceWorker as? Any != null
-    }
-
-    val isFcmSupported by lazy {
-        isServiceWorkerSupported
-    }
-
-    val serviceWorker by lazy {
-        window.navigator.serviceWorker.register(serviceWorkerFileName)
-    }
-
-    fun registerServiceWorker() {
-        if (isServiceWorkerSupported) {
-            serviceWorker
-        }
-    }
-
-
-    val networkType by lazy {
-        val rxv = Var(NetworkType.unknown)
-        val connection = window.navigator.connection
-        fun update() {
-            rxv.now = connection.type
-        }
-        val listener : (Event) -> Unit = {
-            update()
-        }
-        connection.addEventListener("change", listener)
-        killables += { connection.removeEventListener("change", listener) }
-        GlobalScope.launch {
-            update()
-        }
-        rxv
-    }
-
-    val networkEffectiveType by lazy {
-        val connection = window.navigator.connection
-        val rxv = Var(connection.effectiveType)
-        fun update() {
-            rxv.now = connection.effectiveType
-        }
-        val listener : (Event) -> Unit = {
-            update()
-        }
-        connection.addEventListener("change", listener)
-        killables += { connection.removeEventListener("change", listener) }
-        GlobalScope.launch {
-            update()
-        }
-        rxv
-    }
-}
+//class AppCtx(
+//    val title: String
+//) {
+//
+//    val killables = Killables()
+//
+//
+//
+//    val root by lazy {
+//        RootPanel(document.body!!).also { it.setHourglass() }
+//    }
+//
+//    init {
+//        setupFullScreen()
+//    }
+//
+//    fun hourglass() {
+//        root.setHourglass()
+//    }
+//
+//    val isServiceWorkerSupported by lazy {
+//        window.navigator.serviceWorker as? Any != null
+//    }
+//
+//    val isFcmSupported by lazy {
+//        isServiceWorkerSupported
+//    }
+//
+//    val serviceWorker by lazy {
+//        window.navigator.serviceWorker.register(serviceWorkerFileName)
+//    }
+//
+//    fun registerServiceWorker() {
+//        if (isServiceWorkerSupported) {
+//            serviceWorker
+//        }
+//    }
+//
+//
+//    val networkType by lazy {
+//        val rxv = Var(NetworkType.unknown)
+//        val connection = window.navigator.connection
+//        fun update() {
+//            rxv.now = connection.type
+//        }
+//        val listener : (Event) -> Unit = {
+//            update()
+//        }
+//        connection.addEventListener("change", listener)
+//        killables += { connection.removeEventListener("change", listener) }
+//        GlobalScope.launch {
+//            update()
+//        }
+//        rxv
+//    }
+//
+//    val networkEffectiveType by lazy {
+//        val connection = window.navigator.connection
+//        val rxv = Var(connection.effectiveType)
+//        fun update() {
+//            rxv.now = connection.effectiveType
+//        }
+//        val listener : (Event) -> Unit = {
+//            update()
+//        }
+//        connection.addEventListener("change", listener)
+//        killables += { connection.removeEventListener("change", listener) }
+//        GlobalScope.launch {
+//            update()
+//        }
+//        rxv
+//    }
+//}
