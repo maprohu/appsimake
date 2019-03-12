@@ -2,14 +2,14 @@ package commonfb.loginbase
 
 import commonfb.UserState
 import commonfb.login.Login
-import commonshr.JobScope
-import commonui.widget.switchToView
+import commonui.HasKillsRouting
 import firebase.User
 import firebase.app.App
 import firebase.auth.Auth
+import org.w3c.dom.HTMLElement
 
 open class LoginOnly(
-    parent: JobScope
+    parent: HasKillsRouting<HTMLElement>
 ): LoginBase(parent) {
 
     suspend fun start(
@@ -18,15 +18,13 @@ open class LoginOnly(
     ) {
         fun notLoggedInView(): Login =
             Login(
-                parent = this,
+                parent = hole,
                 base = this,
                 app = app,
                 loggingIn = { switchToUnkownUser() },
                 loginFailed = {
                     reportError(it)
-                    content.switchToView {
-                        notLoggedInView()
-                    }
+                    hole %= notLoggedInView()
                 }
             )
 

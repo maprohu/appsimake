@@ -48,7 +48,7 @@ abstract class AbstractInput: ScreenWrap() {
     abstract var nodeValue: String
 }
 
-fun AbstractInput.bind(
+fun AbstractInput.bindValue(
     deps: HasKills,
     rxv: Var<String>
 ) {

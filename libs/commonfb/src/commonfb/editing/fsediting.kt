@@ -2,6 +2,7 @@ package commonfb.editing
 
 import commonshr.Action
 import commonshr.FsDoc
+import commonshr.Trigger
 import commonshr.properties.RxBase
 import commonui.editing.RxEditing
 import firebase.HasDbKills
@@ -12,8 +13,8 @@ import rx.rx
 fun <T: RxBase<*>> rxEditing(
     deps: HasDbKills,
     initial: FsDoc<T>,
-    delete: Action? = null,
-    preSave: suspend (T) -> Unit
+    delete: Trigger? = null,
+    preSave: (T) -> Unit
 ): RxEditing<T> {
     return RxEditing(
         deps.kills,

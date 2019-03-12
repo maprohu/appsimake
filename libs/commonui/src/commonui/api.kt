@@ -27,9 +27,12 @@ interface KillsApiCommonui: KillsApiDomx {
     fun ScreenWrap.visible(fn: KillsApi.() -> Boolean) = visible(api, fn)
 
     fun <E: Enum<E>> Select.bind(prop: EnumProp<*, E>) = bind(api, prop)
-    fun Select.bind(prop: Var<String>) = bind(api, prop)
+    fun Select.bindValue(prop: Var<String>) = bindValue(api, prop)
 
     fun <V: Any, T: ViewItem<V>> RxIface<T>.runView(hole: HoleT<V>) = runView(api, hole)
+
+    val <V: Any> HoleT<V>.routing get() = routing(api)
+
 
 }
 interface KillsUixApi: Api, HasKillsUix, KillsApiCommonui {

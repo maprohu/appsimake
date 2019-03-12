@@ -46,5 +46,5 @@ fun <E: Enum<E>> Select.bind(
             this %= e.name // TODO proper label?
         }
     }
-    bind(deps, prop.nameVar)
+    bindValue(deps, prop.nameVar)
 }

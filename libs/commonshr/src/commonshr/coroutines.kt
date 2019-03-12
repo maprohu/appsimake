@@ -82,3 +82,5 @@ fun CoroutineScope.executor(): Exec {
     }
 }
 
+fun CoroutineScope.launchNonCancellable(fn: Action) = launch(NonCancellable) { fn() }
+

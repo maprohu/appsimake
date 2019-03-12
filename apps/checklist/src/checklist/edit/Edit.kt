@@ -5,16 +5,13 @@ import checklist.ChecklistItem
 import checklist.loggedin.LoggedIn
 import checklist.loggedin.LoggedInPath
 import rx.RxMutableList
-import common.eventsEmitter
 import commonfb.FBApi
 import commonshr.*
-import commonshr.properties.now
-import commonshr.properties.remAssign
-import commonui.EditFromKillsUixApi
+import commonui.CsKillsView
+import commonui.Editor
+import commonui.SimpleView
 import commonui.editing.RxEditing
-import commonui.widget.ForwardImpl
 import commonui.widget.TopAndContent
-import commonui.widget.UIBase
 import rx.Var
 import rx.eventsEmitter
 
@@ -24,9 +21,9 @@ interface EditPath: LoggedInPath {
 
 class Edit(
     loggedIn: LoggedIn,
-    override val from: ForwardImpl<TopAndContent, *>,
+    override val from: CsKillsView<TopAndContent>,
     initial: FsDoc<Checklist>
-): UIBase<TopAndContent>(from), EditPath, LoggedInPath by loggedIn, FBApi, EditFromKillsUixApi {
+): SimpleView<TopAndContent>(from), EditPath, LoggedInPath by loggedIn, FBApi, Editor {
     override val edit = this
 
     override val editing: RxEditing<Checklist> = rxEditing(initial) { current ->

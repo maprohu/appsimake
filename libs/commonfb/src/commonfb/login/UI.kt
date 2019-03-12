@@ -35,7 +35,7 @@ fun Login.ui() = TopAndContent(
             alignItemsCenter
         }
         column {
-            fun butt(faIcon: FaIcon, label: String, fn: Action): Button {
+            fun butt(faIcon: FaIcon, label: String, fn: Trigger): Button {
                 return widget.insert.button {
                     click(fn)
                     primary

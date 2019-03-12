@@ -1,7 +1,6 @@
 package checklist.edit
 
 import bootstrap.*
-import common.events
 import commonshr.*
 import commonui.editing.bind
 import commonui.editing.required
@@ -45,7 +44,7 @@ fun Edit.ui(): TopAndContent {
                             insert.inputGroup {
                                 input {
                                     required
-                                    bindTo(adder)
+                                    bindValue(this@ui, adder)
                                     performAdd = {
                                         addItem(value)
                                         adder %= ""
@@ -70,7 +69,7 @@ fun Edit.ui(): TopAndContent {
 
                         node.div {
                             list(
-                                items.events().map { cl ->
+                                items.events().mapLive { cl ->
                                     factory.inputGroup {
                                         cls.m1
                                         input {

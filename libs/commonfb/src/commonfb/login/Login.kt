@@ -3,24 +3,27 @@ package commonfb.login
 import commonfb.UserState
 import commonfb.loginbase.UserStateView
 import commonshr.*
+import commonui.HasKillsRouting
+import commonui.SimpleView
 import commonui.widget.*
 import firebase.app.App
 import firebase.auth.GoogleAuthProvider
 import firebase.auth.UserCredential
 import killable.KillSet
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 
 class Login(
-    parent: JobScope,
-    val base: JobScope,
+    parent: HasKillsRouting<TopAndContent>,
+    val base: CoroutineScope,
     val app: App,
     val back: Trigger? = null,
     val loggingIn: Action = {},
     val loginFailed: suspend (dynamic) -> Unit = {},
     val loginSucceeded: suspend (UserCredential) -> Unit = {}
-): UIBase<TopAndContent>(parent), UserStateView {
+): SimpleView<TopAndContent>(parent), UserStateView {
     override val userState = UserState.NotLoggedIn
     override val rawView = ui()
 
@@ -33,7 +36,7 @@ class Login(
         }
     }
 
-    suspend fun google() {
+    fun google() {
         base.launch {
             val provider = GoogleAuthProvider()
             tryLogin {
@@ -42,7 +45,7 @@ class Login(
         }
     }
 
-    suspend fun guest() {
+    fun guest() {
         base.launch {
             tryLogin {
                 app.auth().signInAnonymously().await()

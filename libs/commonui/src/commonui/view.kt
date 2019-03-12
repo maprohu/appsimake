@@ -2,8 +2,10 @@ package commonui
 
 import common.CsKillsApiCommon
 import commonshr.*
+import commonui.progress.Progress
 import commonui.widget.HoleT
 import killable.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import rx.*
 
@@ -50,7 +52,7 @@ typealias IView<V> = HasKillKillsView<V>
 typealias SimpleView<V> = CsKillsView<V>
 abstract class CsKillsView<V>(
     private val parent: HasKillsRouting<V>
-) : CsKills(parent), IView<V>, HasUix, HasRedisplay, HasKillsRouting<V>, HasRouting<V> by parent {
+) : CsKills(parent), IView<V>, KillsUixApi, HasRedisplay, HasKillsRouting<V>, HasRouting<V> by parent {
 
 
     abstract val rawView: V
@@ -108,9 +110,40 @@ interface HasRouting<V> {
 }
 interface HasKillsRouting<V>: HasKills, HasRouting<V>
 
+class RoutingHole<V, N: IView<V>>(
+    parent: HasKills,
+    initial: HasKillsRouting<V>.() -> N
+): HasKillsRouting<V>, KillsApi, HasKills by parent {
+    val content = Var(initial(this)).oldKilled
+    override val activeView = rx { content().viewItem }
+    operator fun remAssign(n: N) { content %= n }
+}
+
+fun <V, N: IView<V>> HasKills.routingHole(
+    initial: HasKillsRouting<V>.() -> N
+) = RoutingHole(this, initial)
+
+fun <V: Any> HoleT<V>.routing(
+    deps: HasKills
+) = RoutingFactory(deps, this)
+
+class RoutingFactory<V: Any>(
+    val deps: HasKills,
+    val hole: HoleT<V>
+) {
+    fun <N: IView<V>> of(
+        initial: HasKillsRouting<V>.() -> N
+    ) = deps.routingHole(initial).apply {
+        activeView.runView(deps, hole)
+    }
+
+}
+
 interface HasRedisplay {
     val redisplay: Trigger
 }
+interface HasCsRedisplay: CoroutineScope, HasRedisplay
+
 sealed class FwdStatus<F: CsKillsView<*>> {
     abstract val forward: F?
     data class Self<F: CsKillsView<*>>(override val forward: F?) : FwdStatus<F>()

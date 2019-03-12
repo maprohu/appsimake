@@ -21,12 +21,9 @@ class Body(
 ): CsKills(NoKill), BodyPath, HasKillsRouting<HTMLElement> {
     override val body = this
 
-    val content = Var<BodyNode>(Progress(this)).oldKilled
+    val hole = slot.routing.of<BodyNode> { Progress(this) }
 
-    override val activeView = rx { content().viewItem }
+    override val activeView = hole.activeView
 
-    init {
-        activeView.runView(slot)
-    }
 }
 

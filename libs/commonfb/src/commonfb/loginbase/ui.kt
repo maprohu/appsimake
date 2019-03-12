@@ -12,9 +12,7 @@ fun LoginBase.ui() = Factory().run {
         boot.main = toastSlots.content
         boot.toasts = toastSlots.toasts.let { tsts ->
             { fn ->
-                exec {
-                    tsts.toast.apply(fn)
-                }
+                tsts.toast.apply(fn)
             }
         }
     }

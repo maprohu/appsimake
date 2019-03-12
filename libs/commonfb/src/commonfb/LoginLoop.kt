@@ -9,6 +9,7 @@ import killable.*
 import rx.Rx
 import rx.RxIface
 import rx.Var
+import rx.mapAsync
 
 
 //interface HasUserState {
@@ -21,14 +22,14 @@ sealed class UserState {
         val user: User
     ): UserState()
 }
-suspend fun JobKillsApi.runUserState(
+suspend fun HasCsKills.runUserState(
     app: App = FB.app,
     fn: suspend KillsApi.(UserState) -> UserState = { it }
 ): RxIface<UserState> {
     return runUserState(app.auth(), fn)
 }
 
-suspend fun JobKillsApi.runUserState(
+suspend fun HasCsKills.runUserState(
     auth: Auth = FB.app.auth(),
     fn: suspend KillsApi.(UserState) -> UserState = { it }
 ): RxIface<UserState> {
@@ -48,7 +49,7 @@ suspend fun JobKillsApi.runUserState(
         }
     )
 
-    return rxv.mapAsync(fn)
+    return rxv.mapAsync(this, fn)
 }
 
 fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx(ks) {

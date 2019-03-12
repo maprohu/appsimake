@@ -263,6 +263,11 @@ fun <T> RxIface<T>.feedTo(deps: HasKills, target: Var<T>) {
     forEach(deps) { target.now = it }
 }
 
+fun <T> RxIface<T>.forEachLater(
+    deps: HasKills,
+    fn: KillsApi.(T) -> Unit
+) = forEachLater(deps.kills, fn)
+
 //fun RxIface<Int>.feedTo(ks: KillSet, rxv: Var<Int>) {
 //    fold(ks, 0) { old, new ->
 //        rxv.transform { it + new - old }
@@ -548,10 +553,10 @@ fun <T> (KillsApi.() -> T).toRx(ks: KillSet) = Rx(ks, this)
 //    return ch
 //}
 
-fun <T> RxIface<T>.toChannelLater(ks: KillSet): ReceiveChannel<T> {
+fun <T> RxIface<T>.toChannelLater(deps: HasKills): ReceiveChannel<T> {
     val ch = Channel<T>(Channel.UNLIMITED)
-    ks += { ch.close() }
-    forEachLater(ks) { t -> ch.offer(t) }
+    deps.kills += { ch.close() }
+    forEachLater(deps) { t -> ch.offer(t) }
     return ch
 }
 

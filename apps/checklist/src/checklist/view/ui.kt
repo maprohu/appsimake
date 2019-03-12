@@ -2,11 +2,11 @@ package checklist.view
 
 import bootstrap.*
 import rx.RxMutableList
-import common.sorted
 import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
+import rx.sorted
 
 class ItemOrder(
     val checked: Boolean,
@@ -26,7 +26,7 @@ fun ViewChecklist.ui() = TopAndContent(
             back
             click { loggedIn.redisplay() }
         }
-        title %= { chklist.doc.name() }
+        title %= { chklist().name() }
         right.buttonGroup {
             cls.m1
             button {
@@ -42,7 +42,7 @@ fun ViewChecklist.ui() = TopAndContent(
                 primary
                 fa.eraser
                 click {
-                    docs.now.clear()
+                    chklist.rxv.now.clear()
                 }
             }
             insert.buttonGroup {
@@ -73,7 +73,7 @@ fun ViewChecklist.ui() = TopAndContent(
                 factory.listGroup {
                     cls.m1
                     node.list(
-                        docs().let { cl ->
+                        chklist().let { cl ->
                             console.dir(cl)
                             cl.items().let { items ->
                                 RxMutableList(items)
@@ -83,7 +83,7 @@ fun ViewChecklist.ui() = TopAndContent(
                                             i.name()
                                         )
                                     }
-                                    .events().map { i ->
+                                    .events().mapLive { i ->
                                         factory.listGroupButton {
                                             cls {
                                                 p1

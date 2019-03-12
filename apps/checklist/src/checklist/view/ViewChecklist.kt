@@ -8,14 +8,11 @@ import checklist.loggedin.LoggedInPath
 import commonfb.FBApi
 import commonshr.FsDoc
 import commonshr.docWrap
+import commonshr.launchNonCancellable
 import commonshr.properties.copy
-import commonshr.properties.now
 import commonshr.toFsDoc
-import commonui.widget.ForwardBase
+import commonui.ForwardBase
 import commonui.widget.TopAndContent
-import rx.Var
-import rx.toRx
-import rx.toVar
 
 interface ViewPath: LoggedInPath {
     val viewChecklist: ViewChecklist
@@ -28,8 +25,6 @@ class ViewChecklist(
 
     val Checklist.fsDoc get() = toFsDoc(chklist.id)
 
-    val docs = chklist.docWrap.docs().toRx(chklist.doc.copy())
-//    val docs = Var(chklist.doc.copy())
 
     fun Checklist.toggle(item: ChecklistItem) {
         item.checked.rxv.transform {
@@ -44,22 +39,18 @@ class ViewChecklist(
     }
 
     fun deleteChecklist() {
-        loggedIn.exec {
+        loggedIn.launchNonCancellable {
             chklist.delete()
-            loggedIn.redisplay()
         }
+        loggedIn.redisplay()
     }
 
     fun editChecklist() {
-        exec {
-            forward.switchTo {
-                Edit(
-                    loggedIn,
-                    this,
-                    chklist
-                )
-            }
-        }
+        this %= Edit(
+            loggedIn,
+            this,
+            chklist
+        )
     }
 
     override val rawView = ui()

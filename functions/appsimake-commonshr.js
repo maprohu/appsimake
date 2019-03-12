@@ -1500,6 +1500,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   KillsApi.prototype.remAssign_djv61p$ = function ($receiver, fn) {
     this.rx_djv61p$($receiver, fn);
   };
+  KillsApi.prototype.get_oldKilled_vsdo34$ = function ($receiver) {
+    return oldKilled($receiver, this);
+  };
+  KillsApi.prototype.get_oldKilledOpt_vsdo34$ = function ($receiver) {
+    return oldKilledOpt($receiver, this);
+  };
   KillsApi.prototype.linked_n1nom7$ = function ($receiver, read, write) {
     return linked($receiver, this, read, write);
   };
@@ -1527,7 +1533,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     return toRxSet($receiver, this.kills);
   };
   KillsApi.prototype.toChannelLater_z5dyp2$ = function ($receiver) {
-    return toChannelLater($receiver, this.kills);
+    return toChannelLater($receiver, this);
   };
   KillsApi.prototype.mapLive_1mq1ue$ = function ($receiver, fn) {
     return mapLive($receiver, this, fn);
@@ -1571,13 +1577,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     kind: Kind_INTERFACE,
     simpleName: 'CsKillsApi',
     interfaces: [KillsApi, CsApi, HasCsKills]
-  };
-  function JobScope() {
-  }
-  JobScope.$metadata$ = {
-    kind: Kind_INTERFACE,
-    simpleName: 'JobScope',
-    interfaces: [CoroutineScope]
   };
   function lib$lambda(it) {
     return new Lib(it);
@@ -2704,6 +2703,61 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     launch($receiver, void 0, void 0, executor$lambda_0(channel, job));
     return executor$lambda_1(channel);
   }
+  function Coroutine$launchNonCancellable$lambda(closure$fn_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$fn = closure$fn_0;
+  }
+  Coroutine$launchNonCancellable$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$launchNonCancellable$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$launchNonCancellable$lambda.prototype.constructor = Coroutine$launchNonCancellable$lambda;
+  Coroutine$launchNonCancellable$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.state_0 = 2;
+            this.result_0 = this.local$closure$fn(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return this.result_0;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function launchNonCancellable$lambda(closure$fn_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$launchNonCancellable$lambda(closure$fn_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function launchNonCancellable($receiver, fn) {
+    return launch($receiver, coroutines.NonCancellable, void 0, launchNonCancellable$lambda(fn));
+  }
   function RefCountMap(create) {
     this.create = create;
     this.map_0 = LinkedHashMap_init();
@@ -2766,12 +2820,40 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'RefCount',
     interfaces: []
   };
+  function HasKill() {
+  }
+  HasKill.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'HasKill',
+    interfaces: []
+  };
+  function HasKilled() {
+  }
+  HasKilled.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'HasKilled',
+    interfaces: []
+  };
   function HasKills() {
   }
   HasKills.$metadata$ = {
     kind: Kind_INTERFACE,
     simpleName: 'HasKills',
     interfaces: []
+  };
+  function HasKillKills() {
+  }
+  HasKillKills.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'HasKillKills',
+    interfaces: [HasKills, HasKill]
+  };
+  function HasKillKilledKills() {
+  }
+  HasKillKilledKills.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'HasKillKilledKills',
+    interfaces: [HasKilled, HasKillKills]
   };
   function KillsDeps(kills) {
     this.kills_ln6p9y$_0 = kills;
@@ -3805,6 +3887,28 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'DynamicOps',
     interfaces: []
   };
+  function NoDynamicOps() {
+    NoDynamicOps_instance = this;
+  }
+  var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
+  NoDynamicOps.prototype.writeTimestamp_frv8pu$ = function (ts) {
+    throw new NotImplementedError_init('An operation is not implemented: ' + 'not implemented');
+  };
+  NoDynamicOps.prototype.readTimestamp_za3rmp$ = function (d) {
+    throw new NotImplementedError_init('An operation is not implemented: ' + 'not implemented');
+  };
+  NoDynamicOps.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'NoDynamicOps',
+    interfaces: [DynamicOps]
+  };
+  var NoDynamicOps_instance = null;
+  function NoDynamicOps_getInstance() {
+    if (NoDynamicOps_instance === null) {
+      new NoDynamicOps();
+    }
+    return NoDynamicOps_instance;
+  }
   function Identity$lambda(it) {
     return it;
   }
@@ -4174,11 +4278,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   PropertyList.prototype.rxlist_4okrys$ = function (create) {
     return this.prop_z4bjo6$(emptyList(), rxListType(create));
   };
-  PropertyList.prototype.boolean = function () {
-    return this.prop_z4bjo6$(false);
+  PropertyList.prototype.boolean_6taknv$ = function (default_0) {
+    if (default_0 === void 0)
+      default_0 = false;
+    return this.prop_z4bjo6$(default_0);
   };
-  PropertyList.prototype.int = function () {
-    return this.prop_z4bjo6$(0);
+  PropertyList.prototype.int_za3lpa$ = function (default_0) {
+    if (default_0 === void 0)
+      default_0 = 0;
+    return this.prop_z4bjo6$(default_0);
   };
   PropertyList.prototype.double = function () {
     return this.prop_z4bjo6$(0.0);
@@ -4976,8 +5084,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }.bind(null, this));
     this.kills_aez966$_0 = this.killSet;
     this.list_0 = emptyList();
-    this.killed_0 = false;
-    this.kill = Killables$kill$lambda(this);
+    this.killedFlag_0 = false;
+    this.killed_w97mwc$_0 = Killables$killed$lambda(this);
+    this.kill_c3gib$_0 = Killables$kill$lambda(this);
   }
   Object.defineProperty(Killables.prototype, 'kills', {
     get: function () {
@@ -5001,7 +5110,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     if (equals(listener, Noop)) {
       return Noop;
     }
-    if (!this.killed_0) {
+    if (!this.killedFlag_0) {
       this.list_0 = plus(this.list_0, listener);
       tmp$ = once(Killables$add$lambda(this, listener));
     }
@@ -5011,6 +5120,16 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
     return tmp$;
   };
+  Object.defineProperty(Killables.prototype, 'killed', {
+    get: function () {
+      return this.killed_w97mwc$_0;
+    }
+  });
+  Object.defineProperty(Killables.prototype, 'kill', {
+    get: function () {
+      return this.kill_c3gib$_0;
+    }
+  });
   Killables.prototype.killables = function () {
     return killables(this.killSet);
   };
@@ -5019,10 +5138,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     $receiver.onKill_8be2vx$.plusAssign_o14v8n$(this.add_o14v8n$($receiver.kill));
     return $receiver;
   };
+  function Killables$killed$lambda(this$Killables) {
+    return function () {
+      return this$Killables.killedFlag_0;
+    };
+  }
   function Killables$kill$lambda(this$Killables) {
     return function () {
-      if (!this$Killables.killed_0) {
-        this$Killables.killed_0 = true;
+      if (!this$Killables.killedFlag_0) {
+        this$Killables.killedFlag_0 = true;
         var l = this$Killables.list_0;
         this$Killables.list_0 = emptyList();
         var tmp$;
@@ -5038,7 +5162,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Killables.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Killables',
-    interfaces: [KillsApi]
+    interfaces: [HasKillKilledKills, KillsApi]
   };
   function join$lambda(closure$cd) {
     return function () {
@@ -5097,6 +5221,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     else
       return instance.doResume(null);
   }
+  function perform($receiver, action) {
+    if (!$receiver.killed()) {
+      action();
+    }
+  }
   function KillableSeq(current, onKill) {
     if (current === void 0)
       current = Noop;
@@ -5106,6 +5235,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     this.kill = KillableSeq$kill$lambda(this);
     this.assign = KillableSeq$assign$lambda(this);
   }
+  KillableSeq.prototype.set_y2pkhw$ = function (k) {
+    this.set_o14v8n$(k.kill);
+  };
   KillableSeq.prototype.set_o14v8n$ = function (k) {
     if (this.killed_0) {
       k();
@@ -5118,8 +5250,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   KillableSeq.prototype.remAssign_o14v8n$ = function (fn) {
     this.set_o14v8n$(fn);
   };
-  KillableSeq.prototype.plusAssign_o14v8n$ = function (fn) {
-    this.set_o14v8n$(fn);
+  KillableSeq.prototype.remAssign_y2pkhw$ = function (fn) {
+    this.set_y2pkhw$(fn);
   };
   KillableSeq.prototype.clear = function () {
     this.set_o14v8n$(Noop);
@@ -5249,6 +5381,204 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     var rxv = new Var(initial);
     launch(deps, void 0, void 0, toRx$lambda_0($receiver, rxv));
     return rxv;
+  }
+  function Coroutine$mapAsync$calc(closure$kseq_0, closure$fn_0, t_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$closure$kseq = closure$kseq_0;
+    this.local$closure$fn = closure$fn_0;
+    this.local$t = t_0;
+  }
+  Coroutine$mapAsync$calc.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$mapAsync$calc.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$mapAsync$calc.prototype.constructor = Coroutine$mapAsync$calc;
+  Coroutine$mapAsync$calc.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.state_0 = 2;
+            this.result_0 = this.local$closure$fn(this.local$closure$kseq.killables(), this.local$t, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return this.result_0;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function mapAsync$calc(closure$kseq_0, closure$fn_0) {
+    return function (t_0, continuation_0, suspended) {
+      var instance = new Coroutine$mapAsync$calc(closure$kseq_0, closure$fn_0, t_0, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function Coroutine$mapAsync$lambda(closure$ch_0, closure$calc_0, closure$rxv_0, $receiver_0, controller, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.$controller = controller;
+    this.exceptionState_0 = 1;
+    this.local$closure$ch = closure$ch_0;
+    this.local$closure$calc = closure$calc_0;
+    this.local$closure$rxv = closure$rxv_0;
+    this.local$tmp$ = void 0;
+    this.local$tmp$_0 = void 0;
+  }
+  Coroutine$mapAsync$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$mapAsync$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$mapAsync$lambda.prototype.constructor = Coroutine$mapAsync$lambda;
+  Coroutine$mapAsync$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.local$tmp$ = this.local$closure$ch.iterator();
+            this.state_0 = 2;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            this.state_0 = 3;
+            this.result_0 = this.local$tmp$.hasNext(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 3:
+            if (!this.result_0) {
+              this.state_0 = 7;
+              continue;
+            }
+             else {
+              this.state_0 = 4;
+              continue;
+            }
+
+          case 4:
+            this.state_0 = 5;
+            this.result_0 = this.local$tmp$.next(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 5:
+            var t = this.result_0;
+            this.local$tmp$_0 = this.local$closure$rxv;
+            this.state_0 = 6;
+            this.result_0 = this.local$closure$calc(t, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 6:
+            this.local$tmp$_0.now = this.result_0;
+            this.state_0 = 2;
+            continue;
+          case 7:
+            return Unit;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function mapAsync$lambda(closure$ch_0, closure$calc_0, closure$rxv_0) {
+    return function ($receiver_0, continuation_0, suspended) {
+      var instance = new Coroutine$mapAsync$lambda(closure$ch_0, closure$calc_0, closure$rxv_0, $receiver_0, this, continuation_0);
+      if (suspended)
+        return instance;
+      else
+        return instance.doResume(null);
+    };
+  }
+  function Coroutine$mapAsync($receiver_0, deps_0, fn_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$calc = void 0;
+    this.local$$receiver = $receiver_0;
+    this.local$deps = deps_0;
+    this.local$fn = fn_0;
+  }
+  Coroutine$mapAsync.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$mapAsync.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$mapAsync.prototype.constructor = Coroutine$mapAsync;
+  Coroutine$mapAsync.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            var kseq = seq(this.local$deps.kills);
+            this.local$calc = mapAsync$calc(kseq, this.local$fn);
+            this.state_0 = 2;
+            this.result_0 = this.local$calc(this.local$$receiver.now, this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            var rxv = new Var(this.result_0);
+            var ch = toChannelLater(this.local$$receiver, this.local$deps);
+            launch(this.local$deps, void 0, void 0, mapAsync$lambda(ch, this.local$calc, rxv));
+            return rxv;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function mapAsync($receiver_0, deps_0, fn_0, continuation_0, suspended) {
+    var instance = new Coroutine$mapAsync($receiver_0, deps_0, fn_0, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
   }
   var currentChild;
   var affected;
@@ -5588,6 +5918,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function feedTo_1($receiver, deps, target) {
     forEach($receiver, deps, feedTo$lambda_1(target));
   }
+  function forEachLater($receiver, deps, fn) {
+    $receiver.forEachLater_aaomyj$(deps.kills, fn);
+  }
   function incremented$lambda(it) {
     return it + 1 | 0;
   }
@@ -5857,10 +6190,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return Unit;
     };
   }
-  function toChannelLater($receiver, ks) {
+  function toChannelLater($receiver, deps) {
     var ch = Channel(2147483647);
-    plusAssign_0(ks, toChannelLater$lambda(ch));
-    $receiver.forEachLater_aaomyj$(ks, toChannelLater$lambda_0(ch));
+    plusAssign_0(deps.kills, toChannelLater$lambda(ch));
+    forEachLater($receiver, deps, toChannelLater$lambda_0(ch));
     return ch;
   }
   function rx_0($receiver, fn) {
@@ -5917,6 +6250,49 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function rx_2($receiver, deps, fn) {
     fn.forEach_aaomyj$(deps.kills, rx$lambda_0($receiver));
+  }
+  function add$lambda_0(closure$item) {
+    return function (it) {
+      return plus(it, closure$item);
+    };
+  }
+  function add$lambda$lambda_1(closure$item) {
+    return function (it) {
+      return minus(it, closure$item);
+    };
+  }
+  function add$lambda_1(closure$item, this$add) {
+    return function () {
+      this$add.transform_ru8m0w$(add$lambda$lambda_1(closure$item));
+      return Unit;
+    };
+  }
+  function add_2($receiver, deps, item) {
+    $receiver.transform_ru8m0w$(add$lambda_0(item));
+    plusAssign_0(deps.kills, add$lambda_1(item, $receiver));
+  }
+  function oldKilled$lambda$lambda(closure$kseq) {
+    return function ($receiver, it) {
+      closure$kseq.remAssign_o14v8n$(it.kill);
+      return Unit;
+    };
+  }
+  function oldKilled($receiver, deps) {
+    var kseq = seq(deps.kills);
+    forEach($receiver, deps, oldKilled$lambda$lambda(kseq));
+    return $receiver;
+  }
+  function oldKilledOpt$lambda$lambda(closure$kseq) {
+    return function ($receiver, it) {
+      var tmp$;
+      closure$kseq.remAssign_o14v8n$((tmp$ = it != null ? it.kill : null) != null ? tmp$ : Noop);
+      return Unit;
+    };
+  }
+  function oldKilledOpt($receiver, deps) {
+    var kseq = seq(deps.kills);
+    forEach($receiver, deps, oldKilledOpt$lambda$lambda(kseq));
+    return $receiver;
   }
   function RxList() {
   }
@@ -7657,7 +8033,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.KillsApi = KillsApi;
   package$commonshr.CsApi = CsApi;
   package$commonshr.CsKillsApi = CsKillsApi;
-  package$commonshr.JobScope = JobScope;
   package$commonshr.lib = lib;
   package$commonshr.Lib = Lib;
   package$commonshr.Function = Function;
@@ -7706,9 +8081,14 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.get_withCounter_sb3j39$ = get_withCounter;
   package$commonshr.discardExecutor_e9pf1l$ = discardExecutor;
   package$commonshr.executor_e9pf1l$ = executor;
+  package$commonshr.launchNonCancellable_hilpzi$ = launchNonCancellable;
   package$commonshr.RefCountMap = RefCountMap;
   package$commonshr.RefCount = RefCount;
+  package$commonshr.HasKill = HasKill;
+  package$commonshr.HasKilled = HasKilled;
   package$commonshr.HasKills = HasKills;
+  package$commonshr.HasKillKills = HasKillKills;
+  package$commonshr.HasKillKilledKills = HasKillKilledKills;
   package$commonshr.KillsDeps = KillsDeps;
   package$commonshr.HasCsKills = HasCsKills;
   package$commonshr.CsKillsDeps = CsKillsDeps;
@@ -7746,6 +8126,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.filter_g39gwq$ = filter;
   var package$properties = package$commonshr.properties || (package$commonshr.properties = {});
   package$properties.DynamicOps = DynamicOps;
+  Object.defineProperty(package$properties, 'NoDynamicOps', {
+    get: NoDynamicOps_getInstance
+  });
   Object.defineProperty(package$properties, 'Identity', {
     get: function () {
       return Identity;
@@ -7859,10 +8242,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$killable.addedTo_wvpfik$ = addedTo_0;
   package$killable.Killables = Killables;
   package$killable.join_yzxo1x$ = join;
+  package$killable.perform_1gfkez$ = perform;
   package$killable.KillableSeq_init_o14v8n$ = KillableSeq_init;
   package$killable.KillableSeq = KillableSeq;
   var package$rx = _.rx || (_.rx = {});
   package$rx.toRx_9uhkxi$ = toRx_0;
+  package$rx.mapAsync_ld00ug$ = mapAsync;
   package$rx.RxChild = RxChild;
   Object.defineProperty(RxCalc, 'Companion', {
     get: RxCalc$Companion_getInstance
@@ -7874,6 +8259,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.RxIface = RxIface;
   package$rx.forEach_yaias7$ = forEach;
   package$rx.feedTo_6zab7q$ = feedTo_1;
+  package$rx.forEachLater_yaias7$ = forEachLater;
   package$rx.incremented_xubefb$ = incremented;
   package$rx.RxVal = RxVal;
   package$rx.add_gcz0w7$ = add_1;
@@ -7895,12 +8281,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.rxClass_53u32h$ = rxClass_1;
   package$rx.rxClass_9rzgmr$ = rxClass_2;
   package$rx.toRx_56vwuc$ = toRx_1;
-  package$rx.toChannelLater_tgu8ha$ = toChannelLater;
+  package$rx.toChannelLater_prszu7$ = toChannelLater;
   package$rx.rx_50j47u$ = rx_0;
   package$rx.get_asVar_vvk9$ = get_asVar;
   package$rx.linked_g2t76q$ = linked;
   package$rx.rx_drrr49$ = rx_1;
   package$rx.rx_fmxlc4$ = rx_2;
+  package$rx.add_2hqy4a$ = add_2;
+  package$rx.oldKilled_jo2xf$ = oldKilled;
+  package$rx.oldKilledOpt_jo2xf$ = oldKilledOpt;
   RxList.Listener = RxList$Listener;
   package$rx.RxList = RxList;
   package$rx.Collector = Collector;
@@ -7954,6 +8343,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   CsKillsApi.prototype.remAssign_wgabca$ = KillsApi.prototype.remAssign_wgabca$;
   CsKillsApi.prototype.remAssign_djv61p$ = KillsApi.prototype.remAssign_djv61p$;
   CsKillsApi.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
+  CsKillsApi.prototype.get_oldKilled_vsdo34$ = KillsApi.prototype.get_oldKilled_vsdo34$;
+  CsKillsApi.prototype.get_oldKilledOpt_vsdo34$ = KillsApi.prototype.get_oldKilledOpt_vsdo34$;
   CsKillsApi.prototype.linked_n1nom7$ = KillsApi.prototype.linked_n1nom7$;
   CsKillsApi.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
   CsKillsApi.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
@@ -7979,6 +8370,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   filter$lambda$Item.prototype.remAssign_wgabca$ = KillsApi.prototype.remAssign_wgabca$;
   filter$lambda$Item.prototype.remAssign_djv61p$ = KillsApi.prototype.remAssign_djv61p$;
   filter$lambda$Item.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
+  filter$lambda$Item.prototype.get_oldKilled_vsdo34$ = KillsApi.prototype.get_oldKilled_vsdo34$;
+  filter$lambda$Item.prototype.get_oldKilledOpt_vsdo34$ = KillsApi.prototype.get_oldKilledOpt_vsdo34$;
   filter$lambda$Item.prototype.linked_n1nom7$ = KillsApi.prototype.linked_n1nom7$;
   filter$lambda$Item.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
   filter$lambda$Item.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
@@ -8005,6 +8398,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   HasNoKill.prototype.remAssign_wgabca$ = KillsApi.prototype.remAssign_wgabca$;
   HasNoKill.prototype.remAssign_djv61p$ = KillsApi.prototype.remAssign_djv61p$;
   HasNoKill.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
+  HasNoKill.prototype.get_oldKilled_vsdo34$ = KillsApi.prototype.get_oldKilled_vsdo34$;
+  HasNoKill.prototype.get_oldKilledOpt_vsdo34$ = KillsApi.prototype.get_oldKilledOpt_vsdo34$;
   HasNoKill.prototype.linked_n1nom7$ = KillsApi.prototype.linked_n1nom7$;
   HasNoKill.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
   HasNoKill.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
@@ -8031,6 +8426,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Killables.prototype.remAssign_wgabca$ = KillsApi.prototype.remAssign_wgabca$;
   Killables.prototype.remAssign_djv61p$ = KillsApi.prototype.remAssign_djv61p$;
   Killables.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
+  Killables.prototype.get_oldKilled_vsdo34$ = KillsApi.prototype.get_oldKilled_vsdo34$;
+  Killables.prototype.get_oldKilledOpt_vsdo34$ = KillsApi.prototype.get_oldKilledOpt_vsdo34$;
   Killables.prototype.linked_n1nom7$ = KillsApi.prototype.linked_n1nom7$;
   Killables.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
   Killables.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
@@ -8069,6 +8466,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   sorted$Holder.prototype.remAssign_wgabca$ = KillsApi.prototype.remAssign_wgabca$;
   sorted$Holder.prototype.remAssign_djv61p$ = KillsApi.prototype.remAssign_djv61p$;
   sorted$Holder.prototype.remAssign_7fncnf$ = KillsApi.prototype.remAssign_7fncnf$;
+  sorted$Holder.prototype.get_oldKilled_vsdo34$ = KillsApi.prototype.get_oldKilled_vsdo34$;
+  sorted$Holder.prototype.get_oldKilledOpt_vsdo34$ = KillsApi.prototype.get_oldKilledOpt_vsdo34$;
   sorted$Holder.prototype.linked_n1nom7$ = KillsApi.prototype.linked_n1nom7$;
   sorted$Holder.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
   sorted$Holder.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;

@@ -20,7 +20,7 @@ interface HasEdit {
 
 interface HasBindKills: HasBind, HasKills
 
-interface HasEditKills: HasEdit, HasKills
+interface HasEditKills: HasEdit, HasKills, HasBindKills
 
 class EditKillsDeps(
     override val editing: DefaultEditing,

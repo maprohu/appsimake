@@ -44,7 +44,7 @@ interface KillsApi: Api, HasKills {
     fun <E> RxSet<E>.process(fn: KillsApi.(E) -> Unit): Unit = process(kills, fn)
 
     fun <T> EmitterIface<SetMove<T>>.toRxSet() = toRxSet(kills)
-    fun <T> RxIface<T>.toChannelLater() = toChannelLater(kills)
+    fun <T> RxIface<T>.toChannelLater() = toChannelLater(api)
 
     fun <T, S> ReceiveChannel<ListEvent<T>>.mapLive(
         fn: suspend KillsApi.(T) -> S

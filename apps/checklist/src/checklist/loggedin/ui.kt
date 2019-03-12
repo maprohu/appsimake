@@ -36,7 +36,7 @@ fun LoggedIn.ui() = TopAndContent(
                 node.list(
                     checklists
                         .listEvents { Checklist.ts.desc }
-                        .map { cl ->
+                        .mapLive { cl ->
                             factory.listGroupButton {
                                 middle %= { cl().name() }
                                 click {

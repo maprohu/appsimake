@@ -3,7 +3,6 @@ package commonfb.loginbase
 import common.obj
 import commonfb.UserState
 import commonfb.runUserState
-import commonshr.JobScope
 import commonui.*
 import commonui.topandcontent.ProgressTC
 import commonui.widget.*
@@ -12,6 +11,7 @@ import firebase.app.App
 import firebase.auth.Auth
 import firebase.firestore.Firestore
 import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
 import org.w3c.dom.HTMLElement
 import rx.Var
 
@@ -58,17 +58,13 @@ abstract class LoginBase(
     )
 
     @Suppress("LeakingThis")
-    val content = Var<UserStateView>(UnkownUser(this)).of(
-        UnkownUser(this),
-        contentHole
-    )
-
+    val hole = contentHole.routing.of<UserStateView> {
+        UnkownUser(this)
+    }
 
 
     suspend fun switchToUnkownUser() {
-        content.switchToView {
-            UnkownUser(this@LoginBase)
-        }
+        hole.content %= UnkownUser(hole)
     }
 
     fun reportError(d: dynamic) {
@@ -83,20 +79,15 @@ abstract class LoginBase(
     ) {
         globalStatus %= "Checking user..."
         runUserState(this).forEach { st ->
-            exec {
-
+            launch {
                 when (st) {
                     is UserState.LoggedIn -> {
                         globalStatus %= "Logged in."
-                        content.switchToView {
-                            loggedInView(st.user)
-                        }
+                        hole.content %= loggedInView(st.user)
                     }
                     is UserState.NotLoggedIn -> {
                         globalStatus %= "Logged out."
-                        content.switchToView {
-                            notLoggedInView()
-                        }
+                        hole.content %= notLoggedInView()
                     }
                     else -> {
                         switchToUnkownUser()

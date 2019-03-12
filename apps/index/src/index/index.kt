@@ -7,6 +7,6 @@ import index.home.Home
 fun main() {
     APP.startRegisteringServiceWorker()
     Body().apply {
-        content %= Home(this)
+        hole %= Home(this)
     }
 }
