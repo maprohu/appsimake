@@ -3,7 +3,6 @@ package commonui
 import commonshr.HasKills
 import commonshr.Trigger
 import commonshr.listen
-import commonui.widget.HasRedisplay
 import commonui.widget.JobScopeWithView
 import commonui.widget.JobSwitch
 import org.w3c.dom.History

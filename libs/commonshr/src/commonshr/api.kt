@@ -28,6 +28,8 @@ interface KillsApi: Api, HasKills {
     operator fun <T> Assign<T>.remAssign(fn: () -> T) { rx(fn) }
     fun <T> Assign<T>.rx(fn: RxIface<T>) = rx(api, fn)
     operator fun <T> Assign<T>.remAssign(fn: RxIface<T>) { rx(fn) }
+    val <T: HasKill, V: RxIface<T>> V.oldKilled get() = oldKilled(api)
+    val <T: HasKill, V: RxIface<T?>> V.oldKilledOpt get() = oldKilledOpt(api)
 
     fun <T, S> Var<T>.linked(
         read: (T) -> S,

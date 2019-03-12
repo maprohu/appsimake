@@ -31,7 +31,7 @@ interface ClockPath: FormPath {
 
 class Clock(
     override val from: Form
-): UIBase<HTMLElement>(from), ClockPath, FormPath by from, FromKillsUixApi, HasHistoryKillsRedisplay {
+): SimpleView<HTMLElement>(from), ClockPath, FormPath by from, FromKillsUixApi, HasHistoryKillsRedisplay {
     override val clock = this
 
     val sounds = form.sounds
@@ -70,6 +70,7 @@ class Clock(
     )
     val animation = Emitter<AnimationData>()
 
+//    override val rawView = document.div
     override val rawView = ui()
 
     override val redisplay = {} // TODO

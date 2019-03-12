@@ -1,9 +1,9 @@
 package commonui.widget
 
+import common.insertAfter
 import common.removeFromParent
 import common.replaceWith
 import commonshr.*
-import commonui.insertAfter
 import domx.cls
 //import killable.KillSet
 //import killable.wrap

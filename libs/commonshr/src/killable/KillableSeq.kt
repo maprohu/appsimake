@@ -1,6 +1,7 @@
 package killable
 
 import commonshr.Assign
+import commonshr.HasKill
 import commonshr.Trigger
 
 
@@ -22,6 +23,7 @@ class KillableSeq private constructor(
         }
     }
 
+    fun set(k: HasKill) = set(k.kill)
     fun set(k: Trigger) {
         if (killed) {
             k()
@@ -34,7 +36,7 @@ class KillableSeq private constructor(
     val assign: Assign<Trigger> = { t -> set(t) }
 
     operator fun remAssign(fn: Trigger) = set(fn)
-    operator fun plusAssign(fn: () -> Unit) = set(fn)
+    operator fun remAssign(fn: HasKill) = set(fn)
     fun clear() = set(Noop)
 
     fun killables() = Killables().also { set(it.kill) }

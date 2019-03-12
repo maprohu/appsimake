@@ -363,7 +363,7 @@ abstract class RxVal<T>(
 
 
 
-//fun <T> RxVal<KillableValue<T>>.killOld(ks: KillSet){
+//fun <T> RxVal<KillableValue<T>>.oldKilled(ks: KillSet){
 //    return off(ks) { it.kill() }
 //}
 
@@ -604,4 +604,14 @@ fun <T> Assign<T>.rx(deps: HasKills, fn: RxIface<T>) {
 fun <T> Var<List<T>>.add(deps: HasKills, item: T) {
     transform { it + item }
     deps.kills += { transform { it - item } }
+}
+
+fun <T: HasKill, V: RxIface<T>> V.oldKilled(deps: HasKills) = apply {
+    val kseq = deps.kills.seq()
+    forEach(deps) { kseq %= it.kill }
+}
+
+fun <T: HasKill, V: RxIface<T?>> V.oldKilledOpt(deps: HasKills) = apply {
+    val kseq = deps.kills.seq()
+    forEach(deps) { kseq %= it?.kill ?: Noop }
 }

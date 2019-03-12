@@ -1,35 +1,29 @@
 package commonui.widget
 
 import bootstrap.setupFullScreen
-import commonshr.JobScope
-import commonshr.constant
-import commonshr.funs
-import commonshr.remAssign
+import commonui.*
 import commonui.progress.Progress
-import kotlinx.coroutines.Job
+import killable.NoKill
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.Node
+import rx.Var
 import kotlin.browser.document
 
 interface BodyPath {
     val body: Body
 }
-typealias BodyNode = ItemWithViewRx<JobScope, HTMLElement>
+typealias BodyNode = IView<HTMLElement>
 class Body(
     slot: Hole = kotlin.run {
         setupFullScreen()
         document.body!!.hole
     }
-): JobKillsImpl(), BodyPath {
+): CsKills(NoKill), BodyPath {
     override val body = this
 
-    val content = JobSwitch.jobWithView<BodyNode>(
-        ItemWithViewRx.hasView(Progress(this))
-    )
+    val content = Var<BodyNode>(Progress(this)).oldKilled
 
     init {
         content.runView(this, slot)
     }
-
 }
 

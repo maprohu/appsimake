@@ -39,7 +39,7 @@ class DropdownMenu(): ScreenWrap() {
     val item get() = DropdownMenuItem().append
     val divider get() = node.div { cls.dropdownDivider }
 
-    fun signOut(deps: HasKillsUix, action: Action) = item {
+    fun signOut(deps: HasKillsUix, action: Trigger) = item {
         text %= "Sign Out"
         fa.signOutAlt
         click(deps, action)

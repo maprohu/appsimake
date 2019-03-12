@@ -57,6 +57,14 @@ fun Node.insertAt(position: Int, element: Node) {
     }
 }
 
+fun Node.insertAfter(what: Node, afterWhat: Node?) {
+    insertBefore(
+        what,
+        if (afterWhat == null) firstChild
+        else afterWhat.nextSibling
+    )
+}
+
 fun Element.removeAt(position: Int): Node {
     return removeChild(children.item(position)!!)
 }

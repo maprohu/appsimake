@@ -37,8 +37,8 @@ open class DefaultBindings(
 
 }
 interface Editing: Bindings {
-    val save: Action
-    val delete: Action
+    val save: Trigger
+    val delete: Trigger
     val canDelete: RxIface<Boolean>
 }
 
@@ -52,8 +52,8 @@ class RxEditing<T: RxBase<*>>(
     val initial: FsDoc<T>,
     val current: T,
     override val canDelete: RxIface<Boolean>,
-    override val delete: Action,
-    saveCurrent: suspend (T) -> Unit
+    override val delete: Trigger,
+    saveCurrent: (T) -> Unit
 ): DefaultEditing(
     kills,
     { !rxCompare(initial(), current) }
@@ -62,8 +62,8 @@ class RxEditing<T: RxBase<*>>(
         kills: KillSet,
         initial: FsDoc<T>,
         canDelete: RxIface<Boolean>,
-        delete: Action,
-        saveCurrent: suspend (T) -> Unit
+        delete: Trigger,
+        saveCurrent: (T) -> Unit
     ): this(
         kills,
         initial,
@@ -73,7 +73,7 @@ class RxEditing<T: RxBase<*>>(
         saveCurrent
     )
 
-    override val save: Action = {
+    override val save: Trigger = {
         saveCurrent(current)
     }
 }

@@ -87,7 +87,10 @@ private var keepAwakeCounter = 0
 
 fun KillsApi.keepScreenAwake() {
     if (keepAwakeCounter == 0) {
-        keepAwakeVideo.play()
+        keepAwakeVideo.apply {
+            currentTime = 0.0
+            play()
+        }
     }
     keepAwakeCounter++
     kills += {

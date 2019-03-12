@@ -2,9 +2,9 @@ package commonui
 
 import commonshr.Exec
 import commonshr.HasKills
+import commonshr.Runner
 import commonui.editing.Bindings
 import commonui.editing.DefaultEditing
-import commonui.widget.HasRedisplay
 import killable.KillSet
 
 interface HasBind {
@@ -49,12 +49,10 @@ interface HasExit {
 interface HasEditFrom: HasEdit, HasFrom
 
 interface HasUix {
-    val uix: Exec
+    val uix: Runner
 }
 
-interface HasFromUix: HasFrom, HasUix {
-
-}
+interface HasFromUix: HasFrom, HasUix
 
 interface HasKillsUix: HasKills, HasUix
 

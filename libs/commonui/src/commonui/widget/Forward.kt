@@ -1,11 +1,9 @@
 package commonui.widget
 
-import common.None
-import common.Optional
-import common.Some
 import commonshr.*
 import commonui.HasKillsUix
-import kotlinx.coroutines.InternalCoroutinesApi
+import commonui.HasRedisplay
+import commonui.HasView
 import kotlinx.coroutines.Job
 import rx.RxIface
 
@@ -36,17 +34,7 @@ class ViewWithForward<V>(
     }
 }
 
-abstract class ForwardBase<V: Any>(
-    coroutineContext: Job
-): ForwardImpl<V, JobScopeWithView<V>>(coroutineContext) {
-    constructor(
-        parent: JobScope
-    ): this(Job(parent.coroutineContext))
-}
 
-interface HasRedisplay {
-    val redisplay: Trigger
-}
 
 interface HasJobRedisplay: HasRedisplay, JobScope
 
@@ -63,7 +51,7 @@ abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
 
     override val forward = JobSwitch.optional<F>()
 
-    override val uix: Exec = run {
+    override val uix: Runner = run {
         val ex = discardExecutor();
 
         { action ->
@@ -88,3 +76,8 @@ abstract class ForwardImpl<V: Any, F: JobScopeWithView<V>>(
 
 }
 
+abstract class ForwardBase<V: Any>(
+    coroutineContext: Job
+): ForwardImpl<V, JobScopeWithView<V>>(coroutineContext) {
+    constructor(parent: JobScope): this(Job(parent.coroutineContext))
+}

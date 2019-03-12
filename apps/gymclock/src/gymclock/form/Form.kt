@@ -2,6 +2,7 @@ package gymclock.form
 
 import commonshr.properties.RxBase
 import commonui.*
+import commonui.ForwardBase
 import commonui.editing.DefaultBindings
 import commonui.editing.DefaultEditing
 import commonui.widget.*
@@ -22,15 +23,15 @@ class Form(
     val sounds by lazy { Sounds() }
 
     companion object {
-        suspend fun boot(hole: Hole) {
+        fun boot(hole: Hole) {
             Body(hole).apply {
-                content.switchToView(Form(this))
+                content %= Form(this)
             }
         }
     }
 
-    suspend fun startWorkout() {
-        forward.switchTo { Clock(this) }
+    fun startWorkout() {
+        forward %= Clock(this)
     }
 
     val model = loadModel()

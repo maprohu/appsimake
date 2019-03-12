@@ -1,13 +1,8 @@
 package killable
 
-import common.EmitterIface
-import common.toRxSet
 import commonshr.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
-import org.w3c.dom.Element
-import org.w3c.dom.HTMLElement
-import rx.*
 
 typealias KillSet = AddRemove<Trigger>
 
@@ -32,7 +27,7 @@ fun KillSet.seq() = KillableSeq().also { it.onKill += add(it.kill) }
 
 fun Trigger.addedTo(ks: KillSet) = apply { ks += this }
 
-class Killables: KillsApi {
+class Killables: KillsApi, HasKillKilledKills {
 
     val killSet: KillSet = ::add
     override val kills = killSet
@@ -49,7 +44,7 @@ class Killables: KillsApi {
             return Noop
         }
 
-        return if (!killed) {
+        return if (!killedFlag) {
             list += listener
 
             { list -= listener }.once()
@@ -60,11 +55,12 @@ class Killables: KillsApi {
         }
     }
 
-    private var killed = false
+    private var killedFlag = false
+    override val killed = { killedFlag}
 
-    val kill: Trigger = {
-        if (!killed) {
-            killed = true
+    override val kill: Trigger = {
+        if (!killedFlag) {
+            killedFlag = true
             val l = list
             list = listOf()
             l.forEach { it() }
@@ -88,4 +84,10 @@ suspend fun KillSet.join() {
     val cd = CompletableDeferred<Unit>()
     this += { cd.complete(Unit) }
     cd.await()
+}
+
+fun HasKilled.perform(action: Trigger) {
+    if (!killed()) {
+        action()
+    }
 }

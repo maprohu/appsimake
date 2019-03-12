@@ -3,13 +3,10 @@ package download
 import commonfb.FB
 import commonfb.loginbase.enablePersistenceAndWait
 import commonui.APP
-import commonui.launchGlobal
 import commonui.widget.Body
 import commonui.widget.Loading
 import commonui.widget.switchToView
 import download.home.Home
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 fun main() {
 

@@ -31,12 +31,12 @@ interface KillsApiCommonui: KillsApiDomx {
 }
 interface KillsUixApi: Api, HasKillsUix, KillsApiCommonui {
 
-    fun EventTarget.click(action: Action) = click(api, action)
-    fun Button.click(action: Action) = click(api, action)
-    fun BadgeAnchor.click(action: Action) = click(api, action)
-    fun DropdownMenuItem.click(action: Action) = click(api, action)
-    fun ListGroupButton.click(action: Action) = click(api, action)
-    fun DropdownMenu.signOut(action: Action) = signOut(api, action)
+    fun EventTarget.click(action: Trigger) = click(api, action)
+    fun Button.click(action: Trigger) = click(api, action)
+    fun BadgeAnchor.click(action: Trigger) = click(api, action)
+    fun DropdownMenuItem.click(action: Trigger) = click(api, action)
+    fun ListGroupButton.click(action: Trigger) = click(api, action)
+    fun DropdownMenu.signOut(action: Trigger) = signOut(api, action)
 
     val Tab.clickActivate get() = clickActivate(api)
     val Tab.clickToggle get() = clickToggle(api)

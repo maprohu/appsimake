@@ -1,13 +1,25 @@
 package commonui.widget
 
+import common.CsKillsApiCommon
 import commonshr.*
 import commonshr.KillsApi
+import commonui.HasView
 import commonui.KillsUixApi
+import commonui.globalStatus
+import killable.KillSet
 import killable.Killables
+import killable.killables
+import killable.perform
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import rx.RxIface
 import rx.Var
+
+
+
+
 
 interface JobScopeApi: JobScope {
 
@@ -41,8 +53,10 @@ val JobScope.createKills get() = Killables().apply {
 }.killSet
 open class JobKillsImpl(
     coroutineContext: Job = Job()
-): JobScopeImpl(coroutineContext), KillsApi, JobKillsApi {
+): JobScopeImpl(coroutineContext), KillsApi, JobKillsApi, HasKilled {
     constructor(parent: JobScope): this(Job(parent.coroutineContext))
+
+    override val killed = { coroutineContext.isCancelled }
 
     override val kills = createKills
 
@@ -107,9 +121,6 @@ open class ExecImpl(coroutineContext: Job) : JobKillsImpl(coroutineContext), Has
 }
 
 
-interface HasView<V> {
-    fun view(prepare: V?.() -> Unit): V?
-}
 interface JobScopeWithView<V: Any>: JobScope, HasView<V>
 
 abstract class ViewImplBase<V: Any>(
@@ -150,7 +161,7 @@ abstract class UIBase<V: Any>(
         parent: JobScope
     ): this(Job(parent.coroutineContext))
 
-    override val uix = discardExecutor()
+    override val uix : Runner = { perform(it) }
 }
 
 open class UIWrap<V: Any>(
