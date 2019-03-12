@@ -88,30 +88,6 @@ class RWArrayProp<T, E>(
     override val writeElement: (E, DynamicOps) -> dynamic
 ) : RWProp<T, Set<E>>(name, rxv, write), ScalarArrayProp<T, E>
 
-//class PropertyItem<T, V>(
-//    val index: Int,
-//    override val name: String,
-//    val defaultValue: V,
-//    override val type: PropertyType<V>
-//): ROProp<T, V> {
-//    override val rxv = Var(defaultValue)
-//
-//    operator fun invoke() = rxv()
-//}
-//
-//fun <V> PropertyItem<*, V>.writeDynamic(ops: DynamicOps): dynamic = type.writeDynamic(now, ops)
-//fun <V> PropertyItem<*, V>.readDynamic(d: dynamic, ops: DynamicOps) {
-//    rxv %= type.readDynamic(d, ops)
-//}
-//val <V> PropertyItem<*, V>.copy get() = type.copier(now)
-//fun <V> PropertyItem<*, V>.resetToDefault() { rxv %= defaultValue }
-//
-//
-//var <V> PropertyItem<*, V>.now
-//    get() = rxv.now
-//    set(v) { rxv.now = v }
-//
-//operator fun <V> PropertyItem<*, V>.invoke() = rxv()
 
 
 class PropertyListItem<V>(

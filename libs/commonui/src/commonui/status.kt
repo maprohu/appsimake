@@ -19,6 +19,12 @@ val globalStatus = Var("Please wait...").apply {
 fun launchGlobal(action: Action) = GlobalScope.launchReport(action)
 
 fun CoroutineScope.launchReport(action: Action) = launch {
+    runReport {
+        action()
+    }
+}
+
+inline fun runReport(action: () -> Unit) {
     try {
         action()
     } catch (e: CancellationException) {

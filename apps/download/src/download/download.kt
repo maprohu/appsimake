@@ -2,24 +2,20 @@ package download
 
 import commonfb.FB
 import commonfb.loginbase.enablePersistenceAndWait
-import commonui.APP
-import commonui.widget.Body
-import commonui.widget.Loading
-import commonui.widget.switchToView
+import commonui.loadApp
 import download.home.Home
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 fun main() {
 
-    val loading = Loading()
-
-    launchGlobal {
-        loading %= "Registering service worker..."
-        APP.startRegisteringServiceWorker()
-        Body(loading.target).apply {
+    GlobalScope.launch {
+        loadApp {
             val app = FB.app
             val db = FB.db
             db.enablePersistenceAndWait()
-            content.switchToView(Home(this, app, db))
+
+            Home(this, app, db)
         }
     }
 

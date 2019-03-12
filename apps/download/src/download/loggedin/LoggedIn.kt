@@ -7,9 +7,9 @@ import commonfb.loginbase.UserStateView
 import commonshr.private
 import commonshr.Trigger
 import commonshr.toFsDoc
+import commonui.SimpleView
 import commonui.globalStatus
 import commonui.widget.TopAndContent
-import commonui.widget.UIBase
 import download.DownloadItem
 import download.downloadLib
 import download.home.Home
@@ -25,7 +25,7 @@ interface LoggedInPath: HomePath {
 class LoggedIn(
     home: Home,
     user: User
-): UIBase<TopAndContent>(home), UserStateView, LoggedInPath, HomePath by home, FBApi {
+): SimpleView<TopAndContent>(home.hole), UserStateView, LoggedInPath, HomePath by home, FBApi {
     override val userState: UserState = UserState.LoggedIn(user)
     override val loggedIn: LoggedIn = this
 

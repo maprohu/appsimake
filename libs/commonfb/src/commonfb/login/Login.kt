@@ -7,6 +7,7 @@ import commonui.HasKillsRouting
 import commonui.SimpleView
 import commonui.widget.*
 import firebase.app.App
+import firebase.auth.Auth
 import firebase.auth.GoogleAuthProvider
 import firebase.auth.UserCredential
 import killable.KillSet
@@ -18,7 +19,7 @@ import kotlinx.coroutines.launch
 class Login(
     parent: HasKillsRouting<TopAndContent>,
     val base: CoroutineScope,
-    val app: App,
+    val auth: Auth,
     val back: Trigger? = null,
     val loggingIn: Action = {},
     val loginFailed: suspend (dynamic) -> Unit = {},
@@ -40,7 +41,7 @@ class Login(
         base.launch {
             val provider = GoogleAuthProvider()
             tryLogin {
-                app.auth().signInWithPopup(provider).await()
+                auth.signInWithPopup(provider).await()
             }
         }
     }
@@ -48,7 +49,7 @@ class Login(
     fun guest() {
         base.launch {
             tryLogin {
-                app.auth().signInAnonymously().await()
+                auth.signInAnonymously().await()
             }
         }
     }

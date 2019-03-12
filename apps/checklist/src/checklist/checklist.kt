@@ -1,16 +1,15 @@
 package checklist
 
-import checklist.home.Home
-import commonui.APP
-import commonui.widget.Body
-import commonui.widget.Loading
+import commonui.launchGlobal
+import commonui.loadApp
+import commonui.show
 
 fun main() {
-    val loading = Loading()
-
-    APP.startRegisteringServiceWorker()
-    Body(loading.target).apply {
-        hole %= Home(this@apply)
+    launchGlobal {
+        Links().apply {
+            load {
+                loggedIn.show()
+            }
+        }
     }
-
 }

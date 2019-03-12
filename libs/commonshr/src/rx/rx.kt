@@ -268,45 +268,6 @@ fun <T> RxIface<T>.forEachLater(
     fn: KillsApi.(T) -> Unit
 ) = forEachLater(deps.kills, fn)
 
-//fun RxIface<Int>.feedTo(ks: KillSet, rxv: Var<Int>) {
-//    fold(ks, 0) { old, new ->
-//        rxv.transform { it + new - old }
-//        new
-//    }
-//    ks += {
-//        rxv.transform { it - now }
-//    }
-//}
-//fun RxIface<Int>.feedTo(ks: KillSet, rxv: Var<Long>) {
-//    fold(ks, 0) { old, new ->
-//        rxv.transform { it + new - old }
-//        new
-//    }
-//    ks += {
-//        rxv.transform { it - now }
-//    }
-//}
-//fun RxIface<Long>.feedTo(ks: KillSet, rxv: Var<Long>) {
-//    fold(ks, 0L) { old, new ->
-//        rxv.transform { it + new - old }
-//        new
-//    }
-//    ks += {
-//        rxv.transform { it - now }
-//    }
-//}
-//fun RxIface<Double>.feedTo(ks: KillSet, rxv: Var<Double>) {
-//    fold(ks, 0.0) { old, new ->
-//        rxv.transform { it + new - old }
-//        new
-//    }
-//    ks += {
-//        rxv.transform { it - now }
-//    }
-//}
-//
-//fun <T> RxIface<Optional<T>>.orDefault(ks: KillSet, v: T) = Rx(ks) { this@orDefault().getOrDefault(v) }
-
 fun Var<Int>.incremented(
     deps: HasKills
 ) {
@@ -517,41 +478,9 @@ fun Element.rxClass(
     rxClass(deps, style, rxv)
 }
 
-//fun Element.rxClassOpt(
-//    ks: KillSet,
-//    style: RxVal<String?>
-//) {
-//    style.onOff(
-//        ks,
-//        { it?.let { c -> addClass(c) } },
-//        { it?.let { c -> removeClass(c) } }
-//    )
-//}
 
 fun <T> (KillsApi.() -> T).toRx(ks: KillSet) = Rx(ks, this)
 
-//fun Element.rxClasses(
-//    ks: KillSet,
-//    style: KillsApi.() -> Collection<String>
-//) = rxClasses(ks, style.toRx(ks))
-//
-//fun Element.rxClasses(
-//    ks: KillSet,
-//    style: RxIface<Collection<String>>
-//) {
-//    style.onOff(
-//        ks,
-//        { addClass(*it.toTypedArray()) },
-//        { removeClass(*it.toTypedArray()) }
-//    )
-//}
-//
-//fun <T> RxIface<T>.toChannel(ks: KillSet): ReceiveChannel<T> {
-//    val ch = Channel<T>(Channel.UNLIMITED)
-//    ks += { ch.close() }
-//    forEach(ks) { t -> ch.offer(t) }
-//    return ch
-//}
 
 fun <T> RxIface<T>.toChannelLater(deps: HasKills): ReceiveChannel<T> {
     val ch = Channel<T>(Channel.UNLIMITED)
@@ -560,25 +489,6 @@ fun <T> RxIface<T>.toChannelLater(deps: HasKills): ReceiveChannel<T> {
     return ch
 }
 
-//suspend fun <T, S> RxIface<T>.mapAsync(
-//    ks: KillSet,
-//    fn: suspend KillsApi.(T) -> S
-//): RxIface<S> {
-//    val kseq = ks.seq()
-//
-//    suspend fun calc(t: T): S = kseq.killables().fn(t)
-//
-//    val rxv = Var(calc(now))
-//    val ch = toChannelLater(ks)
-//
-//    GlobalScope.launch {
-//        for (t in ch) {
-//            rxv.now = calc(t)
-//        }
-//    }.addedTo(ks)
-//
-//    return rxv
-//}
 
 
 fun <T> KillSet.rx(fn: KillsApi.() -> T): RxIface<T> = Rx(this, fn)

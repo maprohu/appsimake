@@ -20,7 +20,7 @@ open class LoginOnly(
             Login(
                 parent = hole,
                 base = this,
-                app = app,
+                auth = app.auth(),
                 loggingIn = { switchToUnkownUser() },
                 loginFailed = {
                     reportError(it)

@@ -12,9 +12,6 @@ import rx.Var
 import rx.mapAsync
 
 
-//interface HasUserState {
-//    val userState: UserState
-//}
 sealed class UserState {
     object Unknown: UserState()
     object NotLoggedIn: UserState()
@@ -60,22 +57,5 @@ fun RxIface<UserState>.toUser(ks: KillSet): RxIface<User?> = Rx(ks) {
     }
 }
 
-//fun RxIface<User?>.toUid(ks: KillSet) = Rx(ks) { this@toUid()?.uid }
 
-
-//object NotLoggedIn
-//class LoggedIn(val user: User)
-//
-//fun Inbox.runLoginEvents(
-//    kills: KillSet,
-//    app: App = FB.app
-//) {
-//    app.auth().onAuthStateChanged { user ->
-//        this += if (user == null) {
-//            NotLoggedIn
-//        } else {
-//            LoggedIn(user)
-//        }
-//    }.addedTo(kills)
-//}
 

@@ -1,17 +1,14 @@
 package commonui
 
-import common.Emitter
-import common.listen
-import common.named
+import common.*
 import commonshr.HasKills
 import commonshr.plusAssign
-import domx.base64
-import domx.source
-import domx.video
 import commonshr.KillsApi
 import commonshr.fn
-import domx.invoke
+import domx.*
 import killable.NoKill
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.w3c.dom.PopStateEvent
 import org.w3c.dom.events.Event
 import rx.Rx
@@ -127,4 +124,44 @@ val popstates by lazy {
     )
 
     emitter.fn
+}
+
+val networkType by lazy {
+    val rxv = Var(NetworkType.unknown)
+    val connection = window.navigator.connection
+    fun update() {
+        rxv.now = connection.type
+    }
+    connection.addEventListener(
+        "change",
+        { update() }
+    )
+    GlobalScope.launch {
+        update()
+    }
+    rxv
+}
+
+val networkEffectiveType by lazy {
+    val connection = window.navigator.connection
+    val rxv = Var(connection.effectiveType)
+    fun update() {
+        rxv.now = connection.effectiveType
+    }
+    connection.addEventListener(
+        "change",
+        { update() }
+    )
+    GlobalScope.launch {
+        update()
+    }
+    rxv
+}
+
+val isServiceWorkerSupported by lazy {
+    window.navigator.serviceWorker as? Any != null
+}
+
+val webkitdirectorySupported by lazy {
+    jsTypeOf(document.input.asDynamic().webkitdirectory.unsafeCast<Any?>()) == "boolean"
 }

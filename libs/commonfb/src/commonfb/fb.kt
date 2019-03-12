@@ -3,9 +3,8 @@ package commonfb
 import common.obj
 import commonshr.Function
 import commonui.APP
-import commonui.isFcmSupported
+import commonui.isServiceWorkerSupported
 import firebase.AppOptions
-import firebase.DbDeps
 import firebase.firestore.*
 import firebase.functions.Functions
 import firebase.functions.HttpsCallableResult
@@ -14,6 +13,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
 import kotlin.js.Promise
+
+val isFcmSupported by lazy {
+    isServiceWorkerSupported
+}
 
 object FB {
 
@@ -63,76 +66,9 @@ object FB {
     }
 
     val storage = app.storage()
-
-
-
 }
 
-//interface HasDB {
-//    val db: Firestore
-//
-//    val DocWrap<*>.ref
-//        get() = docRef(db)
-//
-//    val CollectionWrap<*>.ref
-//        get() = collectionRef(db)
-//}
 
-//class FbCtx(
-//    val appCtx: AppCtx,
-//    val lib: Lib
-//) : HasDB {
-//    val app = FB.app
-//
-//    val name = lib.name
-//
-//    constructor(lib: Lib, title: String) : this(AppCtx(title), lib)
-//
-//
-//    override val db = FB.db
-//    val auth by lazy { app.auth() }
-//    val messaging by lazy {
-//        GlobalScope.async {
-//            val registration = appCtx.serviceWorker.await()
-//
-//            val msg = app.messaging()
-//            msg.useServiceWorker(registration)
-//            msg.usePublicVapidKey("BOgqeELuJyp5wv-HiXzqLsxA2tqGboVZRZdrHTDnrN_DzCCJYuMA_pVBQYB0afOFvtTXSUdHi20NuNGmmtP0fvU")
-//            msg
-//        }
-//    }
-////    val baseRef by lazy { db.doc(lib.firestoreBasePath) }
-////    val singletonsRef by lazy { db.collection(lib.firestoreSingletonsPath) }
-//
-//    fun signOut() {
-//        appCtx.hourglass()
-//        auth.signOut()
-//    }
-//
-//    suspend fun setupMessaging(setupMessagingGranted: suspend (Promise<String>) -> Unit) {
-//        messaging.await().requestPermission().await()
-//
-//        val tokenPromise = messaging.await().getToken()!!
-//
-//        setupMessagingGranted(tokenPromise)
-//    }
-//
-//    suspend fun trySetupMessaging(setupMessagingGranted: suspend (Promise<String>) -> Unit): Boolean {
-//        val tokenPromise = messaging.await().getToken()
-//
-//        return if (tokenPromise == null) {
-//            false
-//        } else {
-//            setupMessagingGranted(tokenPromise)
-//            true
-//        }
-//    }
-//
-////    suspend fun <I, O> call(function: Function<I, O>, input: I): O {
-////        return function.call(app, input)
-////    }
-//
-//}
 
 interface Callable<I, O> {
     suspend fun call(input: I): O

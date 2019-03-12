@@ -5006,15 +5006,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
     return toFsDoc($receiver.parent.factory(d, ops), toFsId_0($receiver, false));
   }
-  function KillableValue(value, kill) {
-    this.value = value;
-    this.kill = kill;
-  }
-  KillableValue.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'KillableValue',
-    interfaces: []
-  };
   function Noop$lambda() {
     return Unit;
   }
@@ -5226,6 +5217,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       action();
     }
   }
+  function KillableValue(value, kill) {
+    this.value = value;
+    this.kill = kill;
+  }
+  KillableValue.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'KillableValue',
+    interfaces: []
+  };
   function KillableSeq(current, onKill) {
     if (current === void 0)
       current = Noop;
@@ -8221,7 +8221,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.toFsDoc_e53g6m$ = toFsDoc_1;
   package$commonshr.get_idOrFail_2s00w$ = get_idOrFail;
   package$commonshr.new_kizxdt$ = new_0;
-  package$killable.KillableValue = KillableValue;
   Object.defineProperty(package$killable, 'Noop', {
     get: function () {
       return Noop;
@@ -8243,6 +8242,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$killable.Killables = Killables;
   package$killable.join_yzxo1x$ = join;
   package$killable.perform_1gfkez$ = perform;
+  package$killable.KillableValue = KillableValue;
   package$killable.KillableSeq_init_o14v8n$ = KillableSeq_init;
   package$killable.KillableSeq = KillableSeq;
   var package$rx = _.rx || (_.rx = {});

@@ -3,9 +3,11 @@ package commonui
 import commonshr.Exec
 import commonshr.HasKills
 import commonshr.Runner
+import commonshr.Trigger
 import commonui.editing.Bindings
 import commonui.editing.DefaultEditing
 import killable.KillSet
+import kotlinx.coroutines.CoroutineScope
 import rx.RxIface
 
 
@@ -17,6 +19,12 @@ interface HasEdit {
     val editing: DefaultEditing
 }
 
+interface HasRedisplay {
+    val redisplay: Trigger
+}
+interface HasKillsRedisplay: HasKills, HasRedisplay
+
+interface HasCsRedisplay: CoroutineScope, HasRedisplay
 
 interface HasBindKills: HasBind, HasKills
 

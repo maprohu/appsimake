@@ -1,8 +1,6 @@
 package commonui
 
-import common.CsKillsApiCommon
 import commonshr.*
-import commonui.progress.Progress
 import commonui.widget.HoleT
 import killable.*
 import kotlinx.coroutines.CoroutineScope
@@ -78,38 +76,12 @@ fun <V: Any, T: ViewItem<V>> RxIface<T>.runView(deps: HasKills, hole: HoleT<V>) 
     rx(deps) { invoke().prepared(hole.prepareOrNull) }.forEach(HasNoKill) { hole %= it }
 }
 
-
-//class ViewWithForward<V>(
-//    val base: HasView<V>,
-//    val forward: () -> HasView<V>?
-//): HasView<V> {
-//    override fun view(prepare: V?.() -> Unit): V? {
-//        return (forward() ?: base).view(prepare)
-//    }
-//
-//    companion object {
-//        operator fun <V, S> invoke(
-//            base: HasView<V>,
-//            current: RxIface<S?>,
-//            view: S.() -> HasView<V>
-//        ): ViewWithForward<V> = ViewWithForward(
-//            base
-//        ) { current()?.view() }
-//
-//        fun <V, T: HasView<V>> of(
-//            base: HasView<V>,
-//            switch: Var<T?>
-//        ) = invoke(
-//            base,
-//            switch
-//        ) { this }
-//    }
-//}
 interface HasRouting<V> {
     val activeView: RxIface<ViewItem<V>>
 }
 interface HasKillsRouting<V>: HasKills, HasRouting<V>
 
+typealias SimpleRoutingHole<V> = RoutingHole<V, IView<V>>
 class RoutingHole<V, N: IView<V>>(
     parent: HasKills,
     initial: HasKillsRouting<V>.() -> N
@@ -139,10 +111,6 @@ class RoutingFactory<V: Any>(
 
 }
 
-interface HasRedisplay {
-    val redisplay: Trigger
-}
-interface HasCsRedisplay: CoroutineScope, HasRedisplay
 
 sealed class FwdStatus<F: CsKillsView<*>> {
     abstract val forward: F?
@@ -164,10 +132,11 @@ fun <F: CsKillsView<*>> Var<FwdStatus<F>>.returnToSelf() {
 
 abstract class ForwardView<V: Any, F: CsKillsView<V>>(
     parent: HasKillsRouting<V>
-): CsKillsView<V>(parent), HasRedisplay, HasUix {
+): CsKillsView<V>(parent), HasKillsRedisplay, HasUix {
 
     private val status = Var<FwdStatus<F>>(FwdStatus.Self(null))
 
+    @Suppress("LeakingThis")
     private val forward = rx { status().forward }.oldKilledOpt
 
     private val baseView get() = super.viewItem
