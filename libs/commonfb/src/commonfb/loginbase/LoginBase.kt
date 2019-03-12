@@ -4,7 +4,7 @@ import common.obj
 import commonfb.UserState
 import commonfb.runUserState
 import commonshr.JobScope
-import commonui.globalStatus
+import commonui.*
 import commonui.topandcontent.ProgressTC
 import commonui.widget.*
 import firebase.User
@@ -13,24 +13,26 @@ import firebase.auth.Auth
 import firebase.firestore.Firestore
 import kotlinx.coroutines.await
 import org.w3c.dom.HTMLElement
+import rx.Var
+
 interface LoginBasePath {
     val loginBase: LoginBase
 }
 
-interface UserStateView: JobScopeWithView<TopAndContent> {
+interface UserStateView: IView<TopAndContent> {
     val userState: UserState
 }
 
 class UnkownUser(
-    parent: JobScope
+    parent: HasKillsRouting<TopAndContent>
 ): ProgressTC(parent), UserStateView {
     override val userState = UserState.Unknown
 }
 
 
 abstract class LoginBase(
-    parent: JobScope
-): UIBase<HTMLElement>(parent), LoginBasePath {
+    parent: HasKillsRouting<HTMLElement>
+): SimpleView<HTMLElement>(parent), LoginBasePath {
     @Suppress("LeakingThis")
     override val loginBase = this
 
@@ -56,7 +58,7 @@ abstract class LoginBase(
     )
 
     @Suppress("LeakingThis")
-    val content = views<UserStateView>().of(
+    val content = Var<UserStateView>(UnkownUser(this)).of(
         UnkownUser(this),
         contentHole
     )

@@ -62,8 +62,6 @@ class Clock(
         historyItem
 
         run()
-
-        Clock::class.qualifiedName
     }
 
 
