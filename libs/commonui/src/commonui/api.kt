@@ -1,5 +1,6 @@
 package commonui
 
+import common.CsKillsApiCommon
 import commonshr.*
 import commonui.widget.*
 import commonshr.KillsApi
@@ -27,6 +28,8 @@ interface KillsApiCommonui: KillsApiDomx {
 
     fun <E: Enum<E>> Select.bind(prop: EnumProp<*, E>) = bind(api, prop)
     fun Select.bind(prop: Var<String>) = bind(api, prop)
+
+    fun <V: Any, T: ViewItem<V>> RxIface<T>.runView(hole: HoleT<V>) = runView(api, hole)
 
 }
 interface KillsUixApi: Api, HasKillsUix, KillsApiCommonui {
@@ -61,6 +64,8 @@ interface CsApiCommonui: CsApi {
     ) = list(api, nodes)
 
 }
+
+interface CsKillsApiCommonui: CsApiCommonui, KillsApiCommonui, CsKillsApiCommon
 
 interface BindKillsApi: HasBindKills, KillsApiCommonui {
 

@@ -6,6 +6,8 @@ import commonshr.Runner
 import commonui.editing.Bindings
 import commonui.editing.DefaultEditing
 import killable.KillSet
+import rx.RxIface
+
 
 interface HasBind {
     val editing: Bindings
@@ -59,3 +61,4 @@ interface HasKillsUix: HasKills, HasUix
 interface HasFromKillsUix: HasFromUix, HasKillsUix
 
 interface HasEditKillsUix: HasEdit, HasKills, HasUix, HasKillsUix, HasEditKills
+

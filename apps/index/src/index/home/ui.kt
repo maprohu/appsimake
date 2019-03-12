@@ -42,12 +42,6 @@ fun Home.ui() = factory.screen {
                 app("checklist", "Checklist")
 
             }
-
-
-
         }
     }
-
-
-
 }.node

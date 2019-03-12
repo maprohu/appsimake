@@ -5,6 +5,7 @@ import commonui.*
 import commonui.progress.Progress
 import killable.NoKill
 import org.w3c.dom.HTMLElement
+import rx.RxIface
 import rx.Var
 import kotlin.browser.document
 
@@ -17,13 +18,15 @@ class Body(
         setupFullScreen()
         document.body!!.hole
     }
-): CsKills(NoKill), BodyPath {
+): CsKills(NoKill), BodyPath, HasKillsRouting<HTMLElement> {
     override val body = this
 
     val content = Var<BodyNode>(Progress(this)).oldKilled
 
+    override val activeView = rx { content().viewItem }
+
     init {
-        content.runView(this, slot)
+        activeView.runView(slot)
     }
 }
 

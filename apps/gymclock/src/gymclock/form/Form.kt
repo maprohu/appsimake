@@ -1,11 +1,10 @@
 package gymclock.form
 
-import commonshr.properties.RxBase
 import commonui.*
 import commonui.ForwardBase
 import commonui.editing.DefaultBindings
-import commonui.editing.DefaultEditing
 import commonui.widget.*
+import domx.replay
 import gymclock.clock.Clock
 import gymclock.data.loadModel
 import org.w3c.dom.HTMLElement
@@ -22,16 +21,8 @@ class Form(
 
     val sounds by lazy { Sounds() }
 
-    companion object {
-        fun boot(hole: Hole) {
-            Body(hole).apply {
-                content %= Form(this)
-            }
-        }
-    }
-
     fun startWorkout() {
-        forward %= Clock(this)
+        this %= Clock(this)
     }
 
     val model = loadModel()
@@ -40,8 +31,15 @@ class Form(
 
     override val history = BrowserHistory()
 
+    init {
+        historyRoot
 
-    init { historyRoot }
+        model.sounds.forEach {
+            if (it) {
+                sounds.prepareAudio.replay()
+            }
+        }
+    }
 
     override val rawView = ui()
 

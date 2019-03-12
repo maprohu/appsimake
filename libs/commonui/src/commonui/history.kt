@@ -3,8 +3,6 @@ package commonui
 import commonshr.HasKills
 import commonshr.Trigger
 import commonshr.listen
-import commonui.widget.JobScopeWithView
-import commonui.widget.JobSwitch
 import org.w3c.dom.History
 import kotlin.browser.window
 
@@ -12,8 +10,11 @@ interface From {
     fun isFromVisible(): Boolean
 }
 
-fun <F: JobScopeWithView<*>> fromRoot(forward: JobSwitch<F?>) = object: From {
-    override fun isFromVisible() = forward.now == null
+object SimpleRedisplay: HasRedisplay {
+    override val redisplay = { window.history.back() }
+}
+object SimpleFrom: HasFrom {
+    override val from = SimpleRedisplay
 }
 
 class BrowserHistory {

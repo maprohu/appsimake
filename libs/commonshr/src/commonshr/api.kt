@@ -79,6 +79,6 @@ interface CsKillsApi: HasCsKills, CsApi, KillsApi {
 
 
 
-interface JobScope: CoroutineScope {
-    override val coroutineContext: Job
-}
+//interface JobScope: CoroutineScope {
+//    override val coroutineContext: Job
+//}

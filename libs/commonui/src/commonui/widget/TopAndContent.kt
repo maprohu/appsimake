@@ -1,6 +1,8 @@
 package commonui.widget
 
-import commonshr.JobScope
+import commonshr.HasKills
+import commonui.HasKillsRouting
+import commonui.SimpleView
 import org.w3c.dom.HTMLElement
 
 class TopAndContent(
@@ -12,7 +14,7 @@ class TopAndContent(
     }
 }
 
-class HourglassView(parent: JobScope): ViewImpl<TopAndContent>(parent) {
+class HourglassView(parent: HasKillsRouting<TopAndContent>): SimpleView<TopAndContent>(parent) {
     override val rawView = TopAndContent.hourglass
 }
 
