@@ -3,6 +3,7 @@ package checklist.view
 import bootstrap.*
 import rx.RxMutableList
 import commonshr.*
+import commonui.backButton
 import commonui.widget.*
 import domx.*
 import fontawesome.*
@@ -22,10 +23,7 @@ class ItemOrder(
 
 fun ViewChecklist.ui() = TopAndContent(
     topbar = factory.topbar {
-        left.button {
-            back
-            click { loggedIn.redisplay() }
-        }
+        left.backButton
         title %= { chklist().name() }
         right.buttonGroup {
             cls.m1
@@ -74,7 +72,6 @@ fun ViewChecklist.ui() = TopAndContent(
                     cls.m1
                     node.list(
                         chklist().let { cl ->
-                            console.dir(cl)
                             cl.items().let { items ->
                                 RxMutableList(items)
                                     .sorted(kills) { i ->

@@ -97,8 +97,8 @@ interface EditFromKillsUixApi: EditKillsUixApi, HasEditFromKillsUix {
 
 //interface HistoryKillsRedisplayApi: Api, KillsApiCommonui, HasHistoryKillsRedisplay {
 //}
-val HasHistoryKillsRedisplay.historyItem get() = historyItem(this)
-val HasHistoryKillsRedisplay.historyRoot get() = historyRoot(this)
+//val HasHistoryKillsRedisplay.historyItem get() = historyItem(this)
+//val HasHistoryKillsRedisplay.historyRoot get() = historyRoot(this)
 
 interface EditExitFromKillsUixApi: EditFromKillsUixApi, HasEditExitFromKillsUix {
     val Factory.saveDeleteButton get() = saveDeleteButton(api)

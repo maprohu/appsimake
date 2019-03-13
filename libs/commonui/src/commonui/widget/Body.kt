@@ -4,6 +4,7 @@ import bootstrap.setupFullScreen
 import commonshr.invoke
 import commonui.*
 import commonui.progress.Progress
+import commonui.topandcontent.ProgressTC
 import killable.NoKill
 import org.w3c.dom.HTMLElement
 import rx.RxIface
@@ -67,7 +68,11 @@ class BodyTC(
 
     @Suppress("LeakingThis")
     val hole = contentHole.routing.of<IView<TopAndContent>> {
-        HourglassView(this)
+        ProgressTC(this)
+    }
+
+    init {
+        body.hole %= this
     }
 
 }

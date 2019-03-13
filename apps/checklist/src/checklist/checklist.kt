@@ -7,9 +7,7 @@ import commonui.show
 fun main() {
     launchGlobal {
         Links().apply {
-            load {
-                loggedIn.show()
-            }
+            load { loggedIn.show() }
         }
     }
 }

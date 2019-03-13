@@ -37,6 +37,7 @@ fun loginHandler(
     )
 
     return {
+        globalStatus %= "Checking login status..."
         firstUser.await()
 
         user ?: run {

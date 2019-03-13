@@ -13,6 +13,7 @@ import org.w3c.dom.events.EventTarget
 
 fun EventTarget.click(deps: HasKillsUix, action: Trigger) {
     onClick(deps) {
+        it.preventDefault()
         deps.uix(action)
     }
 }

@@ -7,9 +7,7 @@ import checklist.loggedin.LoggedInPath
 import rx.RxMutableList
 import commonfb.FBApi
 import commonshr.*
-import commonui.CsKillsView
-import commonui.Editor
-import commonui.SimpleView
+import commonui.*
 import commonui.editing.RxEditing
 import commonui.widget.TopAndContent
 import rx.Var
@@ -21,9 +19,10 @@ interface EditPath: LoggedInPath {
 
 class Edit(
     loggedIn: LoggedIn,
-    override val from: CsKillsView<TopAndContent>,
-    initial: FsDoc<Checklist>
-): SimpleView<TopAndContent>(from), EditPath, LoggedInPath by loggedIn, FBApi, Editor {
+    from: CsKillsView<TopAndContent>,
+    initial: FsDoc<Checklist>,
+    override val exit: HasRedisplay = GoBackRedisplay(2)
+): SimpleView<TopAndContent>(from), EditPath, LoggedInPath by loggedIn, FBApi, Editor, HasFrom by SimpleFrom {
     override val edit = this
 
     override val editing: RxEditing<Checklist> = rxEditing(initial) { current ->

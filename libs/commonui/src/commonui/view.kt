@@ -2,6 +2,8 @@ package commonui
 
 import commonshr.*
 import commonui.widget.HoleT
+import commonui.widget.HourglassView
+import commonui.widget.TopAndContent
 import killable.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -50,7 +52,7 @@ typealias IView<V> = HasKillKillsView<V>
 typealias SimpleView<V> = CsKillsView<V>
 abstract class CsKillsView<V>(
     private val parent: HasKillsRouting<V>
-) : CsKills(parent), IView<V>, KillsUixApi, HasRedisplay, HasKillsRouting<V>, HasRouting<V> by parent {
+) : CsKills(parent), IView<V>, KillsUixApi, HasKillsRedisplay, HasRoute, HasKillsRouting<V>, HasRouting<V> by parent {
 
 
     abstract val rawView: V
@@ -69,11 +71,20 @@ abstract class CsKillsView<V>(
 
     var displayRoute = {}
 
-    override val redisplay = { displayRoute() }
+    final override val activateRoute = { perform { displayRoute() } }
+
+    open fun doRedisplay() { displayRoute() }
+
+    final override val redisplay = { perform { doRedisplay() } }
+
 }
 
 fun <V: Any, T: ViewItem<V>> RxIface<T>.runView(deps: HasKills, hole: HoleT<V>) {
     rx(deps) { invoke().prepared(hole.prepareOrNull) }.forEach(HasNoKill) { hole %= it }
+}
+
+interface HasRoute {
+    val activateRoute: Trigger
 }
 
 interface HasRouting<V> {
@@ -129,6 +140,9 @@ fun <F: CsKillsView<*>> Var<FwdStatus<F>>.returnToSelf() {
 }
 
 
+fun ForwardView<TopAndContent, SimpleView<TopAndContent>>.hourglass() {
+    this %= HourglassView(this)
+}
 
 abstract class ForwardView<V: Any, F: CsKillsView<V>>(
     parent: HasKillsRouting<V>
@@ -148,7 +162,7 @@ abstract class ForwardView<V: Any, F: CsKillsView<V>>(
             }
         }
 
-    override val redisplay = {
+    override fun doRedisplay() {
         returnToSelf()
         displayRoute()
     }

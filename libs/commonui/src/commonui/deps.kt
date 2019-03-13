@@ -43,11 +43,11 @@ interface HasEditExitFromKillsUix: HasEdit, HasExit, HasFrom, HasKills, HasUix, 
     override val exit get() = from
 }
 
-interface HasHistory {
-    val history: BrowserHistory
-}
+//interface HasHistory {
+//    val history: BrowserHistory
+//}
 
-interface HasHistoryKillsRedisplay: HasHistory, HasKills, HasRedisplay
+//interface HasHistoryKillsRedisplay: HasHistory, HasKills, HasRedisplay
 
 interface HasFrom {
     val from: HasRedisplay

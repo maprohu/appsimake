@@ -104,6 +104,13 @@ val <D> DocSource<D>.new get() = new()
 fun <D> DocSource<D>.new(d: dynamic = dyn()) = new(d, firebase.firestore.FsDynamicOps)
 
 
+suspend fun <D> DocSource<D>.get(deps: HasDb): FsDoc<D> {
+    val ds = docRef(deps).get().await()
+    require(ds.exists) { "Document does not exist: $path"}
+    return parent.factory(ds.data(), FsDynamicOps).toFsDoc(toFsId(true))
+}
+
+
 
 
 

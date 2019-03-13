@@ -20,6 +20,8 @@ interface DbApi: Api, HasDb {
 
     fun <T> CollectionWrap<T>.query(query: QuerySettingsBuilder<T>.() -> Unit = {}) = query(api, query)
 
+    suspend fun <D> DocSource<D>.get() = get(api)
+
 
 }
 

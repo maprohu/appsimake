@@ -6,13 +6,15 @@ import checklist.edit.Edit
 import checklist.loggedin.LoggedIn
 import checklist.loggedin.LoggedInPath
 import commonfb.FBApi
-import commonshr.FsDoc
-import commonshr.docWrap
-import commonshr.launchNonCancellable
+import commonfb.FBFromApi
+import commonshr.*
 import commonshr.properties.copy
-import commonshr.toFsDoc
 import commonui.ForwardBase
+import commonui.FromKillsUixApi
+import commonui.HasFrom
+import commonui.SimpleFrom
 import commonui.widget.TopAndContent
+import kotlinx.coroutines.launch
 
 interface ViewPath: LoggedInPath {
     val viewChecklist: ViewChecklist
@@ -20,7 +22,7 @@ interface ViewPath: LoggedInPath {
 class ViewChecklist(
     from: LoggedIn,
     val chklist: FsDoc<Checklist>
-): ForwardBase<TopAndContent>(from), ViewPath, LoggedInPath by from, FBApi {
+): ForwardBase<TopAndContent>(from), ViewPath, LoggedInPath by from, FBFromApi, HasFrom by SimpleFrom {
     override val viewChecklist = this
 
     val Checklist.fsDoc get() = toFsDoc(chklist.id)
@@ -45,12 +47,13 @@ class ViewChecklist(
         loggedIn.redisplay()
     }
 
-    fun editChecklist() {
-        this %= Edit(
-            loggedIn,
-            this,
-            chklist
-        )
+    fun editChecklist() = launch {
+//        this %= Edit(
+//            loggedIn,
+//            this,
+//            chklist
+//        )
+        links.editChecklist.fwd(chklist.idOrFail)
     }
 
     override val rawView = ui()

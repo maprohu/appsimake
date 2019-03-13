@@ -11,10 +11,7 @@ import firebase.auth.Auth
 import firebase.auth.GoogleAuthProvider
 import firebase.auth.UserCredential
 import killable.KillSet
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.await
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class Login(
     parent: HasKillsRouting<TopAndContent>,
@@ -41,7 +38,8 @@ class Login(
         base.launch {
             val provider = GoogleAuthProvider()
             tryLogin {
-                auth.signInWithPopup(provider).await()
+                auth.signInWithRedirect(provider).await()
+                CompletableDeferred<UserCredential>().await()
             }
         }
     }
