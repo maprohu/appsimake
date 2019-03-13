@@ -101,7 +101,6 @@ fun ViewChecklist.ui() = TopAndContent(
                                                 }
                                             }
                                             node.on("mousedown") {
-                                                console.dir(it)
                                                 cl.toggle(i)
                                             }
                                         }.node

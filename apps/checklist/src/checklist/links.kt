@@ -10,6 +10,7 @@ import commonshr.HasCsKills
 import commonshr.HasKills
 import commonshr.toFsDoc
 import commonui.*
+import commonui.error.ErrorTC
 import commonui.widget.Body
 import commonui.widget.BodyTC
 import commonui.widget.HourglassView
@@ -68,27 +69,47 @@ class Links(
     }
 
     val viewChecklist by param<String>().link { p ->
-        loggedIn.get().let { li ->
+        loggedIn.get()?.let { li ->
             li.hourglass()
 
-            ViewChecklist(
-                li,
-                li.checklists.doc(p).get(DbDeps(db.await()))
-            ).apply {
-                li %= this
-                chklist.live
+            try {
+                ViewChecklist(
+                    li,
+                    li.checklists.doc(p).get(DbDeps(db.await()))
+                ).apply {
+                    li %= this
+                    chklist.live
+                }
+            } catch (e: dynamic) {
+                li %= ErrorTC(li, e)
+
+                null
             }
         }
     }
 
     val editChecklist by param<String>().link { p ->
-        viewChecklist.get(p).let { vc ->
+        viewChecklist.get(p)?.let { vc ->
             Edit(
                 vc.loggedIn,
                 vc,
-                vc.chklist
+                vc.chklist,
+                GoBack2Redisplay
             ).apply {
                 vc %= this
+            }
+        }
+    }
+
+    val newChecklist by link {
+        loggedIn.get()?.let { li ->
+            Edit(
+                li,
+                li,
+                li.createNewChecklistDoc()
+            ).apply {
+                initial.live
+                li %= this
             }
         }
     }

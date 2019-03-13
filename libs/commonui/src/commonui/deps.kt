@@ -35,6 +35,10 @@ class EditKillsDeps(
     override val kills: KillSet
 ): HasEditKills
 
+class RedisplayDeps(
+    override val redisplay: Trigger
+): HasRedisplay
+
 operator fun DefaultEditing.plus(kills: KillSet) = EditKillsDeps(this, kills)
 
 interface HasEditFromKillsUix: HasEdit, HasFrom, HasKills, HasUix, HasEditKillsUix

@@ -11,6 +11,7 @@ import commonshr.FsDoc
 import commonshr.idOrFail
 import commonui.ForwardBase
 import commonui.HasKillsRouting
+import commonui.fwd
 import commonui.remAssign
 import commonui.widget.TopAndContent
 import firebase.HasDb
@@ -33,22 +34,26 @@ class LoggedIn(
 
     val checklists = checklistLib.app.private.doc(user.uid).checklists
 
+    fun createNewChecklistDoc() = Checklist().apply {
+        name %= "<unknown>"
+    }.toRandomFsDoc(checklists)
+
     fun signOut() {
         links.signOut()
     }
 
-    fun new() {
-        val item = Checklist().apply {
-            name %= "<unknown>"
-        }.toRandomFsDoc(checklists)
+    fun newChecklist() = launch {
+//        val item = createNewChecklistDoc()
+//
+//        this %= Edit(
+//            this,
+//            this,
+//            item
+//        ).apply {
+//            item.live
+//        }
 
-        this %= Edit(
-            this,
-            this,
-            item
-        ).apply {
-            item.live
-        }
+        links.newChecklist.fwd()
     }
 
     fun viewChecklist(cl: FsDoc<Checklist>) = launch {

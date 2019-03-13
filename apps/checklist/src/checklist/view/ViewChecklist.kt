@@ -9,10 +9,7 @@ import commonfb.FBApi
 import commonfb.FBFromApi
 import commonshr.*
 import commonshr.properties.copy
-import commonui.ForwardBase
-import commonui.FromKillsUixApi
-import commonui.HasFrom
-import commonui.SimpleFrom
+import commonui.*
 import commonui.widget.TopAndContent
 import kotlinx.coroutines.launch
 
@@ -44,7 +41,7 @@ class ViewChecklist(
         loggedIn.launchNonCancellable {
             chklist.delete()
         }
-        loggedIn.redisplay()
+        from.redisplay()
     }
 
     fun editChecklist() = launch {

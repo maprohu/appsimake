@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.launch
+import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.PopStateEvent
 import kotlin.browser.window
 
@@ -31,11 +32,13 @@ class Holder<P, F: Any>(
     var item: F?
 )
 
+private val hashData get() = window.location.hash.drop(1)
+
 class Link<P, F: HasKills>(
     val name: String,
     val root: Boolean,
     val converter: Converter<P>,
-    val factory: suspend (P) -> F,
+    val factory: suspend (P) -> F?,
     val display: F.() -> Unit
 ) {
     suspend fun showLink(param: String) {
@@ -43,11 +46,12 @@ class Link<P, F: HasKills>(
     }
     private var holder: Holder<P, F>? = null
     suspend fun show(param: P, forcePush: Boolean = false) {
-        get(param, forcePush).display()
+        get(param, forcePush)?.display()
     }
     suspend fun fwd(param: P) {
         show(param, true)
     }
+
 
     private fun pushState(param: P) {
         val stateData = "$name/${converter.serialize(param)}"
@@ -57,7 +61,7 @@ class Link<P, F: HasKills>(
                 "",
                 "#$stateData"
             )
-        } else {
+        } else if (hashData != stateData) {
             window.history.pushState(
                 stateData,
                 "",
@@ -66,12 +70,14 @@ class Link<P, F: HasKills>(
         }
     }
 
-    suspend fun get(param: P, forcePush: Boolean = false): F {
+    suspend fun get(param: P, forcePush: Boolean = false): F? {
         holder.let { h ->
             return if (h == null || h.param != param || h.item == null) {
-                factory(param).also { i ->
+                factory(param)?.also { i ->
                     holder = Holder(param, i).apply {
-                        i.kills += { this.item = null }
+                        i.kills += {
+                            this.item = null
+                        }
                     }
                     pushState(param)
                 }
@@ -94,7 +100,7 @@ open class LinksBase(coroutineScope: CoroutineScope): CoroutineScope by coroutin
 
     fun <F: HasKillsRedisplay> link(
         root: Boolean = false,
-        get: suspend () -> F
+        get: suspend () -> F?
     ) = param(root, UnitConverter).link { get() }
 
 
@@ -108,7 +114,7 @@ open class LinksBase(coroutineScope: CoroutineScope): CoroutineScope by coroutin
         val converter: Converter<P> = JsonConverter.unsafeCast<Converter<P>>()
     ) {
         fun <F: HasKillsRedisplay> link(
-            get: suspend (P) -> F
+            get: suspend (P) -> F?
         ) = named { name ->
             Link(
                 name,
@@ -128,8 +134,7 @@ open class LinksBase(coroutineScope: CoroutineScope): CoroutineScope by coroutin
             HasNoKill,
             "popstate"
         ) {
-//            states.offer(it.state as String)
-            states.offer(window.location.hash.drop(1))
+            states.offer(hashData)
         }
         launch {
             for (h in states) {
@@ -140,7 +145,7 @@ open class LinksBase(coroutineScope: CoroutineScope): CoroutineScope by coroutin
 
     suspend fun load(default: Action) {
         listenPopstates(default)
-        showHash(window.location.hash.drop(1), default)
+        showHash(hashData, default)
     }
 
     suspend fun showHash(hash: String, default: Action) {

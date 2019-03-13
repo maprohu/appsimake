@@ -61,6 +61,8 @@ abstract class CsKillsView<V>(
     override val viewItem get() = selfViewItem
     val isActiveView by lazy { rx { parent.activeView() == selfViewItem } }
 
+    open val shouldPreserve = false
+
     override val uix: Runner = { action ->
         perform {
             if (isActiveView.now) {
@@ -136,7 +138,11 @@ fun <F: CsKillsView<*>> Var<FwdStatus<F>>.forwardTo(fwd: F) {
 }
 operator fun <F: CsKillsView<*>> Var<FwdStatus<F>>.remAssign(fwd: F) { forwardTo(fwd) }
 fun <F: CsKillsView<*>> Var<FwdStatus<F>>.returnToSelf() {
-    transform { FwdStatus.Self(it.forward) }
+    transform {
+        FwdStatus.Self(
+            it.forward?.takeIf { f -> f.shouldPreserve }
+        )
+    }
 }
 
 
@@ -176,8 +182,13 @@ abstract class ForwardView<V: Any, F: CsKillsView<V>>(
     }
     operator fun remAssign(fwd: F) { forwardTo(fwd) }
     fun returnToSelf() { status.returnToSelf() }
+
+    fun clearForward() {
+        status %= FwdStatus.Self<F>(null)
+    }
 }
 
 abstract class ForwardBase<V: Any>(
     parent: HasKillsRouting<V>
 ): ForwardView<V, SimpleView<V>>(parent)
+

@@ -10,14 +10,14 @@ interface From {
     fun isFromVisible(): Boolean
 }
 
-class GoBackRedisplay(val count: Int = 1): HasRedisplay {
+class GoBackNRedisplay(private val count: Int = 1): HasRedisplay {
     override val redisplay = { window.history.go(-count) }
 }
-object SimpleRedisplay: HasRedisplay {
-    override val redisplay = { window.history.back() }
-}
+val GoBack2Redisplay = GoBackNRedisplay(2)
+val GoBackRedisplay = GoBackNRedisplay(1)
+
 object SimpleFrom: HasFrom {
-    override val from = SimpleRedisplay
+    override val from = GoBackRedisplay
 }
 
 //class BrowserHistory {

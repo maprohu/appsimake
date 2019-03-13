@@ -23,7 +23,9 @@ fun <V: RxBase<*>> rxListType(
     read: (dynamic, DynamicOps) -> V
 ) = PropertyType(
     copier = { list ->
-        list.map { e -> e.copy() }
+        list.map { e ->
+            e.copy()
+        }
     },
     compare = { a, b ->
         listCompare(a, b, ::rxCompare)

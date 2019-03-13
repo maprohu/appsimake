@@ -24,7 +24,7 @@ fun LoggedIn.ui() = TopAndContent(
             fa.plus
             primary
             click {
-                new()
+                newChecklist()
             }
         }
     }.node,
