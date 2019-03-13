@@ -169,6 +169,9 @@ fun LoggedIn.ui() = TopAndContent(
                                         cls.p2
                                         secondary
                                         fa.trashAlt
+                                        click {
+                                            i.delete()
+                                        }
                                     }
                                 }
                             }
