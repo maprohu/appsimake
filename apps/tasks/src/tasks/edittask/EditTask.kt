@@ -1,10 +1,10 @@
 package tasks.edittask
 
 import commonfb.FBApi
+import commonfb.FBFromApi
 import commonshr.FsDoc
 import commonui.Editor
-import commonui.widget.ForwardBase
-import commonui.widget.HasRedisplay
+import commonui.ForwardTC
 import commonui.widget.TopAndContent
 import kotlinx.coroutines.launch
 import tasks.data.deleteCollections
@@ -16,8 +16,8 @@ interface EditTaskPath: ViewTaskPath {
     val editTask: EditTask
 }
 class EditTask(
-    override val from: ViewTask
-): ForwardBase<TopAndContent>(from), EditTaskPath, ViewTaskPath by from, FBApi, Editor {
+    from: ViewTask
+): ForwardTC(from), EditTaskPath, ViewTaskPath by from, FBFromApi, Editor {
     override val editTask = this
     override val exit = viewTask.from
 

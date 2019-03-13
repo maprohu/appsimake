@@ -1,24 +1,18 @@
 package tasks.selecttags
 
 import commonfb.FBFromApi
-import commonshr.FsDoc
-import commonui.widget.ForwardBase
-import commonui.widget.TopAndContent
+import commonui.ForwardTC
 import rx.Var
-import tasks.edittag.EditTag
 import tasks.listtasks.ListTasks
 import tasks.listtasks.ListTasksPath
-import tasks.loggedin.LoggedIn
-import tasks.loggedin.LoggedInPath
-import taskslib.Tag
 
 interface SelectTagsPath: ListTasksPath {
     val selectTags: SelectTags
 }
 class SelectTags(
-    override val from: ListTasks,
+    from: ListTasks,
     val result: Var<List<String>>
-): ForwardBase<TopAndContent>(from), SelectTagsPath, ListTasksPath by from, FBFromApi {
+): ForwardTC(from), SelectTagsPath, ListTasksPath by from, FBFromApi {
     override val selectTags = this
 
     val current = Var(result.now)

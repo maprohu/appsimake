@@ -21,7 +21,9 @@ interface DbKillsApiCommonfb: DbKillsApi {
 }
 
 interface FBApi: CsDbKillsUixApi, HasRedisplay
-interface FBFromApi: FBApi, CsDbFromKillsUixApi
+interface FBFromApi: FBApi, CsDbFromKillsUixApi {
+    override val from: HasRedisplay get() = GoBackRedisplay
+}
 
 interface CsDbKillsUixApi: CsDbKillsApi, DbKillsApiCommonfb, KillsUixApi, CsApiCommonui, KillsApiCommonui {
 

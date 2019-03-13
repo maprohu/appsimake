@@ -1,39 +1,32 @@
 package tasks.loggedin
 
 import commonfb.FBApi
-import commonfb.UserState
-import commonfb.loginbase.UserStateView
 import commonshr.private
 import commonshr.FsDoc
 import commonshr.idOrFail
-import commonui.widget.ForwardBase
+import commonui.*
 import commonui.widget.TopAndContent
-import firebase.HasDb
 import firebase.User
-import firebase.app.App
 import firebase.firestore.*
 import kotlinx.coroutines.launch
 import rx.Var
 import rx.readOnly
-import tasks.home.Home
-import tasks.home.HomePath
+import tasks.Links
+import tasks.LinksPath
 import tasks.listtags.ListTags
 import tasks.listtasks.ListTasks
-import tasks.viewtask.ViewTaskApi
 import taskslib.*
 
-interface LoggedInPath: HomePath, HasDb {
+interface LoggedInPath: LinksPath {
     val loggedIn: LoggedIn
 }
 
 class LoggedIn(
-    home: Home,
-    user: User,
-    val app: App,
-    override val db: Firestore
-): ForwardBase<TopAndContent>(home), UserStateView, LoggedInPath, HomePath by home, FBApi, ViewTaskApi {
+    links: Links,
+    hole: HasKillsRouting<TopAndContent>,
+    user: User
+): ForwardTC(hole), LoggedInPath, LinksPath by links, FBApi {
 
-    override val userState: UserState = UserState.LoggedIn(user)
     override val loggedIn: LoggedIn = this
 
     val private = tasksLib.app.private.doc(user.uid)
@@ -55,9 +48,7 @@ class LoggedIn(
     }.readOnly
 
     fun signOut() {
-        launch {
-            app.auth().signOut()
-        }
+        links.signOut()
     }
 
 //    fun newTask() {
@@ -75,12 +66,8 @@ class LoggedIn(
 //        }
 //    }
 
-    fun listTasks() {
-        exec {
-            forward.switchTo {
-                ListTasks(this)
-            }
-        }
+    fun listTasks() = launch {
+        links.listTasks.fwd()
     }
 
     fun FsDoc<Task>.hide() {
@@ -100,12 +87,14 @@ class LoggedIn(
         }
     }
 
-    fun listTags() {
-        exec {
-            forward.switchTo {
-                ListTags(this)
-            }
-        }
+    fun listTags() = launch {
+        links.listTags.fwd()
+    }
+
+    fun newTask() {}
+
+    fun FsDoc<Task>.view() = launch {
+        links.viewTask.fwd(idOrFail)
     }
 
     override val rawView: TopAndContent = ui()

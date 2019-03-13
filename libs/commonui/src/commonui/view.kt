@@ -1,6 +1,7 @@
 package commonui
 
 import commonshr.*
+import commonui.topandcontent.ProgressTC
 import commonui.widget.HoleT
 import commonui.widget.HourglassView
 import commonui.widget.TopAndContent
@@ -93,6 +94,7 @@ interface HasRouting<V> {
     val activeView: RxIface<ViewItem<V>>
 }
 interface HasKillsRouting<V>: HasKills, HasRouting<V>
+typealias FromTC = HasKillsRouting<TopAndContent>
 
 typealias SimpleRoutingHole<V> = RoutingHole<V, IView<V>>
 class RoutingHole<V, N: IView<V>>(
@@ -146,11 +148,14 @@ fun <F: CsKillsView<*>> Var<FwdStatus<F>>.returnToSelf() {
 }
 
 
+fun SimpleRoutingHole<TopAndContent>.hourglass() {
+    this %= ProgressTC(this)
+}
 fun ForwardView<TopAndContent, SimpleView<TopAndContent>>.hourglass() {
-    this %= HourglassView(this)
+    this %= ProgressTC(this)
 }
 
-abstract class ForwardView<V: Any, F: CsKillsView<V>>(
+abstract class ForwardView<V: Any, in F: CsKillsView<V>>(
     parent: HasKillsRouting<V>
 ): CsKillsView<V>(parent), HasKillsRedisplay, HasUix {
 
@@ -177,7 +182,7 @@ abstract class ForwardView<V: Any, F: CsKillsView<V>>(
         status %= fwd
         fwd.displayRoute = {
             status %= fwd
-            displayRoute()
+            activateRoute()
         }
     }
     operator fun remAssign(fwd: F) { forwardTo(fwd) }
@@ -188,6 +193,9 @@ abstract class ForwardView<V: Any, F: CsKillsView<V>>(
     }
 }
 
+fun <V: Any, F: CsKillsView<V>> F.setTo(view: ForwardView<V, F>) = apply { view %= this }
+
+typealias ForwardTC = ForwardBase<TopAndContent>
 abstract class ForwardBase<V: Any>(
     parent: HasKillsRouting<V>
 ): ForwardView<V, SimpleView<V>>(parent)

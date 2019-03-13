@@ -26,6 +26,10 @@ inline val GetOptionsSource.Companion.default get() = "default".unsafeCast<GetOp
 inline val GetOptionsSource.Companion.server  get() = "server".unsafeCast<GetOptionsSource>()
 inline val GetOptionsSource.Companion.cache   get() = "cache".unsafeCast<GetOptionsSource>()
 
+fun getOptionsCache() = obj<GetOptions>().apply {
+    source = GetOptionsSource.cache
+}
+
 //fun <T> queryUi(
 //        query: Query,
 //        element: Element,

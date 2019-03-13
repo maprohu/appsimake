@@ -219,17 +219,20 @@ open class JsApp(
 //        }
 //    }
 
+    val icon192 by task { config.icon192 }
+    val icon512 by task { config.icon512 }
+
     val manifestText by task {
         AppManifest().apply {
             name = config.title
             val ics = mutableListOf<AppManifest.Icon>()
-            config.icon192?.let { i ->
+            icon192?.let { i ->
                 ics += AppManifest.Icon().apply {
                     src = i
                     sizes = "192x192"
                 }
             }
-            config.icon512?.let { i ->
+            icon512?.let { i ->
                 ics += AppManifest.Icon().apply {
                     src = i
                     sizes = "512x512"

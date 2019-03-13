@@ -1,32 +1,35 @@
 package tasks.listtasks
 
 import commonfb.FBFromApi
-import commonui.widget.ForwardBase
+import commonshr.FsDoc
+import commonui.ForwardBase
 import commonui.widget.TopAndContent
 import rx.Var
 import tasks.loggedin.LoggedIn
-import tasks.viewtask.ViewTaskApi
 import tasks.loggedin.LoggedInPath
-import tasks.selecttags.SelectTags
+import taskslib.Task
 
 interface ListTasksPath: LoggedInPath {
     val listTasks: ListTasks
 }
 class ListTasks(
-    override val from: LoggedIn
-): ForwardBase<TopAndContent>(from), ListTasksPath, LoggedInPath by from, FBFromApi, ViewTaskApi {
+    from: LoggedIn
+): ForwardBase<TopAndContent>(from), ListTasksPath, LoggedInPath by from, FBFromApi {
     override val listTasks = this
 
     val tags = Var(emptyList<String>())
 
     fun selectTags() {
-        exec {
-            forward.switchTo {
-                SelectTags(this, tags)
-            }
-        }
+//        exec {
+//            forward.switchTo {
+//                SelectTags(this, tags)
+//            }
+//        }
     }
 
+    fun newTask() {}
+
+    fun FsDoc<Task>.view() {}
 
     override val rawView = ui()
 }

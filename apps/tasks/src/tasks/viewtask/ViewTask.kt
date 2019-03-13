@@ -5,11 +5,10 @@ import commonshr.FsDoc
 import commonshr.docWrap
 import commonshr.properties.copy
 import commonshr.toFsDoc
-import commonui.widget.ForwardBase
-import commonui.widget.HasJobRedisplay
-import commonui.widget.TopAndContent
-import tasks.editnote.EditNote
-import tasks.edittask.EditTask
+import commonui.ForwardTC
+import commonui.FromTC
+import commonui.HasFrom
+import commonui.SimpleFrom
 import tasks.loggedin.LoggedIn
 import tasks.loggedin.LoggedInPath
 import taskslib.Note
@@ -22,37 +21,37 @@ interface ViewTaskPath: LoggedInPath {
 }
 class ViewTask(
     loggedIn: LoggedIn,
-    override val from: HasJobRedisplay,
+    from: FromTC,
     val item: FsDoc<Task>
-): ForwardBase<TopAndContent>(from), ViewTaskPath, LoggedInPath by loggedIn, FBFromApi {
+): ForwardTC(from), ViewTaskPath, LoggedInPath by loggedIn, FBFromApi {
     override val viewTask = this
 
     val notes = item.docWrap.notes
 
     fun FsDoc<Note>.edit() {
-        exec {
-            forward.switchTo {
-                EditNote(this@ViewTask, this)
-            }
-        }
+//        exec {
+//            forward.switchTo {
+//                EditNote(this@ViewTask, this)
+//            }
+//        }
     }
 
     fun edit() {
-        exec {
-            forward.switchTo {
-                EditTask(this@ViewTask)
-            }
-        }
+//        exec {
+//            forward.switchTo {
+//                EditTask(this@ViewTask)
+//            }
+//        }
     }
 
     fun newComment() {
-        exec {
-            forward.switchTo {
-                EditNote(this@ViewTask, Note().toRandomFsDoc(notes)).apply {
-                    item.live
-                }
-            }
-        }
+//        exec {
+//            forward.switchTo {
+//                EditNote(this@ViewTask, Note().toRandomFsDoc(notes)).apply {
+//                    item.live
+//                }
+//            }
+//        }
     }
 
     fun markAsCompleted() {

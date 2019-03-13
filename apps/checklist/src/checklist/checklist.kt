@@ -1,13 +1,7 @@
 package checklist
 
-import commonui.launchGlobal
-import commonui.loadApp
-import commonui.show
+import commonfb.FBLinks
 
 fun main() {
-    launchGlobal {
-        Links().apply {
-            load { loggedIn.show() }
-        }
-    }
+    FBLinks.start { Links(it) }
 }

@@ -1,25 +1,23 @@
 package tasks.edittag
 
-import commonfb.FBApi
+import commonfb.FBFromApi
 import commonshr.FsDoc
 import commonui.Editor
-import commonui.widget.ForwardBase
+import commonui.ForwardBase
 import commonui.widget.TopAndContent
 import tasks.listtags.ListTags
 import tasks.listtags.ListTagsPath
-import tasks.viewtask.ViewTask
-import tasks.viewtask.ViewTaskPath
-import taskslib.Note
 import taskslib.Tag
 
 interface EditTagPath: ListTagsPath {
     val editTag: EditTag
 }
 class EditTag(
-    override val from: ListTags,
+    from: ListTags,
     val item: FsDoc<Tag>
-): ForwardBase<TopAndContent>(from), EditTagPath, ListTagsPath by from, FBApi, Editor {
+): ForwardBase<TopAndContent>(from), EditTagPath, ListTagsPath by from, FBFromApi, Editor {
     override val editTag = this
+    init { item.live }
 
     override val editing = rxEditing(item)
 

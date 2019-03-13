@@ -20,15 +20,14 @@ import firebase.app.App
 import firebase.firestore.*
 import kotlinx.coroutines.launch
 
-interface LoggedInPath: LinksPath, HasDb {
+interface LoggedInPath: LinksPath {
     val loggedIn: LoggedIn
 }
 
 class LoggedIn(
     links: Links,
     hole: HasKillsRouting<TopAndContent>,
-    user: User,
-    override val db: Firestore
+    user: User
 ): ForwardBase<TopAndContent>(hole), LoggedInPath, LinksPath by links, FBApi {
     override val loggedIn: LoggedIn = this
 

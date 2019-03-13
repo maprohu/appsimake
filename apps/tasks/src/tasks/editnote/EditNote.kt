@@ -1,10 +1,9 @@
 package tasks.editnote
 
-import commonfb.FBApi
+import commonfb.FBFromApi
 import commonshr.FsDoc
 import commonui.Editor
-import commonui.widget.ForwardBase
-import commonui.widget.TopAndContent
+import commonui.ForwardTC
 import tasks.viewtask.ViewTask
 import tasks.viewtask.ViewTaskPath
 import taskslib.Note
@@ -13,9 +12,9 @@ interface EditNotePath: ViewTaskPath {
     val editNote: EditNote
 }
 class EditNote(
-    override val from: ViewTask,
+    from: ViewTask,
     val item: FsDoc<Note>
-): ForwardBase<TopAndContent>(from), EditNotePath, ViewTaskPath by from, FBApi, Editor {
+): ForwardTC(from), EditNotePath, ViewTaskPath by from, FBFromApi, Editor {
     override val editNote = this
 
     override val editing = rxEditing(item)

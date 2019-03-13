@@ -48,7 +48,7 @@ fun ListTasks.ui(): TopAndContent {
                             this %= f.label
                         }
                     }
-                    bind(
+                    bindValue(
                         statusFilter.linked(
                             read = { it.key },
                             write = { StatusFilter.valueOf(it) }
