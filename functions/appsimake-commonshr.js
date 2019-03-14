@@ -3913,6 +3913,50 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     return it;
   }
   var Identity;
+  function Coroutine$SuspendIdentity$lambda(it_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$it = it_0;
+  }
+  Coroutine$SuspendIdentity$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$SuspendIdentity$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$SuspendIdentity$lambda.prototype.constructor = Coroutine$SuspendIdentity$lambda;
+  Coroutine$SuspendIdentity$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            return this.local$it;
+          case 1:
+            throw this.exception_0;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function SuspendIdentity$lambda(it_0, continuation_0, suspended) {
+    var instance = new Coroutine$SuspendIdentity$lambda(it_0, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
+  }
+  var SuspendIdentity;
   function CompareEquals$lambda(a, b) {
     return equals(a, b);
   }
@@ -4886,6 +4930,18 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'RefDoc',
     interfaces: []
   };
+  function EditableDoc(id, doc, exists) {
+    if (exists === void 0)
+      exists = true;
+    this.id = id;
+    this.doc = doc;
+    this.exists = exists;
+  }
+  EditableDoc.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'EditableDoc',
+    interfaces: []
+  };
   function FsIdState() {
   }
   function FsIdState$NoId() {
@@ -4996,6 +5052,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function toFsDoc_1($receiver, cw, id) {
     return toFsDoc($receiver, toFsId(cw, new FsIdState$HasId(id, true)));
   }
+  function toFsEditable($receiver, id, exists) {
+    if (exists === void 0)
+      exists = true;
+    return new EditableDoc(id, $receiver, exists);
+  }
   function get_idOrFail($receiver) {
     var tmp$;
     return (Kotlin.isType(tmp$ = $receiver.id.state.now, FsIdState$HasId) ? tmp$ : throwCCE()).id;
@@ -5004,7 +5065,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     if (d === void 0) {
       d = {};
     }
-    return toFsDoc($receiver.parent.factory(d, ops), toFsId_0($receiver, false));
+    return toFsEditable($receiver.parent.factory(d, ops), $receiver, false);
+  }
+  function toFsDoc_2($receiver) {
+    return new RefDoc(toFsId_0($receiver.id, $receiver.exists), $receiver.doc);
   }
   function Noop$lambda() {
     return Unit;
@@ -8134,6 +8198,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
       return Identity;
     }
   });
+  Object.defineProperty(package$properties, 'SuspendIdentity', {
+    get: function () {
+      return SuspendIdentity;
+    }
+  });
   Object.defineProperty(package$properties, 'CompareEquals', {
     get: function () {
       return CompareEquals;
@@ -8205,6 +8274,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   });
   package$properties.TS = TS;
   package$commonshr.RefDoc = RefDoc;
+  package$commonshr.EditableDoc = EditableDoc;
   Object.defineProperty(FsIdState, 'NoId', {
     get: FsIdState$NoId_getInstance
   });
@@ -8219,8 +8289,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.toFsDoc_ved7zl$ = toFsDoc;
   package$commonshr.toFsDoc_s7qlz4$ = toFsDoc_0;
   package$commonshr.toFsDoc_e53g6m$ = toFsDoc_1;
+  package$commonshr.toFsEditable_s8vq45$ = toFsEditable;
   package$commonshr.get_idOrFail_2s00w$ = get_idOrFail;
   package$commonshr.new_kizxdt$ = new_0;
+  package$commonshr.toFsDoc_ihdkly$ = toFsDoc_2;
   Object.defineProperty(package$killable, 'Noop', {
     get: function () {
       return Noop;
@@ -8484,6 +8556,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   singletons = coll();
   fcmtokens = coll();
   Identity = Identity$lambda;
+  SuspendIdentity = SuspendIdentity$lambda;
   CompareEquals = CompareEquals$lambda;
   IdentityWriteDynamic = IdentityWriteDynamic$lambda;
   IdentityReadDynamic = IdentityReadDynamic$lambda;

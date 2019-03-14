@@ -10,19 +10,18 @@ interface SelectTagsPath: ListTasksPath {
     val selectTags: SelectTags
 }
 class SelectTags(
-    from: ListTasks,
-    val result: Var<List<String>>
+    from: ListTasks
 ): ForwardTC(from), SelectTagsPath, ListTasksPath by from, FBFromApi {
     override val selectTags = this
 
-    val current = Var(result.now)
+    val current = Var(listTasks.tags.now)
 
     fun cancel() {
         from.redisplay()
     }
 
     fun submit() {
-        result %= current.now
+        listTasks.tags %= current.now
         from.redisplay()
     }
 

@@ -61,16 +61,16 @@ fun ViewTask.ui() = TopAndContent(
                 dl {
                     cls.m1
                     dt %= "Title"
-                    dd %= { item().title() }
+                    dd %= { fsDoc().title() }
                     dt %= "Text"
-                    dd %= { item().text() }
+                    dd %= { fsDoc().text() }
                     dt %= "Status"
-                    dd %= { item().status().name }
+                    dd %= { fsDoc().status().name }
                     dt %= "Tags"
                     dd {
                         widget %= {
                             document.div {
-                                item().tags().forEach { id ->
+                                fsDoc().tags().forEach { id ->
                                     insert.badge {
                                         cls {
                                             m1

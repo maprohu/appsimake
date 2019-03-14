@@ -9,9 +9,7 @@ import domx.on
 import killable.HasNoKill
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.launch
-import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.PopStateEvent
 import kotlin.browser.window
 
@@ -64,12 +62,12 @@ class Holder<P, F: Any>(
 
 private val hashData get() = window.location.hash.drop(1)
 
-class Link<P, F: HasKills>(
+class Link<P, out F: HasKills>(
     val name: String,
     val root: Boolean,
     converter: PConverter<P>,
     val factory: suspend (P) -> F?,
-    val display: F.() -> Unit
+    val display: (@UnsafeVariance F).() -> Unit
 ) {
     val hashConverter = converter + HashSerializer
     suspend fun showLink(param: String) {
@@ -83,10 +81,13 @@ class Link<P, F: HasKills>(
         show(param, true)
     }
 
-
     private fun pushState(param: P) {
+        pushState(param, root)
+    }
+
+    internal fun pushState(param: P, replace: Boolean) {
         val stateData = "$name/${hashConverter.serialize(param)}"
-        if (root) {
+        if (replace) {
             window.history.replaceState(
                 stateData,
                 "",
@@ -105,11 +106,7 @@ class Link<P, F: HasKills>(
         holder.let { h ->
             return if (h == null || h.param != param || h.item == null) {
                 factory(param)?.also { i ->
-                    holder = Holder(param, i).apply {
-                        i.kills += {
-                            this.item = null
-                        }
-                    }
+                    set(param, i)
                     pushState(param)
                 }
             } else {
@@ -120,16 +117,49 @@ class Link<P, F: HasKills>(
             }
         }
     }
+
+    internal fun set(param: P, view: @UnsafeVariance F) {
+        holder = Holder(param, view).apply {
+            view.kills += {
+                this.item = null
+            }
+        }
+    }
+
+    internal fun clear() {
+        holder = null
+    }
 }
 
 suspend fun Link<Unit, *>.show() = show(Unit)
 suspend fun Link<Unit, *>.fwd() = fwd(Unit)
 suspend fun <F: HasKills> Link<Unit, F>.get() = get(Unit)
 
+suspend fun <B: HasKills> Link<BaseParam<B, Unit, Unit>, *>.fwd(base: Link<Unit, B>) = fwd(
+    BaseParam(
+        LinkParam(base, Unit),
+        Unit
+    )
+)
+suspend fun <B: HasKills, P> Link<BaseParam<B, Unit, P>, *>.fwd(base: Link<Unit, B>, param: P) = fwd(
+    BaseParam(
+        LinkParam(base, Unit),
+        param
+    )
+)
+
 data class LinkParam<P, F: HasKills>(
     val link: Link<P, F>,
     val param: P
+) {
+    suspend fun get(forcePush: Boolean = false) = link.get(param, forcePush)
+}
+
+val <P, F: HasKills> LinkParam<P, F>.withUnit get() = BaseParam(
+    this,
+    Unit
 )
+
 data class BaseParam<B: HasKills, PB, P>(
     val link: LinkParam<PB, B>,
     val param: P
@@ -180,110 +210,182 @@ abstract class LinksBase(coroutineScope: CoroutineScope): CoroutineScope by coro
             },
             deserialize = { o ->
                 BaseParam(
-                    link = links[o.link]!!.unsafeCast<Link<P, F>>(),
+                    link = lc.deserialize(o.base),
                     param = paramConverter.deserialize(o.param)
                 )
             }
         )
+    }
 
 
-        abstract val welcome: Link<Unit, *>
+    abstract val welcome: Link<Unit, *>
 
-        init {
-            APP.startRegisteringServiceWorker()
+    init {
+        APP.startRegisteringServiceWorker()
+    }
+
+    fun <F: HasKillsRedisplay> link(
+        root: Boolean = false,
+        get: suspend () -> F?
+    ) = param(root, UnitConverter).link { get() }
+
+
+    fun <P> param(
+        root: Boolean = false,
+        converter: PConverter<P> = nullConverter()
+    ) = LinkBuilder(root, converter)
+
+
+    inner class LinkBuilder<P>(
+        val root: Boolean = false,
+        val converter: PConverter<P> = nullConverter()
+    ) {
+        fun <F: HasKillsRedisplay> link(
+            get: suspend (P) -> F?
+        ) = named { name ->
+            Link(
+                name,
+                root,
+                converter,
+                get,
+                { redisplay() }
+            ).also {
+                links[name] = it
+            }
         }
+    }
+
+    fun <B: HasKills> linkBase() = linkBase<Unit, B>(UnitConverter)
+    fun baseTC() = linkBase<FromTC>()
+
+    fun <BP, B: HasKills> linkBase(
+        converter: PConverter<BP> = nullConverter()
+    ) = LinkParamBuilder<BP, B>(converter)
+
+    inner class LinkParamBuilder<BP, B: HasKills>(
+        private val baseParamConverter: PConverter<BP> = jsonConverter()
+    ) {
+        fun <P> param(
+            converter: PConverter<P> = jsonConverter()
+        ) = LinkBuilder(
+            false,
+            baseConverter<B, BP, P>(
+                baseParamConverter,
+                converter
+            )
+        )
 
         fun <F: HasKillsRedisplay> link(
-            root: Boolean = false,
-            get: suspend () -> F?
-        ) = param(root, UnitConverter).link { get() }
+            get: suspend (LinkParam<BP, B>) -> F?
+        ) = param(UnitConverter).link { get(it.link) }
 
+    }
 
-        fun <P> param(
-            root: Boolean = false,
-            converter: PConverter<P> = nullConverter()
-        ) = LinkBuilder(root, converter)
-
-
-        inner class LinkBuilder<P>(
-            val root: Boolean = false,
-            val converter: PConverter<P> = nullConverter()
+    private fun listenPopstates() {
+        val states = Channel<String>(Channel.UNLIMITED)
+        window.on<PopStateEvent>(
+            HasNoKill,
+            "popstate"
         ) {
-            fun <F: HasKillsRedisplay> link(
-                get: suspend (P) -> F?
-            ) = named { name ->
-                Link(
-                    name,
-                    root,
-                    converter,
-                    get,
-                    { redisplay() }
-                ).also {
-                    links[name] = it
-                }
+            states.offer(hashData)
+        }
+        launch {
+            for (h in states) {
+                showHash(h)
             }
         }
+    }
 
-        fun <P, F: HasKills> linkParam(
-            converter: PConverter<P> = nullConverter()
-        ) = LinkParamBuilder<P, F>(converter)
+    suspend fun load() {
+        listenPopstates()
+        showHash(hashData)
+    }
 
-//    inner class LinkParamBuilder<BP, B: HasKills>(
-//        converter: PConverter<BP> = jsonConverter()
-//    ) {
-//        private val lc = linkConverter<BP, B>(converter)
-//        private val lb = LinkBuilder(false, lc)
-//
-//        fun <P> param(
-//            converter: PConverter<P> = jsonConverter()
-//        ) = LinkBuilder(root, converter)
-//
-//        fun <F: HasKillsRedisplay> link(
-//            get: suspend (P, B) -> F?
-//        ) = lb.link { lp ->
-//            lp.link.get(lp.param)?.let { l -> get(lp.param, l) }
-//        }
-//    }
+    suspend fun showHash(hash: String) {
+        val linkName = hash.substringBefore('/')
 
-        private fun listenPopstates() {
-            val states = Channel<String>(Channel.UNLIMITED)
-            window.on<PopStateEvent>(
-                HasNoKill,
-                "popstate"
-            ) {
-                states.offer(hashData)
-            }
-            launch {
-                for (h in states) {
-                    showHash(h)
-                }
-            }
-        }
+        val link = links[linkName]
 
-        suspend fun load() {
-            listenPopstates()
-            showHash(hashData)
-        }
-
-        suspend fun showHash(hash: String) {
-            val linkName = hash.substringBefore('/')
-
-            val link = links[linkName]
-
-            if (link != null) {
-                try {
-                    link.showLink(hash.substringAfter('/', ""))
-                } catch (e: dynamic) {
-                    reportd(e)
-                    welcome.show()
-                }
-            } else {
+        if (link != null) {
+            try {
+                link.showLink(hash.substringAfter('/', ""))
+            } catch (e: dynamic) {
+                reportd(e)
                 welcome.show()
             }
+        } else {
+            welcome.show()
         }
     }
 
 
 }
 
+class EditorExit<in T>(
+    val onPersist: (T) -> Unit = {},
+    override val exit: HasRedisplay = GoBack2Redisplay
+): HasExit {
+    companion object {
+        val GoBack = EditorExit<Any?>(
+            exit = GoBackRedisplay
+        )
+        val GoBack2 = EditorExit<Any?>()
+    }
+}
+
+class LinkParamView<P, F: HasKills>(
+    val link: Link<P, F>,
+    val param: P,
+    val item: F
+)
+
+fun <EP, EF: HasKills> exiting(
+    new: Link<*, *>,
+    edit: LinkParam<EP, EF>
+): EditorExit<EF> {
+    return EditorExit(
+        onPersist = { editor ->
+            new.clear()
+            edit.apply {
+                link.apply {
+                    set(param, editor)
+                    pushState(param, true)
+                }
+            }
+        },
+        exit = GoBackRedisplay
+    )
+}
+fun <VP, VF: HasKills, EP, EF: HasKills> exiting(
+    new: Link<*, *>,
+    view: LinkParamView<VP, VF>,
+    edit: LinkParam<EP, EF>
+): EditorExit<EF> {
+
+    var exit = GoBackRedisplay
+
+    return EditorExit(
+        onPersist = { editor ->
+            new.clear()
+            view.apply {
+                link.apply {
+                    set(param, item)
+                    pushState(param, true)
+                }
+            }
+            edit.apply {
+                link.apply {
+                    set(param, editor)
+                    pushState(param, false)
+                }
+            }
+            exit = GoBack2Redisplay
+        },
+        exit = RedisplayDeps {
+            exit.redisplay()
+        }
+    )
+}
+
+typealias NewLink<LP, EP, E> = Link<BaseParam<FromTC, LP, EP>, E>
 

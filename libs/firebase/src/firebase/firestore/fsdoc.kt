@@ -22,6 +22,8 @@ fun CollectionWrap<*>.collectionRef(deps: HasDb) = deps.db.collection(path)
 fun <D> CollectionWrap<D>.randomDoc(deps: HasDb) = doc(collectionRef(deps).doc().id)
 fun <D> CollectionSource<D>.randomDoc(deps: HasDb) = doc(collectionRef(deps).doc().id)
 
+fun <D> CollectionSource<D>.randomEditable(deps: HasDb, d: dynamic = dyn()) = randomDoc(deps).new(d)
+
 fun <D: RxBase<*>> FsDoc<D>.save(deps: HasDb): Promise<Unit> {
     return id.state.now.let { st ->
         val dw = when (st) {
@@ -41,7 +43,15 @@ fun <D: RxBase<*>> FsDoc<D>.save(deps: HasDb): Promise<Unit> {
     }
 }
 
-fun <D: RxBase<*>> FsDoc<D>.delete(deps: HasDb): Promise<Unit> = id.docWrap.docRef(deps).delete()
+fun <D: RxBase<*>> FsEditable<D>.save(deps: HasDb): Promise<Unit> {
+    return id.docRef(deps).set(
+        doc.writeDynamic(FsDynamicOps)
+    )
+}
+
+fun <D: RxBase<*>> FsDoc<D>.delete(deps: HasDb): Promise<Unit> = id.docWrap.delete(deps)
+fun <D> FsEditable<D>.delete(deps: HasDb): Promise<Unit> = id.delete(deps)
+fun <D> DocWrap<D>.delete(deps: HasDb): Promise<Unit> = docRef(deps).delete()
 
 fun <D: RxBase<*>> D.toRandomFsDoc(deps: HasDb, cw: CollectionSource<D>) = toFsDoc(FsId(cw.randomDoc(deps), false))
 
@@ -65,11 +75,9 @@ fun <D> DocSource<D>.docs(deps: HasCsDbKills): ReceiveChannel<D> = deps.produce(
     }
 }
 
-fun <D: RxBase<*>> FsDoc<D>.live(deps: HasCsDbKills) = apply {
-    deps.launch {
-        for (s in snapshots(deps)) {
-            updateFrom(s)
-        }
+fun <D: RxBase<*>> FsDoc<D>.live(deps: HasDbKills) = apply {
+    docWrap.snapshotEmitter(deps).listen(deps) {
+        updateFrom(it)
     }
 }
 
@@ -104,7 +112,7 @@ val <D> DocSource<D>.new get() = new()
 fun <D> DocSource<D>.new(d: dynamic = dyn()) = new(d, firebase.firestore.FsDynamicOps)
 
 
-suspend fun <D> DocSource<D>.get(deps: HasDb): FsDoc<D> {
+suspend fun <D> DocSource<D>.get(deps: HasDb): FsEditable<D> {
     val ds = docRef(deps).run {
         try {
             get(getOptionsCache()).await()
@@ -113,7 +121,7 @@ suspend fun <D> DocSource<D>.get(deps: HasDb): FsDoc<D> {
         }
     }
     require(ds.exists) { "Document does not exist: $path"}
-    return parent.factory(ds.data(), FsDynamicOps).toFsDoc(toFsId(true))
+    return parent.factory(ds.data(), FsDynamicOps).toFsEditable(this)
 }
 
 

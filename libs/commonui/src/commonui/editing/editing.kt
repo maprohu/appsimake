@@ -18,8 +18,8 @@ interface Bindings {
     fun addDirty(deps: HasKills, rxv: RxIface<Boolean>)
 }
 open class DefaultBindings(
-    final override val kills: KillSet,
-    defaultDirty: () -> Boolean = { false }
+    final override val kills: KillSet
+//    defaultDirty: () -> Boolean = { false }
 ): Bindings, KillsApi {
 
 
@@ -29,7 +29,7 @@ open class DefaultBindings(
     final override val canSave = this.rx { validations().all { it() } }
 
     final override val dirty = this.rx {
-        extraDirty().any { it() } || defaultDirty()
+        extraDirty().any { it() }
     }
 
     override fun addValidation(deps: HasKills, rxv: RxIface<Boolean>) = validations.add(deps, rxv)
@@ -43,37 +43,57 @@ interface Editing: Bindings {
 }
 
 abstract class DefaultEditing(
-    kills: KillSet,
-    defaultDirty: () -> Boolean
-): DefaultBindings(kills, defaultDirty), Editing
+    kills: KillSet
+//    defaultDirty: () -> Boolean
+): DefaultBindings(
+    kills
+//    defaultDirty
+), Editing
 
 class RxEditing<T: RxBase<*>>(
     kills: KillSet,
     val initial: FsDoc<T>,
-    val current: T,
     override val canDelete: RxIface<Boolean>,
     override val delete: Trigger,
-    saveCurrent: (T) -> Unit
-): DefaultEditing(
-    kills,
-    { !rxCompare(initial(), current) }
-), KillsApi {
-    constructor(
-        kills: KillSet,
-        initial: FsDoc<T>,
-        canDelete: RxIface<Boolean>,
-        delete: Trigger,
-        saveCurrent: (T) -> Unit
-    ): this(
-        kills,
-        initial,
-        initial.rxv.now.copy(),
-        canDelete,
-        delete,
-        saveCurrent
-    )
+    saveCurrent: (T) -> Unit,
+    onPersist: Trigger
+): DefaultEditing(kills), KillsApi {
+    val current: T = initial.rxv.now.copy()
+
+    init {
+        extraDirty.transform { it + rx { !initial.id.state().exists || !rxCompare(initial(), current) } }
+    }
+
+
+//    constructor(
+//        kills: KillSet,
+//        initial: FsDoc<T>,
+//        canDelete: RxIface<Boolean>,
+//        delete: Trigger,
+//        saveCurrent: (T) -> Unit
+//    ): this(
+//        kills,
+//        initial,
+//        initial.rxv.now.copy(),
+//        canDelete,
+//        delete,
+//        saveCurrent
+//    )
+
+    private val onPersistOnce by lazy {
+        onPersist()
+    }
+
+    init {
+        initial.id.state.forEach {s ->
+            if (s.exists) {
+                onPersistOnce
+            }
+        }
+    }
 
     override val save: Trigger = {
+        onPersistOnce
         saveCurrent(current)
     }
 }

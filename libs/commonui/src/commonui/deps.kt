@@ -44,6 +44,9 @@ operator fun DefaultEditing.plus(kills: KillSet) = EditKillsDeps(this, kills)
 interface HasEditFromKillsUix: HasEdit, HasFrom, HasKills, HasUix, HasEditKillsUix
 
 interface HasEditExitFromKillsUix: HasEdit, HasExit, HasFrom, HasKills, HasUix, HasEditFromKillsUix {
+}
+
+interface DefaultExit: HasExit, HasFrom {
     override val exit get() = from
 }
 
@@ -59,6 +62,10 @@ interface HasFrom {
 interface HasExit {
     val exit: HasRedisplay
 }
+
+class ExitDeps(
+    override val exit: HasRedisplay
+): HasExit
 
 interface HasEditFrom: HasEdit, HasFrom
 

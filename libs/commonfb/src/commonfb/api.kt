@@ -1,10 +1,7 @@
 package commonfb
 
-import commonshr.FsDoc
-import commonshr.api
 import commonfb.editing.*
-import commonshr.Action
-import commonshr.Trigger
+import commonshr.*
 import commonshr.properties.RxBase
 import commonui.*
 import firebase.CsDbKillsApi
@@ -12,12 +9,19 @@ import firebase.DbKillsApi
 
 
 interface DbKillsApiCommonfb: DbKillsApi {
-    fun <T: RxBase<*>> rxEditing(
-        initial: FsDoc<T>,
-        delete: Trigger? = null,
-        preSave: (T) -> Unit = {}
-    ) = rxEditing(api, initial, delete, preSave)
 
+    fun <T: RxBase<*>> rxEditing(
+        initial: FsEditable<T>,
+        delete: Trigger? = null,
+        onPersist: Trigger = {},
+        preSave: (T) -> Unit = {}
+    ) = rxEditing(
+        api,
+        initial,
+        delete = delete,
+        onPersist = onPersist,
+        preSave = preSave
+    )
 }
 
 interface FBApi: CsDbKillsUixApi, HasRedisplay

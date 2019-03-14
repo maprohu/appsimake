@@ -25,7 +25,7 @@ class LoggedIn(
     links: Links,
     hole: HasKillsRouting<TopAndContent>,
     user: User
-): ForwardTC(hole), LoggedInPath, LinksPath by links, FBApi {
+): ForwardTC(hole), LoggedInPath, LinksPath by links, FBApi, FromTC {
 
     override val loggedIn: LoggedIn = this
 
@@ -51,22 +51,7 @@ class LoggedIn(
         links.signOut()
     }
 
-//    fun newTask() {
-//        exec {
-//            forward.switchTo {
-//                Task().toRandomFsDoc(tasksCollection).run {
-//                    ViewTask(this@LoggedIn, this).apply {
-//                        item.live
-//                        forward.switchTo {
-//                            EditTask(this)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-    fun listTasks() = launch {
+    fun listTasks() = advance {
         links.listTasks.fwd()
     }
 
@@ -87,14 +72,16 @@ class LoggedIn(
         }
     }
 
-    fun listTags() = launch {
+    fun listTags() = advance {
         links.listTags.fwd()
     }
 
-    fun newTask() {}
+    fun newTask() = advance {
+        links.newTask.fwd(links.welcome)
+    }
 
-    fun FsDoc<Task>.view() = launch {
-        links.viewTask.fwd(idOrFail)
+    fun FsDoc<Task>.view() = advance {
+        links.viewTask.fwd(links.welcome, idOrFail)
     }
 
     override val rawView: TopAndContent = ui()

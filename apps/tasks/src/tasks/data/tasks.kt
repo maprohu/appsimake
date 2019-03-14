@@ -1,5 +1,6 @@
 package tasks.data
 
+import commonshr.DocWrap
 import commonshr.FsDoc
 import commonshr.docWrap
 import firebase.HasDb
@@ -7,7 +8,7 @@ import firebase.firestore.*
 import taskslib.Task
 import taskslib.notes
 
-suspend fun FsDoc<Task>.deleteCollections(
+suspend fun DocWrap<Task>.deleteCollections(
     deps: HasDb
 ) {
     deps.batch {
@@ -15,8 +16,8 @@ suspend fun FsDoc<Task>.deleteCollections(
     }
 }
 
-suspend fun FsDoc<Task>.deleteCollections(
+suspend fun DocWrap<Task>.deleteCollections(
     batch: FsBatch
 ) {
-    batch.delete(docWrap.notes.collectionRef(batch))
+    batch.delete(notes.collectionRef(batch))
 }

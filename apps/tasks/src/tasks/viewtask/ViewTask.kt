@@ -1,14 +1,9 @@
 package tasks.viewtask
 
 import commonfb.FBFromApi
-import commonshr.FsDoc
-import commonshr.docWrap
+import commonshr.*
 import commonshr.properties.copy
-import commonshr.toFsDoc
-import commonui.ForwardTC
-import commonui.FromTC
-import commonui.HasFrom
-import commonui.SimpleFrom
+import commonui.*
 import tasks.loggedin.LoggedIn
 import tasks.loggedin.LoggedInPath
 import taskslib.Note
@@ -22,26 +17,20 @@ interface ViewTaskPath: LoggedInPath {
 class ViewTask(
     loggedIn: LoggedIn,
     from: FromTC,
-    val item: FsDoc<Task>
+    val fromLink: Link<Unit, FromTC>,
+    val editable: FsEditable<Task>
 ): ForwardTC(from), ViewTaskPath, LoggedInPath by loggedIn, FBFromApi {
     override val viewTask = this
 
-    val notes = item.docWrap.notes
+    val notes = editable.id.notes
 
-    fun FsDoc<Note>.edit() {
-//        exec {
-//            forward.switchTo {
-//                EditNote(this@ViewTask, this)
-//            }
-//        }
+    val fsDoc = editable.toFsDoc().live
+
+    fun FsDoc<Note>.edit() = advance {
     }
 
-    fun edit() {
-//        exec {
-//            forward.switchTo {
-//                EditTask(this@ViewTask)
-//            }
-//        }
+    fun edit() = advance {
+        links.editTask.fwd(fromLink, editable.id.id)
     }
 
     fun newComment() {
@@ -55,9 +44,9 @@ class ViewTask(
     }
 
     fun markAsCompleted() {
-        item.rxv.now.copy().apply {
+        fsDoc.rxv.now.copy().apply {
             status %= TaskStatus.Completed
-            toFsDoc(item.id).save()
+            toFsDoc(fsDoc.id).save()
             from.redisplay()
         }
     }

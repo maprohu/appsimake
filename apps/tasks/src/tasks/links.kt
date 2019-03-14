@@ -2,24 +2,27 @@ package tasks
 
 import commonfb.FBLinks
 import commonfb.FBLinksDeps
+import commonshr.toFsEditable
 import commonui.*
 import firebase.DbApi
+import tasks.editnote.EditNote
 import tasks.edittag.EditTag
+import tasks.edittask.EditTask
 import tasks.listtags.ListTags
 import tasks.listtasks.ListTasks
 import tasks.loggedin.LoggedIn
+import tasks.selecttags.SelectTags
 import tasks.viewtask.ViewTask
 
 interface LinksPath: DbApi {
     val links: Links
 }
 
-typealias TasksParam<T> = BaseParam<String, T>
-
 class Links(
     deps: FBLinksDeps
 ): FBLinks(deps), LinksPath {
     override val links = this
+
 
     override val welcome by link(true) {
         LoggedIn(
@@ -27,19 +30,24 @@ class Links(
             deps.hole,
             login()
         ).apply {
-            displayRoute = { deps.hole %= this }
+            deps.hole %= this
         }
     }
 
     val listTags by link {
         welcome.get()?.let { li ->
-            ListTags(li).setTo(li)
+            ListTags(li).forwarding(li)
         }
     }
 
     val listTasks by link {
         welcome.get()?.let { li ->
-            ListTasks(li).setTo(li)
+            ListTasks(li).forwarding(li)
+        }
+    }
+    val selectTags by link {
+        listTasks.get()?.let { l ->
+            SelectTags(l).forwarding(l)
         }
     }
 
@@ -48,23 +56,80 @@ class Links(
             EditTag(
                 vc,
                 vc.loggedIn.userTags.doc(p).get()
-            ).setTo(vc)
+            ).forwarding(vc)
         }
     }
 
-    val x = listOf(
-        welcome,
-        listTasks
-    )
-
-
-    val viewTask by param<TasksParam<String>>().link { p ->
-        welcome.get()?.let { vc ->
-            ViewTask(
+    val newTag: Link<Unit, EditTag> by link {
+        listTags.get()?.let { vc ->
+            val item = vc.loggedIn.userTags.randomEditable()
+            EditTag(
                 vc,
-                vc,
-                vc.loggedIn.tasksCollection.doc(p).get()
-            ).setTo(vc)
+                item,
+                exiting(
+                    newTag,
+                    LinkParam(editTag, item.id.id)
+                )
+            ).forwarding(vc)
+        }
+    }
+
+    val viewTask by baseTC().param<String>().link { p ->
+        welcome.get()?.let { w ->
+            p.link.get()?.let { parent ->
+                ViewTask(
+                    w,
+                    parent,
+                    p.link.link,
+                    w.loggedIn.tasksCollection.doc(p.param).get()
+                ).forwarding(parent)
+            }
+        }
+    }
+
+    val editNote by baseTC().param<String>().link { p ->
+        viewTask.get(p)?.let { vt ->
+            EditNote(
+                vt,
+                vt.fsDoc.toFsEditable()
+            ).forwarding(vt)
+        }
+    }
+
+    val editTask by baseTC().param<String>().link { p ->
+        viewTask.get(p)?.let { vt ->
+            EditTask(
+                vt,
+                vt.fsDoc.toFsEditable()
+            ).forwarding(vt)
+        }
+    }
+    val newTask: NewLink<Unit, Unit, EditTask> by baseTC().link { p ->
+        welcome.get()?.let { w ->
+            p.link.get()?.let { parent ->
+                val item = w.loggedIn.tasksCollection.randomEditable()
+
+                val ip = BaseParam(p, item.id.id)
+
+                val vt = ViewTask(
+                    w,
+                    parent,
+                    p.link,
+                    item
+                )
+
+                EditTask(
+                    vt,
+                    item,
+                    exiting(
+                        new = newTask,
+                        view = LinkParamView(viewTask, ip, vt),
+                        edit = LinkParam(editTask, ip)
+                    )
+                ).forwarding(vt).also {
+                    parent %= vt
+                }
+            }
         }
     }
 

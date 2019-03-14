@@ -42,7 +42,7 @@ class Links(
             deps.hole,
             login()
         ).apply {
-            displayRoute = { deps.hole %= this }
+            deps.hole %= this
         }
     }
 

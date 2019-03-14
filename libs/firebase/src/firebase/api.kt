@@ -1,6 +1,7 @@
 package firebase
 
 import common.CsKillsApiCommon
+import common.dyn
 import commonshr.*
 import commonshr.properties.RxBase
 import commonshr.properties.SnapshotEvent
@@ -15,26 +16,26 @@ interface DbApi: Api, HasDb {
     val <D> CollectionWrap<D>.randomDoc: DocWrap<D> get() = randomDoc(api)
 
     fun <D: RxBase<*>> D.toRandomFsDoc(cw: CollectionSource<D>) = toRandomFsDoc(api, cw)
+    fun <D> CollectionSource<D>.randomEditable(d: dynamic = dyn()) = randomEditable(api, d)
     fun <D: RxBase<*>> FsDoc<D>.save() = save(api)
+    fun <D: RxBase<*>> FsEditable<D>.save() = save(api)
     fun <D: RxBase<*>> FsDoc<D>.delete(): Promise<Unit> = delete(api)
+    fun <D> FsEditable<D>.delete(): Promise<Unit> = delete(api)
 
     fun <T> CollectionWrap<T>.query(query: QuerySettingsBuilder<T>.() -> Unit = {}) = query(api, query)
 
     suspend fun <D> DocSource<D>.get() = get(api)
 
-
 }
 
 
-interface KillsApiFirebase: KillsApi
+interface KillsApiFirebase: KillsApi {
+    fun DocumentReference.onSnapshotNext(onNext: (DocumentSnapshot) -> Unit) = onSnapshotNext(api, onNext)
+}
 
-
-
-interface DbKillsApi: HasDbKills, DbApi, KillsApiFirebase
-
-
-
-
+interface DbKillsApi: HasDbKills, DbApi, KillsApiFirebase {
+    val <D: RxBase<*>> FsDoc<D>.live get() = live(api)
+}
 
 interface CsApiFirebase: CsApi {
 
@@ -61,7 +62,6 @@ interface CsDbKillsApi: HasCsDbKills, CsKillsApiFirebase, DbApi, KillsApiFirebas
         query: QuerySettingsBuilder<T>.() -> Unit = {}
     ) = listEvents(api, query)
 
-    val <D: RxBase<*>> FsDoc<D>.live get() = live(api)
 
     fun <D> DocSource<D>.docs() = docs(api)
 

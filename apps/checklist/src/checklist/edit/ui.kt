@@ -16,7 +16,7 @@ fun Edit.ui(): TopAndContent {
     return TopAndContent(
         topbar = factory.topbar {
             slots.left.backSaveDiscard
-            title %= if (shouldPreserve) "Edit Checklist" else "New Checklist"
+            title %= "Edit Checklist"
             right.saveDeleteButton
         }.node,
         content = factory.scrollPane {

@@ -1,34 +1,36 @@
 package tasks.edittask
 
-import commonfb.FBApi
 import commonfb.FBFromApi
-import commonshr.FsDoc
-import commonui.Editor
-import commonui.ForwardTC
-import commonui.widget.TopAndContent
+import commonshr.FsEditable
+import commonshr.Trigger
+import commonui.*
 import kotlinx.coroutines.launch
 import tasks.data.deleteCollections
 import tasks.viewtask.ViewTask
 import tasks.viewtask.ViewTaskPath
-import taskslib.Note
+import taskslib.Task
 
 interface EditTaskPath: ViewTaskPath {
     val editTask: EditTask
 }
+
+
 class EditTask(
-    from: ViewTask
-): ForwardTC(from), EditTaskPath, ViewTaskPath by from, FBFromApi, Editor {
+    from: ViewTask,
+    item: FsEditable<Task>,
+    exit: EditorExit<EditTask> = EditorExit.GoBack2
+): ForwardTC(from), EditTaskPath, ViewTaskPath by from, FBFromApi, Editor, HasExit by exit {
     override val editTask = this
-    override val exit = viewTask.from
 
     override val editing = rxEditing(
-        viewTask.item,
+        item,
         delete = {
-            viewTask.item.delete()
+            item.delete()
             loggedIn.launch {
-                viewTask.item.deleteCollections(this@EditTask)
+                item.id.deleteCollections(this@EditTask)
             }
-        }
+        },
+        onPersist = { exit.onPersist(this) }
     )
 
     override val rawView = ui()

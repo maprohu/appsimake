@@ -6,6 +6,7 @@ import commonshr.*
 import commonshr.properties.SnapshotEvent
 import commonshr.properties.wrapSnapshotEvents
 import firebase.HasDb
+import firebase.HasDbKills
 import firebaseshr.*
 import killable.*
 import kotlinx.coroutines.*
@@ -147,6 +148,16 @@ fun Query.idDiffs(fn: ((SetDiff<String>) -> Unit)) : Trigger = onSnapshotNext { 
 fun DocumentReference.onSnapshotNext(
     onNext: (DocumentSnapshot) -> Unit
 ) : Trigger = onSnapshot(onNext, { report(it.unsafeCast<Throwable>()) })
+
+fun DocumentReference.onSnapshotNext(
+    deps: HasKills,
+    onNext: (DocumentSnapshot) -> Unit
+) {
+    deps.kills += onSnapshotNext(onNext)
+}
+
+
+
 
 //data class ListenConfig<T>(
 //    val list: RxMutableList<T>,

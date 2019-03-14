@@ -1,11 +1,13 @@
 package firebase.firestore
 
+import common.Emitter
 import rx.*
 import commonshr.CollectionSource
 import commonshr.DocWrap
 import commonshr.*
 import commonshr.properties.*
 import firebase.HasCsDbKills
+import firebase.HasDb
 import killable.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -70,6 +72,10 @@ fun ReceiveChannel<DocumentChange>.toSnapshotEvents(deps: CoroutineScope): Recei
 
 
 fun <D> DocWrap<D>.snapshots(deps: HasCsDbKills) = docRef(deps).documentSnapshots(deps)
+
+fun <D> DocWrap<D>.snapshotEmitter(
+    deps: HasDb
+): EmitterFn<DocumentSnapshot> = docRef(deps).let { ref -> { ref.onSnapshotNext(it)} }
 
 fun <T: RxBase<*>> CollectionSource<T>.listEvents(
     deps: HasCsDbKills,

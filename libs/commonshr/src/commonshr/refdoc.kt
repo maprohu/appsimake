@@ -13,6 +13,12 @@ class RefDoc<I, D>(
     operator fun invoke() = rxv()
 }
 
+class EditableDoc<I, D>(
+    val id: I,
+    val doc: D,
+    val exists: Boolean = true
+)
+
 sealed class FsIdState {
     abstract val exists: Boolean
     object NoId: FsIdState() {
@@ -55,6 +61,9 @@ val <D> FsId<D>.docWrap
 
 
 typealias FsDoc<D> = RefDoc<FsId<D>, D>
+typealias FsEditable<D> = EditableDoc<DocSource<D>, D>
+
+
 
 val <D> FsDoc<D>.docWrap get() = id.docWrap
 
@@ -64,7 +73,14 @@ fun <D> DocSource<D>.toFsId(exists: Boolean) = parent.toFsId(FsIdState.HasId(id,
 fun <D> D.toFsDoc(id: FsId<D>) = FsDoc(id, this)
 fun <D> D.toFsDoc(cw: CollectionSource<D>) = toFsDoc(cw.toFsId(FsIdState.NoId))
 fun <D> D.toFsDoc(cw: CollectionSource<D>, id: String) = toFsDoc(cw.toFsId(FsIdState.HasId(id, true)))
+fun <D> D.toFsEditable(id: DocSource<D>, exists: Boolean = true) = FsEditable(id, this, exists)
 
 val <T> FsDoc<T>.idOrFail: String get() = (id.state.now as FsIdState.HasId).id
 
-fun <D> DocSource<D>.new(d: dynamic = dyn(), ops: DynamicOps) = parent.factory(d, ops).toFsDoc(toFsId(false))
+fun <D> DocSource<D>.new(d: dynamic = dyn(), ops: DynamicOps) = parent.factory(d, ops).toFsEditable(this, false)
+
+fun <D> FsEditable<D>.toFsDoc() = FsDoc(id.toFsId(exists), doc)
+fun <D> FsDoc<D>.toFsEditable() = FsEditable(id.docWrap, rxv.now, id.state.now.exists)
+
+
+

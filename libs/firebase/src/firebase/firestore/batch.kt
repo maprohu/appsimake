@@ -53,7 +53,6 @@ class FsBatch(
 inline fun HasDb.batch(batchSize: Int = MaxBatchSize, fn: FsBatch.() -> Unit) = db.batch(batchSize, fn)
 inline fun Firestore.batch(batchSize: Int = MaxBatchSize, fn: FsBatch.() -> Unit) {
     FsBatch(this, batchSize).apply {
-        console.dir(this)
         fn()
         commit()
     }
