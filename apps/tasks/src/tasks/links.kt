@@ -51,7 +51,7 @@ class Links(
         }
     }
 
-    val editTag by param<String>().link { p ->
+    val editTag by stringParam().link { p ->
         listTags.get()?.let { vc ->
             EditTag(
                 vc,
@@ -87,13 +87,19 @@ class Links(
         }
     }
 
-    val editNote by baseTC().param<String>().link { p ->
+    val editNote by viewTask.subParam<String>().link { p ->
         viewTask.get(p)?.let { vt ->
             EditNote(
                 vt,
                 vt.fsDoc.toFsEditable()
             ).forwarding(vt)
         }
+    }
+    val newNote by viewTask.subLink { vt ->
+        EditNote(
+            vt,
+            vt.notes.randomEditable()
+        ).forwarding(vt)
     }
 
     val editTask by baseTC().param<String>().link { p ->

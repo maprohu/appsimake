@@ -1,10 +1,7 @@
 package commonui
 
 import common.named
-import common.obj
 import commonshr.*
-import commonshr.properties.Identity
-import commonshr.properties.SuspendIdentity
 import domx.on
 import killable.HasNoKill
 import kotlinx.coroutines.CoroutineScope
@@ -13,47 +10,7 @@ import kotlinx.coroutines.launch
 import org.w3c.dom.PopStateEvent
 import kotlin.browser.window
 
-class Converter<D, S>(
-    val serialize: (D) -> S,
-    val deserialize: suspend (S) -> D
-)
 
-val NullConverter = Converter(
-    serialize = Identity,
-    deserialize = SuspendIdentity
-)
-
-val URIEncoder = Converter<String, String>(
-    serialize = { encodeURIComponent(it) },
-    deserialize = { decodeURIComponent(it) }
-)
-
-@Suppress("UnsafeCastFromDynamic")
-val JsonConverter = Converter<dynamic, String>(
-    serialize = { JSON.stringify(it) },
-    deserialize = { JSON.parse(it)}
-)
-
-val HashSerializer = JsonConverter + URIEncoder
-
-operator fun <A, B, C> Converter<A, B>.plus(other: Converter<B, C>) = Converter<A, C>(
-    serialize = { other.serialize(serialize(it))},
-    deserialize = { deserialize(other.deserialize(it)) }
-)
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun <T> jsonConverter() = JsonConverter.unsafeCast<Converter<T, String>>()
-@Suppress("NOTHING_TO_INLINE")
-inline fun <T> Converter<T, *>.toDynamic() = unsafeCast<Converter<T, dynamic>>()
-@Suppress("NOTHING_TO_INLINE")
-inline fun <D, S> nullConverter() = NullConverter.unsafeCast<Converter<D, S>>()
-
-typealias PConverter<T> = Converter<T, dynamic>
-
-val UnitConverter = Converter<Unit, dynamic>(
-    serialize = {null},
-    deserialize = {Unit}
-)
 
 class Holder<P, F: Any>(
     val param: P,
@@ -62,31 +19,38 @@ class Holder<P, F: Any>(
 
 private val hashData get() = window.location.hash.drop(1)
 
-class Link<P, out F: HasKills>(
-    val name: String,
-    val root: Boolean,
-    converter: PConverter<P>,
-    val factory: suspend (P) -> F?,
-    val display: (@UnsafeVariance F).() -> Unit
+
+typealias LView = HasKillsRedisplay
+
+
+class Link<P, out F: LView>(
+    internal val linksBase: LinksBase,
+    internal val name: String,
+    internal val converter: Hasher<P>,
+    internal val factory: suspend (P) -> F?
 ) {
-    val hashConverter = converter + HashSerializer
-    suspend fun showLink(param: String) {
-        show(hashConverter.deserialize(param))
-    }
+//    val hashConverter = converter + HashSerializer
+//
+//    suspend fun showLink(param: String) {
+//        show(hashConverter.deserialize(param))
+//    }
+
     private var holder: Holder<P, F>? = null
-    suspend fun show(param: P, forcePush: Boolean = false) {
-        get(param, forcePush)?.display()
+    suspend fun show(param: P) {
+        get(param)?.redisplay?.invoke()
     }
     suspend fun fwd(param: P) {
-        show(param, true)
+        show(param)
     }
+
+    internal val root = false
 
     private fun pushState(param: P) {
         pushState(param, root)
     }
 
     internal fun pushState(param: P, replace: Boolean) {
-        val stateData = "$name/${hashConverter.serialize(param)}"
+        val stateData = linksBase.linkHasher<P, F>().serialize(LinkParam(this, param), EmptyHashStruct).toHashString()
         if (replace) {
             window.history.replaceState(
                 stateData,
@@ -102,17 +66,14 @@ class Link<P, out F: HasKills>(
         }
     }
 
-    suspend fun get(param: P, forcePush: Boolean = false): F? {
+    suspend fun get(param: P): F? {
         holder.let { h ->
-            return if (h == null || h.param != param || h.item == null) {
+            return if ( h?.item == null || h.param != param ) {
                 factory(param)?.also { i ->
                     set(param, i)
                     pushState(param)
                 }
             } else {
-                if (forcePush) {
-                    pushState(param)
-                }
                 h.item!!
             }
         }
@@ -129,94 +90,76 @@ class Link<P, out F: HasKills>(
     internal fun clear() {
         holder = null
     }
+
+    fun <SF: HasKillsRedisplay> subLink(fn: suspend (F) -> SF) = subParam(UnitConverter).link { bp ->
+        get(bp.link.param)?.let { fn(it) }
+    }
+
+
+
+    fun <SP> subParam(subParamConverter: PConverter<SP> = nullConverter()): LinksBase.LinkBuilder<BaseParam<@UnsafeVariance F, P, SP>> =
+        linksBase.linkBase<P, F>(converter).param(subParamConverter)
+
 }
 
 suspend fun Link<Unit, *>.show() = show(Unit)
 suspend fun Link<Unit, *>.fwd() = fwd(Unit)
-suspend fun <F: HasKills> Link<Unit, F>.get() = get(Unit)
+suspend fun <F: LView> Link<Unit, F>.get() = get(Unit)
 
-suspend fun <B: HasKills> Link<BaseParam<B, Unit, Unit>, *>.fwd(base: Link<Unit, B>) = fwd(
-    BaseParam(
-        LinkParam(base, Unit),
-        Unit
-    )
-)
-suspend fun <B: HasKills, P> Link<BaseParam<B, Unit, P>, *>.fwd(base: Link<Unit, B>, param: P) = fwd(
-    BaseParam(
-        LinkParam(base, Unit),
-        param
-    )
-)
+//suspend fun <B: HasKills> Link<BaseParam<B, Unit, Unit>, *>.fwd(base: Link<Unit, B>) = fwd(
+//    BaseParam(
+//        LinkParam(base, Unit),
+//        Unit
+//    )
+//)
+//suspend fun <B: HasKills, P> Link<BaseParam<B, Unit, P>, *>.fwd(base: Link<Unit, B>, param: P) = fwd(
+//    BaseParam(
+//        LinkParam(base, Unit),
+//        param
+//    )
+//)
 
-data class LinkParam<P, F: HasKills>(
+data class LinkParam<P, F: LView>(
     val link: Link<P, F>,
+//    val view: F,
     val param: P
 ) {
-    suspend fun get(forcePush: Boolean = false) = link.get(param, forcePush)
+    suspend fun get() = link.get(param)
 }
 
-val <P, F: HasKills> LinkParam<P, F>.withUnit get() = BaseParam(
-    this,
-    Unit
-)
+//val <P, F: HasKills> LinkParam<P, F>.withUnit get() = BaseParam(
+//    this,
+//    Unit
+//)
 
-data class BaseParam<B: HasKills, PB, P>(
-    val link: LinkParam<PB, B>,
-    val param: P
-)
+//data class BaseParam<B: HasKills, PB, P>(
+//    val link: LinkParam<PB, B>,
+//    val param: P
+//)
 
-external interface LinkParamObject {
-    var link: String
-    var param: dynamic
-}
+//external interface LinkParamObject {
+//    var link: String
+//    var param: dynamic
+//}
+//
+//external interface BaseParamObject {
+//    var base: LinkParamObject
+//    var param: dynamic
+//}
+//
+//interface HasLink<P> {
+//    val linkId: P
+//}
 
-external interface BaseParamObject {
-    var base: LinkParamObject
-    var param: dynamic
-}
 
 abstract class LinksBase(coroutineScope: CoroutineScope): CoroutineScope by coroutineScope {
-    private val links = mutableMapOf<String, Link<*, *>>()
+    internal val links = mutableMapOf<String, Link<*, *>>()
 
-    fun <P, F: HasKills> linkConverter(
-        paramConverter: PConverter<P> = nullConverter()
-    ): Converter<LinkParam<P, F>, LinkParamObject> = Converter(
-        serialize = { lp ->
-            obj {
-                link = lp.link.name
-                param = paramConverter.serialize(lp.param)
-            }
-        },
-        deserialize = { o ->
-            LinkParam(
-                link = links[o.link]!!.unsafeCast<Link<P, F>>(),
-                param = paramConverter.deserialize(o.param)
-            )
-        }
-    )
+    internal val LinkNameHashItemizer  = linkNameHashItemizer<Any?, LView>(links)
+    internal val LinkHasher = linkHashTransformer(LinkNameHashItemizer)
 
-    fun <B: HasKills, BP, P> baseConverter(
-        baseParamConverter: PConverter<BP> = nullConverter(),
-        paramConverter: PConverter<P> = nullConverter()
-    ): Converter<BaseParam<B, BP, P>, BaseParamObject> {
-        val lc = linkConverter<BP, B>(baseParamConverter)
-
-        return Converter(
-            serialize = { lp ->
-                obj {
-                    base = lc.serialize(lp.link)
-                    param = paramConverter.serialize(lp.param)
-                }
-            },
-            deserialize = { o ->
-                BaseParam(
-                    link = lc.deserialize(o.base),
-                    param = paramConverter.deserialize(o.param)
-                )
-            }
-        )
-    }
-
+    @Suppress("NOTHING_TO_INLINE")
+    internal inline fun <P, L: LView> linkHasher() = LinkHasher.unsafeCast<Hasher<LinkParam<P, L>>>()
 
     abstract val welcome: Link<Unit, *>
 
@@ -224,60 +167,98 @@ abstract class LinksBase(coroutineScope: CoroutineScope): CoroutineScope by coro
         APP.startRegisteringServiceWorker()
     }
 
-    fun <F: HasKillsRedisplay> link(
+    fun <F: LView> link(
         root: Boolean = false,
         get: suspend () -> F?
-    ) = param(root, UnitConverter).link { get() }
+    ) = param(root, UnitHasher).link { get() }
 
 
     fun <P> param(
         root: Boolean = false,
-        converter: PConverter<P> = nullConverter()
+        converter: Hasher<P>
     ) = LinkBuilder(root, converter)
 
+    fun stringParam(
+        root: Boolean = false,
+        converter: Hasher<String> = StringHashTransformer
+    ) = LinkBuilder(root, converter)
+
+    private fun <P, F: LView> namedLink(
+        converter: Hasher<P>,
+        factory: suspend (P) -> F?
+    ) = named { name ->
+        Link(
+            this@LinksBase,
+            name,
+            converter,
+            factory
+        ).also {
+            links[name] = it
+        }
+    }
+
+    inner class ParamBuilder1<P1>(
+        internal val converter: Hasher<P1>
+    ) {
+        fun <F: LView> link(
+            get: suspend (P1) -> F?
+        ) = namedLink(converter, get)
+    }
+
+    inner class ParamBuilder2<P1, P2>(
+        val parent: ParamBuilder1<P1>,
+        val converter: Hasher<P2>
+    ) {
+        fun <F: LView> link(
+            get: suspend (P1, P2) -> F?
+        ) = namedLink(converter, get)
+    }
 
     inner class LinkBuilder<P>(
         val root: Boolean = false,
-        val converter: PConverter<P> = nullConverter()
+        val converter: Hasher<P>
     ) {
-        fun <F: HasKillsRedisplay> link(
+        fun <F: LView> link(
             get: suspend (P) -> F?
         ) = named { name ->
             Link(
+                this@LinksBase,
                 name,
-                root,
                 converter,
-                get,
-                { redisplay() }
+                get
             ).also {
                 links[name] = it
             }
         }
     }
 
-    fun <B: HasKills> linkBase() = linkBase<Unit, B>(UnitConverter)
+//    fun <B: HasKills, PB, P, F: HasKillsRedisplay> LinkBuilder<BaseParam<B, PB, P>>.subLink(fn: suspend (B, P) -> F) = link
+
+    fun <B: LView> linkBase() = linkBase<Unit, B>(UnitHasher)
     fun baseTC() = linkBase<FromTC>()
 
-    fun <BP, B: HasKills> linkBase(
-        converter: PConverter<BP> = nullConverter()
+    fun <BP, B: LView> linkBase(
+        converter: Hasher<BP>
     ) = LinkParamBuilder<BP, B>(converter)
 
-    inner class LinkParamBuilder<BP, B: HasKills>(
-        private val baseParamConverter: PConverter<BP> = jsonConverter()
+    inner class LinkParamBuilder<BP, B: LView>(
+        private val baseHasher: Hasher<BP>
     ) {
         fun <P> param(
-            converter: PConverter<P> = jsonConverter()
+            converter: Hasher<P>
         ) = LinkBuilder(
             false,
-            baseConverter<B, BP, P>(
-                baseParamConverter,
+            linkIdTransformer(
+                baseHasher,
                 converter
-            )
+            ) + linkHasher()
         )
 
         fun <F: HasKillsRedisplay> link(
             get: suspend (LinkParam<BP, B>) -> F?
-        ) = param(UnitConverter).link { get(it.link) }
+        ) = param(UnitHasher).link {
+            get(it.link)
+        }
 
     }
 
@@ -302,18 +283,13 @@ abstract class LinksBase(coroutineScope: CoroutineScope): CoroutineScope by coro
     }
 
     suspend fun showHash(hash: String) {
-        val linkName = hash.substringBefore('/')
-
-        val link = links[linkName]
-
-        if (link != null) {
-            try {
-                link.showLink(hash.substringAfter('/', ""))
-            } catch (e: dynamic) {
-                reportd(e)
-                welcome.show()
+        try {
+            LinkHasher.deserialize(hash.toHashStruct()).apply {
+                require(serialized.isEmpty()) { "Link not consumed entirely: $serialized" }
+                data.get()!!.redisplay()
             }
-        } else {
+        } catch (e: dynamic) {
+            reportd(e)
             welcome.show()
         }
     }
@@ -386,6 +362,4 @@ fun <VP, VF: HasKills, EP, EF: HasKills> exiting(
         }
     )
 }
-
-typealias NewLink<LP, EP, E> = Link<BaseParam<FromTC, LP, EP>, E>
 

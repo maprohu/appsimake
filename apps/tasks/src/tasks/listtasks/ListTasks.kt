@@ -3,10 +3,7 @@ package tasks.listtasks
 import commonfb.FBFromApi
 import commonshr.FsDoc
 import commonshr.idOrFail
-import commonui.ForwardBase
-import commonui.FromTC
-import commonui.advance
-import commonui.fwd
+import commonui.*
 import commonui.widget.TopAndContent
 import rx.Var
 import tasks.loggedin.LoggedIn
