@@ -126,7 +126,8 @@ interface HasKillsRoutingTC: HasKillsRouting<TopAndContent>
 
 interface HasForwardKillsRouting<V, in F: Any>: HasKillsRouting<V>, HasForward<F>
 interface HasForwardKillsRedisplayRouting<V, in F: Any>: HasKillsRouting<V>, HasForward<F>, HasKillsRedisplay
-typealias FromTC = HasForwardKillsRedisplayRouting<TopAndContent, ViewTC>
+
+//typealias FromTC = HasForwardKillsRedisplayRouting<TopAndContent, ViewTC>
 
 typealias SimpleRoutingHole<V> = RoutingHole<V, IView<V>>
 class RoutingHole<V, N: IView<V>>(

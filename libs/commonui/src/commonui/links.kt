@@ -1,6 +1,7 @@
 package commonui
 
 import common.named
+import common.namedFn
 import commonshr.*
 import domx.on
 import killable.HasNoKill
@@ -10,6 +11,9 @@ import kotlinx.coroutines.launch
 import org.w3c.dom.PopStateEvent
 import kotlin.browser.window
 
+interface LinkedFrom<B> {
+    val base: B
+}
 
 
 class Holder<P, F: Any>(
@@ -19,15 +23,35 @@ class Holder<P, F: Any>(
 
 private val hashData get() = window.location.hash.drop(1)
 
+data class ViewId(
+    val name: String,
+    val param: HashStruct
+)
+interface HasViewid {
+    val viewId: Viewid get() = identity()
+}
 
+interface HasLink<T> {
+    val link: LinkOps<T>
+}
+
+interface LinkOps<T> {
+    suspend fun <P, V: LView> show(link: Link<T, P, V>, param: P)
+}
+
+
+
+interface HasKillsRedisplayViewid: HasKillsRedisplay, HasViewid
 typealias LView = HasKillsRedisplay
+typealias LViewid = HasKillsRedisplayViewid
 
 
 class Link<P, out F: LView>(
     internal val linksBase: LinksBase,
     internal val name: String,
     internal val converter: Hasher<P>,
-    internal val factory: suspend (P) -> F?
+    internal val factory: suspend (P) -> F?,
+    internal val root: Boolean = false
 ) {
 //    val hashConverter = converter + HashSerializer
 //
@@ -42,8 +66,6 @@ class Link<P, out F: LView>(
     suspend fun fwd(param: P) {
         show(param)
     }
-
-    internal val root = false
 
     private fun pushState(param: P) {
         pushState(param, root)
@@ -91,16 +113,43 @@ class Link<P, out F: LView>(
         holder = null
     }
 
-    fun <SF: HasKillsRedisplay> subLink(fn: suspend (F) -> SF) = subParam(UnitConverter).link { bp ->
-        get(bp.link.param)?.let { fn(it) }
+    fun <CF: LView> child(
+        get: suspend (F) -> CF?
+    ) = linksBase.namedLink(converter) { pp ->
+        get(pp)?.let { get(it) }
     }
 
+    fun <P> param(hasher: Hasher<P>) = ParamBuilder(hasher)
 
-
-    fun <SP> subParam(subParamConverter: PConverter<SP> = nullConverter()): LinksBase.LinkBuilder<BaseParam<@UnsafeVariance F, P, SP>> =
-        linksBase.linkBase<P, F>(converter).param(subParamConverter)
+    inner class ParamBuilder<CP>(
+        val childConverter: Hasher<CP>
+    ) {
+        fun <CF: LView> child(
+            getChild: suspend (F, CP) -> CF?
+        ) = linksBase.namedLink(
+            linkIdTransformer(
+                converter,
+                childConverter
+            )
+        ) { li ->
+            get(li.parent)?.let { getChild(it, li.id) }
+        }
+    }
+//
+//    fun <SF: HasKillsRedisplay> child(fn: suspend (F) -> SF) = param(UnitConverter).child { bp ->
+//        get(bp.link.param)?.let { fn(it) }
+//    }
+//
+//
+//
+//    fun <SP> param(subParamConverter: PConverter<SP> = nullConverter()): LinksBase.LinkBuilder<BaseParam<@UnsafeVariance F, P, SP>> =
+//        linksBase.linkBase<P, F>(converter).param(subParamConverter)
 
 }
+
+
+
+
 
 suspend fun Link<Unit, *>.show() = show(Unit)
 suspend fun Link<Unit, *>.fwd() = fwd(Unit)
@@ -121,11 +170,12 @@ suspend fun <F: LView> Link<Unit, F>.get() = get(Unit)
 
 data class LinkParam<P, F: LView>(
     val link: Link<P, F>,
-//    val view: F,
     val param: P
 ) {
     suspend fun get() = link.get(param)
 }
+
+
 
 //val <P, F: HasKills> LinkParam<P, F>.withUnit get() = BaseParam(
 //    this,
@@ -161,106 +211,137 @@ abstract class LinksBase(coroutineScope: CoroutineScope): CoroutineScope by coro
     @Suppress("NOTHING_TO_INLINE")
     internal inline fun <P, L: LView> linkHasher() = LinkHasher.unsafeCast<Hasher<LinkParam<P, L>>>()
 
-    abstract val welcome: Link<Unit, *>
+    abstract val welcome: Link<Unit, LView>
 
     init {
         APP.startRegisteringServiceWorker()
     }
 
-    fun <F: LView> link(
-        root: Boolean = false,
-        get: suspend () -> F?
-    ) = param(root, UnitHasher).link { get() }
+//    fun <F: LView> link(
+//        root: Boolean = false,
+//        get: suspend () -> F?
+//    ) = param(root, UnitHasher).link { get() }
+//
+//
+//    fun <P> param(
+//        root: Boolean = false,
+//        converter: Hasher<P>
+//    ) = LinkBuilder(root, converter)
+//
+//    fun stringParam(
+//        root: Boolean = false,
+//        converter: Hasher<String> = StringHasher
+//    ) = LinkBuilder(root, converter)
 
+    protected fun <F: LView> rootLink(
+        factory: suspend () -> F?
+    ) = namedLink(UnitHasher, true) {
+        factory()
+    }
 
-    fun <P> param(
-        root: Boolean = false,
-        converter: Hasher<P>
-    ) = LinkBuilder(root, converter)
-
-    fun stringParam(
-        root: Boolean = false,
-        converter: Hasher<String> = StringHashTransformer
-    ) = LinkBuilder(root, converter)
-
-    private fun <P, F: LView> namedLink(
+    internal fun <P, F: LView> namedLink(
         converter: Hasher<P>,
+        factory: suspend (P) -> F?
+    ) = namedLink(converter, false, factory)
+
+    internal fun <P, F: LView> namedLink(
+        converter: Hasher<P>,
+        root: Boolean,
         factory: suspend (P) -> F?
     ) = named { name ->
         Link(
             this@LinksBase,
             name,
             converter,
-            factory
+            factory,
+            root
         ).also {
             links[name] = it
         }
     }
 
-    inner class ParamBuilder1<P1>(
-        internal val converter: Hasher<P1>
-    ) {
-        fun <F: LView> link(
-            get: suspend (P1) -> F?
-        ) = namedLink(converter, get)
-    }
+//    inner class ParamBuilder1<P1>(
+//        internal val converter: Hasher<P1>
+//    ) {
+//        fun <F: LView> link(
+//            get: suspend (P1) -> F?
+//        ) = namedLink(converter, get)
+//    }
 
-    inner class ParamBuilder2<P1, P2>(
-        val parent: ParamBuilder1<P1>,
-        val converter: Hasher<P2>
-    ) {
-        fun <F: LView> link(
-            get: suspend (P1, P2) -> F?
-        ) = namedLink(converter, get)
-    }
+    inner class MultiParentBuilder<PV: LViewid> {
 
-    inner class LinkBuilder<P>(
-        val root: Boolean = false,
-        val converter: Hasher<P>
-    ) {
-        fun <F: LView> link(
-            get: suspend (P) -> F?
-        ) = named { name ->
-            Link(
-                this@LinksBase,
-                name,
-                converter,
-                get
-            ).also {
-                links[name] = it
+        @Suppress("NOTHING_TO_INLINE")
+        internal inline fun parentHasher() = linkHasher<Any?, PV>()
+
+        fun <F: LView> child(
+            get: suspend (PV) -> F?
+        ) = namedLink(parentHasher()) { pp ->
+            pp.get()?.let { get(it) }
+        }
+
+        fun <P> param(hasher: Hasher<P>) = ParamBuilder(hasher)
+
+        inner class ParamBuilder<P>(
+            val converter: Hasher<P>
+        ) {
+            fun <F: LView> child(
+                get: suspend (PV, P) -> F?
+            ) = namedLink(
+                linkIdTransformer(
+                    parentHasher(),
+                    converter
+                )
+            ) { li ->
+                li.parent.get()?.let { get(it, li.id) }
             }
         }
     }
 
+//    inner class LinkBuilder<P>(
+//        val root: Boolean = false,
+//        val converter: Hasher<P>
+//    ) {
+//        fun <F: LView> link(
+//            get: suspend (P) -> F?
+//        ) = named { name ->
+//            Link(
+//                this@LinksBase,
+//                name,
+//                converter,
+//                get
+//            ).also {
+//                links[name] = it
+//            }
+//        }
+//    }
+
 //    fun <B: HasKills, PB, P, F: HasKillsRedisplay> LinkBuilder<BaseParam<B, PB, P>>.subLink(fn: suspend (B, P) -> F) = link
 
-    fun <B: LView> linkBase() = linkBase<Unit, B>(UnitHasher)
-    fun baseTC() = linkBase<FromTC>()
 
-    fun <BP, B: LView> linkBase(
-        converter: Hasher<BP>
-    ) = LinkParamBuilder<BP, B>(converter)
+    fun <B: LView> parents() = MultiParentBuilder<B>()
+    fun parentTC() = parents<FromTC>()
 
-    inner class LinkParamBuilder<BP, B: LView>(
-        private val baseHasher: Hasher<BP>
-    ) {
-        fun <P> param(
-            converter: Hasher<P>
-        ) = LinkBuilder(
-            false,
-            linkIdTransformer(
-                baseHasher,
-                converter
-            ) + linkHasher()
-        )
 
-        fun <F: HasKillsRedisplay> link(
-            get: suspend (LinkParam<BP, B>) -> F?
-        ) = param(UnitHasher).link {
-            get(it.link)
-        }
-
-    }
+//    inner class LinkParamBuilder<BP, B: LView>(
+//        private val baseHasher: Hasher<BP>
+//    ) {
+//        fun <P> param(
+//            converter: Hasher<P>
+//        ) = LinkBuilder(
+//            false,
+//            linkIdTransformer(
+//                baseHasher,
+//                converter
+//            ) + linkHasher()
+//        )
+//
+//        fun <F: HasKillsRedisplay> link(
+//            get: suspend (LinkParam<BP, B>) -> F?
+//        ) = param(UnitHasher).link {
+//            get(it.link)
+//        }
+//
+//    }
 
     private fun listenPopstates() {
         val states = Channel<String>(Channel.UNLIMITED)
@@ -309,13 +390,13 @@ class EditorExit<in T>(
     }
 }
 
-class LinkParamView<P, F: HasKills>(
+class LinkParamView<P, F: LView>(
     val link: Link<P, F>,
     val param: P,
     val item: F
 )
 
-fun <EP, EF: HasKills> exiting(
+fun <EP, EF: LView> exiting(
     new: Link<*, *>,
     edit: LinkParam<EP, EF>
 ): EditorExit<EF> {
@@ -332,7 +413,7 @@ fun <EP, EF: HasKills> exiting(
         exit = GoBackRedisplay
     )
 }
-fun <VP, VF: HasKills, EP, EF: HasKills> exiting(
+fun <VP, VF: LView, EP, EF: LView> exiting(
     new: Link<*, *>,
     view: LinkParamView<VP, VF>,
     edit: LinkParam<EP, EF>

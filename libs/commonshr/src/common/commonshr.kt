@@ -22,7 +22,7 @@ inline fun dyn(fn: dynamic.() -> Unit) = dyn().unsafeCast<Any>().apply(fn)
 inline fun <T> obj(fn: T.() -> Unit) = obj<T>().apply(fn)
 
 class NamedDelegate<out T>(
-    private val init : (String) -> T
+    private val init : (String) -> (() -> T)
 ) {
     operator fun provideDelegate(
         thisRef: Any?,
@@ -30,7 +30,7 @@ class NamedDelegate<out T>(
     ): ReadOnlyProperty<Any?, T> {
         val value = init(prop.name)
         return object : ReadOnlyProperty<Any?, T> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>): T = value
+            override fun getValue(thisRef: Any?, property: KProperty<*>): T = value()
         }
     }
 }
@@ -49,7 +49,15 @@ class NamedThisDelegate<in O, out T>(
     }
 }
 
-fun <T> named(fn: (String) -> T) = NamedDelegate(fn)
+fun <T> named(fn: (String) -> T) = NamedDelegate { n -> fn(n).funs.constant }
+fun <T> namedFn(fn: (String) -> () -> T) = NamedDelegate(fn)
+fun <T> namedLazy(fn: (String) -> T) = namedFn { name ->
+    lazy {
+        fn(name)
+    }.let { l ->
+        { l.value }
+    }
+}
 fun <O, T> namedThis(fn: (O, String) -> T) = NamedThisDelegate(fn)
 
 //abstract class DynRx<T>(

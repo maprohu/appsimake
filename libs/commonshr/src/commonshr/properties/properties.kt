@@ -4,17 +4,11 @@ import common.NamedDelegate
 import common.dyn
 import common.jsNew
 import common.named
-import commonshr.hasOwnProperty
+import commonshr.*
 import killable.HasNoKill
 import killable.NoKill
 import rx.*
 
-typealias Copier<V> = (V) -> V
-typealias Compare<V> = (V, V) -> Boolean
-
-val Identity: (Any?) -> Any? = { it }
-val SuspendIdentity: suspend (Any?) -> Any? = { it }
-val CompareEquals: Compare<Any?> = { a, b -> a == b }
 
 typealias WriteDynamic<T> = (T, DynamicOps) -> dynamic
 typealias ReadDynamic<T> = (dynamic, DynamicOps) -> T

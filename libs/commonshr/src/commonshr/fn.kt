@@ -5,6 +5,18 @@ import rx.Rx
 typealias Assign<T> = (T) -> Unit
 typealias Callback<T> = (T) -> Unit
 typealias OptAssign<T> = Assign<T?>
+typealias Function1<I, O> = (I) -> O
+typealias Filter<T> = Function1<T, T>
+
+typealias Copier<V> = (V) -> V
+typealias Compare<V> = (V, V) -> Boolean
+
+val Identity: (Any?) -> Any? = { it }
+val SuspendIdentity: suspend (Any?) -> Any? = { it }
+val CompareEquals: Compare<Any?> = { a, b -> a == b }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun <V> identity(): Filter<V> = Identity.unsafeCast<Filter<V>>()
 
 @Suppress("NOTHING_TO_INLINE")
 inline operator fun <T> Assign<T>.remAssign(value: T) = this(value)

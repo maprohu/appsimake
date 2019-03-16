@@ -115,7 +115,7 @@ fun <D> singleHashTransformer(
     }
 )
 
-val StringHashTransformer = singleHashTransformer<String>(nullConverter())
+val StringHasher = singleHashTransformer<String>(nullConverter())
 
 
 operator fun <D, S, D2> Transformer<D, S>.plus(converter: Converter<D2, D>): Transformer<D2, S> = Transformer(
@@ -144,6 +144,8 @@ data class LinkId<P, I>(
     val parent: P,
     val id: I
 )
+
+val <I> I.asChildLinkId get() = LinkId(Unit, this)
 
 data class TransformerOutput<D, S>(
     val data: D,
