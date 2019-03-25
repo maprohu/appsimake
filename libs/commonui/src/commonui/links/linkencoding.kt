@@ -1,9 +1,9 @@
-package commonui
+package commonui.links
 
+import commonui.*
+import commonshr.*
 import commonshr.decodeURIComponent
 import commonshr.encodeURIComponent
-import commonshr.properties.Identity
-import commonshr.properties.SuspendIdentity
 
 class Converter<D, S>(
     val serialize: (D) -> S,
@@ -57,10 +57,21 @@ fun HashStruct.split() = run {
     require(isNotEmpty()) { "Cannot split empty HashStruct." }
 
     SplitHash(
-        last(),
-        dropLast(1)
+        item = last(),
+        struct = dropLast(1)
     )
 }
+
+class NamedHashStruct(
+    val name: String,
+    val hash: HashStruct
+)
+
+val HashStruct.toNamed get() = split().toNamed
+val SplitHash.toNamed get() = NamedHashStruct(
+    name = item,
+    hash = struct
+)
 
 data class SplitHash(
     val item: HashItem,
@@ -248,52 +259,3 @@ fun <T, S> listTransformer(
     }
 )
 
-//external interface LinkIdObject<P, I> {
-//    var parent: P
-//    var id: I
-//}
-//
-//fun <PC, P, IC, I> linkIdConverter(
-//    parentConverter: Converter<PC, P>,
-//    idConverter: Converter<IC, I>
-//) = Converter<LinkId<PC, IC>, LinkIdObject<P, I>>(
-//    serialize = { linkId ->
-//        obj {
-//            parent = parentConverter.serialize(linkId.parent)
-//            id = idConverter.serialize(linkId.id)
-//        }
-//    },
-//    deserialize = { lio ->
-//        LinkId(
-//            parent = parentConverter.deserialize(lio.parent),
-//            id = idConverter.deserialize(lio.id)
-//        )
-//    }
-//)
-//
-//fun <PC, P> parentIdConverter(
-//    converter: Converter<PC, P>
-//) = Converter<LinkId<PC, Unit>, P>(
-//    serialize = { linkId ->
-//        converter.serialize(linkId.parent)
-//    },
-//    deserialize = { lio ->
-//        LinkId(
-//            converter.deserialize(lio),
-//            Unit
-//        )
-//    }
-//)
-//fun <PC, P> childIdConverter(
-//    converter: Converter<PC, P>
-//) = Converter<LinkId<Unit, PC>, P>(
-//    serialize = { linkId ->
-//        converter.serialize(linkId.id)
-//    },
-//    deserialize = { lio ->
-//        LinkId(
-//            Unit,
-//            converter.deserialize(lio)
-//        )
-//    }
-//)

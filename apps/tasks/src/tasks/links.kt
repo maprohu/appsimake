@@ -1,7 +1,8 @@
 package tasks
 
-import commonfb.FBLinks
-import commonfb.FBLinksDeps
+import commonfb.FbLinks
+import commonfb.FbLinksApi
+import commonfb.FbLinksDeps
 import commonui.*
 import firebase.DbApi
 import tasks.editnote.EditNote
@@ -18,8 +19,8 @@ interface LinksPath: DbApi {
 }
 
 class Links(
-    deps: FBLinksDeps
-): FBLinks(deps), LinksPath {
+    deps: FbLinksDeps
+): FbLinksApi, LinksPath {
     override val links = this
 
 

@@ -1,7 +1,7 @@
 package checklist
 
-import commonfb.FBLinks
+import commonfb.FbLinks
 
 fun main() {
-    FBLinks.start { Links(it) }
+    FbLinks.start { Links(it) }
 }

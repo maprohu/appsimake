@@ -19,6 +19,9 @@ interface HasEdit {
     val editing: DefaultEditing
 }
 
+interface HasShow {
+    val show: Trigger
+}
 interface HasRedisplay {
     val redisplay: Trigger
 }

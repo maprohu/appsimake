@@ -21,7 +21,6 @@ class Holder<P, F: Any>(
     var item: F?
 )
 
-private val hashData get() = window.location.hash.drop(1)
 
 data class ViewId(
     val name: String,
@@ -343,37 +342,12 @@ abstract class LinksBase(coroutineScope: CoroutineScope): CoroutineScope by coro
 //
 //    }
 
-    private fun listenPopstates() {
-        val states = Channel<String>(Channel.UNLIMITED)
-        window.on<PopStateEvent>(
-            HasNoKill,
-            "popstate"
-        ) {
-            states.offer(hashData)
-        }
-        launch {
-            for (h in states) {
-                showHash(h)
-            }
-        }
-    }
 
     suspend fun load() {
         listenPopstates()
         showHash(hashData)
     }
 
-    suspend fun showHash(hash: String) {
-        try {
-            LinkHasher.deserialize(hash.toHashStruct()).apply {
-                require(serialized.isEmpty()) { "Link not consumed entirely: $serialized" }
-                data.get()!!.redisplay()
-            }
-        } catch (e: dynamic) {
-            reportd(e)
-            welcome.show()
-        }
-    }
 
 
 }

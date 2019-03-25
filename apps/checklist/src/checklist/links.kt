@@ -3,37 +3,18 @@ package checklist
 import checklist.edit.Edit
 import checklist.loggedin.LoggedIn
 import checklist.view.ViewChecklist
-import commonfb.FB
-import commonfb.FBLinks
-import commonfb.FBLinksDeps
-import commonfb.loginbase.enablePersistenceAndWait
-import commonfb.loginbase.loginHandler
-import commonfb.persistentDb
-import commonshr.HasCsKills
-import commonshr.HasKills
-import commonshr.toFsDoc
+import commonfb.FbLinks
+import commonfb.FbLinksDeps
 import commonui.*
 import commonui.error.ErrorTC
-import commonui.widget.Body
-import commonui.widget.BodyTC
-import commonui.widget.HourglassView
-import commonui.widget.TopAndContent
 import firebase.DbApi
-import firebase.DbDeps
-import firebase.HasDb
-import firebase.firestore.get
-import firebase.firestore.withDefaultSettings
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.await
-import kotlinx.coroutines.launch
 
 interface LinksPath: DbApi {
     val links: Links
 }
 class Links(
-    deps: FBLinksDeps
-): FBLinks(deps), LinksPath {
+    deps: FbLinksDeps
+): FbLinks(deps), LinksPath {
     override val links = this
 
     override val welcome by link(true) {
