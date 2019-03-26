@@ -5,7 +5,6 @@ import checklist.ChecklistItem
 import checklist.loggedin.LoggedIn
 import checklist.loggedin.LoggedInPath
 import rx.RxMutableList
-import commonfb.FBApi
 import commonfb.FBFromApi
 import commonshr.*
 import commonui.*

@@ -4,6 +4,7 @@ import commonfb.UserState
 import commonfb.loginbase.UserStateView
 import commonshr.*
 import commonui.HasKillsRouting
+import commonui.HasKillsRoutingTC
 import commonui.SimpleView
 import commonui.widget.*
 import firebase.app.App
@@ -14,7 +15,7 @@ import killable.KillSet
 import kotlinx.coroutines.*
 
 class Login(
-    parent: HasKillsRouting<TopAndContent>,
+    parent: HasKillsRoutingTC,
     val base: CoroutineScope,
     val auth: Auth,
     val back: Trigger? = null,

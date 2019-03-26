@@ -3,6 +3,7 @@ package tasks.selecttags
 import commonfb.FBFromApi
 import commonui.ForwardTC
 import commonui.LViewUnit
+import commonui.links.Linkage
 import rx.Var
 import tasks.listtasks.ListTasks
 import tasks.listtasks.ListTasksPath
@@ -11,7 +12,8 @@ interface SelectTagsPath: ListTasksPath {
     val selectTags: SelectTags
 }
 class SelectTags(
-    from: ListTasks
+    from: ListTasks,
+    linkage: Linkage
 ): ForwardTC(from), SelectTagsPath, ListTasksPath by from, FBFromApi {
     override val selectTags = this
 

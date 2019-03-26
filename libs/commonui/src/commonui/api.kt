@@ -90,6 +90,7 @@ interface EditKillsApi: BindKillsApi, HasEditKills {
 
 interface EditKillsUixApi: EditKillsApi, HasEditKillsUix {
     val Factory.saveButton get() = saveButton(api)
+    val SlotHoles.backSaveDiscard get() = BackSaveDiscard(api, this)
 }
 
 interface EditFromKillsUixApi: EditKillsUixApi, HasEditFromKillsUix {
@@ -105,7 +106,7 @@ interface EditExitFromKillsUixApi: EditFromKillsUixApi, HasEditExitFromKillsUix 
     val SlotHoles.backSaveDiscard get() = BackSaveDiscard(api, this)
 }
 
-typealias Editor = EditExitFromKillsUixApi
+typealias Editor = EditFromKillsUixApi
 
 
 

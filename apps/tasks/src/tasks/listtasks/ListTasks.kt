@@ -4,6 +4,7 @@ import commonfb.FBFromApi
 import commonshr.FsDoc
 import commonshr.idOrFail
 import commonui.*
+import commonui.links.Linkage
 import commonui.widget.TopAndContent
 import rx.Var
 import tasks.loggedin.LoggedIn
@@ -14,7 +15,8 @@ interface ListTasksPath: LoggedInPath {
     val listTasks: ListTasks
 }
 class ListTasks(
-    from: LoggedIn
+    from: LoggedIn,
+    linkage: Linkage
 ): ForwardBase<TopAndContent>(from), ListTasksPath, LoggedInPath by from, FBFromApi, FromTC {
     override val listTasks = this
 

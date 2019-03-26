@@ -2,71 +2,120 @@ package commonfb.loginbase
 
 import commonfb.login.Login
 import commonshr.*
-import commonui.IView
-import commonui.RoutingHole
-import commonui.SimpleRoutingHole
-import commonui.globalStatus
+import commonui.*
 import commonui.topandcontent.ProgressTC
 import commonui.widget.TopAndContent
 import firebase.User
 import firebase.auth.Auth
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlin.coroutines.RestrictsSuspension
 
 
-class LoginError(message: String? = null, cause: Throwable? = null) : Throwable(message, cause)
-
-fun loginHandler(
-    deps: HasCsKills,
+suspend fun performLogin(
+    parent: ForwardTC,
     auth: Auth,
-    hole: SimpleRoutingHole<TopAndContent>,
     reporter: (dynamic) -> Unit = { reportd(it) }
-): suspend () -> User {
-    var user: User? = null
+) = performLogin(
+    parent,
+    parent,
+    auth,
+    { parent %= it },
+    reporter
+)
 
-    val firstUser = CompletableDeferred<Unit>()
 
-    deps.kills += auth.onAuthStateChanged(
+suspend fun performLogin(
+    deps: HasCsKills,
+    parent: HasKillsRoutingTC,
+    auth: Auth,
+    hole: Assign<ViewTC>,
+    reporter: (dynamic) -> Unit = { reportd(it) }
+): User {
+    val cd = CompletableDeferred<User>()
+
+    fun attempt() {
+        hole %= Login(
+            parent,
+            deps,
+            auth,
+            loggingIn = {
+                globalStatus %= "Logging in..."
+                hole %= ProgressTC(parent)
+            },
+            loginFailed = { e ->
+                reporter(e)
+                attempt()
+            },
+            loginSucceeded = { u ->
+                cd.complete(u.user!!)
+            }
+        )
+    }
+
+    attempt()
+
+    return cd.await()
+}
+
+suspend fun Auth.firstUser(): User? {
+    globalStatus %= "Checking login status..."
+
+    val cd = CompletableDeferred<User?>()
+
+    val stopListening = onAuthStateChanged(
         next = { u ->
-            user = u
-            firstUser.complete(Unit)
+            cd.complete(u)
         },
-        error = {
-            report(it)
+        error = { e ->
+            cd.completeExceptionally(e.unsafeCast<Throwable>())
         }
     )
 
-    return {
-        globalStatus %= "Checking login status..."
-        firstUser.await()
+    try {
+        return cd.await()
+    } finally {
+        stopListening()
+    }
+}
 
-        user ?: run {
 
-            val cd = CompletableDeferred<User>()
+typealias UserFn = suspend () -> User
 
-            fun attempt() {
-                hole %= Login(
-                    hole,
-                    deps,
-                    auth,
-                    loggingIn = {
-                        globalStatus %= "Logging in..."
-                        hole %= ProgressTC(hole)
-                    },
-                    loginFailed = { e ->
-                        reporter(e)
-                        attempt()
-                    },
-                    loginSucceeded = { u ->
-                        cd.complete(u.user!!)
-                    }
-                )
-            }
+class RequireUser(
+    private val deps: CoroutineScope,
+    auth: Auth,
+    private val signIn: suspend () -> User
+) {
 
-            attempt()
+    private var latest: UserFn? = run {
+        val cd = CompletableDeferred<User?>()
+        deps.launchReport {
+            cd.complete(auth.firstUser())
+        }
 
-            cd.await()
+        suspend {
+            cd.await()?.also { u ->
+                latest = { u }
+            } ?: startSignIn()()
         }
     }
+
+    private suspend fun startSignIn(): UserFn {
+        val cd = CompletableDeferred<User>()
+        deps.launchReport {
+            cd.complete(signIn())
+        }
+        return suspend { cd.await() }.also {
+            latest = it
+        }
+    }
+
+    suspend fun requireUser() = (latest ?: startSignIn()).invoke()
+
+    fun signOut() { latest = null }
+
 }
 

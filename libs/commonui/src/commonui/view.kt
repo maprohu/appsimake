@@ -122,7 +122,7 @@ interface HasRouting<V> {
     val activeView: RxIface<ViewItem<V>>
 }
 interface HasKillsRouting<V>: HasKills, HasRouting<V>
-interface HasKillsRoutingTC: HasKillsRouting<TopAndContent>
+typealias HasKillsRoutingTC = HasKillsRouting<TopAndContent>
 
 interface HasForwardKillsRouting<V, in F: Any>: HasKillsRouting<V>, HasForward<F>
 interface HasForwardKillsRedisplayRouting<V, in F: Any>: HasKillsRouting<V>, HasForward<F>, HasKillsRedisplay
@@ -196,7 +196,8 @@ abstract class ForwardView<V: Any, in F: CsKillsView<V>>(
 ): CsKillsView<V>(parent), HasKillsRedisplay, HasUix, HasForward<F> {
 
 //    private val status = Var<FwdStatus<F>>(FwdStatus.Self(null))
-    private val status = Var<F?>(null).oldKilledOpt
+    @Suppress("LeakingThis")
+    protected val status: Var<@UnsafeVariance F?> = Var<F?>(null).oldKilledOpt
 
 //    @Suppress("LeakingThis")
 //    private val forward = rx { status().forward }.oldKilledOpt

@@ -5,6 +5,7 @@ import org.w3c.dom.*
 import rx.*
 import kotlin.browser.document
 import common.*
+import commonshr.HasKills
 import commonshr.invoke
 import domx.*
 import commonshr.KillsApi
@@ -290,6 +291,8 @@ fun HTMLElement.rxText(ks: KillSet, rxVal: RxVal<String>) {
         innerText = it
     }
 }
+
+fun HTMLElement.rxText(deps: HasKills, fn: KillsApi.() -> String) = rxText(deps.kills, fn)
 
 fun HTMLElement.rxText(ks: KillSet, fn: KillsApi.() -> String) {
     val rx = Rx(ks, fn)

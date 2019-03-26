@@ -2,19 +2,20 @@ package commonui.links
 
 import commonshr.Assign
 import commonshr.remAssign
-import commonui.HasShow
-import commonui.launchReport
+import commonui.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlin.browser.window
 
-interface LinkPoint<out T: HasShow> {
+//typealias LinkPointItem = HasKillsLinkageRedisplay
+typealias LinkPointItem = HasKillsRedisplay
+interface LinkPoint<out T: LinkPointItem> {
     suspend fun load(hash: HashStruct): T?
 }
 
 class LinksHandle(
     val linkPointMap: Map<String, LinkPoint<*>>,
-    val home: LinkPoint<HasShow>,
+    val home: LinkPoint<LinkPointItem>,
     var depth: Assign<Int>
 )
 
@@ -29,9 +30,9 @@ fun CoroutineScope.runLinks(
 
             try {
                 val named = ps.hash.toHashStruct().toNamed
-                linkPointMap.getValue(named.name).load(named.hash)?.show?.invoke()
+                linkPointMap.getValue(named.name).load(named.hash)?.redisplay?.invoke()
             } catch (e: dynamic) {
-                home.load(EmptyHashStruct)?.show?.invoke()
+                home.load(EmptyHashStruct)?.redisplay?.invoke()
             }
         }
 

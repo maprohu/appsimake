@@ -50,15 +50,20 @@ abstract class DefaultEditing(
 //    defaultDirty
 ), Editing
 
+data class EditingTriggers<T>(
+    val delete: Trigger,
+    val onPersist: Trigger = {},
+    val saveCurrent: (T) -> Unit
+)
+
 class RxEditing<T: RxBase<*>>(
     kills: KillSet,
     val initial: FsDoc<T>,
     override val canDelete: RxIface<Boolean>,
-    override val delete: Trigger,
-    saveCurrent: (T) -> Unit,
-    onPersist: Trigger
+    val triggers: EditingTriggers<T>
 ): DefaultEditing(kills), KillsApi {
     val current: T = initial.rxv.now.copy()
+    override val delete = triggers.delete
 
     init {
         extraDirty.transform { it + rx { !initial.id.state().exists || !rxCompare(initial(), current) } }
@@ -81,7 +86,7 @@ class RxEditing<T: RxBase<*>>(
 //    )
 
     private val onPersistOnce by lazy {
-        onPersist()
+        triggers.onPersist()
     }
 
     init {
@@ -94,7 +99,7 @@ class RxEditing<T: RxBase<*>>(
 
     override val save: Trigger = {
         onPersistOnce
-        saveCurrent(current)
+        triggers.saveCurrent(current)
     }
 }
 
@@ -212,7 +217,10 @@ fun Factory.saveDeleteButton(deps: HasEditExitFromKillsUix) = buttonGroup {
     }
 }
 
-class BackSaveDiscard(deps: HasEditExitFromKillsUix, holes: SlotHoles): HasEditExitFromKillsUix by deps, KillsApiCommonui, KillsUixApi {
+class BackSaveDiscard(
+    deps: HasEditExitFromKillsUix,
+    holes: SlotHoles
+): HasEditExitFromKillsUix by deps, KillsApiCommonui, KillsUixApi {
     private fun fromOrExit() {
         if (editing.canDelete.now) {
             from.redisplay()

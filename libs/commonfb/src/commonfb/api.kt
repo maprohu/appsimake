@@ -4,6 +4,7 @@ import commonfb.editing.*
 import commonshr.*
 import commonshr.properties.RxBase
 import commonui.*
+import commonui.editing.EditingTriggers
 import firebase.CsDbKillsApi
 import firebase.DbKillsApi
 
@@ -12,15 +13,11 @@ interface DbKillsApiCommonfb: DbKillsApi {
 
     fun <T: RxBase<*>> rxEditing(
         initial: FsEditable<T>,
-        delete: Trigger? = null,
-        onPersist: Trigger = {},
-        preSave: (T) -> Unit = {}
+        triggers: Copier<EditingTriggers<T>> = identity()
     ) = rxEditing(
         api,
         initial,
-        delete = delete,
-        onPersist = onPersist,
-        preSave = preSave
+        triggers
     )
 }
 

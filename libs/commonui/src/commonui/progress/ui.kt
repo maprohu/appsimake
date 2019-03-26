@@ -9,7 +9,9 @@ import commonshr.KillsApi
 
 fun Progress.ui() = progressUI()
 
-fun KillsApi.progressUI() = factory.wraps.div {
+fun HasKills.progressUI() = progressUI(this)
+
+fun progressUI(deps: HasKills) = factory.wraps.div {
     cls {
         flexGrow1
         column()
@@ -25,7 +27,8 @@ fun KillsApi.progressUI() = factory.wraps.div {
             m1
             textMuted
         }
-        this %= { globalStatus() }
+
+        rxText(deps) { globalStatus() }
     }
 }.node
 

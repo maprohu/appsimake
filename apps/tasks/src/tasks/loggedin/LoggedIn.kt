@@ -5,6 +5,8 @@ import commonshr.private
 import commonshr.FsDoc
 import commonshr.idOrFail
 import commonui.*
+import commonui.links.LinkApi
+import commonui.links.Linkage
 import commonui.widget.TopAndContent
 import firebase.User
 import firebase.firestore.*
@@ -23,9 +25,10 @@ interface LoggedInPath: LinksPath {
 
 class LoggedIn(
     links: Links,
+    override val linkage: Linkage,
     hole: HasKillsRouting<TopAndContent>,
     user: User
-): ForwardTC(hole), LoggedInPath, LinksPath by links, FBApi, FromTC {
+): ForwardTC(hole), LoggedInPath, LinksPath by links, FBApi, LinkApi<LoggedIn> {
 
     override val loggedIn: LoggedIn = this
 
@@ -47,7 +50,7 @@ class LoggedIn(
         rx { tags.list.allRx().map { it().name() }.toSet() }.forEach { this@apply %= it }
     }.readOnly
 
-    fun signOut() {
+    fun signOut() = advance {
         links.signOut()
     }
 
@@ -77,11 +80,11 @@ class LoggedIn(
     }
 
     fun newTask() = advance {
-        links.newTask.fwd(links.welcome)
+        links.newTask.fwd()
     }
 
     fun FsDoc<Task>.view() = advance {
-        links.viewTask.fwd(links.welcome, idOrFail)
+        links.viewTask.fwd(idOrFail)
     }
 
     override val rawView: TopAndContent = ui()

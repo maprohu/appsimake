@@ -2,6 +2,7 @@ package commonfb.editing
 
 import commonshr.*
 import commonshr.properties.RxBase
+import commonui.editing.EditingTriggers
 import commonui.editing.RxEditing
 import firebase.HasDbKills
 import firebase.firestore.delete
@@ -12,9 +13,7 @@ import rx.rx
 fun <T: RxBase<*>> rxEditing(
     deps: HasDbKills,
     editable: FsEditable<T>,
-    delete: Trigger? = null,
-    onPersist: Trigger = {},
-    preSave: (T) -> Unit
+    triggers: Copier<EditingTriggers<T>> = identity()
 ): RxEditing<T> {
     val initial = editable.toFsDoc().live(deps)
 
@@ -22,15 +21,17 @@ fun <T: RxBase<*>> rxEditing(
         deps.kills,
         initial,
         canDelete = rx(deps) { initial.id.state().exists },
-        delete = delete ?: { initial.delete(deps) },
-        saveCurrent = { current ->
-            preSave(current)
-            FsDoc(
-                initial.id,
-                current
-            ).save(deps)
-        },
-        onPersist = onPersist
+        triggers = triggers(
+            EditingTriggers(
+                delete = { initial.delete(deps) },
+                saveCurrent = { current ->
+                    FsDoc(
+                        initial.id,
+                        current
+                    ).save(deps)
+                }
+            )
+        )
     )
 }
 

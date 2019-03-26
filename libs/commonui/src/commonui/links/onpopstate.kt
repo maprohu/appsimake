@@ -16,6 +16,8 @@ class PopStateInfo(
     val hash: String
 )
 
+val hashData get() = window.location.hash.drop(1)
+
 fun popStateChannel(
     deps: HasKills
 ): ReceiveChannel<PopStateInfo> {

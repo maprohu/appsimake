@@ -1,40 +1,41 @@
 package commonfb.loginbase
 
-import commonfb.UserState
 import commonfb.login.Login
-import commonui.HasKillsRouting
+import commonui.*
+import commonui.links.LinkPointItem
+import commonui.links.Linkage
+import commonui.links.NamedHashStruct
+import commonui.topandcontent.ProgressTC
+import commonui.widget.TopAndContent
 import firebase.User
 import firebase.app.App
 import firebase.auth.Auth
-import org.w3c.dom.HTMLElement
+import kotlinx.coroutines.await
+import commonshr.*
 
-open class LoginOnly(
-    parent: HasKillsRouting<HTMLElement>
-): LoginBase(parent) {
+class LoginOnly(
+    parent: HasKillsRoutingTC,
+    private val auth: Auth
+): ForwardTC(parent), LinkPointItem {
+    override val rawView = TopAndContent.hourglass
 
-    suspend fun start(
-        app: App,
-        loggedInView: suspend (User) -> UserStateView
-    ) {
-        fun notLoggedInView(): Login =
-            Login(
-                parent = hole,
-                base = this,
-                auth = app.auth(),
-                loggingIn = { switchToUnkownUser() },
-                loginFailed = {
-                    reportError(it)
-                    hole %= notLoggedInView()
-                }
-            )
+    suspend fun signIn() = performLogin(this, auth)
 
-        app.auth().start(
-            loggedInView = loggedInView,
-            notLoggedInView = {
-                notLoggedInView()
-            }
-        )
+    suspend fun signOut() {
+        hourglass()
+        auth.signOut().await()
+        signIn()
+    }
+
+    private fun hourglass() {
+        this %= ProgressTC(this)
+    }
+
+    init {
+        hourglass()
     }
 
 }
 
+
+class User

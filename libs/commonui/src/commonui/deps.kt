@@ -1,15 +1,26 @@
 package commonui
 
-import commonshr.Exec
 import commonshr.HasKills
 import commonshr.Runner
 import commonshr.Trigger
 import commonui.editing.Bindings
 import commonui.editing.DefaultEditing
+import commonui.links.HashStruct
+import commonui.links.Linkage
+import commonui.links.NamedHashStruct
 import killable.KillSet
 import kotlinx.coroutines.CoroutineScope
-import rx.RxIface
 
+interface HasHash {
+    val hash: NamedHashStruct
+}
+interface HasLinkage {
+    val linkage: Linkage
+}
+
+
+interface HasHashKillsRedisplay: HasHash, HasKillsRedisplay
+interface HasKillsLinkageRedisplay: HasLinkage, HasKillsRedisplay
 
 interface HasBind {
     val editing: Bindings
@@ -19,9 +30,6 @@ interface HasEdit {
     val editing: DefaultEditing
 }
 
-interface HasShow {
-    val show: Trigger
-}
 interface HasRedisplay {
     val redisplay: Trigger
 }

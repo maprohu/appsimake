@@ -62,10 +62,12 @@ fun HashStruct.split() = run {
     )
 }
 
-class NamedHashStruct(
+data class NamedHashStruct(
     val name: String,
     val hash: HashStruct
 )
+
+val NamedHashStruct.toHashStruct: HashStruct get() = hash + name
 
 val HashStruct.toNamed get() = split().toNamed
 val SplitHash.toNamed get() = NamedHashStruct(
@@ -79,36 +81,36 @@ data class SplitHash(
 )
 
 typealias Hasher<T> = Transformer<T, HashStruct>
-typealias LinkHasher<P, L> = Hasher<LinkParam<P, L>>
+//typealias LinkHasher<P, L> = Hasher<LinkParam<P, L>>
+//
+//internal fun <P, F: LView> linkNameHashItemizer(links: Map<String, Link<*, *>>) =
+//    HashItemizer(
+//        serialize = { it.name },
+//        deserialize = { links.getValue(it).unsafeCast<Link<P, F>>() }
+//    )
 
-internal fun <P, F: LView> linkNameHashItemizer(links: Map<String, Link<*, *>>) =
-    HashItemizer(
-        serialize = { it.name },
-        deserialize = { links.getValue(it).unsafeCast<Link<P, F>>() }
-    )
-
-fun <P, L: LView> linkHashTransformer(
-    nc: HashItemizer<Link<P, L>>
-) = Hasher(
-    serialize = { link, hash ->
-        link.link.converter.serialize(link.param, hash) + nc.serialize(link.link)
-    },
-    deserialize = { hash ->
-        val split = hash.split()
-
-        nc.deserialize(split.item).let { link ->
-            link.converter.deserialize(split.struct).let { out ->
-                TransformerOutput(
-                    LinkParam(
-                        link,
-                        out.data
-                    ),
-                    out.serialized
-                )
-            }
-        }
-    }
-)
+//fun <P, L: LView> linkHashTransformer(
+//    nc: HashItemizer<Link<P, L>>
+//) = Hasher(
+//    serialize = { link, hash ->
+//        link.link.converter.serialize(link.param, hash) + nc.serialize(link.link)
+//    },
+//    deserialize = { hash ->
+//        val split = hash.split()
+//
+//        nc.deserialize(split.item).let { link ->
+//            link.converter.deserialize(split.struct).let { out ->
+//                TransformerOutput(
+//                    LinkParam(
+//                        link,
+//                        out.data
+//                    ),
+//                    out.serialized
+//                )
+//            }
+//        }
+//    }
+//)
 
 fun <D> singleHashTransformer(
     converter: HashItemizer<D>

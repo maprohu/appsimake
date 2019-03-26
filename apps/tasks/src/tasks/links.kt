@@ -3,7 +3,10 @@ package tasks
 import commonfb.FbLinks
 import commonfb.FbLinksApi
 import commonfb.FbLinksDeps
+import commonfb.FbLinksFactory
 import commonui.*
+import commonui.links.BaseLinkPoint
+import commonui.links.StringHasher
 import firebase.DbApi
 import tasks.editnote.EditNote
 import tasks.edittag.EditTag
@@ -20,33 +23,33 @@ interface LinksPath: DbApi {
 
 class Links(
     deps: FbLinksDeps
-): FbLinksApi, LinksPath {
+): FbLinksFactory(deps), LinksPath {
     override val links = this
 
-
-    override val welcome by rootLink {
+    override val home = root { link ->
         LoggedIn(
             this,
+            link,
             deps.hole,
-            login()
-        ).apply {
-            deps.hole %= this
+            requestUser()
+        ).also {
+            deps.hole %= it
         }
     }
 
-    val listTags by welcome.child { li ->
-        ListTags(li).forwarding(li)
+    val listTags by home.child { li, link ->
+        ListTags(li, link).forwarding(li)
     }
 
-    val listTasks by welcome.child { li ->
-        ListTasks(li).forwarding(li)
+    val listTasks by home.child { li, lnk ->
+        ListTasks(li, lnk).forwarding(li)
     }
 
-    val selectTags by listTasks.child { l ->
-        SelectTags(l).forwarding(l)
+    val selectTags by listTasks.child { l, lnk ->
+        SelectTags(l, lnk).forwarding(l)
     }
 
-    val editTag by listTags.param(StringHasher).child { lt, tid ->
+    val editTag by listTags.param(StringHasher).child { lt, tid, lnk->
         EditTag(
             lt,
             lt.loggedIn.userTags.doc(tid).get()
