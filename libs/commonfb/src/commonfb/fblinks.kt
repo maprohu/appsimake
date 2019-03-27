@@ -41,6 +41,7 @@ abstract class FbLinksFactory(
             homeName: String = "home",
             fn: suspend (FbLinksDeps) -> FbLinksFactory
         ) = launchGlobal {
+            APP.startRegisteringServiceWorker()
             BodyTC().apply {
                 val app = FB.app
 

@@ -152,4 +152,14 @@ fun WindowOrWorkerGlobalScope.onInterval(timeout: Int, fn: () -> Unit): Trigger 
     }.once()
 }
 
+fun EventTarget.listenOnce(type: String, fn: (Event) -> Unit) {
+    val ks = Killables()
+
+    ks += listen(
+        type
+    ) {
+        ks.kill()
+        fn(it)
+    }
+}
 

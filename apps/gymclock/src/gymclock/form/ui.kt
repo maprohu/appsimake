@@ -90,7 +90,7 @@ fun Form.ui() = factory.screen {
                     x3
                     running
                 }
-                enabled { editing.canSave() }
+                enabled { bindings.canSave() }
                 click {
                     startWorkout()
                 }

@@ -34,6 +34,7 @@ interface KillsApiCommonui: KillsApiDomx {
     val <V: Any> HoleT<V>.routing get() = routing(api)
 
     fun Bindings.addDirty(fn: KillsApi.() -> Boolean) = addDirty(api, fn)
+    fun KeepAwake.keepScreenAwake() = keepScreenAwake(api)
 }
 
 interface KillsUixApi: Api, HasKillsUix, KillsApiCommonui {

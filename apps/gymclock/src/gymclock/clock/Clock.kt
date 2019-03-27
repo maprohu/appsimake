@@ -9,18 +9,22 @@ import org.w3c.dom.HTMLAudioElement
 import org.w3c.dom.HTMLElement
 import rx.Var
 import commonui.*
+import commonui.links.Linkage
+import gymclock.form.Sounds
 
 interface ClockPath: FormPath {
     val clock: Clock
 }
 
 class Clock(
-    from: Form
-): SimpleView<HTMLElement>(from), ClockPath, FormPath by from, FromKillsUixApi, HasHistoryKillsRedisplay, HasFrom by SimpleFrom {
+    from: Form,
+    linkage: Linkage,
+    val sounds: Sounds,
+    val keepAwake: KeepAwake
+): SimpleView<HTMLElement>(from), ClockPath, FormPath by from, BackKillsUixApi, HasBack by linkage {
     override val clock = this
 
 
-    val sounds = form.sounds
     val model = form.model
 
     class Phase(
@@ -59,8 +63,6 @@ class Clock(
     override val rawView = ui()
 
     init {
-        historyItem
-
         run()
     }
 

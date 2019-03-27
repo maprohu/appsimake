@@ -38,7 +38,7 @@ fun Clock.run() {
                 Phase(
                     model.delay.now,
                     Cls.bgWarning,
-                    sounds.restAudio
+                    sounds.rest
                 )
             ).nonZeroes().toPhaseList()
 
@@ -46,12 +46,12 @@ fun Clock.run() {
                 Phase(
                     model.work.now,
                     Cls.bgSuccess,
-                    sounds.workAudio
+                    sounds.work
                 ),
                 Phase(
                     model.rest.now,
                     Cls.bgWarning,
-                    sounds.restAudio
+                    sounds.rest
                 )
             ).nonZeroes()
             val repeat = repeatPhases.toPhaseList()
@@ -61,7 +61,7 @@ fun Clock.run() {
 
             rx { browserVisible() }.forEach { vis ->
                 if (vis) {
-                    keepScreenAwake()
+                    keepAwake.keepScreenAwake()
 
                     val passed = (Date().getTime() - started) / 1000.0
 
@@ -108,7 +108,7 @@ fun Clock.run() {
                         } else {
                             counter.now = c
                             if (model.sounds.now && c in 1..3) {
-                                sounds.prepareAudio.replay()
+                                sounds.prepare.replay()
                             }
                         }
                     }

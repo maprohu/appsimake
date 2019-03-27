@@ -6,15 +6,65 @@ import common.obj
 import commonshr.Trigger
 import commonshr.plusAssign
 import commonui.*
+import commonui.widget.Body
+import commonui.widget.BodyTC
 import kotlin.browser.window
 
 
 typealias LinksContext = Any
 interface BaseTC: LinkPointItem, HasKillsRoutingTC, HasForwardTC, HasLinkage, HasCsForwardKillsRoutingTC
 
+class LinksDeps(
+    val homeName: String,
+    val body: Body
+)
+
 abstract class LinksFactory(
     private val homeName: String = "home"
 ) {
+    companion object {
+        fun startTC(
+            homeName: String = "home",
+            fn: suspend (String, BodyTC) -> LinksFactory
+        ) = launchGlobal {
+            APP.startRegisteringServiceWorker()
+            BodyTC().apply {
+                val links = fn(homeName, this)
+
+                runLinks(
+                    LinksHandle(
+                        links.map,
+                        links.home
+                    ),
+                    popStateChannel(this)
+                )
+            }
+        }
+
+        fun start(
+            homeName: String = "home",
+            fn: suspend (LinksDeps) -> LinksFactory
+        ) = launchGlobal {
+            APP.startRegisteringServiceWorker()
+            Body().apply {
+                val links = fn(
+                    LinksDeps(
+                        homeName,
+                        this
+                    )
+                )
+
+                runLinks(
+                    LinksHandle(
+                        links.map,
+                        links.home
+                    ),
+                    popStateChannel(this)
+                )
+            }
+        }
+    }
+
     val context: LinksContext = object {}
 
     protected fun <T: LinkPointItem> root(fn: suspend (Linkage) -> T) = HomeLinkPoint(this, homeName, fn)
