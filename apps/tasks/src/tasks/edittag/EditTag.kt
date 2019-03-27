@@ -19,14 +19,7 @@ class EditTag(
 ): ForwardBase<TopAndContent>(from), EditTagPath, ListTagsPath by from, FBBackApi, Editor, HasBack by linkage {
     override val editTag = this
 
-    override val editing = rxEditing(item) { tr ->
-        tr.copy(
-            delete = {
-                tr.delete()
-                back()
-            }
-        )
-    }
+    override val editing = rxEditing(item)
 
     override val rawView = ui()
 }

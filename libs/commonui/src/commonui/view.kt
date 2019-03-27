@@ -1,7 +1,6 @@
 package commonui
 
 import commonshr.*
-import commonui.topandcontent.ProgressBackTC
 import commonui.topandcontent.ProgressTC
 import commonui.widget.HoleT
 import commonui.widget.HourglassView
@@ -97,17 +96,17 @@ open class MultiView<V, F: CsKillsView<V>>(
 
 }
 
-fun loadView(
-    parent: HasKillsRouting<TopAndContent>,
-    fn: suspend () -> ViewTC
-) = MultiView<TopAndContent, ViewTC>(
-    parent,
-    ProgressBackTC(parent)
-).apply {
-    launch {
-        current %= fn()
-    }
-}
+//fun loadView(
+//    parent: HasKillsRouting<TopAndContent>,
+//    fn: suspend () -> ViewTC
+//) = MultiView<TopAndContent, ViewTC>(
+//    parent,
+//    ProgressBackTC(parent)
+//).apply {
+//    launch {
+//        current %= fn()
+//    }
+//}
 
 
 fun <V: Any, T: ViewItem<V>> RxIface<T>.runView(deps: HasKills, hole: HoleT<V>) {
@@ -125,6 +124,11 @@ interface HasKillsRouting<V>: HasKills, HasRouting<V>
 typealias HasKillsRoutingTC = HasKillsRouting<TopAndContent>
 
 interface HasForwardKillsRouting<V, in F: Any>: HasKillsRouting<V>, HasForward<F>
+typealias HasForwardKillsRoutingTC = HasForwardKillsRouting<TopAndContent, ViewTC>
+
+interface HasCsForwardKillsRouting<V, in F: Any>: HasForwardKillsRouting<V, F>, CoroutineScope
+typealias HasCsForwardKillsRoutingTC = HasCsForwardKillsRouting<TopAndContent, ViewTC>
+
 interface HasForwardKillsRedisplayRouting<V, in F: Any>: HasKillsRouting<V>, HasForward<F>, HasKillsRedisplay
 
 //typealias FromTC = HasForwardKillsRedisplayRouting<TopAndContent, ViewTC>
@@ -186,6 +190,9 @@ fun SimpleRoutingHole<TopAndContent>.hourglass() {
 fun ForwardView<TopAndContent, SimpleView<TopAndContent>>.hourglass() {
     this %= ProgressTC(this)
 }
+fun HasForwardKillsRoutingTC.hourglass() {
+    this %= ProgressTC(this)
+}
 
 typealias HasForwardTC = HasForward<ViewTC>
 interface HasForward<in F: Any> {
@@ -194,7 +201,7 @@ interface HasForward<in F: Any> {
 
 abstract class ForwardView<V: Any, in F: CsKillsView<V>>(
     parent: HasKillsRouting<V>
-): CsKillsView<V>(parent), HasKillsRedisplay, HasUix, HasForward<F>, HasRedisplayv {
+): CsKillsView<V>(parent), HasKillsRedisplay, HasUix, HasForward<F>, HasRedisplayv, HasCsForwardKillsRouting<V, F> {
 
 //    private val status = Var<FwdStatus<F>>(FwdStatus.Self(null))
     @Suppress("LeakingThis")
@@ -254,7 +261,8 @@ abstract class ForwardBase<V: Any>(
     parent: HasKillsRouting<V>
 ): ForwardView<V, SimpleView<V>>(parent)
 
-fun ForwardTC.advance(fn: Action) {
+fun HasCsForwardKillsRoutingTC.advance(fn: Action) {
+    globalStatus %= "Loading..."
     hourglass()
     launch { fn() }
 }

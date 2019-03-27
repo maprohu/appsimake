@@ -3,7 +3,6 @@ package checklist.view
 import bootstrap.*
 import rx.RxMutableList
 import commonshr.*
-import commonui.backButton
 import commonui.widget.*
 import domx.*
 import fontawesome.*

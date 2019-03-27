@@ -3,9 +3,7 @@ package commonfb
 import commonfb.FB.app
 import commonfb.loginbase.*
 import commonui.*
-import commonui.links.Linkage
-import commonui.links.LinksDepth
-import commonui.links.LinksFactory
+import commonui.links.*
 import commonui.widget.BodyTC
 import commonui.widget.TopAndContent
 import firebase.*
@@ -19,7 +17,6 @@ import kotlin.coroutines.CoroutineContext
 
 data class FbLinksDeps(
     val homeName: String,
-    val linksDepth: LinksDepth,
     override val kills: KillSet,
     override val coroutineContext: CoroutineContext,
     val app: App,
@@ -29,57 +26,41 @@ data class FbLinksDeps(
     val auth = app.auth()
 }
 
-//class FbLinks(
-//    val deps: FbLinksDeps
-//): HasCsDbKills by deps, DbKillsApi {
-//
-//
-//    @Suppress("LeakingThis")
-//    val login = loginHandler(
-//        this,
-//        app.auth(),
-//        deps.hole
-//    )
-//
-//
-//}
-
 suspend fun App.persistentDb(): Firestore {
     return firestore().withDefaultSettings().apply {
         enablePersistenceAndWait()
     }
 }
 
-//interface FbLinksDef: LinksDef {
-//    val fbLinks: FbLinks
-//}
-//
-//interface FbLinksApi: LinksApi, FbLinksDef
-
-
 abstract class FbLinksFactory(
     private val deps: FbLinksDeps
-) : LinksFactory(deps.homeName, deps.linksDepth), HasCsDbKills by deps {
+) : LinksFactory(deps.homeName), HasCsDbKills by deps {
 
     companion object {
         fun start(
             homeName: String = "home",
-            linksDepth: LinksDepth,
             fn: suspend (FbLinksDeps) -> FbLinksFactory
         ) = launchGlobal {
-            BodyTC().run {
+            BodyTC().apply {
                 val app = FB.app
 
-                fn(
+                val links = fn(
                     FbLinksDeps(
                         homeName,
-                        linksDepth,
                         kills,
                         coroutineContext,
                         app,
                         app.persistentDb(),
                         hole
                     )
+                )
+
+                runLinks(
+                    LinksHandle(
+                        links.map,
+                        links.home
+                    ),
+                    popStateChannel(links)
                 )
             }
         }

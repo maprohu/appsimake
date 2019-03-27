@@ -33,8 +33,9 @@ interface KillsApiCommonui: KillsApiDomx {
 
     val <V: Any> HoleT<V>.routing get() = routing(api)
 
-
+    fun Bindings.addDirty(fn: KillsApi.() -> Boolean) = addDirty(api, fn)
 }
+
 interface KillsUixApi: Api, HasKillsUix, KillsApiCommonui {
 
     fun EventTarget.click(action: Trigger) = click(api, action)
@@ -100,12 +101,11 @@ interface CreateKillsUixApi: CreateKillsApi, HasCreateKillsUix {
 
 interface EditKillsUixApi: EditKillsApi, HasEditKillsUix {
     val Factory.saveButton get() = saveButton(api)
-    val Factory.saveDeleteButton get() = saveDeleteButton(api)
 }
 
 interface BackEditKillsUixApi: EditKillsUixApi, HasBackEditKillsUix {
     val SlotHoles.backSaveDiscard get() = BackSaveDiscard(api, this)
-
+    val Factory.saveDeleteButton get() = saveDeleteButton(api)
 }
 
 interface BackCreateKillsUixApi: CreateKillsUixApi, HasBackCreateKillsUix {

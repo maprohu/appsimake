@@ -18,7 +18,7 @@ class EditNote(
 ): ForwardTC(from), EditNotePath, ViewTaskPath by from, FBBackApi, Editor, HasBack by linkage {
     override val editNote = this
 
-    override val editing = rxEditing(item, backOnDelete())
+    override val editing = rxEditing(item)
 
     override val rawView = ui()
 }

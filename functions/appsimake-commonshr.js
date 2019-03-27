@@ -19,6 +19,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var wrapFunction = Kotlin.wrapFunction;
   var Kind_CLASS = Kotlin.Kind.CLASS;
   var ReadOnlyProperty = Kotlin.kotlin.properties.ReadOnlyProperty;
+  var lazy = Kotlin.kotlin.lazy_klfg04$;
   var plus = Kotlin.kotlin.collections.plus_qloxvw$;
   var minus = Kotlin.kotlin.collections.minus_2ws7j4$;
   var Unit = Kotlin.kotlin.Unit;
@@ -61,7 +62,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var numberToInt = Kotlin.numberToInt;
   var map = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.map_610k8f$;
-  var lazy = Kotlin.kotlin.lazy_klfg04$;
   var get_lastIndex = Kotlin.kotlin.collections.get_lastIndex_55thoc$;
   var drop = Kotlin.kotlin.collections.drop_ba2ldo$;
   var produce = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.produce_f6xzli$;
@@ -183,7 +183,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     this.closure$value = closure$value;
   }
   NamedDelegate$provideDelegate$ObjectLiteral.prototype.getValue_lrcp0p$ = function (thisRef, property) {
-    return this.closure$value;
+    return this.closure$value();
   };
   NamedDelegate$provideDelegate$ObjectLiteral.$metadata$ = {
     kind: Kind_CLASS,
@@ -220,8 +220,39 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'NamedThisDelegate',
     interfaces: []
   };
+  function get_constant$lambda(this$constant) {
+    return function () {
+      return this$constant;
+    };
+  }
+  function named$lambda(closure$fn) {
+    return function (n) {
+      return get_constant$lambda(closure$fn(n));
+    };
+  }
   function named(fn) {
+    return new NamedDelegate(named$lambda(fn));
+  }
+  function namedFn(fn) {
     return new NamedDelegate(fn);
+  }
+  function namedLazy$lambda$lambda(closure$fn, closure$name) {
+    return function () {
+      return closure$fn(closure$name);
+    };
+  }
+  function namedLazy$lambda$lambda$lambda(closure$l) {
+    return function () {
+      return closure$l.value;
+    };
+  }
+  function namedLazy$lambda(closure$fn) {
+    return function (name) {
+      return namedLazy$lambda$lambda$lambda(lazy(namedLazy$lambda$lambda(closure$fn, name)));
+    };
+  }
+  function namedLazy(fn) {
+    return namedFn(namedLazy$lambda(fn));
   }
   function namedThis(fn) {
     return new NamedThisDelegate(fn);
@@ -2946,6 +2977,64 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function report(error) {
     console.error(error);
   }
+  function Identity$lambda(it) {
+    return it;
+  }
+  var Identity;
+  function Coroutine$SuspendIdentity$lambda(it_0, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.local$it = it_0;
+  }
+  Coroutine$SuspendIdentity$lambda.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$SuspendIdentity$lambda.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$SuspendIdentity$lambda.prototype.constructor = Coroutine$SuspendIdentity$lambda;
+  Coroutine$SuspendIdentity$lambda.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            return this.local$it;
+          case 1:
+            throw this.exception_0;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  function SuspendIdentity$lambda(it_0, continuation_0, suspended) {
+    var instance = new Coroutine$SuspendIdentity$lambda(it_0, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
+  }
+  var SuspendIdentity;
+  function CompareEquals$lambda(a, b) {
+    return equals(a, b);
+  }
+  var CompareEquals;
+  var identity = defineInlineFunction('appsimake-commonshr.commonshr.identity_287e2$', wrapFunction(function () {
+    var commonshr = _.commonshr;
+    return function () {
+      return commonshr.Identity;
+    };
+  }));
   var remAssign = defineInlineFunction('appsimake-commonshr.commonshr.remAssign_t3h96y$', function ($receiver, value) {
     $receiver(value);
   });
@@ -3909,58 +3998,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
     return NoDynamicOps_instance;
   }
-  function Identity$lambda(it) {
-    return it;
-  }
-  var Identity;
-  function Coroutine$SuspendIdentity$lambda(it_0, continuation_0) {
-    CoroutineImpl.call(this, continuation_0);
-    this.exceptionState_0 = 1;
-    this.local$it = it_0;
-  }
-  Coroutine$SuspendIdentity$lambda.$metadata$ = {
-    kind: Kotlin.Kind.CLASS,
-    simpleName: null,
-    interfaces: [CoroutineImpl]
-  };
-  Coroutine$SuspendIdentity$lambda.prototype = Object.create(CoroutineImpl.prototype);
-  Coroutine$SuspendIdentity$lambda.prototype.constructor = Coroutine$SuspendIdentity$lambda;
-  Coroutine$SuspendIdentity$lambda.prototype.doResume = function () {
-    do
-      try {
-        switch (this.state_0) {
-          case 0:
-            return this.local$it;
-          case 1:
-            throw this.exception_0;
-          default:this.state_0 = 1;
-            throw new Error('State Machine Unreachable execution');
-        }
-      }
-       catch (e) {
-        if (this.state_0 === 1) {
-          this.exceptionState_0 = this.state_0;
-          throw e;
-        }
-         else {
-          this.state_0 = this.exceptionState_0;
-          this.exception_0 = e;
-        }
-      }
-     while (true);
-  };
-  function SuspendIdentity$lambda(it_0, continuation_0, suspended) {
-    var instance = new Coroutine$SuspendIdentity$lambda(it_0, continuation_0);
-    if (suspended)
-      return instance;
-    else
-      return instance.doResume(null);
-  }
-  var SuspendIdentity;
-  function CompareEquals$lambda(a, b) {
-    return equals(a, b);
-  }
-  var CompareEquals;
   function IdentityWriteDynamic$lambda(t, f) {
     return t;
   }
@@ -3970,9 +4007,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   var IdentityReadDynamic;
   var identityCopier = defineInlineFunction('appsimake-commonshr.commonshr.properties.identityCopier_287e2$', wrapFunction(function () {
-    var properties = _.commonshr.properties;
+    var commonshr = _.commonshr;
     return function () {
-      return properties.Identity;
+      return commonshr.Identity;
     };
   }));
   var identityWriteDynamic = defineInlineFunction('appsimake-commonshr.commonshr.properties.identityWriteDynamic_287e2$', wrapFunction(function () {
@@ -3988,9 +4025,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     };
   }));
   var compareEquals = defineInlineFunction('appsimake-commonshr.commonshr.properties.compareEquals_287e2$', wrapFunction(function () {
-    var properties = _.commonshr.properties;
+    var commonshr = _.commonshr;
     return function () {
-      return properties.CompareEquals;
+      return commonshr.CompareEquals;
     };
   }));
   function ReadWrite() {
@@ -4002,10 +4039,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function PropertyType(copier, compare, writeDynamic, readDynamic) {
     if (copier === void 0) {
-      copier = package$properties.Identity;
+      copier = package$commonshr.Identity;
     }
     if (compare === void 0) {
-      compare = package$properties.CompareEquals;
+      compare = package$commonshr.CompareEquals;
     }
     if (writeDynamic === void 0) {
       writeDynamic = package$properties.IdentityWriteDynamic;
@@ -5069,6 +5106,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function toFsDoc_2($receiver) {
     return new RefDoc(toFsId_0($receiver.id, $receiver.exists), $receiver.doc);
+  }
+  function toFsEditable_0($receiver) {
+    return new EditableDoc(get_docWrap($receiver.id), $receiver.rxv.now, $receiver.id.state.now.exists);
   }
   function Noop$lambda() {
     return Unit;
@@ -8046,6 +8086,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$common.NamedDelegate = NamedDelegate;
   package$common.NamedThisDelegate = NamedThisDelegate;
   package$common.named_cq6yhu$ = named;
+  package$common.namedFn_z5kd8q$ = namedFn;
+  package$common.namedLazy_cq6yhu$ = namedLazy;
   package$common.namedThis_5cxx4g$ = namedThis;
   package$common.jsNew_x7e9z0$ = jsNew;
   package$common.jsNew_8jhc6t$ = jsNew_0;
@@ -8160,6 +8202,22 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.listen_5ge9y1$ = listen;
   package$commonshr.reportd_za3rmp$ = reportd;
   package$commonshr.report_s8jyv4$ = report;
+  Object.defineProperty(package$commonshr, 'Identity', {
+    get: function () {
+      return Identity;
+    }
+  });
+  Object.defineProperty(package$commonshr, 'SuspendIdentity', {
+    get: function () {
+      return SuspendIdentity;
+    }
+  });
+  Object.defineProperty(package$commonshr, 'CompareEquals', {
+    get: function () {
+      return CompareEquals;
+    }
+  });
+  package$commonshr.identity_287e2$ = identity;
   package$commonshr.remAssign_t3h96y$ = remAssign;
   package$commonshr.remAssign_cslpg8$ = remAssign_0;
   package$commonshr.get_value_8dahcb$ = get_value;
@@ -8192,21 +8250,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$properties.DynamicOps = DynamicOps;
   Object.defineProperty(package$properties, 'NoDynamicOps', {
     get: NoDynamicOps_getInstance
-  });
-  Object.defineProperty(package$properties, 'Identity', {
-    get: function () {
-      return Identity;
-    }
-  });
-  Object.defineProperty(package$properties, 'SuspendIdentity', {
-    get: function () {
-      return SuspendIdentity;
-    }
-  });
-  Object.defineProperty(package$properties, 'CompareEquals', {
-    get: function () {
-      return CompareEquals;
-    }
   });
   Object.defineProperty(package$properties, 'IdentityWriteDynamic', {
     get: function () {
@@ -8293,6 +8336,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.get_idOrFail_2s00w$ = get_idOrFail;
   package$commonshr.new_kizxdt$ = new_0;
   package$commonshr.toFsDoc_ihdkly$ = toFsDoc_2;
+  package$commonshr.toFsEditable_fvyl56$ = toFsEditable_0;
   Object.defineProperty(package$killable, 'Noop', {
     get: function () {
       return Noop;

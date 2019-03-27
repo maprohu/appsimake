@@ -1,12 +1,15 @@
 package checklist
 
-import checklist.edit.Edit
+import checklist.editchecklist.EditChecklist
 import checklist.loggedin.LoggedIn
+import checklist.loggedin.LoggedInTC
+import checklist.newchecklist.NewChecklist
 import checklist.view.ViewChecklist
-import commonfb.FbLinks
 import commonfb.FbLinksDeps
+import commonfb.FbLinksFactory
+import commonshr.toFsEditable
 import commonui.*
-import commonui.error.ErrorTC
+import commonui.links.StringHasher
 import firebase.DbApi
 
 interface LinksPath: DbApi {
@@ -14,63 +17,50 @@ interface LinksPath: DbApi {
 }
 class Links(
     deps: FbLinksDeps
-): FbLinks(deps), LinksPath {
+): FbLinksFactory(deps), LinksPath {
     override val links = this
 
-    override val welcome by link(true) {
+    override val home = root { lnk ->
         LoggedIn(
             this,
+            lnk,
             deps.hole,
-            login()
+            requestUser()
         ).apply {
             deps.hole %= this
         }
     }
 
-    val viewChecklist by param<String>().link { p ->
-        welcome.get()?.let { li ->
-            li.hourglass()
-
-            try {
-                ViewChecklist(
-                    li,
-                    li.checklists.doc(p).get()
-                ).apply {
-                    li %= this
-                    chklist.live
-                }
-            } catch (e: dynamic) {
-                li %= ErrorTC(li, e)
-
-                null
-            }
-        }
+    val viewChecklist by home.param(StringHasher).child { parent, id, lnk ->
+        ViewChecklist(
+            parent,
+            lnk,
+            parent.checklists.doc(id).get()
+        ).forwarding(parent)
     }
 
-    val editChecklist by param<String>().link { p ->
-        viewChecklist.get(p)?.let { vc ->
-            Edit(
-                vc.loggedIn,
-                vc,
-                vc.chklist,
-                GoBack2Redisplay
-            ).apply {
-                vc %= this
-            }
-        }
+    val editViewChecklist by viewChecklist.child { parent, lnk ->
+        EditChecklist(
+            parent,
+            lnk,
+            parent.chklist.toFsEditable(),
+            deleteTrigger = { parent.backOnRedisplay() }
+        ).forwarding(parent)
     }
 
-    val newChecklist by link {
-        welcome.get()?.let { li ->
-            Edit(
-                li,
-                li,
-                li.createNewChecklistDoc()
-            ).apply {
-                initial.live
-                li %= this
-            }
-        }
+    val editChecklist by base<LoggedInTC<*>>().param(StringHasher).child { parent, id, lnk ->
+        EditChecklist(
+            parent,
+            lnk,
+            parent.loggedIn.checklists.doc(id).get()
+        ).forwarding(parent)
+    }
+
+    val newChecklist by base<LoggedInTC<*>>().child { parent, lnk ->
+        NewChecklist(
+            parent,
+            lnk
+        ).forwarding(parent)
     }
 
 

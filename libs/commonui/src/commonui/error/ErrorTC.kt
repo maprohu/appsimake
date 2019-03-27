@@ -2,6 +2,7 @@ package commonui.error
 
 import bootstrap.m1
 import bootstrap.p1
+import commonshr.Trigger
 import commonshr.invoke
 import commonui.*
 import commonui.widget.TopAndContent
@@ -12,8 +13,9 @@ import domx.span
 
 class ErrorTC(
     parent: HasKillsRouting<TopAndContent>,
+    override val back: Trigger,
     val message: dynamic
-) : SimpleView<TopAndContent>(parent), FromKillsUixApi, HasFrom by SimpleFrom {
+) : SimpleView<TopAndContent>(parent), BackKillsUixApi {
     override val rawView = TopAndContent(
         topbar = factory.topbar {
             left.backButton

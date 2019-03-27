@@ -1,6 +1,7 @@
-package checklist.edit
+package checklist.editchecklist
 
 import bootstrap.*
+import checklist.Checklist
 import commonshr.*
 import commonui.editing.bind
 import commonui.editing.required
@@ -9,15 +10,25 @@ import commonui.widget.*
 import domx.div
 import domx.*
 import fontawesome.*
-import killable.NoKill
 
-fun Edit.ui(): TopAndContent {
+fun EditChecklist.ui() = editChecklistUi(
+    editing.current,
+    control
+) {
+    slots.left.backSaveDiscard
+    title %= "Edit Checklist"
+    right.saveDeleteButton
+}
+
+fun EditChecklistLike.editChecklistUi(
+    item: Checklist,
+    control: EditChecklistControl,
+    topbarCustomizer: Topbar.() -> Unit
+): TopAndContent {
 
     return TopAndContent(
         topbar = factory.topbar {
-            slots.left.backSaveDiscard
-            title %= "Edit Checklist"
-            right.saveDeleteButton
+            topbarCustomizer()
         }.node,
         content = factory.scrollPane {
             pane {
@@ -31,7 +42,7 @@ fun Edit.ui(): TopAndContent {
                         cls.flexFixedSize()
                         label %= "Title"
                         input {
-                            bind(editing.current.name.rxv).required()
+                            bind(item.name.rxv).required()
                         }
                     }
                     insert.formGroup {
@@ -44,15 +55,18 @@ fun Edit.ui(): TopAndContent {
                             insert.inputGroup {
                                 input {
                                     required
-                                    bindValue(this@ui, adder)
-                                    performAdd = {
-                                        addItem(value)
-                                        adder %= ""
-                                        value = ""
-                                    }
-                                    onsubmit {
-                                        performAdd()
-                                        node.focus()
+
+                                    with(control) {
+                                        bindValue(this@editChecklistUi, adder)
+                                        performAdd = {
+                                            addItem(value)
+                                            adder %= ""
+                                            value = ""
+                                        }
+                                        onsubmit {
+                                            performAdd()
+                                            node.focus()
+                                        }
                                     }
                                 }
                                 append {
@@ -69,11 +83,11 @@ fun Edit.ui(): TopAndContent {
 
                         node.div {
                             list(
-                                items.events().mapLive { cl ->
+                                control.items.events().mapLive { cl ->
                                     factory.inputGroup {
                                         cls.m1
                                         input {
-                                            bind(editing + kills, cl.name.rxv).required()
+                                            bind(bindings + kills, cl.name.rxv).required()
                                         }
                                         append {
                                             insert.button {
@@ -82,7 +96,7 @@ fun Edit.ui(): TopAndContent {
                                                     fa.trashAlt
                                                 }
                                                 click {
-                                                    items.remove(cl)
+                                                    control.items.remove(cl)
                                                 }
                                             }
                                         }

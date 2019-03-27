@@ -36,7 +36,6 @@ class EditTask(
                     item.id.deleteCollections(this@EditTask)
                 }
                 deleteTrigger()
-                back()
             }
         )
     }

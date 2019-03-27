@@ -2,19 +2,19 @@ package commonui
 
 import kotlin.browser.window
 
-interface From {
-    fun isFromVisible(): Boolean
-}
+//interface From {
+//    fun isFromVisible(): Boolean
+//}
+//
+//class GoBackNRedisplay(private val count: Int = 1): HasRedisplay {
+//    override val redisplay = { window.history.go(-count) }
+//}
+//val GoBack2Redisplay = GoBackNRedisplay(2)
+//val GoBackRedisplay = GoBackNRedisplay(1)
 
-class GoBackNRedisplay(private val count: Int = 1): HasRedisplay {
-    override val redisplay = { window.history.go(-count) }
-}
-val GoBack2Redisplay = GoBackNRedisplay(2)
-val GoBackRedisplay = GoBackNRedisplay(1)
-
-object SimpleFrom: HasFrom {
-    override val from = GoBackRedisplay
-}
+//object SimpleFrom: HasFrom {
+//    override val from = GoBackRedisplay
+//}
 
 //class BrowserHistory {
 //    private var nextId = 0

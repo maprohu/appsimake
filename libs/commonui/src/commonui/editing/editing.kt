@@ -17,6 +17,12 @@ interface Bindings {
     fun addValidation(deps: HasKills, rxv: RxIface<Boolean>)
     fun addDirty(deps: HasKills, rxv: RxIface<Boolean>)
 }
+
+fun Bindings.addDirty(deps: HasKills, fn: KillsApi.() -> Boolean) {
+    addDirty(deps, rx(deps, fn))
+}
+
+
 open class DefaultBindings(
     final override val kills: KillSet
 ): Bindings, KillsApi {
@@ -36,6 +42,7 @@ open class DefaultBindings(
 }
 interface Creating: Bindings {
     val persist: Trigger
+    val edit: Trigger
 }
 interface Editing: Bindings {
     val save: Trigger
@@ -49,7 +56,8 @@ abstract class DefaultEditing(
 ), Editing
 
 data class CreatingTriggers<T>(
-    val persist: (T) -> Unit
+    val persist: (T) -> Unit,
+    val edit: () -> Unit = {}
 )
 data class EditingTriggers<T>(
     val delete: Trigger,
@@ -69,6 +77,10 @@ class RxCreating<T: RxBase<*>>(
 
     override val persist: Trigger = {
         triggers.persist(current)
+    }
+
+    override val edit = {
+        triggers.edit()
     }
 }
 
@@ -179,14 +191,6 @@ fun <V> AbstractInput.bind(
     }
 }
 
-
-//interface EditingApi : HasEdit, KillsApi, HasFrom, HasUix, KillsApiCommonui {
-//
-//    fun <T: RxBase<*>> rxEditing(initial: T, saveCurrent: suspend (T) -> Unit) = RxEditing(initial, kills, saveCurrent)
-//
-//
-//}
-
 fun Factory.saveButton(
     deps: HasEditKillsUix,
     fn: Button.() -> Unit = { m1 }
@@ -206,10 +210,13 @@ fun Factory.persistButton(
     primary
     fa.save
     enabled(deps) { deps.creating.canSave() }
-    click(deps) { deps.creating.persist() }
+    click(deps) {
+        deps.creating.persist()
+        deps.creating.edit()
+    }
 }.apply(fn)
 
-fun Factory.saveDeleteButton(deps: HasEditKillsUix) = buttonGroup {
+fun Factory.saveDeleteButton(deps: HasBackEditKillsUix) = buttonGroup {
     m1
     slots.buttons.slot.insert.saveButton(deps) {}
     dropdownSplit {
@@ -222,6 +229,7 @@ fun Factory.saveDeleteButton(deps: HasEditKillsUix) = buttonGroup {
                 text %= "Delete"
                 click(deps) {
                     deps.editing.delete()
+                    deps.back()
                 }
             }
         }
@@ -272,6 +280,7 @@ class BackPersistDiscard(
                 }
                 click {
                     creating.persist()
+                    back()
                 }
             }
             dropdownSplit {
@@ -344,6 +353,7 @@ class BackSaveDiscard(
                 }
                 click {
                     editing.save()
+                    back()
                 }
             }
             dropdownSplit {

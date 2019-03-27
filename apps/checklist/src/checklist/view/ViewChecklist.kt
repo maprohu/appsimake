@@ -4,28 +4,29 @@ import checklist.Checklist
 import checklist.ChecklistItem
 import checklist.loggedin.LoggedIn
 import checklist.loggedin.LoggedInPath
+import checklist.loggedin.LoggedInTC
 import commonfb.FBBackApi
 import commonshr.*
 import commonui.*
-import commonui.widget.TopAndContent
-import kotlinx.coroutines.launch
+import commonui.links.Linkage
 
 interface ViewPath: LoggedInPath {
     val viewChecklist: ViewChecklist
 }
 class ViewChecklist(
     from: LoggedIn,
-    val chklist: FsDoc<Checklist>
-): ForwardBase<TopAndContent>(from), ViewPath, LoggedInPath by from, FBBackApi, HasFrom by SimpleFrom {
+    override val linkage: Linkage,
+    val editable: FsEditable<Checklist>
+): ForwardTC(from), LoggedInTC<ViewChecklist>, ViewPath, LoggedInPath by from, FBBackApi, HasBack by linkage {
     override val viewChecklist = this
 
-    val Checklist.fsDoc get() = toFsDoc(chklist.id)
+    val chklist = editable.toFsDoc().live
+
+    val Checklist.fsDoc get() = toFsDoc(editable.id.toFsId(true))
 
 
     fun Checklist.toggle(item: ChecklistItem) {
-        item.checked.rxv.transform {
-            !it
-        }
+        item.checked.rxv.transform { !it }
         fsDoc.save()
     }
 
@@ -38,16 +39,11 @@ class ViewChecklist(
         loggedIn.launchNonCancellable {
             chklist.delete()
         }
-        from.redisplay()
+        back()
     }
 
-    fun editChecklist() = launch {
-//        this %= Edit(
-//            loggedIn,
-//            this,
-//            chklist
-//        )
-        links.editChecklist.fwd(chklist.idOrFail)
+    fun editChecklist() = advance {
+        links.editViewChecklist.fwd()
     }
 
     override val rawView = ui()

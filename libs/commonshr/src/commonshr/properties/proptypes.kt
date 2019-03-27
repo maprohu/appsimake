@@ -1,5 +1,6 @@
 package commonshr.properties
 
+import commonshr.Compare
 import rx.RxIface
 import kotlin.reflect.KClass
 

@@ -54,6 +54,11 @@ interface HasEditKills: HasEdit, HasKills, HasBindKills
 
 interface HasCreateKills: HasCreate, HasKills
 
+class BindKillsDeps(
+    override val bindings: Bindings,
+    override val kills: KillSet
+): HasBindKills
+
 class EditKillsDeps(
     override val editing: DefaultEditing,
     override val kills: KillSet
@@ -63,6 +68,7 @@ class RedisplayDeps(
     override val redisplay: Trigger
 ): HasRedisplay
 
+operator fun Bindings.plus(kills: KillSet) = BindKillsDeps(this, kills)
 operator fun DefaultEditing.plus(kills: KillSet) = EditKillsDeps(this, kills)
 
 interface HasBackEditKillsUix: HasBack, HasEditKillsUix

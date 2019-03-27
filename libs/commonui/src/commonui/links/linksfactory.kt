@@ -5,19 +5,15 @@ import common.named
 import common.obj
 import commonshr.Trigger
 import commonshr.plusAssign
-import commonui.HasBack
-import commonui.HasForwardTC
-import commonui.HasKillsRoutingTC
-import commonui.HasLinkage
+import commonui.*
 import kotlin.browser.window
 
 
 typealias LinksContext = Any
-interface BaseTC: LinkPointItem, HasKillsRoutingTC, HasForwardTC, HasLinkage
+interface BaseTC: LinkPointItem, HasKillsRoutingTC, HasForwardTC, HasLinkage, HasCsForwardKillsRoutingTC
 
 abstract class LinksFactory(
-    private val homeName: String = "home",
-    val linksDepth: LinksDepth
+    private val homeName: String = "home"
 ) {
     val context: LinksContext = object {}
 
@@ -25,7 +21,7 @@ abstract class LinksFactory(
 
     abstract val home: HomeLinkPoint<LinkPointItem>
 
-    internal val map by lazy {
+    val map by lazy {
         mutableMapOf<String, BaseLinkPoint<*, *>>().apply {
             put(homeName, home)
         }
@@ -65,6 +61,8 @@ class Linkage(
     val forward: LinkForward
 ): HasBack
 
+val HistoryBack = { window.history.back() }
+
 interface LinkApi<T>: HasLinkage {
 
     suspend fun <P, CI: LinkPointItem, CP: ChildLinkPoint<T, CI, P>> CP.fwd(param: P, replace: Boolean = false) = linkage.forward.to(this, param, replace)
@@ -74,9 +72,14 @@ interface LinkApi<T>: HasLinkage {
 
 abstract class BaseLinkPoint<out T: LinkPointItem, P>(
     val factory: LinksFactory,
-    val name: String,
+    override val name: String,
     val paramHasher: Hasher<P>
 ): LinkPoint<T> {
+    init {
+        @Suppress("LeakingThis")
+        factory.map[name] = this
+    }
+
     val map: MutableMap<HashStruct, @UnsafeVariance T> = mutableMapOf()
 
     suspend fun getOrPut(hash: HashStruct, view: suspend () -> @UnsafeVariance T) = map.getOrPut(hash) {
@@ -105,22 +108,22 @@ abstract class BaseLinkPoint<out T: LinkPointItem, P>(
         }
     }
 
-    final override suspend fun load(hash: HashStruct): T? {
+    final override suspend fun load(hash: HashStruct, depth: Int): T? {
         val withParam = paramHasher.deserialize(hash)
 
-        return load(hash, withParam.data, withParam.serialized)
+        return load(hash, withParam.data, withParam.serialized, depth)
     }
 
-    abstract suspend fun load(hash: HashStruct, param: P, parentHash: HashStruct): T?
+    abstract suspend fun load(hash: HashStruct, param: P, parentHash: HashStruct, depth: Int): T?
 
-    fun createLinkage(hash: HashStruct) = Linkage(
-        back = { window.history.back() },
+    fun createLinkage(hash: HashStruct, depth: Int, back: Trigger) = Linkage(
+        back = back,
         forward = LinkForwardImpl(
             NamedHashStruct(
                 name,
                 hash
             ),
-            factory.linksDepth.currentDepth
+            toDepth = depth + 1
         )
     )
 
@@ -131,11 +134,14 @@ class HomeLinkPoint<out T: LinkPointItem>(
     name: String,
     private val fn: suspend (Linkage) -> T
 ) : BaseLinkPoint<T, Unit>(factory, name, UnitHasher) {
-    override suspend fun load(hash: HashStruct, param: Unit, parentHash: HashStruct): T? {
+    override suspend fun load(hash: HashStruct, param: Unit, parentHash: HashStruct, depth: Int): T? {
         require(EmptyHashStruct == parentHash) { "home loaded with link parameters!" }
 
-        return getOrPut(EmptyHashStruct) { fn(createLinkage(hash)) }
+        return getOrPut(EmptyHashStruct) { fn(createLinkage(hash, depth, HistoryBack)) }
     }
+
+    suspend fun load() = load(EmptyHashStruct, 0)
+
 }
 
 abstract class ChildLinkPoint<in B: LinkPointItem, out T: LinkPointItem, P>(
@@ -146,56 +152,75 @@ abstract class ChildLinkPoint<in B: LinkPointItem, out T: LinkPointItem, P>(
 ) : BaseLinkPoint<T, P>(factory, name, paramHasher) {
 
     abstract fun parentHash(hash: NamedHashStruct): HashStruct
-    abstract suspend fun loadParent(hash: HashStruct): @UnsafeVariance B?
+    abstract fun parentLink(hash: HashStruct): NamedHashStruct
+    abstract suspend fun loadParent(hash: HashStruct, parentDepth: Int): @UnsafeVariance B?
 
-    override suspend fun load(hash: HashStruct, param: P, parentHash: HashStruct): T? = loadParent(parentHash)?.let { parent ->
+    override suspend fun load(hash: HashStruct, param: P, parentHash: HashStruct, depth: Int): T? = loadParent(parentHash, if (depth == 0) 0 else depth - 1)?.let { parent ->
         fn(
             parent,
             param,
-            createLinkage(hash)
+            createLinkage(
+                hash,
+                depth,
+                if (depth > 0) HistoryBack else {
+                    val fromHash = parentLink(parentHash);
+
+                    {
+                        updateHistoryState(
+                            fromHash,
+                            0,
+                            true
+                        )
+                        parent.redisplay()
+                    }
+                }
+            )
+        )
+    }
+}
+
+fun updateHistoryState(
+    linkHash: NamedHashStruct,
+    toDepth: Int,
+    replace: Boolean = false
+) {
+    val data = obj<PopStateData> {
+        this.depth = toDepth
+    }
+    val stateData = "#${linkHash.toHashStruct.toHashString()}"
+
+    if (replace) {
+        window.history.replaceState(
+            data,
+            "",
+            stateData
+        )
+    } else {
+        window.history.pushState(
+            data,
+            "",
+            stateData
         )
     }
 }
 
 class LinkForwardImpl(
     val hash: NamedHashStruct,
-    val depth: Int
+    val toDepth: Int
 ): LinkForward {
-    private fun updateState(
-        linkHash: NamedHashStruct,
-        replace: Boolean = false
-    ) {
-        val data = obj<PopStateData> {
-            this.depth = if (replace) this@LinkForwardImpl.depth else + 1
-        }
-        val stateData = "#${linkHash.toHashStruct.toHashString()}"
-
-        if (replace) {
-            window.history.replaceState(
-                data,
-                "",
-                "#$stateData"
-            )
-        } else {
-            window.history.pushState(
-                data,
-                "",
-                "#$stateData"
-            )
-        }
-    }
     override suspend fun <T : LinkPointItem, P> to(link: ChildLinkPoint<*, T, P>, param: P, replace: Boolean) {
         val withParam = link.paramHasher.serialize(param, link.parentHash(hash))
 
-        updateState(
+        updateHistoryState(
             NamedHashStruct(
                 link.name,
                 withParam
             ),
+            toDepth,
             replace
         )
 
-        link.load(withParam)?.redisplay?.invoke()
+        link.load(withParam, toDepth)?.redisplay?.invoke()
     }
 }
 
@@ -206,8 +231,9 @@ class SingleLinkPoint<B: LinkPointItem, out T: LinkPointItem, P>(
     fn: suspend (base: B, param: P, linkage: Linkage) -> T?,
     val parentLink: LinkPoint<B>
 ) : ChildLinkPoint<B, T, P>(factory, name, paramHasher, fn) {
-    override suspend fun loadParent(hash: HashStruct): B? = parentLink.load(hash)
+    override suspend fun loadParent(hash: HashStruct, parentDepth: Int): B? = parentLink.load(hash, parentDepth)
     override fun parentHash(hash: NamedHashStruct): HashStruct = hash.hash
+    override fun parentLink(hash: HashStruct): NamedHashStruct = NamedHashStruct(parentLink.name, hash)
 }
 
 
@@ -217,8 +243,9 @@ class MultiLinkPoint<in B: LinkPointItem, out T: LinkPointItem, P>(
     paramHasher: Hasher<P>,
     fn: suspend (base: B, param: P, linkage: Linkage) -> T?
 ) : ChildLinkPoint<B, T, P>(factory, name, paramHasher, fn) {
-    override suspend fun loadParent(hash: HashStruct): @UnsafeVariance B? = hash.toNamed.let { nhs ->
-        factory.map.getValue(nhs.name).unsafeCast<LinkPoint<B>>().load(nhs.hash)
+    override suspend fun loadParent(hash: HashStruct, parentDepth: Int): @UnsafeVariance B? = hash.toNamed.let { nhs ->
+        factory.map.getValue(nhs.name).unsafeCast<LinkPoint<B>>().load(nhs.hash, parentDepth)
     }
     override fun parentHash(hash: NamedHashStruct): HashStruct = hash.toHashStruct
+    override fun parentLink(hash: HashStruct): NamedHashStruct = hash.toNamed
 }
