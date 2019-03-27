@@ -1,20 +1,19 @@
 package commonui.widget
 
-import common.listenAs
 import commonshr.*
 import commonui.HasKillsUix
-import commonui.HasUix
-import domx.on
 import domx.onClick
-import org.w3c.dom.events.Event
 import org.w3c.dom.events.EventTarget
-
+import kotlin.browser.window
 
 
 fun EventTarget.click(deps: HasKillsUix, action: Trigger) {
     onClick(deps) {
         it.preventDefault()
-        deps.uix(action)
+        window.setTimeout(
+            { deps.uix(action) },
+            0
+        )
     }
 }
 

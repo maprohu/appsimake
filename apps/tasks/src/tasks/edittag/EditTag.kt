@@ -16,7 +16,7 @@ class EditTag(
     from: ListTags,
     linkage: Linkage,
     item: FsEditable<Tag>
-): ForwardBase<TopAndContent>(from), EditTagPath, ListTagsPath by from, FBBackApi, Editor, HasBack by linkage {
+): ForwardTC(from), EditTagPath, ListTagsPath by from, FBBackApi, Editor, HasBack by linkage {
     override val editTag = this
 
     override val editing = rxEditing(item)

@@ -20,7 +20,13 @@ import kotlin.browser.document
 
 
 fun EditTask.ui() = editTaskUi(editing.current) {
-    slots.left.backSaveDiscard
+    slots.left.backSaveDiscard {
+        if (!fromView) {
+            saveAndView {
+                viewTask()
+            }
+        }
+    }
     title %= "Edit Task"
     right.saveDeleteButton
 }

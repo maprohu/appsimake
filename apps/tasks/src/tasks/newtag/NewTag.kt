@@ -2,6 +2,7 @@ package tasks.newtag
 
 import commonfb.FBBackApi
 import commonui.*
+import commonui.editing.onEdit
 import commonui.editing.onPersist
 import commonui.links.Linkage
 import commonui.widget.TopAndContent
@@ -21,7 +22,7 @@ class NewTag(
 
     override val creating = rxCreating(
         item,
-        onPersist {
+        onEdit {
             from.editTag(item.id.id, true)
         }
     )

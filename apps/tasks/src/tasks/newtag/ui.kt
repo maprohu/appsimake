@@ -15,9 +15,9 @@ import kotlin.browser.document
 
 fun NewTag.ui() = TopAndContent(
     topbar = factory.topbar {
-        slots.left.backSaveDiscard
+        slots.left.backPersistDiscard
         title %= "New Tag"
-        right.saveButton
+        right.persistButton
     }.node,
     content = document.column {
         cls {
@@ -27,7 +27,7 @@ fun NewTag.ui() = TopAndContent(
             cls {
                 m1
             }
-            bind(editing.current.name).required()
+            bind(creating.current.name).required()
         }
     }
 )

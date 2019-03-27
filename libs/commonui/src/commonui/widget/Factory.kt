@@ -233,7 +233,7 @@ class SlotVar(
 abstract class ScreenWrap: HasHTMLElement, InvokeApply {
     val target = Var<Slot?>(null)
 
-    val <T: HasHTMLElement> T.append: T get() = apply { this@ScreenWrap.node.widget %= this@apply.node }
+    val <T: ScreenWrap> T.append: T get() = setTo(this@ScreenWrap.node.widget)
 }
 
 fun ScreenWrap.visible(deps: HasKills, fn: KillsApi.() -> Boolean) {

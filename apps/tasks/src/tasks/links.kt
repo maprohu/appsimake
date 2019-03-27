@@ -2,6 +2,7 @@ package tasks
 
 import commonfb.FbLinksDeps
 import commonfb.FbLinksFactory
+import commonshr.reportd
 import commonshr.toFsEditable
 import commonui.*
 import commonui.links.StringHasher
@@ -79,7 +80,8 @@ class Links(
             vt,
             lnk,
             vt.fsDoc.toFsEditable(),
-            deleteTrigger = { vt.backOnRedisplay() }
+            deleteTrigger = { vt.backOnRedisplay() },
+            fromView = true
         ).forwarding(vt)
     }
 

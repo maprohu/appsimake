@@ -19,12 +19,13 @@ interface EditTaskPath: LoggedInPath {
     val editTask: EditTask
 }
 
-interface EditTaskLike: BindKillsApi, LoggedInPath, KillsUixApi, CsKillsApi, CsApiCommonui
+interface EditTaskLike: BindCsKillsUixApi, LoggedInPath
 class EditTask(
     val from: LoggedInTC<*>,
     linkage: Linkage,
-    item: FsEditable<Task>,
-    deleteTrigger: Trigger = Noop
+    val item: FsEditable<Task>,
+    deleteTrigger: Trigger = Noop,
+    val fromView: Boolean = false
 ): ForwardTC(from), EditTaskLike, EditTaskPath, LoggedInPath by from, FBBackApi, Editor, HasBack by linkage {
     override val editTask = this
 
@@ -38,6 +39,14 @@ class EditTask(
                 deleteTrigger()
             }
         )
+    }
+
+    fun viewTask() {
+        with (from) {
+            advance {
+                links.viewTask.fwd(item.id.id, true)
+            }
+        }
     }
 
     override val rawView = ui()

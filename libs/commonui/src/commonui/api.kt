@@ -117,4 +117,5 @@ typealias Editor = BackEditKillsUixApi
 typealias Creator = BackCreateKillsUixApi
 
 
+interface BindCsKillsUixApi: BindKillsApi, KillsUixApi, CsKillsApi, CsApiCommonui
 

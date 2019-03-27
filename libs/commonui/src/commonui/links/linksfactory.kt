@@ -82,9 +82,15 @@ abstract class BaseLinkPoint<out T: LinkPointItem, P>(
 
     val map: MutableMap<HashStruct, @UnsafeVariance T> = mutableMapOf()
 
-    suspend fun getOrPut(hash: HashStruct, view: suspend () -> @UnsafeVariance T) = map.getOrPut(hash) {
-        view().apply {
+    suspend fun getOrPut(hash: HashStruct, view: suspend () -> @UnsafeVariance T?): T? {
+        return map[hash] ?: view()?.apply {
+//            val hstr = namedHash(hash).toHashStruct.toHashString()
+
+//            console.log("on: $hstr")
+            map[hash] = this
+
             kills += {
+//                console.log("off: $hstr")
                 map.remove(hash)
             }
         }
@@ -108,10 +114,14 @@ abstract class BaseLinkPoint<out T: LinkPointItem, P>(
         }
     }
 
-    final override suspend fun load(hash: HashStruct, depth: Int): T? {
-        val withParam = paramHasher.deserialize(hash)
+    fun namedHash(hash: HashStruct) = NamedHashStruct(
+        name,
+        hash
+    )
 
-        return load(hash, withParam.data, withParam.serialized, depth)
+    final override suspend fun load(hash: HashStruct, depth: Int): T? = getOrPut(hash) {
+        val withParam = paramHasher.deserialize(hash)
+        load(hash, withParam.data, withParam.serialized, depth)
     }
 
     abstract suspend fun load(hash: HashStruct, param: P, parentHash: HashStruct, depth: Int): T?
@@ -119,10 +129,7 @@ abstract class BaseLinkPoint<out T: LinkPointItem, P>(
     fun createLinkage(hash: HashStruct, depth: Int, back: Trigger) = Linkage(
         back = back,
         forward = LinkForwardImpl(
-            NamedHashStruct(
-                name,
-                hash
-            ),
+            namedHash(hash),
             toDepth = depth + 1
         )
     )
@@ -137,7 +144,7 @@ class HomeLinkPoint<out T: LinkPointItem>(
     override suspend fun load(hash: HashStruct, param: Unit, parentHash: HashStruct, depth: Int): T? {
         require(EmptyHashStruct == parentHash) { "home loaded with link parameters!" }
 
-        return getOrPut(EmptyHashStruct) { fn(createLinkage(hash, depth, HistoryBack)) }
+        return fn(createLinkage(hash, depth, HistoryBack))
     }
 
     suspend fun load() = load(EmptyHashStruct, 0)

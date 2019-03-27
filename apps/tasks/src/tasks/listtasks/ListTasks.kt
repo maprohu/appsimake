@@ -4,11 +4,13 @@ import commonfb.FBBackApi
 import commonshr.FsDoc
 import commonshr.idOrFail
 import commonui.*
+import commonui.links.LinkApi
 import commonui.links.Linkage
 import commonui.widget.TopAndContent
 import rx.Var
 import tasks.loggedin.LoggedIn
 import tasks.loggedin.LoggedInPath
+import tasks.loggedin.LoggedInTC
 import taskslib.Task
 
 interface ListTasksPath: LoggedInPath {
@@ -16,8 +18,8 @@ interface ListTasksPath: LoggedInPath {
 }
 class ListTasks(
     from: LoggedIn,
-    linkage: Linkage
-): ForwardBase<TopAndContent>(from), ListTasksPath, LoggedInPath by from, FBBackApi, FromTC {
+    override val linkage: Linkage
+): ForwardBase<TopAndContent>(from), LoggedInTC<ListTasks>, ListTasksPath, LoggedInPath by from, FBBackApi, HasBack by linkage {
     override val listTasks = this
 
     val tags = Var(emptyList<String>())
@@ -27,11 +29,11 @@ class ListTasks(
     }
 
     fun newTask() = advance {
-        links.newTask.fwd(links.listTasks)
+        links.newTask.fwd()
     }
 
     fun FsDoc<Task>.view() = advance {
-        links.viewTask.fwd(links.listTasks, idOrFail)
+        links.viewTask.fwd(idOrFail)
     }
 
     override val rawView = ui()

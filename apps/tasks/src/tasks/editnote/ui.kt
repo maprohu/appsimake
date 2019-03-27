@@ -16,7 +16,7 @@ import kotlin.browser.document
 fun EditNote.ui() = TopAndContent(
     topbar = factory.topbar {
         slots.left.backSaveDiscard
-        title %= "Note"
+        title %= "Edit Note"
         right.saveDeleteButton
     }.node,
     content = document.column {

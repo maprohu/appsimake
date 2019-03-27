@@ -9,8 +9,7 @@ import fontawesome.*
 import kotlin.browser.document
 
 class DropdownMenuItem(): ScreenWrap() {
-    override val node = document.a {
-        href = "#"
+    override val node = document.button {
         cls {
             dropdownItem
             p1

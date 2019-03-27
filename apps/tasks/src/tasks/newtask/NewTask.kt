@@ -21,16 +21,25 @@ class NewTask(
 
     val item = loggedIn.tasksCollection.randomEditable()
 
-    override val creating = rxCreating(
-        item,
-        onPersist {
-            with (from) {
-                advance {
-                    links.editTask.fwd(item.id.id, true)
+    override val creating = rxCreating(item) { tr ->
+        tr.copy(
+            edit = {
+                with (from) {
+                    advance {
+                        links.editTask.fwd(item.id.id, true)
+                    }
                 }
             }
+        )
+    }
+
+    fun viewTask() {
+        with (from) {
+            advance {
+                links.viewTask.fwd(item.id.id, true)
+            }
         }
-    )
+    }
 
     override val rawView = ui()
 }

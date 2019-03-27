@@ -92,6 +92,13 @@ fun <T> onPersist(fn: Trigger): Copier<CreatingTriggers<T>> = { tr ->
         }
     )
 }
+fun <T> onEdit(fn: Trigger): Copier<CreatingTriggers<T>> = { tr ->
+    tr.copy(
+        edit = {
+            fn()
+        }
+    )
+}
 
 class RxEditing<T: RxBase<*>>(
     kills: KillSet,
@@ -239,135 +246,178 @@ fun Factory.saveDeleteButton(deps: HasBackEditKillsUix) = buttonGroup {
 class BackPersistDiscard(
     deps: HasBackCreateKillsUix,
     holes: SlotHoles
-): HasBackCreateKillsUix by deps, KillsApiCommonui, KillsUixApi {
-    init {
+): HasBackCreateKillsUix by deps, KillsApiCommonui, KillsUixApi, InvokeApply {
+    val discardButton = holes.slot.insert.button {
+        visible { creating.dirty() && !creating.canSave() }
+        m1p2
+        fa.backspace
+        danger
+        click {
+            back()
+        }
+    }
 
-        holes.slot.insert.button {
-            visible { creating.dirty() && !creating.canSave() }
-            m1p2
-            fa.backspace
-            danger
+    val backButton = holes.slot.insert.button {
+        visible { !creating.dirty() && !creating.canSave() }
+        back
+        click {
+            back()
+        }
+    }
+    val saveButtonGroup = holes.slot.insert.buttonGroup {
+        visible { creating.canSave() }
+        cls.m1
+        button {
+            cls {
+                p2
+                btnSuccess
+            }
+            node.span {
+                cls.fa {
+                    fw
+                    chevronLeft
+                }
+            }
+            node.span {
+                cls.fa {
+                    fw
+                    save
+                }
+            }
             click {
+                creating.persist()
                 back()
             }
         }
-        holes.slot.insert.button {
-            visible { !creating.dirty() && !creating.canSave() }
-            back
-            click {
-                back()
-            }
+        dropdownSplit {
+            cls.btnSuccess
         }
-        holes.slot.insert.buttonGroup {
-            visible { creating.canSave() }
-            cls.m1
-            button {
-                cls {
-                    p2
-                    btnSuccess
-                }
-                node.span {
-                    cls.fa {
-                        fw
-                        chevronLeft
-                    }
-                }
-                node.span {
-                    cls.fa {
-                        fw
-                        save
-                    }
-                }
+        menu {
+            item {
+                visible { !creating.dirty() }
+                fa.chevronLeft
+                text %= "Back"
                 click {
-                    creating.persist()
                     back()
                 }
             }
-            dropdownSplit {
-                cls.btnSuccess
-            }
-            menu {
-                item {
-                    visible { !creating.dirty() }
-                    fa.chevronLeft
-                    text %= "Back"
-                    click {
-                        back()
-                    }
-                }
-                item {
-                    visible { creating.dirty() }
-                    cls.textDanger
-                    fa.backspace
-                    text %= "Discard"
-                    click {
-                        back()
-                    }
+            item {
+                visible { creating.dirty() }
+                cls.textDanger
+                fa.backspace
+                text %= "Discard"
+                click {
+                    back()
                 }
             }
         }
     }
 
+    fun saveAndView(view: Trigger) {
+        saveButtonGroup.menu.item {
+            cls.textSuccess
+            fa.save
+            text %= "Save and View"
+            click {
+                creating.persist()
+                view()
+            }
+        }
+    }
+
 }
+
 class BackSaveDiscard(
     deps: HasBackEditKillsUix,
     holes: SlotHoles
-): HasBackEditKillsUix by deps, KillsApiCommonui, KillsUixApi {
-    init {
+): HasBackEditKillsUix by deps, KillsApiCommonui, KillsUixApi, InvokeApply {
+    val discardButton = holes.slot.insert.button {
+        visible { editing.dirty() && !editing.canSave() }
+        m1p2
+        fa.backspace
+        danger
+        click {
+            back()
+        }
+    }
 
-        holes.slot.insert.button {
-            visible { editing.dirty() && !editing.canSave() }
-            m1p2
-            fa.backspace
-            danger
+    val backButton = holes.slot.insert.buttonGroup {
+        visible { !editing.dirty() }
+        cls.m1
+        button {
+            cls {
+                p2
+                btnSecondary
+            }
+            fa.chevronLeft
             click {
                 back()
             }
         }
-        holes.slot.insert.button {
-            visible { !editing.dirty() }
-            back
+    }
+
+    val backButtonDropdown by lazy {
+        backButton.dropdownSplit {
+            cls.btnSecondary
+        }
+        backButton.menu
+    }
+
+    val saveButtonGroup = holes.slot.insert.buttonGroup {
+        visible { editing.dirty() && editing.canSave() }
+        cls.m1
+        button {
+            cls {
+                p2
+                btnSuccess
+            }
+            node.span {
+                cls.fa {
+                    fw
+                    chevronLeft
+                }
+            }
+            node.span {
+                cls.fa {
+                    fw
+                    save
+                }
+            }
             click {
+                editing.save()
                 back()
             }
         }
-        holes.slot.insert.buttonGroup {
-            visible { editing.dirty() && editing.canSave() }
-            cls.m1
-            button {
-                cls {
-                    p2
-                    btnSuccess
-                }
-                node.span {
-                    cls.fa {
-                        fw
-                        chevronLeft
-                    }
-                }
-                node.span {
-                    cls.fa {
-                        fw
-                        save
-                    }
-                }
+        dropdownSplit {
+            cls.btnSuccess
+        }
+        menu {
+            item {
+                cls.textDanger
+                fa.backspace
+                text %= "Discard"
                 click {
-                    editing.save()
                     back()
                 }
             }
-            dropdownSplit {
-                cls.btnSuccess
+        }
+    }
+
+    fun saveAndView(view: Trigger) {
+        saveButtonGroup.menu.item {
+            cls.textSuccess
+            fa.save
+            text %= "Save and View"
+            click {
+                editing.save()
+                view()
             }
-            menu {
-                item {
-                    cls.textDanger
-                    fa.backspace
-                    text %= "Discard"
-                    click {
-                        back()
-                    }
-                }
+        }
+        backButtonDropdown.item {
+            fa.eye
+            text %= "Close and View"
+            click {
+                view()
             }
         }
     }

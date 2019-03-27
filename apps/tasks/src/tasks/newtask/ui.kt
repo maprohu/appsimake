@@ -20,8 +20,10 @@ import taskslib.Task
 import kotlin.browser.document
 
 
-fun NewTask.ui() = editTaskUi(item.doc) {
-    slots.left.backPersistDiscard
+fun NewTask.ui() = editTaskUi(creating.current) {
+    slots.left.backPersistDiscard.saveAndView {
+        viewTask()
+    }
     title %= "New Task"
     right.persistButton
 }
