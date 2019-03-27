@@ -1,6 +1,6 @@
 package tasks.listtasks
 
-import commonfb.FBFromApi
+import commonfb.FBBackApi
 import commonshr.FsDoc
 import commonshr.idOrFail
 import commonui.*
@@ -17,7 +17,7 @@ interface ListTasksPath: LoggedInPath {
 class ListTasks(
     from: LoggedIn,
     linkage: Linkage
-): ForwardBase<TopAndContent>(from), ListTasksPath, LoggedInPath by from, FBFromApi, FromTC {
+): ForwardBase<TopAndContent>(from), ListTasksPath, LoggedInPath by from, FBBackApi, FromTC {
     override val listTasks = this
 
     val tags = Var(emptyList<String>())

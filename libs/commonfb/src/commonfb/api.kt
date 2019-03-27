@@ -4,6 +4,7 @@ import commonfb.editing.*
 import commonshr.*
 import commonshr.properties.RxBase
 import commonui.*
+import commonui.editing.CreatingTriggers
 import commonui.editing.EditingTriggers
 import firebase.CsDbKillsApi
 import firebase.DbKillsApi
@@ -19,18 +20,25 @@ interface DbKillsApiCommonfb: DbKillsApi {
         initial,
         triggers
     )
+
+    fun <T: RxBase<*>> rxCreating(
+        initial: FsEditable<T>,
+        triggers: Copier<CreatingTriggers<T>> = identity()
+    ) = rxCreating(
+        api,
+        initial,
+        triggers
+    )
 }
 
 interface FBApi: CsDbKillsUixApi, HasRedisplay
-interface FBFromApi: FBApi, CsDbFromKillsUixApi {
-    override val from: HasRedisplay get() = GoBackRedisplay
-}
+interface FBBackApi: FBApi, BackCsDbKillsUixApi, HasBackRedisplayv
 
 interface CsDbKillsUixApi: CsDbKillsApi, DbKillsApiCommonfb, KillsUixApi, CsApiCommonui, KillsApiCommonui {
 
 }
 
-interface CsDbFromKillsUixApi: CsDbKillsUixApi, FromKillsUixApi {
+interface BackCsDbKillsUixApi: CsDbKillsUixApi, BackKillsUixApi {
 
 }
 

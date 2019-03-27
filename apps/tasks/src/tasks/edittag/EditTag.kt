@@ -1,10 +1,9 @@
 package tasks.edittag
 
-import commonfb.FBFromApi
-import commonshr.FsDoc
+import commonfb.FBBackApi
 import commonshr.FsEditable
-import commonshr.Trigger
 import commonui.*
+import commonui.links.Linkage
 import commonui.widget.TopAndContent
 import tasks.listtags.ListTags
 import tasks.listtags.ListTagsPath
@@ -15,14 +14,19 @@ interface EditTagPath: ListTagsPath {
 }
 class EditTag(
     from: ListTags,
-    item: FsEditable<Tag>,
-    val delete: Trigger
-): ForwardBase<TopAndContent>(from), EditTagPath, ListTagsPath by from, FBFromApi, Editor {
+    linkage: Linkage,
+    item: FsEditable<Tag>
+): ForwardBase<TopAndContent>(from), EditTagPath, ListTagsPath by from, FBBackApi, Editor, HasBack by linkage {
     override val editTag = this
 
-    override val editing = rxEditing(
-        item
-    )
+    override val editing = rxEditing(item) { tr ->
+        tr.copy(
+            delete = {
+                tr.delete()
+                back()
+            }
+        )
+    }
 
     override val rawView = ui()
 }

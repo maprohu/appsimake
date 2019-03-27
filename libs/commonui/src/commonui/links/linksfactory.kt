@@ -5,11 +5,15 @@ import common.named
 import common.obj
 import commonshr.Trigger
 import commonshr.plusAssign
+import commonui.HasBack
+import commonui.HasForwardTC
+import commonui.HasKillsRoutingTC
 import commonui.HasLinkage
 import kotlin.browser.window
 
 
 typealias LinksContext = Any
+interface BaseTC: LinkPointItem, HasKillsRoutingTC, HasForwardTC, HasLinkage
 
 abstract class LinksFactory(
     private val homeName: String = "home",
@@ -57,9 +61,9 @@ interface LinkForward {
 }
 class Linkage(
 //    val hash: NamedHashStruct,
-    val back: Trigger,
+    override val back: Trigger,
     val forward: LinkForward
-)
+): HasBack
 
 interface LinkApi<T>: HasLinkage {
 
@@ -134,7 +138,7 @@ class HomeLinkPoint<out T: LinkPointItem>(
     }
 }
 
-abstract class ChildLinkPoint<B: LinkPointItem, out T: LinkPointItem, P>(
+abstract class ChildLinkPoint<in B: LinkPointItem, out T: LinkPointItem, P>(
     factory: LinksFactory,
     name: String,
     paramHasher: Hasher<P>,
@@ -142,7 +146,7 @@ abstract class ChildLinkPoint<B: LinkPointItem, out T: LinkPointItem, P>(
 ) : BaseLinkPoint<T, P>(factory, name, paramHasher) {
 
     abstract fun parentHash(hash: NamedHashStruct): HashStruct
-    abstract suspend fun loadParent(hash: HashStruct): B?
+    abstract suspend fun loadParent(hash: HashStruct): @UnsafeVariance B?
 
     override suspend fun load(hash: HashStruct, param: P, parentHash: HashStruct): T? = loadParent(parentHash)?.let { parent ->
         fn(
@@ -207,13 +211,13 @@ class SingleLinkPoint<B: LinkPointItem, out T: LinkPointItem, P>(
 }
 
 
-class MultiLinkPoint<B: LinkPointItem, out T: LinkPointItem, P>(
+class MultiLinkPoint<in B: LinkPointItem, out T: LinkPointItem, P>(
     factory: LinksFactory,
     name: String,
     paramHasher: Hasher<P>,
     fn: suspend (base: B, param: P, linkage: Linkage) -> T?
 ) : ChildLinkPoint<B, T, P>(factory, name, paramHasher, fn) {
-    override suspend fun loadParent(hash: HashStruct): B? = hash.toNamed.let { nhs ->
+    override suspend fun loadParent(hash: HashStruct): @UnsafeVariance B? = hash.toNamed.let { nhs ->
         factory.map.getValue(nhs.name).unsafeCast<LinkPoint<B>>().load(nhs.hash)
     }
     override fun parentHash(hash: NamedHashStruct): HashStruct = hash.toHashStruct

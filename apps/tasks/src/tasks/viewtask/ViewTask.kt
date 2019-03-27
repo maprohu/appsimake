@@ -1,11 +1,13 @@
 package tasks.viewtask
 
-import commonfb.FBFromApi
+import commonfb.FBBackApi
 import commonshr.*
 import commonshr.properties.copy
 import commonui.*
-import tasks.loggedin.LoggedIn
+import commonui.links.LinkApi
+import commonui.links.Linkage
 import tasks.loggedin.LoggedInPath
+import tasks.loggedin.LoggedInTC
 import taskslib.Note
 import taskslib.Task
 import taskslib.TaskStatus
@@ -15,39 +17,37 @@ interface ViewTaskPath: LoggedInPath {
     val viewTask: ViewTask
 }
 class ViewTask(
-    loggedIn: LoggedIn,
-    from: FromTC,
-    val fromLink: Link<Unit, FromTC>,
-    val editable: FsEditable<Task>
-): ForwardTC(from), ViewTaskPath, LoggedInPath by loggedIn, FBFromApi {
+    loggedIn: LoggedInTC<*>,
+    override val linkage: Linkage,
+    editable: FsEditable<Task>
+): ForwardTC(loggedIn), LoggedInTC<ViewTask>, ViewTaskPath, LoggedInPath by loggedIn, FBBackApi, HasBack by linkage  {
     override val viewTask = this
 
     val notes = editable.id.notes
 
     val fsDoc = editable.toFsDoc().live
 
-    fun FsDoc<Note>.edit() = advance {
+    fun FsDoc<Note>.edit() {
+        editNote(idOrFail)
+    }
+
+    fun editNote(id: String, replace: Boolean = false) = advance {
+        links.editNote.fwd(id, replace)
     }
 
     fun edit() = advance {
-        links.editTask.fwd(fromLink, editable.id.id)
+        links.editViewTask.fwd()
     }
 
-    fun newComment() {
-//        exec {
-//            forward.switchTo {
-//                EditNote(this@ViewTask, Note().toRandomFsDoc(notes)).apply {
-//                    item.live
-//                }
-//            }
-//        }
+    fun newComment() = advance {
+        links.newNote.fwd()
     }
 
     fun markAsCompleted() {
         fsDoc.rxv.now.copy().apply {
             status %= TaskStatus.Completed
             toFsDoc(fsDoc.id).save()
-            from.redisplay()
+            back()
         }
     }
 

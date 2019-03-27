@@ -18,7 +18,17 @@ import taskslib.Note
 import taskslib.Task
 import kotlin.browser.document
 
-fun EditTask.ui(): TopAndContent {
+
+fun EditTask.ui() = editTaskUi(editing.current) {
+    slots.left.backSaveDiscard
+    title %= "Edit Task"
+    right.saveDeleteButton
+}
+
+fun EditTaskLike.editTaskUi(
+    item: Task,
+    topbarCustomizer: Topbar.() -> Unit
+): TopAndContent {
 
     val mainPage = factory.scrollPane {
         pane {
@@ -26,20 +36,20 @@ fun EditTask.ui(): TopAndContent {
             insert.formGroup {
                 label %= "Title"
                 input {
-                    bind(editing.current.title).required()
+                    bind(item.title).required()
                 }
             }
             insert.formGroup {
                 label %= "Text"
                 textArea {
                     node.rows = 5
-                    bind(editing.current.text)
+                    bind(item.text)
                 }
             }
             insert.formGroup {
                 label %= "Status"
                 select {
-                    bind(editing.current.status)
+                    bind(item.status)
                 }
             }
         }
@@ -54,7 +64,7 @@ fun EditTask.ui(): TopAndContent {
         fun create() {
             if (canCreate.now) {
                 loggedIn.createTag(filter.now).idOrFail.let { id ->
-                    editing.current.tags.rxv.transform { it + id }
+                    item.tags.rxv.transform { it + id }
                 }
                 clearFilter.fire()
             }
@@ -108,7 +118,7 @@ fun EditTask.ui(): TopAndContent {
                             .mapLive { e ->
                                 visibleCount.incremented()
                                 val id = e.idOrFail
-                                val contains = rx { id in editing.current.tags() }
+                                val contains = rx { id in item.tags() }
                                 factory.listGroupButton {
                                     left.insert.wraps.div {
                                         cls {
@@ -121,9 +131,9 @@ fun EditTask.ui(): TopAndContent {
                                     text %= { e().name() }
                                     click {
                                         if (contains.now) {
-                                            editing.current.tags.rxv.transform { it - id }
+                                            item.tags.rxv.transform { it - id }
                                         } else {
-                                            editing.current.tags.rxv.transform { it + id }
+                                            item.tags.rxv.transform { it + id }
                                         }
                                     }
                                 }.node
@@ -138,9 +148,7 @@ fun EditTask.ui(): TopAndContent {
     val active = Var<HTMLElement>(mainPage)
     return TopAndContent(
         topbar = factory.topbar {
-            slots.left.backSaveDiscard
-            title %= "Edit Task"
-            right.saveDeleteButton
+            topbarCustomizer()
             tabs {
                 tab {
                     clickActivate

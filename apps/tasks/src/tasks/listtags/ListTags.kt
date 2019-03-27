@@ -1,13 +1,12 @@
 package tasks.listtags
 
-import commonfb.FBFromApi
+import commonfb.FBBackApi
 import commonshr.FsDoc
 import commonshr.idOrFail
 import commonui.*
 import commonui.links.LinkApi
 import commonui.links.Linkage
 import commonui.widget.TopAndContent
-import kotlinx.coroutines.launch
 import tasks.loggedin.LoggedIn
 import tasks.loggedin.LoggedInPath
 import taskslib.Tag
@@ -18,7 +17,7 @@ interface ListTagsPath: LoggedInPath {
 class ListTags(
     from: LoggedIn,
     override val linkage: Linkage
-): ForwardBase<TopAndContent>(from), ListTagsPath, LoggedInPath by from, FBFromApi, LinkApi<ListTags> {
+): ForwardBase<TopAndContent>(from), ListTagsPath, LoggedInPath by from, FBBackApi, LinkApi<ListTags>, HasBack by linkage {
     override val listTags = this
 
     fun newTag() = advance {

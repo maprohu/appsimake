@@ -1,37 +1,45 @@
 package tasks.edittask
 
-import commonfb.FBFromApi
+import commonfb.FBBackApi
+import commonshr.CsKillsApi
 import commonshr.FsEditable
 import commonshr.Trigger
 import commonui.*
+import commonui.links.Linkage
+import killable.Noop
 import kotlinx.coroutines.launch
 import tasks.data.deleteCollections
+import tasks.loggedin.LoggedInPath
+import tasks.loggedin.LoggedInTC
 import tasks.viewtask.ViewTask
 import tasks.viewtask.ViewTaskPath
 import taskslib.Task
 
-interface EditTaskPath: ViewTaskPath {
+interface EditTaskPath: LoggedInPath {
     val editTask: EditTask
 }
 
-
+interface EditTaskLike: BindKillsApi, LoggedInPath, KillsUixApi, CsKillsApi, CsApiCommonui
 class EditTask(
-    from: ViewTask,
+    val from: LoggedInTC<*>,
+    linkage: Linkage,
     item: FsEditable<Task>,
-    exit: EditorExit<EditTask> = EditorExit.GoBack2
-): ForwardTC(from), EditTaskPath, ViewTaskPath by from, FBFromApi, Editor, HasExit by exit {
+    deleteTrigger: Trigger = Noop
+): ForwardTC(from), EditTaskLike, EditTaskPath, LoggedInPath by from, FBBackApi, Editor, HasBack by linkage {
     override val editTask = this
 
-    override val editing = rxEditing(
-        item,
-        delete = {
-            item.delete()
-            loggedIn.launch {
-                item.id.deleteCollections(this@EditTask)
+    override val editing = rxEditing(item) { tr ->
+        tr.copy(
+            delete = {
+                item.delete()
+                loggedIn.launch {
+                    item.id.deleteCollections(this@EditTask)
+                }
+                deleteTrigger()
+                back()
             }
-        },
-        onPersist = { exit.onPersist(this) }
-    )
+        )
+    }
 
     override val rawView = ui()
 }

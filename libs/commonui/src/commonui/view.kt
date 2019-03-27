@@ -187,13 +187,14 @@ fun ForwardView<TopAndContent, SimpleView<TopAndContent>>.hourglass() {
     this %= ProgressTC(this)
 }
 
+typealias HasForwardTC = HasForward<ViewTC>
 interface HasForward<in F: Any> {
     val fwd: (F?) -> Unit
 }
 
 abstract class ForwardView<V: Any, in F: CsKillsView<V>>(
     parent: HasKillsRouting<V>
-): CsKillsView<V>(parent), HasKillsRedisplay, HasUix, HasForward<F> {
+): CsKillsView<V>(parent), HasKillsRedisplay, HasUix, HasForward<F>, HasRedisplayv {
 
 //    private val status = Var<FwdStatus<F>>(FwdStatus.Self(null))
     @Suppress("LeakingThis")
@@ -234,10 +235,15 @@ abstract class ForwardView<V: Any, in F: CsKillsView<V>>(
 //        status %= FwdStatus.Self<F>(null)
 //    }
 
-    override val redisplay = { returnToSelf() }
+    override var redisplay = { returnToSelf() }
     override val fwd: (F?) -> Unit = { forwardTo(it) }
 
 }
+
+fun HasBackRedisplayv.backOnRedisplay() {
+    redisplay = { back() }
+}
+
 
 operator fun <F: Any> HasForward<F>.remAssign(item: F?) { fwd(item) }
 

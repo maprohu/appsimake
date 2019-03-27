@@ -49,7 +49,11 @@ interface KillsUixApi: Api, HasKillsUix, KillsApiCommonui {
 
 }
 
-interface FromKillsUixApi: Api, HasFromKillsUix, KillsUixApi {
+interface BackApi: Api, HasBack {
+    fun <T> backOnDelete() = backOnDelete<T>(api)
+}
+
+interface BackKillsUixApi: Api, BackApi, HasBackKillsUix, KillsUixApi {
 
     val Topbar.backButton get() = backButton(api)
     val Factory.backButton get() = backButton(api)
@@ -84,29 +88,33 @@ interface BindKillsApi: HasBindKills, KillsApiCommonui {
 
 }
 
-interface EditKillsApi: BindKillsApi, HasEditKills {
+interface EditKillsApi: BindKillsApi, HasEditKills
+
+interface CreateKillsApi: BindKillsApi, HasCreateKills
+
+
+interface CreateKillsUixApi: CreateKillsApi, HasCreateKillsUix {
+    val Factory.persistButton get() = persistButton(api)
 
 }
 
 interface EditKillsUixApi: EditKillsApi, HasEditKillsUix {
     val Factory.saveButton get() = saveButton(api)
-    val SlotHoles.backSaveDiscard get() = BackSaveDiscard(api, this)
-}
-
-interface EditFromKillsUixApi: EditKillsUixApi, HasEditFromKillsUix {
-}
-
-//interface HistoryKillsRedisplayApi: Api, KillsApiCommonui, HasHistoryKillsRedisplay {
-//}
-//val HasHistoryKillsRedisplay.historyItem get() = historyItem(this)
-//val HasHistoryKillsRedisplay.historyRoot get() = historyRoot(this)
-
-interface EditExitFromKillsUixApi: EditFromKillsUixApi, HasEditExitFromKillsUix {
     val Factory.saveDeleteButton get() = saveDeleteButton(api)
-    val SlotHoles.backSaveDiscard get() = BackSaveDiscard(api, this)
 }
 
-typealias Editor = EditFromKillsUixApi
+interface BackEditKillsUixApi: EditKillsUixApi, HasBackEditKillsUix {
+    val SlotHoles.backSaveDiscard get() = BackSaveDiscard(api, this)
+
+}
+
+interface BackCreateKillsUixApi: CreateKillsUixApi, HasBackCreateKillsUix {
+    val SlotHoles.backPersistDiscard get() = BackPersistDiscard(api, this)
+}
+
+
+typealias Editor = BackEditKillsUixApi
+typealias Creator = BackCreateKillsUixApi
 
 
 

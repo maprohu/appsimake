@@ -1,11 +1,9 @@
 package tasks
 
-import commonfb.FbLinks
-import commonfb.FbLinksApi
 import commonfb.FbLinksDeps
 import commonfb.FbLinksFactory
+import commonshr.toFsEditable
 import commonui.*
-import commonui.links.BaseLinkPoint
 import commonui.links.StringHasher
 import firebase.DbApi
 import tasks.editnote.EditNote
@@ -14,6 +12,10 @@ import tasks.edittask.EditTask
 import tasks.listtags.ListTags
 import tasks.listtasks.ListTasks
 import tasks.loggedin.LoggedIn
+import tasks.loggedin.LoggedInTC
+import tasks.newnote.NewNote
+import tasks.newtag.NewTag
+import tasks.newtask.NewTask
 import tasks.selecttags.SelectTags
 import tasks.viewtask.ViewTask
 
@@ -52,102 +54,64 @@ class Links(
     val editTag by listTags.param(StringHasher).child { lt, tid, lnk->
         EditTag(
             lt,
+            lnk,
             lt.loggedIn.userTags.doc(tid).get()
         ).forwarding(lt)
     }
 
-    val newTag: Link<Unit, EditTag> by listTags.child { lt ->
-        val item = lt.loggedIn.userTags.randomEditable()
-        EditTag(
+    val newTag by listTags.child { lt, lnk ->
+        NewTag(
             lt,
-            item,
-            exiting(
-                newTag,
-                LinkParam(editTag, item.id.id.asChildLinkId)
-            )
+            lnk
         ).forwarding(lt)
     }
 
-    val viewTask by parentTC().param(StringHasher).child { parent, tid ->
-        welcome.get()?.let { w ->
-            ViewTask(
-                w,
-                parent,
-                p.link.link,
-                w.loggedIn.tasksCollection.doc(p.param).get()
-            ).forwarding(parent)
-        }
+    val viewTask by base<LoggedInTC<*>>().param(StringHasher).child { parent, tid, lnk ->
+        ViewTask(
+            parent,
+            lnk,
+            parent.loggedIn.tasksCollection.doc(tid).get()
+        ).forwarding(parent)
     }
 
-    val editTask by baseTC().param<String>().link { p ->
-        viewTask.get(p)?.let { vt ->
-            EditTask(
-                vt,
-                vt.fsDoc.toFsEditable()
-            ).forwarding(vt)
-        }
+    val editViewTask by viewTask.child { vt, lnk ->
+        EditTask(
+            vt,
+            lnk,
+            vt.fsDoc.toFsEditable(),
+            deleteTrigger = { vt.backOnRedisplay() }
+        ).forwarding(vt)
     }
 
-    val editNote by viewTask.subParam<String>().link { p ->
-        viewTask.get(p)?.let { vt ->
-            EditNote(
-                vt,
-                vt.fsDoc.toFsEditable()
-            ).forwarding(vt)
-        }
-    }
-    val newNote by viewTask.subLink { vt ->
+    val editNote by viewTask.param(StringHasher).child { vt, nid, lnk ->
         EditNote(
             vt,
-            vt.notes.randomEditable()
+            lnk,
+            vt.notes.doc(nid).get()
+        ).forwarding(vt)
+    }
+
+    val newNote by viewTask.child { vt, lnk ->
+        NewNote(
+            vt,
+            lnk
         ).forwarding(vt)
     }
 
 
-    val newTask: NewLink<Unit, Unit, EditTask> by baseTC().link { p ->
-        welcome.get()?.let { w ->
-            p.link.get()?.let { parent ->
-                val item = w.loggedIn.tasksCollection.randomEditable()
-
-                val ip = BaseParam(p, item.id.id)
-
-                val vt = ViewTask(
-                    w,
-                    parent,
-                    p.link,
-                    item
-                )
-
-                EditTask(
-                    vt,
-                    item,
-                    exiting(
-                        new = newTask,
-                        view = LinkParamView(viewTask, ip, vt),
-                        edit = LinkParam(editTask, ip)
-                    )
-                ).forwarding(vt).also {
-                    parent %= vt
-                }
-            }
-        }
+    val editTask by base<LoggedInTC<*>>().param(StringHasher).child { parent, tid, lnk ->
+        EditTask(
+            parent,
+            lnk,
+            parent.loggedIn.tasksCollection.doc(tid).get()
+        ).forwarding(parent)
     }
 
-
-//    val newChecklist by link {
-//        welcome.get()?.let { li ->
-//            Edit(
-//                li,
-//                li,
-//                li.createNewChecklistDoc()
-//            ).apply {
-//                initial.live
-//                li %= this
-//            }
-//        }
-//    }
-
-
-
+    val newTask by base<LoggedInTC<*>>().child { parent, lnk ->
+        NewTask(
+            parent,
+            lnk
+        ).forwarding(parent)
+    }
 
 }

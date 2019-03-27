@@ -19,9 +19,7 @@ interface Bindings {
 }
 open class DefaultBindings(
     final override val kills: KillSet
-//    defaultDirty: () -> Boolean = { false }
 ): Bindings, KillsApi {
-
 
     val extraDirty = Var(emptyList<RxIface<Boolean>>())
     val validations = Var(emptyList<RxIface<Boolean>>())
@@ -36,30 +34,56 @@ open class DefaultBindings(
     override fun addDirty(deps: HasKills, rxv: RxIface<Boolean>) = extraDirty.add(deps, rxv)
 
 }
+interface Creating: Bindings {
+    val persist: Trigger
+}
 interface Editing: Bindings {
     val save: Trigger
     val delete: Trigger
-    val canDelete: RxIface<Boolean>
 }
 
 abstract class DefaultEditing(
     kills: KillSet
-//    defaultDirty: () -> Boolean
 ): DefaultBindings(
     kills
-//    defaultDirty
 ), Editing
 
+data class CreatingTriggers<T>(
+    val persist: (T) -> Unit
+)
 data class EditingTriggers<T>(
     val delete: Trigger,
-    val onPersist: Trigger = {},
-    val saveCurrent: (T) -> Unit
+    val save: (T) -> Unit
 )
+
+class RxCreating<T: RxBase<*>>(
+    kills: KillSet,
+    val initial: FsEditable<T>,
+    val triggers: CreatingTriggers<T>
+): DefaultBindings(kills), Creating, KillsApi {
+    val current: T = initial.doc.copy()
+
+    init {
+        extraDirty.transform { it + rx { !rxCompare(initial.doc, current) } }
+    }
+
+    override val persist: Trigger = {
+        triggers.persist(current)
+    }
+}
+
+fun <T> onPersist(fn: Trigger): Copier<CreatingTriggers<T>> = { tr ->
+    tr.copy(
+        persist = { current ->
+            tr.persist(current)
+            fn()
+        }
+    )
+}
 
 class RxEditing<T: RxBase<*>>(
     kills: KillSet,
     val initial: FsDoc<T>,
-    override val canDelete: RxIface<Boolean>,
     val triggers: EditingTriggers<T>
 ): DefaultEditing(kills), KillsApi {
     val current: T = initial.rxv.now.copy()
@@ -69,38 +93,18 @@ class RxEditing<T: RxBase<*>>(
         extraDirty.transform { it + rx { !initial.id.state().exists || !rxCompare(initial(), current) } }
     }
 
-
-//    constructor(
-//        kills: KillSet,
-//        initial: FsDoc<T>,
-//        canDelete: RxIface<Boolean>,
-//        delete: Trigger,
-//        saveCurrent: (T) -> Unit
-//    ): this(
-//        kills,
-//        initial,
-//        initial.rxv.now.copy(),
-//        canDelete,
-//        delete,
-//        saveCurrent
-//    )
-
-    private val onPersistOnce by lazy {
-        triggers.onPersist()
-    }
-
-    init {
-        initial.id.state.forEach {s ->
-            if (s.exists) {
-                onPersistOnce
-            }
-        }
-    }
-
     override val save: Trigger = {
-        onPersistOnce
-        triggers.saveCurrent(current)
+        triggers.save(current)
     }
+}
+
+fun <T> backOnDelete(deps: HasBack): Copier<EditingTriggers<T>> = { tr ->
+    tr.copy(
+        delete = {
+            tr.delete()
+            deps.back()
+        }
+    )
 }
 
 
@@ -168,8 +172,8 @@ fun <V> AbstractInput.bind(
         b.validations.transform { it + extractValid }
         b.dirties.transform { it + Rx(deps.kills) { !extractValid() } }
 
-        deps.editing.addValidation(deps, b.valid)
-        deps.editing.addDirty(deps, b.dirty)
+        deps.bindings.addValidation(deps, b.valid)
+        deps.bindings.addDirty(deps, b.dirty)
 
         b.valid.forEach(deps.kills) { valid %= it }
     }
@@ -194,91 +198,165 @@ fun Factory.saveButton(
     click(deps) { deps.editing.save() }
 }.apply(fn)
 
-fun Factory.saveDeleteButton(deps: HasEditExitFromKillsUix) = buttonGroup {
+fun Factory.persistButton(
+    deps: HasCreateKillsUix,
+    fn: Button.() -> Unit = { m1 }
+) = button {
+    p2
+    primary
+    fa.save
+    enabled(deps) { deps.creating.canSave() }
+    click(deps) { deps.creating.persist() }
+}.apply(fn)
+
+fun Factory.saveDeleteButton(deps: HasEditKillsUix) = buttonGroup {
     m1
     slots.buttons.slot.insert.saveButton(deps) {}
     dropdownSplit {
         primary
-        visible(deps) { deps.editing.canDelete() }
         menu {
-            visible(deps) { deps.editing.canDelete() }
             right
             item {
-                enabled(deps) { deps.editing.canDelete() }
                 cls.textDanger
                 fa.trashAlt
                 text %= "Delete"
                 click(deps) {
                     deps.editing.delete()
-                    deps.exit.redisplay()
                 }
             }
         }
     }
 }
 
-class BackSaveDiscard(
-    deps: HasEditExitFromKillsUix,
+class BackPersistDiscard(
+    deps: HasBackCreateKillsUix,
     holes: SlotHoles
-): HasEditExitFromKillsUix by deps, KillsApiCommonui, KillsUixApi {
-    private fun fromOrExit() {
-        if (editing.canDelete.now) {
-            from.redisplay()
-        } else {
-            exit.redisplay()
-        }
-    }
-    val discard = holes.slot.insert.button {
-        visible { editing.dirty() && !editing.canSave() }
-        m1p2
-        fa.backspace
-        danger
-        click {
-            fromOrExit()
-        }
-    }
-    val back = holes.slot.insert.button {
-        visible { !editing.dirty() }
-        back
-        click {
-            fromOrExit()
-        }
-    }
-    val save = holes.slot.insert.buttonGroup {
-        visible { editing.dirty() && editing.canSave() }
-        cls.m1
-        button {
-            cls {
-                p2
-                btnSuccess
-            }
-            node.span {
-                cls.fa {
-                    fw
-                    chevronLeft
-                }
-            }
-            node.span {
-                cls.fa {
-                    fw
-                    save
-                }
-            }
+): HasBackCreateKillsUix by deps, KillsApiCommonui, KillsUixApi {
+    init {
+
+        holes.slot.insert.button {
+            visible { creating.dirty() && !creating.canSave() }
+            m1p2
+            fa.backspace
+            danger
             click {
-                editing.save()
-                from.redisplay()
+                back()
             }
         }
-        dropdownSplit {
-            cls.btnSuccess
+        holes.slot.insert.button {
+            visible { !creating.dirty() && !creating.canSave() }
+            back
+            click {
+                back()
+            }
         }
-        menu {
-            item {
-                cls.textDanger
-                fa.backspace
-                text %= "Discard"
+        holes.slot.insert.buttonGroup {
+            visible { creating.canSave() }
+            cls.m1
+            button {
+                cls {
+                    p2
+                    btnSuccess
+                }
+                node.span {
+                    cls.fa {
+                        fw
+                        chevronLeft
+                    }
+                }
+                node.span {
+                    cls.fa {
+                        fw
+                        save
+                    }
+                }
                 click {
-                    fromOrExit()
+                    creating.persist()
+                }
+            }
+            dropdownSplit {
+                cls.btnSuccess
+            }
+            menu {
+                item {
+                    visible { !creating.dirty() }
+                    fa.chevronLeft
+                    text %= "Back"
+                    click {
+                        back()
+                    }
+                }
+                item {
+                    visible { creating.dirty() }
+                    cls.textDanger
+                    fa.backspace
+                    text %= "Discard"
+                    click {
+                        back()
+                    }
+                }
+            }
+        }
+    }
+
+}
+class BackSaveDiscard(
+    deps: HasBackEditKillsUix,
+    holes: SlotHoles
+): HasBackEditKillsUix by deps, KillsApiCommonui, KillsUixApi {
+    init {
+
+        holes.slot.insert.button {
+            visible { editing.dirty() && !editing.canSave() }
+            m1p2
+            fa.backspace
+            danger
+            click {
+                back()
+            }
+        }
+        holes.slot.insert.button {
+            visible { !editing.dirty() }
+            back
+            click {
+                back()
+            }
+        }
+        holes.slot.insert.buttonGroup {
+            visible { editing.dirty() && editing.canSave() }
+            cls.m1
+            button {
+                cls {
+                    p2
+                    btnSuccess
+                }
+                node.span {
+                    cls.fa {
+                        fw
+                        chevronLeft
+                    }
+                }
+                node.span {
+                    cls.fa {
+                        fw
+                        save
+                    }
+                }
+                click {
+                    editing.save()
+                }
+            }
+            dropdownSplit {
+                cls.btnSuccess
+            }
+            menu {
+                item {
+                    cls.textDanger
+                    fa.backspace
+                    text %= "Discard"
+                    click {
+                        back()
+                    }
                 }
             }
         }

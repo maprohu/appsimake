@@ -5,7 +5,7 @@ import checklist.ChecklistItem
 import checklist.loggedin.LoggedIn
 import checklist.loggedin.LoggedInPath
 import rx.RxMutableList
-import commonfb.FBFromApi
+import commonfb.FBBackApi
 import commonshr.*
 import commonui.*
 import commonui.editing.RxEditing
@@ -22,7 +22,7 @@ class Edit(
     parent: CsKillsView<TopAndContent>,
     val initial: FsDoc<Checklist>,
     override val exit: HasRedisplay = GoBackRedisplay
-): SimpleView<TopAndContent>(parent), EditPath, LoggedInPath by loggedIn, FBFromApi, Editor, HasFrom by SimpleFrom {
+): SimpleView<TopAndContent>(parent), EditPath, LoggedInPath by loggedIn, FBBackApi, Editor, HasFrom by SimpleFrom {
     override val edit = this
 
 
