@@ -3,9 +3,13 @@ package commonui.widget
 import bootstrap.*
 import common.removeFromParent
 import commonshr.*
+import commonui.HasCsToast
+import commonui.HasToast
 import domx.*
 import fontawesome.*
 import killable.HasNoKill
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import styles.*
 import kotlin.browser.document
 
@@ -25,8 +29,27 @@ class Toasts: ScreenWrap() {
 
 }
 
+fun HasToast.toast(fn: ToastFn) = toaster(fn)
+inline fun <T> HasToast.toastReport(fn: () -> T) = try {
+    fn()
+} catch (e: CancellationException) {
+    throw e
+} catch (e: dynamic) {
+    toaster {
+        error(e)
+    }
+    throw e
+}
+
+fun HasCsToast.launchToast(fn: Action) = launch {
+    toastReport {
+        fn()
+    }
+}
+
 
 typealias ToastFn = Toast.() -> Unit
+typealias Toaster = (ToastFn) -> Unit
 class Toast: ScreenWrap() {
     override val node = document.a {
         cls {
@@ -39,6 +62,7 @@ class Toast: ScreenWrap() {
         }
         href = "#"
         onClick(HasNoKill) {
+            it.preventDefault()
             removeFromParent()
         }
     }

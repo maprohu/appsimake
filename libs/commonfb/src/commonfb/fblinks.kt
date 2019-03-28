@@ -15,6 +15,7 @@ import kotlinx.coroutines.await
 import rx.RxIface
 import kotlin.coroutines.CoroutineContext
 import commonui.view.*
+import commonui.widget.Toaster
 
 data class FbLinksDeps(
     val homeName: String,
@@ -22,8 +23,9 @@ data class FbLinksDeps(
     override val coroutineContext: CoroutineContext,
     val app: App,
     override val db: Firestore,
-    val hole: SimpleRoutingHole<TopAndContent>
-): HasCsDbKills {
+    val hole: SimpleRoutingHole<TopAndContent>,
+    override val toaster: Toaster
+): HasCsDbKillsToast {
     val auth = app.auth()
 }
 
@@ -33,9 +35,11 @@ suspend fun App.persistentDb(): Firestore {
     }
 }
 
+interface FbLinksApi: DbApi, HasToast
+
 abstract class FbLinksFactory(
-    private val deps: FbLinksDeps
-) : LinksFactory(deps.homeName), HasCsDbKills by deps {
+    val deps: FbLinksDeps
+) : LinksFactory(deps.homeName), HasCsDbKillsToast by deps {
 
     companion object {
         fun start(
@@ -53,7 +57,8 @@ abstract class FbLinksFactory(
                         coroutineContext,
                         app,
                         app.persistentDb(),
-                        hole
+                        hole,
+                        toaster
                     )
                 )
 
@@ -69,7 +74,7 @@ abstract class FbLinksFactory(
     }
 
     @Suppress("LeakingThis")
-    private val userProvider = RequireUser(
+    val userProvider = RequireUser(
         this,
         deps.auth
     ) {
@@ -86,11 +91,16 @@ abstract class FbLinksFactory(
     suspend fun signOut() {
         globalStatus %= "Signing out..."
         deps.hole.hourglass()
-        userProvider.signOut()
         app.auth().signOut().await()
+        userProvider.signOut()
     }
 
-    suspend fun requestUser() = userProvider.requireUser()
+    fun signOutNow() {
+        userProvider.signOut()
+        app.auth().signOut()
+    }
+
+
 
 
 

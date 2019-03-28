@@ -10,6 +10,7 @@ import commonui.links.HashStruct
 import commonui.links.Linkage
 import commonui.links.NamedHashStruct
 import commonui.view.Redisplay
+import commonui.widget.Toaster
 import killable.KillSet
 import kotlinx.coroutines.CoroutineScope
 
@@ -116,4 +117,9 @@ interface HasBackKillsUix: HasBackUix, HasKillsUix
 interface HasEditKillsUix: HasEdit, HasKills, HasUix, HasKillsUix, HasEditKills
 
 interface HasCreateKillsUix: HasUix, HasKillsUix, HasCreateKills
+
+interface HasToast {
+    val toaster: Toaster
+}
+interface HasCsToast: CoroutineScope, HasToast
 

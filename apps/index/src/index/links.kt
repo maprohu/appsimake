@@ -1,5 +1,6 @@
 package index
 
+import commonfb.FbLinksApi
 import commonfb.FbLinksDeps
 import commonfb.FbLinksFactory
 import commonshr.toFsEditable
@@ -8,7 +9,7 @@ import commonui.links.StringHasher
 import firebase.DbApi
 import index.home.Home
 
-interface LinksPath: DbApi {
+interface LinksPath: FbLinksApi {
     val links: Links
 }
 class Links(

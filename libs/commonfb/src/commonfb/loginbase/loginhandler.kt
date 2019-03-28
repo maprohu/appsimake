@@ -18,15 +18,16 @@ import commonui.view.*
 
 
 suspend fun performLogin(
-    parent: ForwardTC,
+    parent: HasCsForwardKillsRoutingTC,
     auth: Auth,
     reporter: (dynamic) -> Unit = { reportd(it) }
 ) = performLogin(
     parent,
     parent,
     auth,
-    { parent %= it },
-    reporter
+    hole = { parent %= it },
+    back = { parent %= null },
+    reporter = reporter
 )
 
 
@@ -35,6 +36,7 @@ suspend fun performLogin(
     parent: HasKillsRoutingTC,
     auth: Auth,
     hole: Assign<ViewTC>,
+    back: Trigger? = null,
     reporter: (dynamic) -> Unit = { reportd(it) }
 ): User {
     val cd = CompletableDeferred<User>()
@@ -44,11 +46,13 @@ suspend fun performLogin(
             parent,
             deps,
             auth,
+            back = back,
             loggingIn = {
                 globalStatus %= "Logging in..."
                 hole %= ProgressTC(parent)
             },
             loginFailed = { e ->
+                console.log("loginfailed")
                 reporter(e)
                 attempt()
             },
@@ -87,10 +91,11 @@ suspend fun Auth.firstUser(): User? {
 
 typealias UserFn = suspend () -> User
 
+typealias PerformLogin = suspend () -> User
 class RequireUser(
     private val deps: CoroutineScope,
     auth: Auth,
-    private val signIn: suspend () -> User
+    val signIn: PerformLogin
 ) {
     val state = Var<UserState>(UserState.Unknown)
 
@@ -111,11 +116,11 @@ class RequireUser(
         }
     }
 
-    private suspend fun startSignIn(): UserFn {
+    suspend fun startSignIn(performLogin: PerformLogin = signIn): UserFn {
         val cd = CompletableDeferred<User>()
         deps.launchReport {
             cd.complete(
-                signIn().also { u ->
+                performLogin().also { u ->
                     state %= UserState.LoggedIn(u)
                 }
             )
@@ -125,7 +130,7 @@ class RequireUser(
         }
     }
 
-    suspend fun requireUser() = (latest ?: startSignIn()).invoke()
+    suspend fun requireUser(performLogin: PerformLogin = signIn) = (latest ?: startSignIn(performLogin)).invoke()
 
     fun signOut() {
         state %= UserState.NotLoggedIn

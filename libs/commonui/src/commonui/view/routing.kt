@@ -51,7 +51,7 @@ class RoutingFactory<V: Any>(
 
 }
 
-fun SimpleRoutingHole<TopAndContent>.hourglass() {
+fun SimpleRoutingHoleTC.hourglass() {
     this %= ProgressTC(this)
 }
 

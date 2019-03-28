@@ -8,8 +8,6 @@ import commonui.progress.Progress
 import commonui.topandcontent.ProgressTC
 import killable.NoKill
 import org.w3c.dom.HTMLElement
-import rx.RxIface
-import rx.Var
 import kotlin.browser.document
 import commonui.view.*
 
@@ -34,7 +32,7 @@ class Body(
 
 class BodyTC(
     body: Body = Body()
-): SimpleView<HTMLElement>(body) {
+): SimpleView<HTMLElement>(body), HasToast {
 
     class Slots {
         lateinit var top: Hole
@@ -43,6 +41,8 @@ class BodyTC(
     }
 
     val slts = Slots()
+
+    override val toaster: Toaster = { fn -> slts.toasts(fn) }
 
     override val rawView = run {
         factory.screen {

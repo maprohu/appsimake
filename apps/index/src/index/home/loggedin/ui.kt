@@ -12,6 +12,7 @@ fun LoggedIn.ui() = TopAndContent(
             bars
             menu {
                 signOut {
+                    signOut()
                 }
             }
         }

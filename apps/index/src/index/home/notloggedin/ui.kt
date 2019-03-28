@@ -12,6 +12,7 @@ fun NotLoggedIn.ui() = TopAndContent(
             bars
             menu {
                 signIn {
+                    home.signIn()
                 }
             }
         }

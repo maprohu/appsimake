@@ -62,3 +62,7 @@ infix fun Trigger.with(trigger: Trigger): Trigger = {
 
 operator fun <T> AddRemove<T>.plusAssign(trigger: T) { this(trigger) }
 
+interface HasAssign<T> {
+    val assign: Assign<T>
+}
+operator fun <T> HasAssign<T>.remAssign(item: T) { assign %= item }

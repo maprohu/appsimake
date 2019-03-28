@@ -22,7 +22,7 @@ operator fun <F: Any> HasForward<F>.remAssign(item: F?) { fwd(item) }
 interface HasForwardKillsRouting<V, in F: Any>: HasKillsRouting<V>, HasForward<F>
 typealias HasForwardKillsRoutingTC = HasForwardKillsRouting<TopAndContent, ViewTC>
 
-interface HasCsForwardKillsRouting<V, in F: Any>: HasForwardKillsRouting<V, F>, CoroutineScope
+interface HasCsForwardKillsRouting<V, in F: Any>: HasForwardKillsRouting<V, F>, CoroutineScope, HasCsKills
 interface HasCsForwardKilledKillsRouting<V, in F: Any>: HasCsForwardKillsRouting<V, F>, HasKilled, HasKilledKillsRouting<V>
 typealias HasCsForwardKillsRoutingTC = HasCsForwardKillsRouting<TopAndContent, IViewTC>
 
@@ -71,7 +71,9 @@ interface ForwardMixin<V, in F: HasKillView<V>>: HasView<V>, HasForwardKillsRedi
 fun ForwardView<TopAndContent, SimpleView<TopAndContent>>.hourglass() {
     this %= ProgressTC(this)
 }
-fun HasForwardKillsRoutingTC.hourglass() {
+
+fun HasForwardKillsRoutingTC.hourglass(msg: String? = null) {
+    msg?.also { globalStatus %= it }
     this %= ProgressTC(this)
 }
 
