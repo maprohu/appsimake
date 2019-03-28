@@ -9,6 +9,7 @@ import commonfb.FBBackApi
 import commonshr.*
 import commonui.*
 import commonui.links.Linkage
+import commonui.view.*
 
 interface ViewPath: LoggedInPath {
     val viewChecklist: ViewChecklist

@@ -14,6 +14,7 @@ import tasks.loggedin.LoggedInTC
 import tasks.viewtask.ViewTask
 import tasks.viewtask.ViewTaskPath
 import taskslib.Task
+import commonui.view.*
 
 interface EditTaskPath: LoggedInPath {
     val editTask: EditTask

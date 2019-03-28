@@ -9,6 +9,7 @@ import commonfb.FBBackApi
 import commonui.*
 import commonui.editing.RxCreating
 import commonui.links.Linkage
+import commonui.view.*
 
 interface NewChecklistPath: LoggedInPath {
     val edit: NewChecklist

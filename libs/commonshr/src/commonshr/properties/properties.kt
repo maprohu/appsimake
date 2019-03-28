@@ -133,7 +133,7 @@ open class PropertyList<T> {
         )
     }
 
-    fun string() = prop("")
+    fun string(default: String = "") = prop(default)
     inline fun <reified E: Enum<E>> enum(v: E) = named { name ->
         val type = enumType<E>()
         val rxv = addProperty(name, v, type)
@@ -262,7 +262,7 @@ open class RxBase<T> {
 }
 
 open class RxRoot<T>: RxBase<T>() {
-    val type by o.string()
+    val type by o.string(this::class.simpleName!!)
 
     companion object: RxRoot<Nothing>()
 
@@ -275,12 +275,12 @@ fun <T: RxRoot<*>> wrapper(
     val typeMap =
         classes
             .map { cl ->
-                cl()::class.simpleName!! to cl
+                cl().type.now to cl
             }
             .toMap()
 
     return { d, ops ->
-        RxRoot.apply {
+        RxRoot<Nothing>().apply {
             readDynamic(d, ops)
         }.let { ch ->
             typeMap.getValue(ch.type.now)().apply {

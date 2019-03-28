@@ -1,5 +1,6 @@
 package commonfb.loginbase
 
+import commonfb.UserState
 import commonfb.login.Login
 import commonshr.*
 import commonui.*
@@ -11,7 +12,9 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import rx.Var
 import kotlin.coroutines.RestrictsSuspension
+import commonui.view.*
 
 
 suspend fun performLogin(
@@ -89,11 +92,16 @@ class RequireUser(
     auth: Auth,
     private val signIn: suspend () -> User
 ) {
+    val state = Var<UserState>(UserState.Unknown)
 
     private var latest: UserFn? = run {
         val cd = CompletableDeferred<User?>()
         deps.launchReport {
-            cd.complete(auth.firstUser())
+            cd.complete(
+                auth.firstUser().also { u ->
+                    state %= UserState.of(u)
+                }
+            )
         }
 
         suspend {
@@ -106,7 +114,11 @@ class RequireUser(
     private suspend fun startSignIn(): UserFn {
         val cd = CompletableDeferred<User>()
         deps.launchReport {
-            cd.complete(signIn())
+            cd.complete(
+                signIn().also { u ->
+                    state %= UserState.LoggedIn(u)
+                }
+            )
         }
         return suspend { cd.await() }.also {
             latest = it
@@ -115,7 +127,10 @@ class RequireUser(
 
     suspend fun requireUser() = (latest ?: startSignIn()).invoke()
 
-    fun signOut() { latest = null }
+    fun signOut() {
+        state %= UserState.NotLoggedIn
+        latest = null
+    }
 
 }
 

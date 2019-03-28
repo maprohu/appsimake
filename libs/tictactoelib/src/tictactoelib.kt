@@ -1,18 +1,31 @@
 package tictactoelib
 
-import commonshr.AppDoc
-import commonshr.DocWrap
-import commonshr.coll
-import commonshr.lib
+import commonshr.*
 import commonshr.properties.RxBase
 import commonshr.properties.RxRoot
 import commonshr.properties.wrapper
 
-val tictactoe by lib()
+val tictactoeLib = Lib("tictactoe")
 
 val <D: AppDoc> DocWrap<D>.games by coll<Game>()
 val <D: AppDoc> DocWrap<D>.players by coll<Player>()
 val DocWrap<Game>.moves by coll<Move<*>>()
+
+val CollectionWrap<PrivateSingleton>.status by doc(GameStatus.of)
+
+sealed class GameStatus<T: GameStatus<T>>: RxRoot<T>(), PrivateSingleton {
+    class None: GameStatus<None>()
+    class Waiting: GameStatus<Waiting>()
+    class Playing: GameStatus<Playing>()
+
+    companion object {
+        val of = wrapper(
+            { None() },
+            { Waiting() },
+            { Playing() }
+        )
+    }
+}
 
 external interface MoveData {
     var text: String

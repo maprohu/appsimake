@@ -8,6 +8,7 @@ import commonui.widget.TopAndContent
 import tasks.listtags.ListTags
 import tasks.listtags.ListTagsPath
 import taskslib.Tag
+import commonui.view.*
 
 interface EditTagPath: ListTagsPath {
     val editTag: EditTag

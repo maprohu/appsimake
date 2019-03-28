@@ -1,12 +1,12 @@
 package tasks.selecttags
 
 import commonfb.FBBackApi
-import commonui.ForwardTC
 import commonui.HasBack
 import commonui.links.Linkage
 import rx.Var
 import tasks.listtasks.ListTasks
 import tasks.listtasks.ListTasksPath
+import commonui.view.*
 
 interface SelectTagsPath: ListTasksPath {
     val selectTags: SelectTags

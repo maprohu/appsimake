@@ -1,6 +1,7 @@
 package commonui.widget
 
 import bootstrap.setupFullScreen
+import commonshr.CsKills
 import commonshr.invoke
 import commonui.*
 import commonui.progress.Progress
@@ -10,6 +11,7 @@ import org.w3c.dom.HTMLElement
 import rx.RxIface
 import rx.Var
 import kotlin.browser.document
+import commonui.view.*
 
 interface BodyPath {
     val body: Body
@@ -20,7 +22,7 @@ class Body(
         setupFullScreen()
         document.body!!.hole
     }
-): CsKills(NoKill), BodyPath, HasKillsRouting<HTMLElement> {
+): CsKills(NoKill), CsKillsApiCommonui, BodyPath, HasKillsRouting<HTMLElement> {
     override val body = this
 
     val hole = slot.routing.of<BodyNode> { Progress(this) }

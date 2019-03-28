@@ -4,6 +4,7 @@ import commonfb.FBBackApi
 import commonshr.FsEditable
 import commonui.*
 import commonui.links.Linkage
+import commonui.view.*
 import tasks.viewtask.ViewTask
 import tasks.viewtask.ViewTaskPath
 import taskslib.Note

@@ -35,6 +35,8 @@ interface DocWrap<in D>: HasPath {
     val parent: CollectionWrap<D>?
 }
 
+fun <D> DocWrap<D>.toSource(factory: DynamicFactory<D>) = DocSource(id, parent!!, factory)
+
 class DocWrapImpl<in D>(
     override val id: String,
     override val parent: CollectionWrap<D>?
@@ -42,11 +44,22 @@ class DocWrapImpl<in D>(
     override val path : String  = "${parent?.path ?: ""}/$id"
 }
 
+typealias DynamicFactory<D> = (dynamic, DynamicOps) -> D
 
 class DocSource<D>(
     override val id: String,
-    override val parent: CollectionSource<D>
+    override val parent: CollectionWrap<D>,
+    val factory: DynamicFactory<D>
 ): DocWrap<D> {
+    constructor(
+        id: String,
+        parent: CollectionSource<D>
+    ): this(
+        id,
+        parent,
+        parent.factory
+    )
+
     override val path : String  = "${parent.path}/$id"
 }
 
@@ -70,17 +83,21 @@ interface HasPath {
 
 open class CollectionWrap<in D>(
     val id: String,
-    parent: DocWrap<*>? = null
+    private val parent: DocWrap<*>? = null
 ) : HasPath {
     override val path : String = "${parent?.path ?: ""}/$id"
 
     open fun doc(id: String): DocWrap<D> = DocWrapImpl(id, this)
+
+    fun toSource(
+        factory: DynamicFactory<D>
+    ): CollectionSource<@UnsafeVariance D> = CollectionSource(id, parent, factory)
 }
 
 class CollectionSource<D>(
     id: String,
     parent: DocWrap<*>? = null,
-    val factory: (dynamic, DynamicOps) -> D
+    val factory: DynamicFactory<D>
 ): CollectionWrap<D>(id, parent) {
 
     override fun doc(id: String) = DocSource(id, this)
@@ -89,22 +106,33 @@ class CollectionSource<D>(
 
 fun <D2> doc() = object : ReadOnlyProperty<CollectionWrap<D2>, DocWrap<D2>> {
     override fun getValue(thisRef: CollectionWrap<D2>, property: KProperty<*>) =
-            DocWrapImpl(property.name, thisRef)
+        DocWrapImpl(property.name, thisRef)
 }
+
+fun <D2: RxBase<*>> doc(fn: DynamicFactory<D2>) = object : ReadOnlyProperty<CollectionWrap<D2>, DocSource<D2>> {
+    override fun getValue(thisRef: CollectionWrap<D2>, property: KProperty<*>) =
+        DocSource(property.name, thisRef, fn)
+}
+
 
 object apps : CollectionWrap<AppDoc>("apps", null)
 
-open class AppDoc
+interface AppDoc
 
 val <D: AppDoc> DocWrap<D>.admin by coll<AdminDoc>()
 val <D: AppDoc> DocWrap<D>.private by coll<Private>()
 val <D: AppDoc> DocWrap<D>.singletons by coll<Singleton>()
+val <P: Private> DocWrap<P>.singletons by coll<PrivateSingleton>()
 
-class Singleton
-class Private
+interface Singleton
+interface PrivateSingleton
+interface Private
 interface AdminDoc
 
 val DocWrap<Private>.fcmtokens by coll<FcmToken>()
 
-class FcmToken
+interface FcmToken
+
+fun Lib.privateOf(uid: String) = app.private.doc(uid)
+
 

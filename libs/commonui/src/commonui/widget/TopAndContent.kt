@@ -1,10 +1,9 @@
 package commonui.widget
 
 import commonshr.HasKills
-import commonui.HasKillsRouting
-import commonui.SimpleView
 import commonui.progress.progressUI
 import org.w3c.dom.HTMLElement
+import commonui.view.*
 
 class TopAndContent(
     val topbar: HTMLElement?,

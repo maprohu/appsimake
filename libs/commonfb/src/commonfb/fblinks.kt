@@ -7,13 +7,14 @@ import commonui.links.*
 import commonui.widget.BodyTC
 import commonui.widget.TopAndContent
 import firebase.*
-import firebase.User
 import firebase.app.App
 import firebase.firestore.Firestore
 import firebase.firestore.withDefaultSettings
 import killable.KillSet
 import kotlinx.coroutines.await
+import rx.RxIface
 import kotlin.coroutines.CoroutineContext
+import commonui.view.*
 
 data class FbLinksDeps(
     val homeName: String,
@@ -68,7 +69,7 @@ abstract class FbLinksFactory(
     }
 
     @Suppress("LeakingThis")
-    private val requireUser = RequireUser(
+    private val userProvider = RequireUser(
         this,
         deps.auth
     ) {
@@ -78,17 +79,18 @@ abstract class FbLinksFactory(
             deps.auth,
             { deps.hole %= it }
         )
-
     }
+
+    val userState: RxIface<UserState> = userProvider.state
 
     suspend fun signOut() {
         globalStatus %= "Signing out..."
         deps.hole.hourglass()
-        requireUser.signOut()
+        userProvider.signOut()
         app.auth().signOut().await()
     }
 
-    suspend fun requestUser() = requireUser.requireUser()
+    suspend fun requestUser() = userProvider.requireUser()
 
 
 

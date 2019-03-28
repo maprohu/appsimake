@@ -15,8 +15,9 @@ interface HasKills {
     val kills: KillSet
 }
 
+interface HasKilledKills: HasKilled, HasKills
 interface HasKillKills: HasKill, HasKills
-interface HasKillKilledKills: HasKillKills, HasKilled
+interface HasKillKilledKills: HasKillKills, HasKilled, HasKilledKills
 
 data class KillsDeps(
     override val kills: KillSet

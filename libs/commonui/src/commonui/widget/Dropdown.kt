@@ -44,6 +44,12 @@ class DropdownMenu(): ScreenWrap() {
         click(deps, action)
     }
 
+    fun signIn(deps: HasKillsUix, action: Trigger) = item {
+        text %= "Sign in"
+        fa.signInAlt
+        click(deps, action)
+    }
+
 }
 class Dropdown(): ScreenWrap() {
     override val node = document.div {

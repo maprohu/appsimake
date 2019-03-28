@@ -1,7 +1,6 @@
 package commonui.progress
 
-import commonui.HasKillsRouting
-import commonui.SimpleView
+import commonui.view.*
 import org.w3c.dom.HTMLElement
 
 class Progress(

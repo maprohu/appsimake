@@ -12,6 +12,7 @@ import tasks.loggedin.LoggedIn
 import tasks.loggedin.LoggedInPath
 import tasks.loggedin.LoggedInTC
 import taskslib.Task
+import commonui.view.*
 
 interface ListTasksPath: LoggedInPath {
     val listTasks: ListTasks

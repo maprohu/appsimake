@@ -13,6 +13,7 @@ import org.w3c.dom.events.EventTarget
 import rx.HasVar
 import rx.RxIface
 import rx.Var
+import commonui.view.*
 
 interface KillsApiCommonui: KillsApiDomx {
 
@@ -45,6 +46,7 @@ interface KillsUixApi: Api, HasKillsUix, KillsApiCommonui {
     fun DropdownMenuItem.click(action: Trigger) = click(api, action)
     fun ListGroupButton.click(action: Trigger) = click(api, action)
     fun DropdownMenu.signOut(action: Trigger) = signOut(api, action)
+    fun DropdownMenu.signIn(action: Trigger) = signIn(api, action)
 
     val Tab.clickActivate get() = clickActivate(api)
     val Tab.clickToggle get() = clickToggle(api)

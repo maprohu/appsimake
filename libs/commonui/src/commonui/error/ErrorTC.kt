@@ -10,6 +10,7 @@ import commonui.widget.factory
 import domx.invoke
 import domx.remAssign
 import domx.span
+import commonui.view.*
 
 class ErrorTC(
     parent: HasKillsRouting<TopAndContent>,

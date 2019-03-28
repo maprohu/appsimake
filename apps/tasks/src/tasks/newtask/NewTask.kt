@@ -7,6 +7,7 @@ import commonui.links.Linkage
 import tasks.edittask.EditTaskLike
 import tasks.loggedin.LoggedInPath
 import tasks.loggedin.LoggedInTC
+import commonui.view.*
 
 interface NewTaskPath: LoggedInPath {
     val newTask: NewTask

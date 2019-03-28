@@ -104,7 +104,7 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ap
             var player = this.local$tmp$.next();
             console.log('notifying player: ' + player);
             this.state_0 = 4;
-            this.result_0 = await_0(this.local$closure$firestore.collection(get_fcmtokens(get_private(tictactoelib.tictactoe.app).doc_61zpoe$(player)).path).get(), this);
+            this.result_0 = await_0(this.local$closure$firestore.collection(get_fcmtokens(get_private(tictactoelib.tictactoeLib.app).doc_61zpoe$(player)).path).get(), this);
             if (this.result_0 === COROUTINE_SUSPENDED)
               return COROUTINE_SUSPENDED;
             continue;
@@ -176,13 +176,13 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'firebase-functions', 'ap
   function init$lambda(documentSnapshot, eventContext) {
     var tmp$;
     var firestore = documentSnapshot.ref.firestore;
-    var gameRef = firestore.doc(get_games(tictactoelib.tictactoe.app).doc_61zpoe$(typeof (tmp$ = eventContext.params[gameIdParam]) === 'string' ? tmp$ : throwCCE()).path);
+    var gameRef = firestore.doc(get_games(tictactoelib.tictactoeLib.app).doc_61zpoe$(typeof (tmp$ = eventContext.params[gameIdParam]) === 'string' ? tmp$ : throwCCE()).path);
     var moveData = documentSnapshot.data();
     var move = Move.Companion.of(moveData, commonfns.FnsDynamicOps);
     return asPromise(async(coroutines.GlobalScope, void 0, void 0, init$lambda$lambda(gameRef, move, firestore, moveData)));
   }
   function init(exports) {
-    exports[tictactoelib.tictactoe.qualified_61zpoe$('onMove')] = document(get_moves(get_games(tictactoelib.tictactoe.app).doc_61zpoe$('{gameId}')).doc_61zpoe$('{moveId}').path).onCreate(init$lambda);
+    exports[tictactoelib.tictactoeLib.qualified_61zpoe$('onMove')] = document(get_moves(get_games(tictactoelib.tictactoeLib.app).doc_61zpoe$('{gameId}')).doc_61zpoe$('{moveId}').path).onCreate(init$lambda);
   }
   var package$tictactoefns = _.tictactoefns || (_.tictactoefns = {});
   Object.defineProperty(package$tictactoefns, 'gameIdParam', {

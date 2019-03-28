@@ -9,6 +9,7 @@ import commonfb.FBBackApi
 import rx.RxMutableList
 import commonshr.*
 import commonui.*
+import commonui.view.*
 import commonui.editing.*
 import commonui.links.Linkage
 import killable.HasNoKill

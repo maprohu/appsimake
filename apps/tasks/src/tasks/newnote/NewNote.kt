@@ -8,6 +8,7 @@ import commonui.links.Linkage
 import tasks.viewtask.ViewTask
 import tasks.viewtask.ViewTaskPath
 import taskslib.Note
+import commonui.view.*
 
 interface NewNotePath: ViewTaskPath {
     val newNote: NewNote

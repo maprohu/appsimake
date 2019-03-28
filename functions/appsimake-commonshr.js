@@ -1652,6 +1652,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'DocWrap',
     interfaces: [HasPath]
   };
+  function toSource($receiver, factory) {
+    return new DocSource($receiver.id, ensureNotNull($receiver.parent), factory);
+  }
   function DocWrapImpl(id, parent) {
     this.id_hli9nb$_0 = id;
     this.parent_vwa060$_0 = parent;
@@ -1678,9 +1681,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'DocWrapImpl',
     interfaces: [DocWrap]
   };
-  function DocSource(id, parent) {
+  function DocSource(id, parent, factory) {
     this.id_so7c0o$_0 = id;
     this.parent_62eqt5$_0 = parent;
+    this.factory = factory;
     this.path_5zrdcu$_0 = this.parent.path + '/' + this.id;
   }
   Object.defineProperty(DocSource.prototype, 'id', {
@@ -1703,6 +1707,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'DocSource',
     interfaces: [DocWrap]
   };
+  function DocSource_init(id, parent, $this) {
+    $this = $this || Object.create(DocSource.prototype);
+    DocSource.call($this, id, parent, parent.factory);
+    return $this;
+  }
   function coll$ObjectLiteral() {
   }
   coll$ObjectLiteral.prototype.getValue_lrcp0p$ = function (thisRef, property) {
@@ -1746,8 +1755,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     if (parent === void 0)
       parent = null;
     this.id = id;
-    var tmp$;
-    this.path_6soqnf$_0 = ((tmp$ = parent != null ? parent.path : null) != null ? tmp$ : '') + '/' + this.id;
+    this.parent_331zei$_0 = parent;
+    var tmp$, tmp$_0;
+    this.path_6soqnf$_0 = ((tmp$_0 = (tmp$ = this.parent_331zei$_0) != null ? tmp$.path : null) != null ? tmp$_0 : '') + '/' + this.id;
   }
   Object.defineProperty(CollectionWrap.prototype, 'path', {
     get: function () {
@@ -1756,6 +1766,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   });
   CollectionWrap.prototype.doc_61zpoe$ = function (id) {
     return new DocWrapImpl(id, this);
+  };
+  CollectionWrap.prototype.toSource_3096nq$ = function (factory) {
+    return new CollectionSource(this.id, this.parent_331zei$_0, factory);
   };
   CollectionWrap.$metadata$ = {
     kind: Kind_CLASS,
@@ -1769,7 +1782,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     this.factory = factory;
   }
   CollectionSource.prototype.doc_61zpoe$ = function (id) {
-    return new DocSource(id, this);
+    return DocSource_init(id, this);
   };
   CollectionSource.$metadata$ = {
     kind: Kind_CLASS,
@@ -1787,6 +1800,19 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function doc() {
     return new doc$ObjectLiteral();
+  }
+  function doc$ObjectLiteral_0(closure$fn) {
+    this.closure$fn = closure$fn;
+  }
+  doc$ObjectLiteral_0.prototype.getValue_lrcp0p$ = function (thisRef, property) {
+    return new DocSource(property.callableName, thisRef, this.closure$fn);
+  };
+  doc$ObjectLiteral_0.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [ReadOnlyProperty]
+  };
+  function doc_0(fn) {
+    return new doc$ObjectLiteral_0(fn);
   }
   function apps() {
     apps_instance = this;
@@ -1807,7 +1833,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function AppDoc() {
   }
   AppDoc.$metadata$ = {
-    kind: Kind_CLASS,
+    kind: Kind_INTERFACE,
     simpleName: 'AppDoc',
     interfaces: []
   };
@@ -1826,17 +1852,29 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function get_singletons($receiver) {
     return singletons.getValue_lrcp0p$($receiver, singletons_metadata);
   }
+  var singletons_0;
+  var singletons_metadata_0 = new PropertyMetadata('singletons');
+  function get_singletons_0($receiver) {
+    return singletons_0.getValue_lrcp0p$($receiver, singletons_metadata_0);
+  }
   function Singleton() {
   }
   Singleton.$metadata$ = {
-    kind: Kind_CLASS,
+    kind: Kind_INTERFACE,
     simpleName: 'Singleton',
+    interfaces: []
+  };
+  function PrivateSingleton() {
+  }
+  PrivateSingleton.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'PrivateSingleton',
     interfaces: []
   };
   function Private() {
   }
   Private.$metadata$ = {
-    kind: Kind_CLASS,
+    kind: Kind_INTERFACE,
     simpleName: 'Private',
     interfaces: []
   };
@@ -1855,10 +1893,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function FcmToken() {
   }
   FcmToken.$metadata$ = {
-    kind: Kind_CLASS,
+    kind: Kind_INTERFACE,
     simpleName: 'FcmToken',
     interfaces: []
   };
+  function privateOf($receiver, uid) {
+    return get_private($receiver.app).doc_61zpoe$(uid);
+  }
   function hasOwnProperty(d, prop) {
     return d.hasOwnProperty(prop);
   }
@@ -2872,6 +2913,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'HasKills',
     interfaces: []
   };
+  function HasKilledKills() {
+  }
+  HasKilledKills.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'HasKilledKills',
+    interfaces: [HasKills, HasKilled]
+  };
   function HasKillKills() {
   }
   HasKillKills.$metadata$ = {
@@ -2884,7 +2932,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   HasKillKilledKills.$metadata$ = {
     kind: Kind_INTERFACE,
     simpleName: 'HasKillKilledKills',
-    interfaces: [HasKilled, HasKillKills]
+    interfaces: [HasKilledKills, HasKilled, HasKillKills]
   };
   function KillsDeps(kills) {
     this.kills_ln6p9y$_0 = kills;
@@ -4290,8 +4338,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
     return named(PropertyList$prop$lambda(value, type, this));
   };
-  PropertyList.prototype.string = function () {
-    return this.prop_z4bjo6$('');
+  PropertyList.prototype.string_61zpoe$ = function (default_0) {
+    if (default_0 === void 0)
+      default_0 = '';
+    return this.prop_z4bjo6$(default_0);
   };
   PropertyList.prototype.enum_wbfx10$ = defineInlineFunction('appsimake-commonshr.commonshr.properties.PropertyList.enum_wbfx10$', wrapFunction(function () {
     var killable = _.killable;
@@ -4503,7 +4553,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function RxRoot() {
     RxRoot$Companion_getInstance();
     RxBase.call(this);
-    this.type_gtc63r$_0 = this.o.string().provideDelegate_n5byny$(this, RxRoot$type_metadata);
+    this.type_gtc63r$_0 = this.o.string_61zpoe$(ensureNotNull(Kotlin.getKClassFromExpression(this).simpleName)).provideDelegate_n5byny$(this, RxRoot$type_metadata);
   }
   var RxRoot$type_metadata = new PropertyMetadata('type');
   Object.defineProperty(RxRoot.prototype, 'type', {
@@ -4534,7 +4584,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function wrapper$lambda(closure$typeMap) {
     return function (d, ops) {
-      var $receiver = RxRoot$Companion_getInstance();
+      var $receiver = new RxRoot();
       readDynamic($receiver, d, ops);
       var $receiver_0 = getValue(closure$typeMap, $receiver.type.now)();
       readDynamic($receiver_0, d, ops);
@@ -4546,7 +4596,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     var tmp$;
     for (tmp$ = 0; tmp$ !== classes.length; ++tmp$) {
       var item = classes[tmp$];
-      destination.add_11rb$(to(ensureNotNull(Kotlin.getKClassFromExpression(item()).simpleName), item));
+      destination.add_11rb$(to(item().type.now, item));
     }
     var typeMap = toMap(destination);
     return wrapper$lambda(typeMap);
@@ -5044,8 +5094,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'FsIdState',
     interfaces: []
   };
-  function FsId(coll, st) {
+  function FsId(coll, factory, st) {
     this.coll = coll;
+    this.factory = factory;
     this.state = new Var(st);
   }
   FsId.$metadata$ = {
@@ -5055,7 +5106,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function FsId_init(dw, exists, $this) {
     $this = $this || Object.create(FsId.prototype);
-    FsId.call($this, dw.parent, new FsIdState$HasId(dw.id, exists));
+    FsId.call($this, dw.parent, dw.factory, new FsIdState$HasId(dw.id, exists));
     return $this;
   }
   function get_docWrap($receiver) {
@@ -5064,7 +5115,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     if (equals(st, FsIdState$NoId_getInstance()))
       throw Error_init('Doc has no id!');
     else if (Kotlin.isType(st, FsIdState$HasId)) {
-      block$result = $receiver.coll.doc_61zpoe$(st.id);
+      block$result = toSource($receiver.coll.doc_61zpoe$(st.id), $receiver.factory);
     }
      else {
       block$result = Kotlin.noWhenBranchMatched();
@@ -5075,10 +5126,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     return get_docWrap($receiver.id);
   }
   function toFsId($receiver, state) {
-    return new FsId($receiver, state);
+    return new FsId($receiver, $receiver.factory, state);
   }
-  function toFsId_0($receiver, exists) {
-    return toFsId($receiver.parent, new FsIdState$HasId($receiver.id, exists));
+  function toFsId_0($receiver, state, factory) {
+    return new FsId($receiver, factory, state);
+  }
+  function toFsId_1($receiver, exists) {
+    return toFsId_0($receiver.parent, new FsIdState$HasId($receiver.id, exists), $receiver.factory);
   }
   function toFsDoc($receiver, id) {
     return new RefDoc(id, $receiver);
@@ -5102,10 +5156,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     if (d === void 0) {
       d = {};
     }
-    return toFsEditable($receiver.parent.factory(d, ops), $receiver, false);
+    return toFsEditable($receiver.factory(d, ops), $receiver, false);
   }
   function toFsDoc_2($receiver) {
-    return new RefDoc(toFsId_0($receiver.id, $receiver.exists), $receiver.doc);
+    return new RefDoc(toFsId_1($receiver.id, $receiver.exists), $receiver.doc);
   }
   function toFsEditable_0($receiver) {
     return new EditableDoc(get_docWrap($receiver.id), $receiver.rxv.now, $receiver.id.state.now.exists);
@@ -8143,7 +8197,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.Lib = Lib;
   package$commonshr.Function = Function;
   package$commonshr.DocWrap = DocWrap;
+  package$commonshr.toSource_5wla0b$ = toSource;
   package$commonshr.DocWrapImpl = DocWrapImpl;
+  package$commonshr.DocSource_init_swenej$ = DocSource_init;
   package$commonshr.DocSource = DocSource;
   package$commonshr.coll_287e2$ = coll;
   package$commonshr.coll_4okrys$ = coll_0;
@@ -8151,6 +8207,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.CollectionWrap = CollectionWrap;
   package$commonshr.CollectionSource = CollectionSource;
   package$commonshr.doc_287e2$ = doc;
+  package$commonshr.doc_68r5d9$ = doc_0;
   Object.defineProperty(package$commonshr, 'apps', {
     get: apps_getInstance
   });
@@ -8158,11 +8215,14 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.get_admin_py8usb$ = get_admin;
   package$commonshr.get_private_py8usb$ = get_private;
   package$commonshr.get_singletons_py8usb$ = get_singletons;
+  package$commonshr.get_singletons_v34c5b$ = get_singletons_0;
   package$commonshr.Singleton = Singleton;
+  package$commonshr.PrivateSingleton = PrivateSingleton;
   package$commonshr.Private = Private;
   package$commonshr.AdminDoc = AdminDoc;
   package$commonshr.get_fcmtokens_x4imip$ = get_fcmtokens;
   package$commonshr.FcmToken = FcmToken;
+  package$commonshr.privateOf_rzp46g$ = privateOf;
   package$commonshr.hasOwnProperty_hwpqgh$ = hasOwnProperty;
   package$commonshr.opt_h8phid$ = opt;
   Object.defineProperty(SetDiff, 'Companion', {
@@ -8193,6 +8253,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.HasKill = HasKill;
   package$commonshr.HasKilled = HasKilled;
   package$commonshr.HasKills = HasKills;
+  package$commonshr.HasKilledKills = HasKilledKills;
   package$commonshr.HasKillKills = HasKillKills;
   package$commonshr.HasKillKilledKills = HasKillKilledKills;
   package$commonshr.KillsDeps = KillsDeps;
@@ -8328,7 +8389,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.get_docWrap_axmc3l$ = get_docWrap;
   package$commonshr.get_docWrap_2s00w$ = get_docWrap_0;
   package$commonshr.toFsId_5bzvyx$ = toFsId;
-  package$commonshr.toFsId_d81mk7$ = toFsId_0;
+  package$commonshr.toFsId_zebdec$ = toFsId_0;
+  package$commonshr.toFsId_d81mk7$ = toFsId_1;
   package$commonshr.toFsDoc_ved7zl$ = toFsDoc;
   package$commonshr.toFsDoc_s7qlz4$ = toFsDoc_0;
   package$commonshr.toFsDoc_e53g6m$ = toFsDoc_1;
@@ -8598,6 +8660,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   admin = coll();
   private_0 = coll();
   singletons = coll();
+  singletons_0 = coll();
   fcmtokens = coll();
   Identity = Identity$lambda;
   SuspendIdentity = SuspendIdentity$lambda;

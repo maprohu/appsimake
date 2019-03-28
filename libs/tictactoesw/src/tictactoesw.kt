@@ -1,22 +1,21 @@
 package tictactoesw
 
 import common.obj
+import commonshr.properties.NoDynamicOps
 import fbmessagingsw.messageHandler
 import fbmessagingsw.messageTitle
 import fbmessagingsw.sw
-import firebaseshr.initFrom
 import org.w3c.notifications.NotificationOptions
 import tictactoelib.Leave
 import tictactoelib.Move
 import tictactoelib.Placement
 import tictactoelib.Start
-import kotlin.js.Promise
 
-fun main(args: Array<String>) {
+fun main() {
 
     messageTitle = { msgIn ->
         val d = JSON.parse<dynamic>(msgIn.data.json as String)
-        val move = Move.of(d)
+        val move = Move.of(d, NoDynamicOps)
 
         val msg = when (move) {
             is Start -> "game started"

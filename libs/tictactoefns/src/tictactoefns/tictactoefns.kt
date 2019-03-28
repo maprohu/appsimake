@@ -12,14 +12,14 @@ import tictactoelib.*
 const val gameIdParam = "gameId"
 
 fun init(exports: dynamic) {
-    exports[tictactoe.qualified("onMove")] =
+    exports[tictactoeLib.qualified("onMove")] =
             firebasefunctions.firestore
-                .document(tictactoe.app.games.doc("{$gameIdParam}").moves.doc("{moveId}").path)
+                .document(tictactoeLib.app.games.doc("{$gameIdParam}").moves.doc("{moveId}").path)
                 .onCreate { documentSnapshot, eventContext ->
                     val firestore = documentSnapshot.ref.firestore
 
                     val gameRef = firestore.doc(
-                        tictactoe.app.games.doc(
+                        tictactoeLib.app.games.doc(
                             eventContext.params[gameIdParam] as String
                         ).path
                     )
@@ -43,7 +43,7 @@ fun init(exports: dynamic) {
 
                                 val qdss = firestore
                                     .collection(
-                                        tictactoe.app.private.doc(player).fcmtokens.path
+                                        tictactoeLib.app.private.doc(player).fcmtokens.path
                                     )
                                     .get()
                                     .await()

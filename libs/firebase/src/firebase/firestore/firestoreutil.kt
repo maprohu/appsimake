@@ -7,6 +7,7 @@ import commonshr.properties.SnapshotEvent
 import commonshr.properties.wrapSnapshotEvents
 import firebase.HasDb
 import firebase.HasDbKills
+import firebase.User
 import firebaseshr.*
 import killable.*
 import kotlinx.coroutines.*
@@ -30,6 +31,8 @@ inline val GetOptionsSource.Companion.cache   get() = "cache".unsafeCast<GetOpti
 fun getOptionsCache() = obj<GetOptions>().apply {
     source = GetOptionsSource.cache
 }
+
+fun Lib.privateOf(user: User) = privateOf(user.uid)
 
 //fun <T> queryUi(
 //        query: Query,

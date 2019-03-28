@@ -1,5 +1,8 @@
 package commonshr
 
+import killable.KillSet
+import killable.Killables
+import killable.killables
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
@@ -84,3 +87,15 @@ fun CoroutineScope.executor(): Exec {
 
 fun CoroutineScope.launchNonCancellable(fn: Action) = launch(NonCancellable) { fn() }
 
+open class CsKills(killables: Killables): CsKillsApi, HasKillKilledKills by killables  {
+    constructor(parent: KillSet): this(parent.killables())
+    constructor(parent: HasKills): this(parent.kills)
+
+    override val coroutineContext = Job().apply {
+        kills += { cancel() }
+    }
+    suspend fun killAndJoin() {
+        kill()
+        coroutineContext.join()
+    }
+}

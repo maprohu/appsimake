@@ -8,6 +8,7 @@ import commonui.links.Linkage
 import commonui.widget.TopAndContent
 import tasks.listtags.ListTags
 import tasks.listtags.ListTagsPath
+import commonui.view.*
 
 interface NewTagPath: ListTagsPath {
     val newTag: NewTag

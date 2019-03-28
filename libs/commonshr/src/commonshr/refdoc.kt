@@ -31,7 +31,8 @@ sealed class FsIdState {
 }
 
 class FsId<D>(
-    val coll: CollectionSource<D>,
+    val coll: CollectionWrap<D>,
+    val factory: DynamicFactory<D>,
     st: FsIdState
 ) {
     constructor(
@@ -39,6 +40,7 @@ class FsId<D>(
         exists: Boolean
     ): this(
         dw.parent,
+        dw.factory,
         FsIdState.HasId(
             dw.id,
             exists
@@ -54,7 +56,7 @@ val <D> FsId<D>.docWrap
                 throw Error("Doc has no id!")
             }
             is FsIdState.HasId -> {
-                coll.doc(st.id)
+                coll.doc(st.id).toSource(factory)
             }
         }
     }
@@ -67,8 +69,9 @@ typealias FsEditable<D> = EditableDoc<DocSource<D>, D>
 
 val <D> FsDoc<D>.docWrap get() = id.docWrap
 
-fun <D> CollectionSource<D>.toFsId(state: FsIdState) = FsId(this, state)
-fun <D> DocSource<D>.toFsId(exists: Boolean) = parent.toFsId(FsIdState.HasId(id, exists))
+fun <D> CollectionSource<D>.toFsId(state: FsIdState) = FsId(this, factory, state)
+fun <D> CollectionWrap<D>.toFsId(state: FsIdState, factory: DynamicFactory<D>) = FsId(this, factory, state)
+fun <D> DocSource<D>.toFsId(exists: Boolean) = parent.toFsId(FsIdState.HasId(id, exists), factory)
 
 fun <D> D.toFsDoc(id: FsId<D>) = FsDoc(id, this)
 fun <D> D.toFsDoc(cw: CollectionSource<D>) = toFsDoc(cw.toFsId(FsIdState.NoId))
@@ -77,7 +80,7 @@ fun <D> D.toFsEditable(id: DocSource<D>, exists: Boolean = true) = FsEditable(id
 
 val <T> FsDoc<T>.idOrFail: String get() = (id.state.now as FsIdState.HasId).id
 
-fun <D> DocSource<D>.new(d: dynamic = dyn(), ops: DynamicOps) = parent.factory(d, ops).toFsEditable(this, false)
+fun <D> DocSource<D>.new(d: dynamic = dyn(), ops: DynamicOps) = factory(d, ops).toFsEditable(this, false)
 
 fun <D> FsEditable<D>.toFsDoc() = FsDoc(id.toFsId(exists), doc)
 fun <D> FsDoc<D>.toFsEditable() = FsEditable(id.docWrap, rxv.now, id.state.now.exists)

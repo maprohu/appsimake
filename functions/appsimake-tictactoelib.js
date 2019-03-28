@@ -14,14 +14,24 @@ function define(args, fn) {
 
 define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_commonshr) {
   'use strict';
-  var lib = $module$appsimake_commonshr.commonshr.lib;
-  var PropertyMetadata = Kotlin.PropertyMetadata;
+  var Lib = $module$appsimake_commonshr.commonshr.Lib;
   var coll = $module$appsimake_commonshr.commonshr.coll_287e2$;
-  var RxBase = $module$appsimake_commonshr.commonshr.properties.RxBase;
+  var PropertyMetadata = Kotlin.PropertyMetadata;
+  var doc = $module$appsimake_commonshr.commonshr.doc_68r5d9$;
   var Kind_CLASS = Kotlin.Kind.CLASS;
   var wrapper = $module$appsimake_commonshr.commonshr.properties.wrapper_3yfn2g$;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var RxRoot = $module$appsimake_commonshr.commonshr.properties.RxRoot;
+  var PrivateSingleton = $module$appsimake_commonshr.commonshr.PrivateSingleton;
+  var RxBase = $module$appsimake_commonshr.commonshr.properties.RxBase;
+  GameStatus.prototype = Object.create(RxRoot.prototype);
+  GameStatus.prototype.constructor = GameStatus;
+  GameStatus$None.prototype = Object.create(GameStatus.prototype);
+  GameStatus$None.prototype.constructor = GameStatus$None;
+  GameStatus$Waiting.prototype = Object.create(GameStatus.prototype);
+  GameStatus$Waiting.prototype.constructor = GameStatus$Waiting;
+  GameStatus$Playing.prototype = Object.create(GameStatus.prototype);
+  GameStatus$Playing.prototype.constructor = GameStatus$Playing;
   Player.prototype = Object.create(RxBase.prototype);
   Player.prototype.constructor = Player;
   Game.prototype = Object.create(RxBase.prototype);
@@ -36,11 +46,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   Placement.prototype.constructor = Placement;
   Leave.prototype = Object.create(Move.prototype);
   Leave.prototype.constructor = Leave;
-  var tictactoe_metadata = new PropertyMetadata('tictactoe');
-  var tictactoe;
-  function get_tictactoe() {
-    return tictactoe.getValue_lrcp0p$(this, tictactoe_metadata);
-  }
+  var tictactoeLib;
   var games;
   var games_metadata = new PropertyMetadata('games');
   function get_games($receiver) {
@@ -56,6 +62,69 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   function get_moves($receiver) {
     return moves.getValue_lrcp0p$($receiver, moves_metadata);
   }
+  var status;
+  var status_metadata = new PropertyMetadata('status');
+  function get_status($receiver) {
+    return status.getValue_lrcp0p$($receiver, status_metadata);
+  }
+  function GameStatus() {
+    GameStatus$Companion_getInstance();
+    RxRoot.call(this);
+  }
+  function GameStatus$None() {
+    GameStatus.call(this);
+  }
+  GameStatus$None.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'None',
+    interfaces: [GameStatus]
+  };
+  function GameStatus$Waiting() {
+    GameStatus.call(this);
+  }
+  GameStatus$Waiting.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Waiting',
+    interfaces: [GameStatus]
+  };
+  function GameStatus$Playing() {
+    GameStatus.call(this);
+  }
+  GameStatus$Playing.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Playing',
+    interfaces: [GameStatus]
+  };
+  function GameStatus$Companion() {
+    GameStatus$Companion_instance = this;
+    this.of = wrapper([GameStatus$Companion$of$lambda, GameStatus$Companion$of$lambda_0, GameStatus$Companion$of$lambda_1]);
+  }
+  function GameStatus$Companion$of$lambda() {
+    return new GameStatus$None();
+  }
+  function GameStatus$Companion$of$lambda_0() {
+    return new GameStatus$Waiting();
+  }
+  function GameStatus$Companion$of$lambda_1() {
+    return new GameStatus$Playing();
+  }
+  GameStatus$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
+  var GameStatus$Companion_instance = null;
+  function GameStatus$Companion_getInstance() {
+    if (GameStatus$Companion_instance === null) {
+      new GameStatus$Companion();
+    }
+    return GameStatus$Companion_instance;
+  }
+  GameStatus.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'GameStatus',
+    interfaces: [PrivateSingleton, RxRoot]
+  };
   function Player() {
     RxBase.call(this);
     this.active_ir98gi$_0 = this.o.boolean_6taknv$().provideDelegate_n5byny$(this, Player$active_metadata);
@@ -195,12 +264,22 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     interfaces: [Move]
   };
   var package$tictactoelib = _.tictactoelib || (_.tictactoelib = {});
-  Object.defineProperty(package$tictactoelib, 'tictactoe', {
-    get: get_tictactoe
+  Object.defineProperty(package$tictactoelib, 'tictactoeLib', {
+    get: function () {
+      return tictactoeLib;
+    }
   });
   package$tictactoelib.get_games_py8usb$ = get_games;
   package$tictactoelib.get_players_py8usb$ = get_players;
   package$tictactoelib.get_moves_9zet87$ = get_moves;
+  package$tictactoelib.get_status_f98aja$ = get_status;
+  GameStatus.None = GameStatus$None;
+  GameStatus.Waiting = GameStatus$Waiting;
+  GameStatus.Playing = GameStatus$Playing;
+  Object.defineProperty(GameStatus, 'Companion', {
+    get: GameStatus$Companion_getInstance
+  });
+  package$tictactoelib.GameStatus = GameStatus;
   package$tictactoelib.Player = Player;
   package$tictactoelib.Game = Game;
   Object.defineProperty(Move, 'Companion', {
@@ -210,10 +289,11 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   package$tictactoelib.Start = Start;
   package$tictactoelib.Placement = Placement;
   package$tictactoelib.Leave = Leave;
-  tictactoe = lib().provideDelegate_n5byny$(this, tictactoe_metadata);
+  tictactoeLib = new Lib('tictactoe');
   games = coll();
   players = coll();
   moves = coll();
+  status = doc(GameStatus$Companion_getInstance().of);
   Kotlin.defineModule('appsimake-tictactoelib', _);
   return _;
 });

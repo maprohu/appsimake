@@ -4,7 +4,6 @@ import common.CsKillsApiCommon
 import common.dyn
 import commonshr.*
 import commonshr.properties.RxBase
-import commonshr.properties.SnapshotEvent
 import firebase.firestore.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlin.js.Promise
@@ -24,7 +23,8 @@ interface DbApi: Api, HasDb {
 
     fun <T> CollectionWrap<T>.query(query: QuerySettingsBuilder<T>.() -> Unit = {}) = query(api, query)
 
-    suspend fun <D> DocSource<D>.get() = get(api)
+    suspend fun <D> DocSource<D>.getCachedOrServer() = getCachedOrServer(api)
+    suspend fun <D> DocSource<D>.getOrNull(source: GetOptionsSource = GetOptionsSource.default): D? = getOrNull(api, source)
 
 }
 

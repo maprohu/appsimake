@@ -2,7 +2,6 @@ package tasks
 
 import commonfb.FbLinksDeps
 import commonfb.FbLinksFactory
-import commonshr.reportd
 import commonshr.toFsEditable
 import commonui.*
 import commonui.links.StringHasher
@@ -19,6 +18,7 @@ import tasks.newtag.NewTag
 import tasks.newtask.NewTask
 import tasks.selecttags.SelectTags
 import tasks.viewtask.ViewTask
+import commonui.view.*
 
 interface LinksPath: DbApi {
     val links: Links
@@ -56,7 +56,7 @@ class Links(
         EditTag(
             lt,
             lnk,
-            lt.loggedIn.userTags.doc(tid).get()
+            lt.loggedIn.userTags.doc(tid).getCachedOrServer()
         ).forwarding(lt)
     }
 
@@ -71,7 +71,7 @@ class Links(
         ViewTask(
             parent,
             lnk,
-            parent.loggedIn.tasksCollection.doc(tid).get()
+            parent.loggedIn.tasksCollection.doc(tid).getCachedOrServer()
         ).forwarding(parent)
     }
 
@@ -89,7 +89,7 @@ class Links(
         EditNote(
             vt,
             lnk,
-            vt.notes.doc(nid).get()
+            vt.notes.doc(nid).getCachedOrServer()
         ).forwarding(vt)
     }
 
@@ -105,7 +105,7 @@ class Links(
         EditTask(
             parent,
             lnk,
-            parent.loggedIn.tasksCollection.doc(tid).get()
+            parent.loggedIn.tasksCollection.doc(tid).getCachedOrServer()
         ).forwarding(parent)
     }
 

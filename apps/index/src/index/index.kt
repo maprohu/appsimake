@@ -1,12 +1,10 @@
 package index
 
+import commonfb.FbLinksFactory
 import commonui.*
 import commonui.widget.Body
 import index.home.Home
 
 fun main() {
-    APP.startRegisteringServiceWorker()
-    Body().apply {
-        hole %= Home(this)
-    }
+    FbLinksFactory.start { Links(it) }
 }

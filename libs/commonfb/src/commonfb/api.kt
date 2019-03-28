@@ -32,7 +32,7 @@ interface DbKillsApiCommonfb: DbKillsApi {
 }
 
 interface FBApi: CsDbKillsUixApi, HasRedisplay
-interface FBBackApi: FBApi, BackCsDbKillsUixApi, HasBackRedisplayv
+interface FBBackApi: FBApi, BackCsDbKillsUixApi, HasBackRedisplay
 
 interface CsDbKillsUixApi: CsDbKillsApi, DbKillsApiCommonfb, KillsUixApi, CsApiCommonui, KillsApiCommonui {
 

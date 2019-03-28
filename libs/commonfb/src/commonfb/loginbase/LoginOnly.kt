@@ -12,6 +12,7 @@ import firebase.app.App
 import firebase.auth.Auth
 import kotlinx.coroutines.await
 import commonshr.*
+import commonui.view.*
 
 class LoginOnly(
     parent: HasKillsRoutingTC,

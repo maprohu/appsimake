@@ -3,9 +3,7 @@ package commonfb.login
 import commonfb.UserState
 import commonfb.loginbase.UserStateView
 import commonshr.*
-import commonui.HasKillsRouting
-import commonui.HasKillsRoutingTC
-import commonui.SimpleView
+import commonui.view.*
 import commonui.widget.*
 import firebase.app.App
 import firebase.auth.Auth
@@ -22,7 +20,7 @@ class Login(
     val loggingIn: Action = {},
     val loginFailed: suspend (dynamic) -> Unit = {},
     val loginSucceeded: suspend (UserCredential) -> Unit = {}
-): SimpleView<TopAndContent>(parent), UserStateView {
+): ViewTC(parent), UserStateView {
     override val userState = UserState.NotLoggedIn
     override val rawView = ui()
 

@@ -1,8 +1,9 @@
 package commonui.topandcontent
 
-import commonui.HasKillsRouting
-import commonui.SimpleView
+import commonui.view.*
 import commonui.progress.progressUI
+import commonui.view.HasKillsRouting
+import commonui.view.SimpleView
 import commonui.widget.TopAndContent
 
 open class ProgressTC(

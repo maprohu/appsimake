@@ -11,6 +11,7 @@ import commonshr.toFsEditable
 import commonui.*
 import commonui.links.StringHasher
 import firebase.DbApi
+import commonui.view.*
 
 interface LinksPath: DbApi {
     val links: Links
@@ -35,7 +36,7 @@ class Links(
         ViewChecklist(
             parent,
             lnk,
-            parent.checklists.doc(id).get()
+            parent.checklists.doc(id).getCachedOrServer()
         ).forwarding(parent)
     }
 
@@ -52,7 +53,7 @@ class Links(
         EditChecklist(
             parent,
             lnk,
-            parent.loggedIn.checklists.doc(id).get()
+            parent.loggedIn.checklists.doc(id).getCachedOrServer()
         ).forwarding(parent)
     }
 

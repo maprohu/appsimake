@@ -1,5 +1,6 @@
 package commonui.links
 
+import commonui.view.*
 import common.NamedDelegate
 import common.named
 import common.obj
@@ -12,7 +13,7 @@ import kotlin.browser.window
 
 
 typealias LinksContext = Any
-interface BaseTC: LinkPointItem, HasKillsRoutingTC, HasForwardTC, HasLinkage, HasCsForwardKillsRoutingTC
+interface BaseTC: LinkPointItem, HasForwardTC, HasLinkage, HasCsForwardKillsRoutingTC
 
 class LinksDeps(
     val homeName: String,

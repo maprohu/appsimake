@@ -9,6 +9,7 @@ import commonui.editing.DefaultEditing
 import commonui.links.HashStruct
 import commonui.links.Linkage
 import commonui.links.NamedHashStruct
+import commonui.view.Redisplay
 import killable.KillSet
 import kotlinx.coroutines.CoroutineScope
 
@@ -37,12 +38,8 @@ interface HasCreate: HasBind {
 }
 
 interface HasRedisplay {
-    val redisplay: Trigger
+    val redisplay: Redisplay
 }
-interface HasRedisplayv: HasRedisplay {
-    override var redisplay: Trigger
-}
-interface HasBackRedisplayv: HasBack, HasRedisplayv
 
 interface HasKillsRedisplay: HasKills, HasRedisplay
 
@@ -65,7 +62,7 @@ class EditKillsDeps(
 ): HasEditKills
 
 class RedisplayDeps(
-    override val redisplay: Trigger
+    override val redisplay: Redisplay
 ): HasRedisplay
 
 operator fun Bindings.plus(kills: KillSet) = BindKillsDeps(this, kills)
@@ -89,6 +86,8 @@ interface HasBackCreateKillsUix: HasBack, HasCreateKillsUix
 interface HasBack {
     val back: Trigger
 }
+
+interface HasBackRedisplay: HasBack, HasRedisplay
 
 //interface HasFrom {
 //    val from: HasRedisplay

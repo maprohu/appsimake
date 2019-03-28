@@ -1,6 +1,7 @@
 package firebase.firestore
 
 import common.dyn
+import common.obj
 import commonshr.CollectionSource
 import commonshr.CollectionWrap
 import commonshr.DocSource
@@ -60,7 +61,7 @@ fun <D : RxBase<*>> FsDoc<D>.snapshots(deps: HasCsDbKills) = id.docWrap.snapshot
 
 fun <D> DocSource<D>.read(ds: DocumentSnapshot): D? {
     return if (ds.exists) {
-        parent.factory(ds.data(), FsDynamicOps)
+        factory(ds.data(), FsDynamicOps)
     } else {
         null
     }
@@ -90,7 +91,7 @@ fun <D: RxBase<*>> FsDoc<D>.updateFrom(ds: DocumentSnapshot) {
     id.state %= ds.fsIdState
 
     if (ds.exists) {
-        rxv.now = id.coll.factory(ds.data(), FsDynamicOps)
+        rxv.now = id.factory(ds.data(), FsDynamicOps)
     }
 }
 
@@ -112,7 +113,7 @@ val <D> DocSource<D>.new get() = new()
 fun <D> DocSource<D>.new(d: dynamic = dyn()) = new(d, firebase.firestore.FsDynamicOps)
 
 
-suspend fun <D> DocSource<D>.get(deps: HasDb): FsEditable<D> {
+suspend fun <D> DocSource<D>.getCachedOrServer(deps: HasDb): FsEditable<D> {
     val ds = docRef(deps).run {
         try {
             get(getOptionsCache()).await()
@@ -121,7 +122,18 @@ suspend fun <D> DocSource<D>.get(deps: HasDb): FsEditable<D> {
         }
     }
     require(ds.exists) { "Document does not exist: $path"}
-    return parent.factory(ds.data(), FsDynamicOps).toFsEditable(this)
+    return factory(ds.data(), FsDynamicOps).toFsEditable(this)
+}
+
+suspend fun <D> DocSource<D>.getOrNull(deps: HasDb, source: GetOptionsSource = GetOptionsSource.default): D? {
+    val ds = docRef(deps).get(
+        obj { this.source = source }
+    ).await()
+    return if (ds.exists) {
+        factory(ds.data(), FsDynamicOps)
+    } else {
+        null
+    }
 }
 
 

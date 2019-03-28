@@ -12,6 +12,7 @@ import commonui.links.Linkage
 import commonui.widget.TopAndContent
 import firebase.User
 import kotlinx.coroutines.launch
+import commonui.view.*
 
 interface LoggedInTC<T: LoggedInTC<T>>: BaseTC, LoggedInPath, LinkApi<T>
 

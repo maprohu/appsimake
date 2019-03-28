@@ -5,6 +5,7 @@ import commonshr.private
 import commonshr.FsDoc
 import commonshr.idOrFail
 import commonui.*
+import commonui.view.*
 import commonui.links.BaseTC
 import commonui.links.LinkApi
 import commonui.links.LinkPointItem
@@ -20,6 +21,7 @@ import tasks.LinksPath
 import tasks.listtags.ListTags
 import tasks.listtasks.ListTasks
 import taskslib.*
+import commonui.view.*
 
 interface LoggedInTC<T: LoggedInTC<T>>: BaseTC, LoggedInPath, LinkApi<T>
 

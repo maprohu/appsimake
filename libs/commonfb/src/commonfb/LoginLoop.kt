@@ -18,6 +18,14 @@ sealed class UserState {
     data class LoggedIn(
         val user: User
     ): UserState()
+
+    companion object {
+        fun of(user: User?) = if (user == null) {
+            UserState.NotLoggedIn
+        } else {
+            UserState.LoggedIn(user)
+        }
+    }
 }
 suspend fun HasCsKills.runUserState(
     app: App = FB.app,
@@ -34,11 +42,7 @@ suspend fun HasCsKills.runUserState(
 
     kills += auth.onAuthStateChanged(
         { u ->
-            rxv.now = if (u == null) {
-                UserState.NotLoggedIn
-            } else {
-                UserState.LoggedIn(u)
-            }
+            rxv.now = UserState.of(u)
         },
         { e ->
             report(e)
