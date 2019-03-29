@@ -11,6 +11,7 @@ import rx.Var
 import commonui.*
 import commonui.links.Linkage
 import gymclock.form.Sounds
+import commonui.view.*
 
 interface ClockPath: FormPath {
     val clock: Clock

@@ -5,6 +5,7 @@ import commonui.*
 import commonui.links.LinksDeps
 import commonui.links.LinksFactory
 import commonui.links.StringHasher
+import commonui.view.*
 import commonui.widget.Body
 import gymclock.clock.Clock
 import gymclock.form.Form

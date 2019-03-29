@@ -27,9 +27,12 @@ interface MultiMixin<V, F: HasView<V>>: HasView<V> {
 
 abstract class MultiView<V, F: HasView<V>>(
     parent: HasKills
-): CsKills(parent), IViewApi<V>, MultiMixin<V, F>  {
+): CsKills(parent), IViewApi<V>, MultiMixin<V, F>, HasRedisplay  {
     abstract val currentView: RxIface<F>
     override val multiImpl by lazy { MultiImpl(currentView) }
+    override val redisplay = Redisplay {}
 }
 
+
+typealias MultiViewTC = MultiView<TopAndContent, IViewTC>
 

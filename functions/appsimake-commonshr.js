@@ -54,6 +54,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var AbstractMap = Kotlin.kotlin.collections.AbstractMap;
   var ClosedSendChannelException = $module$kotlinx_coroutines_core.kotlinx.coroutines.channels.ClosedSendChannelException;
   var withContext = $module$kotlinx_coroutines_core.kotlinx.coroutines.withContext_i5cbzn$;
+  var Job = $module$kotlinx_coroutines_core.kotlinx.coroutines.Job_5dx9e$;
   var toList_0 = Kotlin.kotlin.text.toList_gw00vp$;
   var reversed = Kotlin.kotlin.collections.reversed_7wnvza$;
   var toCharArray = Kotlin.kotlin.collections.toCharArray_rr68x$;
@@ -2830,6 +2831,103 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function launchNonCancellable($receiver, fn) {
     return launch($receiver, coroutines.NonCancellable, void 0, launchNonCancellable$lambda(fn));
   }
+  function CsKills(killables) {
+    this.$delegate_si8afr$_0 = killables;
+    var $receiver = Job();
+    plusAssign_0(this.kills, CsKills$coroutineContext$lambda$lambda($receiver));
+    this.coroutineContext_gxvc4i$_0 = $receiver;
+  }
+  Object.defineProperty(CsKills.prototype, 'coroutineContext', {
+    get: function () {
+      return this.coroutineContext_gxvc4i$_0;
+    }
+  });
+  function Coroutine$killAndJoin($this, continuation_0) {
+    CoroutineImpl.call(this, continuation_0);
+    this.exceptionState_0 = 1;
+    this.$this = $this;
+  }
+  Coroutine$killAndJoin.$metadata$ = {
+    kind: Kotlin.Kind.CLASS,
+    simpleName: null,
+    interfaces: [CoroutineImpl]
+  };
+  Coroutine$killAndJoin.prototype = Object.create(CoroutineImpl.prototype);
+  Coroutine$killAndJoin.prototype.constructor = Coroutine$killAndJoin;
+  Coroutine$killAndJoin.prototype.doResume = function () {
+    do
+      try {
+        switch (this.state_0) {
+          case 0:
+            this.$this.kill();
+            this.state_0 = 2;
+            this.result_0 = this.$this.coroutineContext.join(this);
+            if (this.result_0 === COROUTINE_SUSPENDED)
+              return COROUTINE_SUSPENDED;
+            continue;
+          case 1:
+            throw this.exception_0;
+          case 2:
+            return;
+          default:this.state_0 = 1;
+            throw new Error('State Machine Unreachable execution');
+        }
+      }
+       catch (e) {
+        if (this.state_0 === 1) {
+          this.exceptionState_0 = this.state_0;
+          throw e;
+        }
+         else {
+          this.state_0 = this.exceptionState_0;
+          this.exception_0 = e;
+        }
+      }
+     while (true);
+  };
+  CsKills.prototype.killAndJoin = function (continuation_0, suspended) {
+    var instance = new Coroutine$killAndJoin(this, continuation_0);
+    if (suspended)
+      return instance;
+    else
+      return instance.doResume(null);
+  };
+  Object.defineProperty(CsKills.prototype, 'kill', {
+    get: function () {
+      return this.$delegate_si8afr$_0.kill;
+    }
+  });
+  Object.defineProperty(CsKills.prototype, 'killed', {
+    get: function () {
+      return this.$delegate_si8afr$_0.killed;
+    }
+  });
+  Object.defineProperty(CsKills.prototype, 'kills', {
+    get: function () {
+      return this.$delegate_si8afr$_0.kills;
+    }
+  });
+  function CsKills$coroutineContext$lambda$lambda(this$) {
+    return function () {
+      this$.cancel();
+      return Unit;
+    };
+  }
+  CsKills.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CsKills',
+    interfaces: [HasKillKilledKills, CsKillsApi]
+  };
+  function CsKills_init(parent, $this) {
+    $this = $this || Object.create(CsKills.prototype);
+    CsKills.call($this, killables(parent));
+    return $this;
+  }
+  function CsKills_init_0(parent, $this) {
+    $this = $this || Object.create(CsKills.prototype);
+    CsKills_init(parent.kills, $this);
+    return $this;
+  }
   function RefCountMap(create) {
     this.create = create;
     this.map_0 = LinkedHashMap_init();
@@ -3224,6 +3322,16 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   }
   function plusAssign_0($receiver, trigger) {
     $receiver(trigger);
+  }
+  function HasAssign() {
+  }
+  HasAssign.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'HasAssign',
+    interfaces: []
+  };
+  function remAssign_1($receiver, item) {
+    $receiver.assign(item);
   }
   function groups$lambda(it) {
     return String_0(toCharArray(reversed(it)));
@@ -4169,6 +4277,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   ROProp.prototype.invoke = function () {
     return this.rxv.invoke();
+  };
+  ROProp.prototype.map_bb8mwd$ = function (deps, fn) {
+    return this.rxv.map_bb8mwd$(deps, fn);
   };
   ROProp.prototype.map_492dlc$ = function (ks, fn) {
     return this.rxv.map_492dlc$(ks, fn);
@@ -5912,6 +6023,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   RxIface.prototype.map_492dlc$ = function (ks, fn) {
     return Rx_init_0(ks, RxIface$map$lambda(fn, this));
   };
+  RxIface.prototype.map_bb8mwd$ = function (deps, fn) {
+    return this.map_492dlc$(deps.kills, fn);
+  };
   RxIface.prototype.forEach_aaomyj$ = function (ks, fn) {
     this.forEach_vlp88o$(ks, RxCalc$Companion_getInstance().KillFirst, fn);
   };
@@ -7433,6 +7547,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   RxLookupKills$Holder.prototype.invoke = function () {
     return this.rxv.invoke();
   };
+  RxLookupKills$Holder.prototype.map_bb8mwd$ = function (deps, fn) {
+    return this.rxv.map_bb8mwd$(deps, fn);
+  };
   RxLookupKills$Holder.prototype.map_492dlc$ = function (ks, fn) {
     return this.rxv.map_492dlc$(ks, fn);
   };
@@ -8248,6 +8365,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.discardExecutor_e9pf1l$ = discardExecutor;
   package$commonshr.executor_e9pf1l$ = executor;
   package$commonshr.launchNonCancellable_hilpzi$ = launchNonCancellable;
+  package$commonshr.CsKills_init_evkg98$ = CsKills_init;
+  package$commonshr.CsKills_init_94o6bb$ = CsKills_init_0;
+  package$commonshr.CsKills = CsKills;
   package$commonshr.RefCountMap = RefCountMap;
   package$commonshr.RefCount = RefCount;
   package$commonshr.HasKill = HasKill;
@@ -8291,6 +8411,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.first_4s9a7f$ = first;
   package$commonshr.with_qs7ci7$ = with_0;
   package$commonshr.plusAssign_aeyq4w$ = plusAssign_0;
+  package$commonshr.HasAssign = HasAssign;
+  package$commonshr.remAssign_4dc8mg$ = remAssign_1;
   package$commonshr.groups_eu8zx7$ = groups;
   package$commonshr.get_groupThousands_s8ev3n$ = get_groupThousands;
   package$commonshr.get_groupThousands_mts6qi$ = get_groupThousands_0;
@@ -8531,6 +8653,38 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   CsKillsApi.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
   CsKillsApi.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;
   toMoves$ObjectLiteral.prototype.plusAssign_qlkmfe$ = EmitterIface.prototype.plusAssign_qlkmfe$;
+  CsKills.prototype.events_9k4h2$ = CsKillsApi.prototype.events_9k4h2$;
+  CsKills.prototype.get_ids_qko62t$ = CsKillsApi.prototype.get_ids_qko62t$;
+  CsKills.prototype.filter_hu0si9$ = CsKillsApi.prototype.filter_hu0si9$;
+  CsKills.prototype.process_y3juat$ = CsKillsApi.prototype.process_y3juat$;
+  CsKills.prototype.process_7xi3v7$ = CsKillsApi.prototype.process_7xi3v7$;
+  CsKills.prototype.toRx_on0lyu$ = CsKillsApi.prototype.toRx_on0lyu$;
+  CsKills.prototype.rx_y6x17j$ = CsKillsApi.prototype.rx_y6x17j$;
+  CsKills.prototype.rx_46ic4w$ = CsKillsApi.prototype.rx_46ic4w$;
+  CsKills.prototype.rx_wgabca$ = CsKillsApi.prototype.rx_wgabca$;
+  CsKills.prototype.rx_djv61p$ = CsKillsApi.prototype.rx_djv61p$;
+  CsKills.prototype.forEach_xwzbbo$ = CsKillsApi.prototype.forEach_xwzbbo$;
+  CsKills.prototype.forEach_35q7bt$ = CsKillsApi.prototype.forEach_35q7bt$;
+  CsKills.prototype.forEachLater_xwzbbo$ = CsKillsApi.prototype.forEachLater_xwzbbo$;
+  CsKills.prototype.map_jtxi0h$ = CsKillsApi.prototype.map_jtxi0h$;
+  CsKills.prototype.onChange_rlu5c6$ = CsKillsApi.prototype.onChange_rlu5c6$;
+  CsKills.prototype.rxClass_c5yvvx$ = CsKillsApi.prototype.rxClass_c5yvvx$;
+  CsKills.prototype.rxClass_6sflyw$ = CsKillsApi.prototype.rxClass_6sflyw$;
+  CsKills.prototype.filtered_tnde95$ = CsKillsApi.prototype.filtered_tnde95$;
+  CsKills.prototype.incremented_eoy9qo$ = CsKillsApi.prototype.incremented_eoy9qo$;
+  CsKills.prototype.feedTo_9o5f67$ = CsKillsApi.prototype.feedTo_9o5f67$;
+  CsKills.prototype.remAssign_wgabca$ = CsKillsApi.prototype.remAssign_wgabca$;
+  CsKills.prototype.remAssign_djv61p$ = CsKillsApi.prototype.remAssign_djv61p$;
+  CsKills.prototype.remAssign_7fncnf$ = CsKillsApi.prototype.remAssign_7fncnf$;
+  CsKills.prototype.get_oldKilled_vsdo34$ = CsKillsApi.prototype.get_oldKilled_vsdo34$;
+  CsKills.prototype.get_oldKilledOpt_vsdo34$ = CsKillsApi.prototype.get_oldKilledOpt_vsdo34$;
+  CsKills.prototype.linked_n1nom7$ = CsKillsApi.prototype.linked_n1nom7$;
+  CsKills.prototype.containsRx_1w65cx$ = CsKillsApi.prototype.containsRx_1w65cx$;
+  CsKills.prototype.toRxSet_jr4bl4$ = CsKillsApi.prototype.toRxSet_jr4bl4$;
+  CsKills.prototype.toChannelLater_z5dyp2$ = CsKillsApi.prototype.toChannelLater_z5dyp2$;
+  CsKills.prototype.mapLive_1mq1ue$ = CsKillsApi.prototype.mapLive_1mq1ue$;
+  CsKills.prototype.listen_ubid8w$ = CsKillsApi.prototype.listen_ubid8w$;
+  CsKills.prototype.plusAssign_ubid8w$ = CsKillsApi.prototype.plusAssign_ubid8w$;
   filter$lambda$Item.prototype.rx_y6x17j$ = KillsApi.prototype.rx_y6x17j$;
   filter$lambda$Item.prototype.rx_46ic4w$ = KillsApi.prototype.rx_46ic4w$;
   filter$lambda$Item.prototype.rx_wgabca$ = KillsApi.prototype.rx_wgabca$;
@@ -8615,6 +8769,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Killables.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
   RxVal.prototype.forEachLater_aaomyj$ = RxIface.prototype.forEachLater_aaomyj$;
   RxVal.prototype.map_492dlc$ = RxIface.prototype.map_492dlc$;
+  RxVal.prototype.map_bb8mwd$ = RxIface.prototype.map_bb8mwd$;
   RxVal.prototype.forEach_aaomyj$ = RxIface.prototype.forEach_aaomyj$;
   RxVal.prototype.forEach_vlp88o$ = RxIface.prototype.forEach_vlp88o$;
   RxVal.prototype.fold_h2yxzx$ = RxIface.prototype.fold_h2yxzx$;

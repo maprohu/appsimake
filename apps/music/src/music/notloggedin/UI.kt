@@ -1,7 +1,7 @@
 package music.notloggedin
 
 import bootstrap.m1
-import commonui.usericon.userIcon
+import commonui.user.userIcon
 import commonshr.invoke
 import commonui.widget.TopAndContent
 import commonui.widget.factory

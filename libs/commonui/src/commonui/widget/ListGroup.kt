@@ -17,6 +17,9 @@ class ListGroup: ScreenWrap() {
         }
     }
 
+    val flush by lazy {
+        cls.listGroupFlush
+    }
 
     val item = insert.with { cls.listGroupItem }
 

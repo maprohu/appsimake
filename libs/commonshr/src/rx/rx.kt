@@ -134,6 +134,7 @@ interface RxIface<out T> {
     operator fun invoke(): T
 
     fun <S> map(ks: KillSet, fn: KillsApi.(T) -> S) = Rx(ks) { fn(invoke()) }
+    fun <S> map(deps: HasKills, fn: KillsApi.(T) -> S) = map(deps.kills, fn)
 
 //    fun <S> flatMap(ks: KillSet, fn: KillsApi.(T) -> RxIface<S>) = Rx(ks) { fn(invoke()) }
 

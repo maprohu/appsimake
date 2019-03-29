@@ -22,7 +22,7 @@ operator fun <F: Any> HasForward<F>.remAssign(item: F?) { fwd(item) }
 interface HasForwardKillsRouting<V, in F: Any>: HasKillsRouting<V>, HasForward<F>
 typealias HasForwardKillsRoutingTC = HasForwardKillsRouting<TopAndContent, ViewTC>
 
-interface HasCsForwardKillsRouting<V, in F: Any>: HasForwardKillsRouting<V, F>, CoroutineScope, HasCsKills
+interface HasCsForwardKillsRouting<V, in F: Any>: HasForwardKillsRouting<V, F>, CoroutineScope, HasCsKills, HasCsKillsRouting<V>
 interface HasCsForwardKilledKillsRouting<V, in F: Any>: HasCsForwardKillsRouting<V, F>, HasKilled, HasKilledKillsRouting<V>
 typealias HasCsForwardKillsRoutingTC = HasCsForwardKillsRouting<TopAndContent, IViewTC>
 
@@ -38,18 +38,14 @@ class ForwardImpl<V, in F: HasKillView<V>>(
     val baseView: () -> ViewItem<V>
 ): HasView<V>, HasForwardKillsRedisplayRouting<V, F>, KillsApi, HasKillsRouting<V> by deps {
 
+    val status: Var<@UnsafeVariance F?> = Var<F?>(null).oldKilledOpt
+
     fun returnToSelf() { status %= null }
+    fun forwardTo(fwd: F?) { status %= fwd }
 
     override var redisplay = Redisplay { returnToSelf() }
     override val fwd: (F?) -> Unit = { forwardTo(it) }
-
-    val status: Var<@UnsafeVariance F?> = Var<F?>(null).oldKilledOpt
-
     override val viewItem get() = status()?.viewItem ?: baseView()
-
-    fun forwardTo(fwd: F?) {
-        status %= fwd
-    }
     operator fun remAssign(fwd: F) { forwardTo(fwd) }
 
 }
@@ -97,7 +93,7 @@ abstract class ForwardBase<V: Any>(
 ): ForwardView<V, IView<V>>(parent)
 
 fun HasCsForwardKillsRoutingTC.advance(fn: Action) {
-    globalStatus %= "Loading..."
+    globalStatus %= "Please wait..."
     hourglass()
     launch { fn() }
 }

@@ -76,10 +76,10 @@ val Cls.cursorPointer by def(
     "cursor: pointer;"
 )
 
-val Cls.hoverColorInherit by def(
-    "color: inherit;",
-    "hover"
-)
+//val Cls.hoverColorInherit by def(
+//    "color: inherit;",
+//    "hover"
+//)
 
 val Cls.overflowHidden by def(
     "overflow: hidden;"
@@ -104,9 +104,9 @@ val Cls.pointerEventsNone by def(
 val Cls.pointerEventsAll by def(
     "pointer-events: all;"
 )
-val Cls.textDecorationNone by def(
-    "text-decoration: none;"
-)
+//val Cls.textDecorationNone by def(
+//    "text-decoration: none;"
+//)
 
 val Cls.fontSize100 by def(
     "font-size: 100%;"

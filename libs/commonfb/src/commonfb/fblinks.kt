@@ -1,6 +1,6 @@
 package commonfb
 
-import commonfb.FB.app
+import commonfb.fwdlogin.FwdLogin
 import commonfb.loginbase.*
 import commonui.*
 import commonui.links.*
@@ -16,6 +16,7 @@ import rx.RxIface
 import kotlin.coroutines.CoroutineContext
 import commonui.view.*
 import commonui.widget.Toaster
+import commonui.widget.toast
 
 data class FbLinksDeps(
     val homeName: String,
@@ -29,20 +30,21 @@ data class FbLinksDeps(
     val auth = app.auth()
 }
 
-suspend fun App.persistentDb(): Firestore {
+suspend fun App.db(persistent: Boolean = true): Firestore {
     return firestore().withDefaultSettings().apply {
-        enablePersistenceAndWait()
+        if (persistent) enablePersistenceAndWait()
     }
 }
 
-interface FbLinksApi: DbApi, HasToast
+interface FbLinksApi: DbApi, HasToast, HasLogin
 
 abstract class FbLinksFactory(
     val deps: FbLinksDeps
-) : LinksFactory(deps.homeName), HasCsDbKillsToast by deps {
+) : LinksFactory(deps.homeName), HasCsDbKillsToast by deps, HasLogin {
 
     companion object {
         fun start(
+            persistentDb: Boolean = true,
             homeName: String = "home",
             fn: suspend (FbLinksDeps) -> FbLinksFactory
         ) = launchGlobal {
@@ -56,7 +58,7 @@ abstract class FbLinksFactory(
                         kills,
                         coroutineContext,
                         app,
-                        app.persistentDb(),
+                        app.db(persistentDb),
                         hole,
                         toaster
                     )
@@ -86,18 +88,29 @@ abstract class FbLinksFactory(
         )
     }
 
-    val userState: RxIface<UserState> = userProvider.state
+    override val userState: RxIface<UserState> = userProvider.state
+    suspend fun requestUser() = userProvider.requireUser()
 
     suspend fun signOut() {
         globalStatus %= "Signing out..."
         deps.hole.hourglass()
-        app.auth().signOut().await()
+        deps.auth.signOut().await()
         userProvider.signOut()
     }
 
     fun signOutNow() {
         userProvider.signOut()
-        app.auth().signOut()
+        deps.auth.signOut()
+    }
+
+    val login by base<BaseTC>().child { baseTC, linkage ->
+        FwdLogin(
+            baseTC,
+            linkage,
+            userProvider.state,
+            deps.auth,
+            reporter = { e -> deps.toast { danger(e) } }
+        ).forwarding(baseTC)
     }
 
 

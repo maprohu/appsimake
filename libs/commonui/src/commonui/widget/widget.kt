@@ -15,23 +15,11 @@ import rx.Rx
 import rx.RxIface
 import rx.rxClass
 
-typealias Inbox = SendChannel<Any>
 
-interface HasInbox {
-    val inbox: Inbox
-//    val Node.child get() = Parent(widget, inbox)
-//    val Slot.child get() = Parent(this, inbox)
-//    val Slot.insert get() = child.insert
-//    val Slot.factory get() = child.factory
-}
-open class InboxWrap(
-    override val inbox: Inbox
-): HasInbox
-
-interface Msg<T>
-class Envelope<T>(val marker: Msg<T>, val msg: T)
-fun <T> Msg<T>.wrap(msg: T) = Envelope(this, msg)
-operator fun <T> Msg<T>.invoke(msg: T) = wrap(msg)
+//interface Msg<T>
+//class Envelope<T>(val marker: Msg<T>, val msg: T)
+//fun <T> Msg<T>.wrap(msg: T) = Envelope(this, msg)
+//operator fun <T> Msg<T>.invoke(msg: T) = wrap(msg)
 
 private const val SlotsAttribute = "appsimakeSlots"
 typealias Slot = OptAssign<Node>

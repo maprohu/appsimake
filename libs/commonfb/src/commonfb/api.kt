@@ -1,11 +1,13 @@
 package commonfb
 
 import commonfb.editing.*
+import commonfb.login.*
 import commonshr.*
 import commonshr.properties.RxBase
 import commonui.*
 import commonui.editing.CreatingTriggers
 import commonui.editing.EditingTriggers
+import commonui.widget.Factory
 import firebase.CsDbKillsApi
 import firebase.DbKillsApi
 
@@ -34,12 +36,10 @@ interface DbKillsApiCommonfb: DbKillsApi {
 interface FBApi: CsDbKillsUixApi, HasRedisplay
 interface FBBackApi: FBApi, BackCsDbKillsUixApi, HasBackRedisplay
 
-interface CsDbKillsUixApi: CsDbKillsApi, DbKillsApiCommonfb, KillsUixApi, CsApiCommonui, KillsApiCommonui {
+interface CsDbKillsUixApi: CsDbKillsApi, DbKillsApiCommonfb, KillsUixApi, CsApiCommonui, KillsApiCommonui
 
+interface BackCsDbKillsUixApi: CsDbKillsUixApi, BackKillsUixApi
+
+interface KillsLoginApi: Api, KillsApi, HasKillsLogin {
+    val Factory.userIcon get() = userIcon(api)
 }
-
-interface BackCsDbKillsUixApi: CsDbKillsUixApi, BackKillsUixApi {
-
-}
-
-

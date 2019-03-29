@@ -5,6 +5,7 @@ import commonshr.*
 import commonui.widget.*
 import domx.*
 import firebase.User
+import index.home.appListUi
 
 fun NotLoggedIn.ui() = TopAndContent(
     topbar = factory.topbar {
@@ -17,38 +18,10 @@ fun NotLoggedIn.ui() = TopAndContent(
             }
         }
         title %= "Apps I Make"
-    }.node,
-    content = factory.scrollPane {
-        pane {
-            cls {
-                p2
-            }
-            insert.listGroup {
-
-                fun app(
-                    id: String,
-                    title: String
-                ) {
-                    node.a {
-                        cls {
-                            listGroupItem
-                            listGroupItemAction
-                        }
-                        href = "../$id/"
-                        innerText = title
-                    }
-                }
-
-                app("tasks", "Tasks")
-                app("tictactoe", "Tic Tac Toe")
-                app("gymclock", "Gym Clock")
-                app("music", "Music Player")
-                app("download", "Download")
-                app("testapp", "Test App")
-                app("checklist", "Checklist")
-
-            }
+        right.userIcon {
+            cls.m1
         }
-    }.node
+    }.node,
+    content = appListUi()
 )
 

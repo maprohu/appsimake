@@ -1,10 +1,8 @@
 package music.boot
 
-import common.obj
 import commonfb.*
-import commonshr.*
 import commonui.globalStatus
-import commonui.usericon.UnknownUserSrc
+import commonui.user.UnknownUserSrc
 import commonui.widget.*
 import firebase.app.App
 import firebase.firestore.Firestore
@@ -16,8 +14,6 @@ import music.common.LocalSongs
 import music.content.Content
 import music.content.UserUnknown
 import music.data.*
-import music.loggedin.LoggedIn
-import music.notloggedin.NotLoggedIn
 import music.player.Player
 import music.player.Visible
 import org.w3c.dom.HTMLElement

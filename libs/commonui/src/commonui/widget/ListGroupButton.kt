@@ -2,9 +2,7 @@ package commonui.widget
 
 import bootstrap.*
 import commonshr.*
-import commonui.usericon.userIcon
 import domx.*
-import styles.scrollVertical
 import kotlin.browser.document
 
 class ListGroupButton: ScreenWrap() {

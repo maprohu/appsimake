@@ -20,8 +20,7 @@ class Login(
     val loggingIn: Action = {},
     val loginFailed: suspend (dynamic) -> Unit = {},
     val loginSucceeded: suspend (UserCredential) -> Unit = {}
-): ViewTC(parent), UserStateView {
-    override val userState = UserState.NotLoggedIn
+): ViewTC(parent) {
     override val rawView = ui()
 
     suspend fun tryLogin(fn: suspend () -> UserCredential) {

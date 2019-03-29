@@ -49,6 +49,7 @@ class SimpleViewImpl<V>(
 interface SimpleViewItemMixin<V>: HasUix, HasRouting<V> {
     val simpleView: SimpleViewImpl<V>
     override val uix get() = simpleView.uix
+    val isActiveView get() = simpleView.isActiveView
 }
 interface SimpleViewMixin<V>: SimpleViewItemMixin<V>, HasView<V> {
     override val viewItem get() = simpleView.viewItem

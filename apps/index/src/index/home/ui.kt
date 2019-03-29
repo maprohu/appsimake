@@ -6,84 +6,45 @@ import commonui.widget.*
 import domx.*
 import firebase.User
 
-fun KillsApi.notLoggedInUi(home: Home) = TopAndContent(
-    topbar = factory.topbar {
-        title {
-            cls.p1
-            this %= "Apps I Make"
+private fun ScreenWrap.app(
+    id: String,
+    title: String
+) {
+    node.a {
+        cls {
+            listGroupItem
+            listGroupItemAction
         }
-    }.node,
-    content = factory.scrollPane {
-        pane {
-            cls {
-                p2
-            }
-            insert.listGroup {
+        href = "../$id/"
+        innerText = title
+    }
+}
 
-                fun app(
-                    id: String,
-                    title: String
-                ) {
-                    node.a {
-                        cls {
-                            listGroupItem
-                            listGroupItemAction
-                        }
-                        href = "../$id/"
-                        innerText = title
-                    }
-                }
-
+fun appListUi() = factory.scrollPane {
+    pane {
+        insert.card {
+            cls.m2
+            header %= "Work In Progress"
+            header.cls.fontWeightBold
+            listGroup {
                 app("tasks", "Tasks")
-                app("tictactoe", "Tic Tac Toe")
                 app("gymclock", "Gym Clock")
-                app("music", "Music Player")
-                app("download", "Download")
-                app("testapp", "Test App")
                 app("checklist", "Checklist")
 
             }
         }
-    }.node
-)
-
-fun KillsApi.loggedInUi(home: Home, user: User) = TopAndContent(
-    topbar = factory.topbar {
-        title {
-            cls.p1
-            this %= "Apps I Make"
-        }
-    }.node,
-    content = factory.scrollPane {
-        pane {
-            cls {
-                p2
-            }
-            insert.listGroup {
-
-                fun app(
-                    id: String,
-                    title: String
-                ) {
-                    node.a {
-                        cls {
-                            listGroupItem
-                            listGroupItemAction
-                        }
-                        href = "../$id/"
-                        innerText = title
-                    }
-                }
-
-                app("tasks", "Tasks")
+        insert.card {
+            cls.m2
+            header %= "More Work In Progress"
+            header.cls.fontWeightBold
+            listGroup {
                 app("tictactoe", "Tic Tac Toe")
-                app("gymclock", "Gym Clock")
                 app("music", "Music Player")
                 app("download", "Download")
                 app("testapp", "Test App")
-                app("checklist", "Checklist")
-
             }
         }
-    }.node
-)
+    }
+}.node
+
+

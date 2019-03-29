@@ -107,6 +107,7 @@ class Factory(
     val form get() = Form().applied
     val inputGroup get() = InputGroup().applied
     val listGroup get() = ListGroup().applied
+    val card get() = Card().applied
     val listGroupButton get() = ListGroupButton().applied
     val nestedListButton get() = NestedListButton().applied
 

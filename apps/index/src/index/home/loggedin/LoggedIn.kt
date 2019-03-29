@@ -1,5 +1,6 @@
 package index.home.loggedin
 
+import commonfb.KillsLoginApi
 import commonui.view.HasKillsRouting
 import commonui.view.SimpleView
 import commonui.view.ViewTC
@@ -14,7 +15,7 @@ interface LoggedInPath: HomePath {
 class LoggedIn(
     parent: HasKillsRouting<TopAndContent>,
     home: Home
-): ViewTC(parent), LoggedInPath, HomePath by home {
+): ViewTC(parent), LoggedInPath, HomePath by home, KillsLoginApi {
     override val loggedIn = this
     override val rawView = ui()
 

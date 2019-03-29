@@ -1,7 +1,6 @@
 package gymclock.form
 
 import commonui.*
-import commonui.ForwardBase
 import commonui.editing.DefaultBindings
 import commonui.links.LinkApi
 import commonui.links.Linkage
@@ -14,6 +13,7 @@ import gymclock.data.loadModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.w3c.dom.HTMLElement
+import commonui.view.*
 
 interface FormPath: LinksPath {
     val form: Form

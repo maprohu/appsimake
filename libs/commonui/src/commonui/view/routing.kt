@@ -16,9 +16,11 @@ interface HasRouting<V> {
     val activeView: RxIface<ViewItem<V>>
 }
 interface HasKillsRouting<V>: HasKills, HasRouting<V>
+interface HasCsKillsRouting<V>: HasKillsRouting<V>, HasCsKills
 interface HasKilledKillsRouting<V>: HasKilledKills, HasRouting<V>, HasKillsRouting<V>
 typealias HasRoutingTC = HasRouting<TopAndContent>
 typealias HasKillsRoutingTC = HasKillsRouting<TopAndContent>
+typealias HasCsKillsRoutingTC = HasCsKillsRouting<TopAndContent>
 
 typealias SimpleRoutingHoleTC = SimpleRoutingHole<TopAndContent>
 typealias SimpleRoutingHole<V> = RoutingHole<V, HasKillView<V>>
@@ -54,4 +56,14 @@ class RoutingFactory<V: Any>(
 fun SimpleRoutingHoleTC.hourglass() {
     this %= ProgressTC(this)
 }
+
+data class KillsRoutingDeps<V>(
+    override val kills: KillSet,
+    override val activeView: RxIface<ViewItem<V>>
+): HasKillsRouting<V>
+
+operator fun <V> HasKills.plus(routing: HasRouting<V>) = KillsRoutingDeps(
+    kills = kills,
+    activeView = routing.activeView
+)
 

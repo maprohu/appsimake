@@ -56,7 +56,7 @@ class Toast: ScreenWrap() {
             alert
             pointerEventsAll
             textDecorationNone
-            hoverColorInherit
+            textReset
             m1
             p1
         }

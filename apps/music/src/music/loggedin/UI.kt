@@ -2,7 +2,7 @@ package music.loggedin
 
 import bootstrap.flexGrow1
 import bootstrap.m1
-import commonui.usericon.userIcon
+import commonui.user.userIcon
 import commonshr.*
 import commonui.widget.*
 import domx.invoke

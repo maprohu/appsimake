@@ -6,5 +6,5 @@ import commonui.widget.Body
 import index.home.Home
 
 fun main() {
-    FbLinksFactory.start { Links(it) }
+    FbLinksFactory.start(false) { Links(it) }
 }
