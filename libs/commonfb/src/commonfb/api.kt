@@ -43,3 +43,7 @@ interface BackCsDbKillsUixApi: CsDbKillsUixApi, BackKillsUixApi
 interface KillsLoginApi: Api, KillsApi, HasKillsLogin {
     val Factory.userIcon get() = userIcon(api)
 }
+
+
+interface KillsLoginUixApi: KillsLoginApi, KillsUixApi {
+}

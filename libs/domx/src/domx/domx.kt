@@ -16,6 +16,7 @@ import rx.forEach
 import kotlin.browser.document
 import kotlin.browser.window
 import kotlin.dom.addClass
+import kotlin.dom.appendText
 import kotlin.dom.removeClass
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -366,6 +367,7 @@ fun HTMLButtonElement.rxEnabled(deps: HasKills, fn: KillsApi.() -> Boolean) {
 }
 
 operator fun HTMLElement.remAssign(text: String) { innerText = text }
+operator fun Element.plusAssign(text: String) { appendText(text) }
 
 val Node.div by elem<HTMLDivElement>()
 val Node.styleTag by elem<HTMLStyleElement>("style")
@@ -381,6 +383,7 @@ val Node.source by elem<HTMLSourceElement>()
 val Node.audio by elem<HTMLAudioElement>()
 val Node.span by elem<HTMLSpanElement>()
 val Node.a by elem<HTMLAnchorElement>()
+val Node.p by elem<HTMLDivElement>()
 val Node.button by elem<HTMLButtonElement>()
 val Node.h1 by elem<HTMLHeadingElement>()
 val Node.h2 by elem<HTMLHeadingElement>()

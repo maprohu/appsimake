@@ -39,4 +39,8 @@ class Home(
     fun signIn() = advance {
         links.login.fwd()
     }
+
+    fun about() = advance {
+        links.about.fwd()
+    }
 }

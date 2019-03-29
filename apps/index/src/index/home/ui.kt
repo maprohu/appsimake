@@ -1,10 +1,13 @@
 package index.home
 
 import bootstrap.*
+import commonfb.KillsLoginApi
+import commonfb.KillsLoginUixApi
 import commonshr.*
 import commonui.widget.*
 import domx.*
 import firebase.User
+import fontawesome.info
 
 private fun ScreenWrap.app(
     id: String,
@@ -18,6 +21,28 @@ private fun ScreenWrap.app(
         href = "../$id/"
         innerText = title
     }
+}
+
+interface HomeApi: HomePath, KillsLoginUixApi {
+
+    fun Topbar.topbarUi() {
+        title %= "Apps I Make"
+
+        right.button {
+            m1p2
+            secondary
+            fa.info
+            click {
+                home.about()
+            }
+        }
+
+        right.userIcon {
+            cls.m1
+        }
+
+    }
+
 }
 
 fun appListUi() = factory.scrollPane {
@@ -41,10 +66,9 @@ fun appListUi() = factory.scrollPane {
                 app("tictactoe", "Tic Tac Toe")
                 app("music", "Music Player")
                 app("download", "Download")
-                app("testapp", "Test App")
+//                app("testapp", "Test App")
             }
         }
     }
 }.node
-
 

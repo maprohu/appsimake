@@ -57,7 +57,7 @@ object firebaseUiJs : JsDownload(
     )
 )
 
-private const val fontAwesomeVersion = "5.5.0"
+private const val fontAwesomeVersion = "5.8.1"
 private const val fontAwesomeDirName = "fontawesome-free-$fontAwesomeVersion-web"
 object fontAwesomeDist : JsDownload(
     "https://use.fontawesome.com/releases/v$fontAwesomeVersion/$fontAwesomeDirName.zip",

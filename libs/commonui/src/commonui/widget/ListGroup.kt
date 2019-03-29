@@ -21,7 +21,7 @@ class ListGroup: ScreenWrap() {
         cls.listGroupFlush
     }
 
-    val item = insert.with { cls.listGroupItem }
+    val item get() = insert.withElement { cls.listGroupItem }
 
 }
 

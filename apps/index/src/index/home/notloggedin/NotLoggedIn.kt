@@ -6,6 +6,7 @@ import commonui.view.SimpleView
 import commonui.view.ViewTC
 import commonui.widget.TopAndContent
 import index.home.Home
+import index.home.HomeApi
 import index.home.HomePath
 import kotlinx.coroutines.launch
 
@@ -16,7 +17,7 @@ interface NotLoggedInPath: HomePath {
 class NotLoggedIn(
     parent: HasKillsRouting<TopAndContent>,
     home: Home
-): ViewTC(parent), NotLoggedInPath, HomePath by home, KillsLoginApi {
+): ViewTC(parent), NotLoggedInPath, HomePath by home, HomeApi {
     override val notLoggedIn = this
     override val rawView = ui()
 

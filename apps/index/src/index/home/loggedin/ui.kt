@@ -17,10 +17,7 @@ fun LoggedIn.ui() = TopAndContent(
                 }
             }
         }
-        title %= "Apps I Make"
-        right.userIcon {
-            cls.m1
-        }
+        topbarUi()
     }.node,
     content = appListUi()
 )

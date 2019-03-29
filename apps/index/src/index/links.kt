@@ -6,7 +6,9 @@ import commonfb.FbLinksFactory
 import commonshr.toFsEditable
 import commonui.*
 import commonui.links.StringHasher
+import commonui.view.forwarding
 import firebase.DbApi
+import index.about.About
 import index.home.Home
 
 interface LinksPath: FbLinksApi {
@@ -25,6 +27,13 @@ class Links(
         ).apply {
             deps.hole %= this
         }
+    }
+
+    val about by home.child { home, linkage ->
+        About(
+            home,
+            linkage
+        ).forwarding(home)
     }
 
 }

@@ -6,6 +6,7 @@ import commonui.view.SimpleView
 import commonui.view.ViewTC
 import commonui.widget.TopAndContent
 import index.home.Home
+import index.home.HomeApi
 import index.home.HomePath
 
 interface LoggedInPath: HomePath {
@@ -15,7 +16,7 @@ interface LoggedInPath: HomePath {
 class LoggedIn(
     parent: HasKillsRouting<TopAndContent>,
     home: Home
-): ViewTC(parent), LoggedInPath, HomePath by home, KillsLoginApi {
+): ViewTC(parent), LoggedInPath, HomePath by home, HomeApi {
     override val loggedIn = this
     override val rawView = ui()
 

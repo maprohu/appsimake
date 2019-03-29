@@ -29,6 +29,7 @@ typealias IView<V> = HasKillKillsView<V>
 typealias IViewTC = IView<TopAndContent>
 
 interface IViewApi<V>: IView<V>, CsKillsApiCommonui
+typealias IViewApiTC = IViewApi<TopAndContent>
 
 fun <V: Any, T: ViewItem<V>> RxIface<T>.runView(deps: HasKills, hole: HoleT<V>) {
     rx(deps) { invoke().prepared(hole.prepareOrNull) }.forEach(HasNoKill) { hole %= it }
