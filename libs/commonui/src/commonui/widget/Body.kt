@@ -14,13 +14,13 @@ import commonui.view.*
 interface BodyPath {
     val body: Body
 }
-typealias BodyNode = IView<HTMLElement>
+typealias BodyNode = IView<ScreenElement>
 class Body(
     slot: Hole = kotlin.run {
         setupFullScreen()
         document.body!!.hole
     }
-): CsKills(NoKill), CsKillsApiCommonui, BodyPath, HasKillsRouting<HTMLElement> {
+): CsKills(NoKill), CsKillsApiCommonui, BodyPath, HasKillsRouting<ScreenElement> {
     override val body = this
 
     val hole = slot.routing.of<BodyNode> { Progress(this) }
@@ -32,7 +32,7 @@ class Body(
 
 class BodyTC(
     body: Body = Body()
-): SimpleView<HTMLElement>(body), HasToast {
+): SimpleView<ScreenElement>(body), HasToast {
 
     class Slots {
         lateinit var top: Hole

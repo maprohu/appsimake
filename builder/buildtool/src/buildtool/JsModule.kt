@@ -306,18 +306,6 @@ open class JsModule(
         publicResmapFile + jsFileValue.map { it.publicFile() }
     }
 
-    fun resmapFileContent(
-        entries: List<Pair<String, String>>
-    ): List<String> {
-        return if (entries.isEmpty()) listOf()
-        else {
-            listOf(resmapContent(
-                entries.map {
-                    ResMapping(it.first, it.second)
-                }
-            ))
-        }
-    }
 
     val testResmapFile by task {
         resmapFileContent(

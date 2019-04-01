@@ -272,15 +272,13 @@ class BackPersistDiscard(
                 p2
                 btnSuccess
             }
-            node.span {
-                cls.fa {
-                    fw
+            insert.icon {
+                fa {
                     chevronLeft
                 }
             }
-            node.span {
-                cls.fa {
-                    fw
+            insert.icon {
+                fa {
                     save
                 }
             }
@@ -371,15 +369,13 @@ class BackSaveDiscard(
                 p2
                 btnSuccess
             }
-            node.span {
-                cls.fa {
-                    fw
+            insert.icon {
+                fa {
                     chevronLeft
                 }
             }
-            node.span {
-                cls.fa {
-                    fw
+            insert.icon {
+                fa {
                     save
                 }
             }

@@ -43,7 +43,7 @@ private fun def(s: String, action: String? = null) = object : ReadOnlyProperty<C
 
 }
 
-val String.cssEscape get() = replace("[^a-zA-Z0-9-]]".toRegex(), "_")
+val String.cssEscape get() = replace("[^a-zA-Z0-9-]".toRegex(), "_")
 
 private fun <T> defParam(
     action: String? = null,
@@ -142,3 +142,11 @@ val Cls.objectFitScaleDown by def(
 val Cls.gridTemplateColumnsAuto by defParam<Int> { count ->
     "grid-template-columns: ${(1..count).joinToString(" ") { "auto" }};"
 }
+
+val Cls.widthEm by defParam<Double> { w ->
+    "width: ${w}em;"
+}
+
+val Cls.width125Em by def(
+    "width: 1.25em;"
+)

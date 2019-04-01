@@ -3,6 +3,7 @@ package commonui.widget
 import bootstrap.*
 import commonshr.invoke
 import domx.*
+import org.w3c.dom.css.ElementCSSInlineStyle
 import styles.leftRightTopBottom0
 import styles.pointerEventsNone
 import kotlin.browser.document
@@ -17,7 +18,7 @@ class Stack(): ScreenWrap() {
     val layer get(): Hole {
         val idx = zIndex++.toString()
         return slot.hole.with {
-            style.zIndex = idx
+            unsafeCast<ElementCSSInlineStyle>().style.zIndex = idx
         }
     }
 

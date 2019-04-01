@@ -1,61 +1,59 @@
 package fontawesome
 
+import common.named
 import commonshr.InvokeApply
 import domx.*
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-//fun Element.fas(name: String) {
-//    classes += "fas fa-$name"
+
+//val Cls.fas by css()
+//val Cls.fab by css()
+//
+//class FaIcon(
+//    val fn: Cls.() -> Fa
+//) {
+//    companion object {
+//        fun fa(fn: Fa.() -> Unit) = FaIcon { fa.apply(fn) }
+//        fun fa(str: String) = FaIcon { fa.apply { element { classes += str} } }
+//        fun faBrands(fn: FaBrands.() -> Unit) = FaIcon { faBrands.apply(fn) }
+//        fun faBrands(str: String) = FaIcon { faBrands.apply { element { classes += str} } }
+//    }
 //}
 //
-//fun Node.fa(name: String) = span {
-//    classes += "fas fa-$name $lineHeightInherit"
+//fun Cls.fa(icon: FaIcon, fn: Fa.() -> Unit = {}): Fa {
+//    return this.run(icon.fn).apply(fn)
+//}
+
+interface FaBase: InvokeApply {
+    fun of(cssName: String)
+}
+interface Fa: FaBase
+interface FaSolid: Fa
+interface FaRegular: Fa
+interface FaBrands: FaBase
+
+
+//open class Fas(val cls: Cls, faCls: String = Cls.fas): InvokeApply {
+//    init {
+//        cls.element {
+//            classes += faCls
+//        }
+//    }
+//    companion object: Fas(Cls)
+//}
+//open class FaBrands(cls: Cls): Fas(cls, Cls.fab) {
+//    companion object: FaBrands(Cls)
 //}
 //
-//fun Node.chevronRight() = fa("chevron-right")
-//fun Node.chevronLeft() = fa("chevron-left")
-//fun Node.chevronDown() = fa("chevron-down")
-//fun Node.spinner() = fa("spinner fa-spin")
+//val Cls.fa
+//    get() = Fas(this)
+//val Cls.faBrands
+//    get() = FaBrands(this)
 
-val Cls.fas by css()
-val Cls.fab by css()
-
-class FaIcon(
-    val fn: Cls.() -> Fa
-) {
-    companion object {
-        fun fa(fn: Fa.() -> Unit) = FaIcon { fa.apply(fn) }
-        fun fa(str: String) = FaIcon { fa.apply { element { classes += str} } }
-        fun faBrands(fn: FaBrands.() -> Unit) = FaIcon { faBrands.apply(fn) }
-        fun faBrands(str: String) = FaIcon { faBrands.apply { element { classes += str} } }
-    }
-}
-
-fun Cls.fa(icon: FaIcon, fn: Fa.() -> Unit = {}): Fa {
-    return this.run(icon.fn).apply(fn)
-}
-
-open class Fa(val cls: Cls, faCls: String = Cls.fas): InvokeApply {
-    init {
-        cls.element {
-            classes += faCls
-        }
-    }
-    companion object: Fa(Cls)
-}
-open class FaBrands(cls: Cls): Fa(cls, Cls.fab) {
-    companion object: FaBrands(Cls)
-}
-
-val Cls.fa
-    get() = Fa(this)
-val Cls.faBrands
-    get() = FaBrands(this)
-
-class FaCssClass(val name: String) : ReadOnlyProperty<Fa, String> {
-    override fun getValue(thisRef: Fa, property: KProperty<*>) : String {
-        thisRef.cls.element { classes += name }
+class FaCssClass(val name: String) : ReadOnlyProperty<FaBase, String> {
+    override fun getValue(thisRef: FaBase, property: KProperty<*>) : String {
+        thisRef.of(name)
         return name
     }
 }
@@ -63,13 +61,29 @@ class FaCssClassProvider(private val cls: String? = null) {
     operator fun provideDelegate(
         thisRef: Nothing?,
         prop: KProperty<*>
-    ) = FaCssClass("fa-${cls ?: prop.name.toCss()}")
+    ) = FaCssClass(cls ?: prop.name.toCss())
 }
 fun facss(cls: String? = null) = FaCssClassProvider(cls)
 
-val Fa.fw by facss()
-val Fa.xs by facss()
-val Fa.sm by facss()
+//class FaCssClass(val name: String) : ReadOnlyProperty<Fa, String> {
+//    override fun getValue(thisRef: Fa, property: KProperty<*>) : String {
+//        thisRef.cls.element { classes += name }
+//        return name
+//    }
+//}
+//class FaCssClassProvider(private val cls: String? = null) {
+//    operator fun provideDelegate(
+//        thisRef: Nothing?,
+//        prop: KProperty<*>
+//    ) = FaCssClass("fa-${cls ?: prop.name.toCss()}")
+//}
+//fun facss(cls: String? = null) = FaCssClassProvider(cls)
+
+//val Fa.fw by facss()
+//val Fa.xs by facss()
+//val Fa.sm by facss()
+
+
 val Fa.copy by facss()
 val Fa.ban by facss()
 val Fa.undo by facss()
@@ -134,10 +148,11 @@ val Fa.syncAlt by facss()
 val Fa.redoAlt by facss()
 val Fa.tachometerAlt by facss()
 val Fa.spinner by facss()
-val Fa.spin by facss()
 val Fa.info by facss()
+
 val FaBrands.google by facss()
 
-val Fa.x2 by facss("2x")
-val Fa.x3 by facss("3x")
-val Fa.x4 by facss("4x")
+//val Fa.spin by facss()
+//val Fa.x2 by facss("2x")
+//val Fa.x3 by facss("3x")
+//val Fa.x4 by facss("4x")

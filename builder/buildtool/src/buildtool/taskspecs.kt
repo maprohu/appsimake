@@ -219,3 +219,16 @@ fun <I, O> createCache(fn: (I) -> O): (I) -> O {
         }
     }
 }
+
+fun resmapFileContent(
+    entries: List<Pair<String, String>>
+): List<String> {
+    return if (entries.isEmpty()) listOf()
+    else {
+        listOf(resmapContent(
+            entries.map {
+                ResMapping(it.first, it.second)
+            }
+        ))
+    }
+}

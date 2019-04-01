@@ -45,8 +45,11 @@ inline val Element.classes
 
 class Classes(private val element: Element) {
     operator fun plusAssign(cls: String?) {
-        cls?.let {
-            c -> c.trim().split(Regex("\\s")).forEach {
+        cls?.let { c ->
+            TODO("classname is an animated property in svg, library addClass fails!")
+//            console.dir(element)
+//            println(c)
+            c.trim().split(Regex("\\s")).forEach {
                 element.addClass(it)
             }
         }

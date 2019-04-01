@@ -27,6 +27,7 @@ object firebaseJs : JsDownload(
     url = URL("https://codeload.github.com/firebase/firebase-bower/zip/v$firebaseVersion"),
     fileName = "$firebaseBaseName.zip",
     extract = ExtractInfo(
+        name = "firebase-dist",
         jsPath = listOf(
             "$firebaseBaseName/firebase-app.js",
             "$firebaseBaseName/firebase-auth.js",
@@ -44,6 +45,7 @@ object firebaseUiJs : JsDownload(
     URL("https://github.com/firebase/firebaseui-web/archive/v$firebaseUiVersion.zip"),
     "$firebaseUiBaseName.zip",
     ExtractInfo(
+        name = "firebaseui-dist",
         jsPath = listOf(
             "$firebaseUiBaseName/dist/firebaseui.js"
         ),
@@ -62,18 +64,30 @@ private const val fontAwesomeDirName = "fontawesome-free-$fontAwesomeVersion-web
 object fontAwesomeDist : JsDownload(
     "https://use.fontawesome.com/releases/v$fontAwesomeVersion/$fontAwesomeDirName.zip",
     ExtractInfo(
+        name = "fontawesome-dist",
         filter = { ze ->
             Paths.get(ze.name).let {
                 it.nameCount >= 2 &&
-                        it.getName(1).toString() in setOf("css", "webfonts")
+//                        it.getName(1).toString() in setOf("css", "webfonts")
+                        it.getName(1).toString() in setOf("sprites")
             }
         },
-        dirResources = listOf(
-            DirResource(
-                fontAwesomeDirName,
-                listOf("css/all.css")
-            )
+        resPath = listOf(
+            "brands.svg" to "$fontAwesomeDirName/sprites/brands.svg",
+            "regular.svg" to "$fontAwesomeDirName/sprites/regular.svg",
+            "solid.svg" to "$fontAwesomeDirName/sprites/solid.svg"
         )
+//        dirResources = listOf(
+//            DirResource(
+//                fontAwesomeDirName
+////                listOf("css/all.css")
+////                listOf(
+////                    "sprites/brands.svg",
+////                    "sprites/regular.svg",
+////                    "sprites/solid.svg"
+////                )
+//            )
+//        )
     )
 )
 

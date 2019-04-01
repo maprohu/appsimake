@@ -225,7 +225,7 @@ class HoleT<T>(
         this?.apply(prepare)
     }
 }
-typealias Hole = HoleT<HTMLElement>
+typealias Hole = HoleT<ScreenElement>
 //class Hole(
 //    val prepare: HTMLElement.() -> Unit,
 //    val slot: Slot
@@ -259,7 +259,7 @@ val Hole.insert: Factory
         }
     }
 
-fun Slot.toHole(prepare: HTMLElement.() -> Unit = {}) = Hole(
+fun Slot.toHole(prepare: ScreenElement.() -> Unit = {}) = Hole(
     prepare,
     this
 )

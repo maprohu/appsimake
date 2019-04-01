@@ -2,6 +2,7 @@ package commonui.widget
 
 import commonshr.*
 import domx.*
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
@@ -35,10 +36,10 @@ import kotlin.browser.document
 //}
 
 data class FactoryAfter(
-    val element: HTMLElement?.() -> Unit = {},
+    val element: ScreenElement?.() -> Unit = {},
     val wrap: ScreenWrap.() -> Unit = {}
 ) {
-    fun withElement(fn: HTMLElement?.() -> Unit) = copy(
+    fun withElement(fn: ScreenElement?.() -> Unit) = copy(
         element = {
             element()
             fn()
@@ -56,10 +57,10 @@ val factory  = Factory()
 class Factory(
     private val after: FactoryAfter = FactoryAfter()
 ): InvokeApply {
-    infix fun with(fn: HTMLElement?.() -> Unit) = Factory(
+    infix fun with(fn: ScreenElement?.() -> Unit) = Factory(
         after.withElement(fn)
     )
-    infix fun withElement(fn: HTMLElement.() -> Unit) = Factory(
+    infix fun withElement(fn: ScreenElement.() -> Unit) = Factory(
         after.withElement {
             after.element(this)
             if (this != null) fn()
@@ -231,7 +232,8 @@ class SlotVar(
 //    return sv.node
 //}
 
-abstract class ScreenWrap: HasHTMLElement, InvokeApply {
+typealias ScreenElement = Element
+abstract class ScreenWrap: HasElement, InvokeApply {
     val target = Var<Slot?>(null)
 
     val <T: ScreenWrap> T.append: T get() = setTo(this@ScreenWrap.node.widget)

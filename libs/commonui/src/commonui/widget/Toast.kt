@@ -88,15 +88,14 @@ class Toast: ScreenWrap() {
         }.setTo(slots.text)
     }
     val close by lazy {
-        document.span {
+        slots.close.insert.icon {
             cls {
                 m1
                 fa {
-                    sm
                     times
                 }
             }
-        }.setTo(slots.close)
+        }
     }
 
     fun warning(txt: String) {

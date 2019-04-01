@@ -35,7 +35,7 @@ fun Login.ui() = TopAndContent(
             alignItemsCenter
         }
         column {
-            fun butt(faIcon: FaIcon, label: String, fn: Trigger): Button {
+            fun butt(faIcon: Icon.() -> Unit, label: String, fn: Trigger): Button {
                 return widget.insert.button {
                     click(fn)
                     primary
@@ -48,10 +48,11 @@ fun Login.ui() = TopAndContent(
                     icon {
                         cls {
                             m1
-                            fa(faIcon) {
-                                fw
-                            }
+//                            fa(faIcon) {
+//                                fw
+//                            }
                         }
+                        faIcon()
                     }
 
                     text {
@@ -62,9 +63,9 @@ fun Login.ui() = TopAndContent(
                     }
                 }
             }
-            butt(FaIcon.faBrands { google }, "Sign in with Google") { google() }
+            butt({ brands.google }, "Sign in with Google") { google() }
 //                butt(FaIcon.fa { at }, "Sign in with email", Email)
-            butt(FaIcon.fa { user }, "Continue as guest") { guest() }
+            butt({ fa.user }, "Continue as guest") { guest() }
         }
 
     }

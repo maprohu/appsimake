@@ -67,6 +67,8 @@ class FileValue(
 
 }
 
+val File.fileValue get() = FileValue(this)
+
 
 data class ExtJs(
     val main: File

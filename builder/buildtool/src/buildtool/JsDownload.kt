@@ -10,10 +10,12 @@ class DirResource(
     val cssPath: List<String> = listOf()
 )
 class ExtractInfo(
+    val name: String,
     val dir: String? = null,
     val filter: (ZipEntry) -> Boolean = { true },
     val jsPath: List<String> = listOf(),
     val cssPath: List<String> = listOf(),
+    val resPath: List<Pair<String, String>> = listOf(),
     val dirResources: List<DirResource> = listOf()
 )
 
@@ -161,16 +163,51 @@ open class JsDownload(
         }
     )
 
-    override val jsFile by task(
+    override val jsFile by
         if (extract == null) {
-            { listOf(downloaded) }
+            task { listOf(downloaded) }
         } else {
-            { extract.jsPath.map { extracted.resolve(it) } }
+            task {
+                testResmapFile + extract.jsPath.map { extracted.resolve(it) }
+            }
         }
-    )
 
     override val jsFileValue by task { jsFile.map { FileValue(it) } }
 
+    override val publicJsFile by
+        if (extract == null) publicTask { jsFileValue }
+        else task {
+            publicResmapFile + jsFileValue.map { it.publicFile() }
+        }
+
+    val testResmapFileLocation by lazy { ProdOutDir.resolve(extract!!.name).resolve("${extract!!.name}.resmap.js") }
+    val testResmapFile by task {
+        resmapFileContent(
+            extract!!.resPath.map {
+                it.first to
+                    extracted.resolve(it.second).relativeTo(TestingDir).fromApp().invariantSeparatorsPath
+            }
+        ).map {
+            testResmapFileLocation.parentFile.mkdirs()
+            testResmapFileLocation.writeText(it)
+            testResmapFileLocation
+        }
+    }
+
+    val publicResFiles by task {
+        extract!!.resPath.map { it.first to extracted.resolve(it.second).fileValue.publicFile() }
+    }
+
+    val publicResmapFile by task {
+        resmapFileContent(
+            publicResFiles.map {
+                it.first to
+                        it.second.relativeTo(TestingDir).fromApp().invariantSeparatorsPath
+            }
+        ).map {
+            publicTextFile("${extract!!.name}.resmap", "js", it)
+        }
+    }
 
 
     override val testingCss by task(

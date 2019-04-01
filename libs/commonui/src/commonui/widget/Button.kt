@@ -51,13 +51,17 @@ class Button(): ScreenWrap() {
     val submit: Unit get() { node.type = "submit" }
 
     val icon by lazy {
-        document.span.setTo(slots.icon)
+        slots.icon.insert.icon {
+            fw
+        }
+//        document.span.setTo(slots.icon)
     }
 
     val fa by lazy {
-        icon.cls.fa {
-            fw
-        }
+        icon.fa
+//        icon.cls.fa {
+//            fw
+//        }
     }
 
     val text by lazy {

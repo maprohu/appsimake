@@ -5,17 +5,25 @@ import org.w3c.dom.Element
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.Node
 import org.w3c.dom.svg.*
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 
-val SvgNS = "http://www.w3.org/2000/svg"
+private val SvgNS = "http://www.w3.org/2000/svg"
 
-private fun <T: SVGElement> Node.svg(name: String, fn: T.() -> Unit = {}) : T = tagNS(SvgNS,name, fn)
+//private fun <T: SVGElement> Node.svg(name: String, fn: T.() -> Unit = {}) : T = tagNS(SvgNS,name, fn)
 
-fun Node.svg(fn: SVGSVGElement.() -> Unit = {}) : SVGSVGElement = svg("svg", fn)
-fun Node.line(fn: SVGLineElement.() -> Unit = {}) : SVGLineElement = svg("line", fn)
-fun Node.rect(fn: SVGRectElement.() -> Unit = {}) : SVGRectElement = svg("rect", fn)
-fun Node.circle(fn: SVGCircleElement.() -> Unit = {}) : SVGCircleElement = svg("circle", fn)
-fun SVGElement.a(fn: SVGAElement.() -> Unit = {}) : SVGAElement = svg("a", fn)
-fun Node.g(fn: SVGGElement.() -> Unit = {}) : SVGGElement = svg("g", fn)
+private class SvgTagDelegate<T : Element>(val name: String? = null) : ReadOnlyProperty<Node, T> {
+    override fun getValue(thisRef: Node, property: KProperty<*>): T = thisRef.tagNS(SvgNS, name ?: property.name)
+}
+private fun <T: SVGElement> svg() = SvgTagDelegate<T>()
+
+val Node.svg by svg<SVGSVGElement>()
+val Node.use by svg<SVGUseElement>()
+val Node.line by svg<SVGLineElement>()
+val Node.rect by svg<SVGRectElement>()
+val Node.circle by svg<SVGCircleElement>()
+val Node.a by svg<SVGAElement>()
+val Node.g by svg<SVGGElement>()
 
 val SVGElement.owner
     get() = ownerSVGElement ?: this as SVGSVGElement

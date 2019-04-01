@@ -17,7 +17,7 @@ fun Factory.userIcon(deps: HasKills, imageUrl: RxIface<String?>) = wraps.div {
         positionRelative
     }
     span {
-        cls.fa.fw
+        cls.widthIcon
     }
     div {
         cls {
