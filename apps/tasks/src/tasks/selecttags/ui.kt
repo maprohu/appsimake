@@ -46,8 +46,8 @@ fun SelectTags.ui() = TopAndContent(
                             val id = tag.idOrFail
                             val selected = rx { id in current() }
                             leftIcon {
-                                fafw
-                                rxClass(Fa.check, selected)
+                                fa.check
+                                svg.visible { selected() }
                             }
                             text %= { tag().name() }
                             click {

@@ -90,14 +90,13 @@ fun ViewChecklist.ui() = TopAndContent(
                                                 this %= { i.name() }
                                             }
 
-                                            left.insert.wraps.span {
+                                            left.insert.icon {
                                                 cls {
                                                     m1
-                                                    fa {
-                                                        fw
-                                                    }
-                                                    rxClass(Fa.check) { i.checked() }
                                                 }
+                                                fa.check
+                                                fw
+                                                svg.visible { i.checked() }
                                             }
                                             node.on("mousedown") {
                                                 cl.toggle(i)

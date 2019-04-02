@@ -88,6 +88,7 @@ class Factory(
 
     val screen get() = Screen().applied
     val icon get() = Icon().applied
+    val svg get() = Svg().applied
     val dropdown get() = Dropdown().applied
     val dropdownMenu get() = DropdownMenu().applied
     val topbar get() = Topbar().applied

@@ -1,67 +1,72 @@
 package commonui.widget
 
-import common.res
+import bootstrap.*
+import commonshr.*
+import commonui.*
 import domx.*
 import fontawesome.*
-import killable.NoKill
-import rx.*
-import styles.width125Em
-import styles.widthEm
-import svgx.svg
-import svgx.use
+import kotlinx.coroutines.*
+import styles.*
+import svgx.*
 import kotlin.browser.document
 
-class Icon: ScreenWrap() {
-    override val node = document.svg {
 
+
+class Icon: ScreenWrap() {
+    override val node = document.div {
+        cls.flexCenter()
+    }
+    val svg = insert.svg {
+        node.attr["fill"] = "currentColor"
     }
 
     val use by lazy {
-        node.use
+        svg.node.use
     }
 
-//    val fafw by lazy {
-//        fa
-//        fw
-//    }
+    fun size(times: Double) {
+        cls.iconWidth(times)
+        svg.cls.iconSquare(times)
+    }
 
     val fw by lazy {
-//        node.classes += Fa.fw
-        node.cls.widthIcon
+        size(1.0)
     }
 
-//    val fa by lazy {
-//        cls.fa
-//    }
+    val x2 by lazy {
+        size(2.0)
+    }
 
-//    val faBrands by lazy {
-//        cls.faBrands
-//    }
+    val x3 by lazy {
+        size(3.0)
+    }
 
-    abstract inner class FaImpl(sprites: String): FaBase {
-        val base = "${res("$sprites.svg")}#"
-        override fun of(cssName: String) {
-            use {
+
+    abstract inner class FaImpl(val doc: Deferred<FaDoc>): FaBase {
+
+        override fun of(cssName: String, cs: CoroutineScope) {
+            cs.launchReport {
                 use.setAttributeNS(
                     "http://www.w3.org/1999/xlink",
                     "xlink:href",
-                    "$base$cssName"
+                    "#${doc.await().icon(cssName)}"
                 )
             }
         }
     }
 
-    val solid: FaSolid = object: FaImpl("solid"), FaSolid {}
-    val regular: FaRegular = object: FaImpl("regular"), FaRegular {}
-    val brands: FaBrands = object: FaImpl("brands"), FaBrands {}
+    val solid: FaSolid by lazy { object: FaImpl(FaDocs.solid), FaSolid {} }
+    val regular: FaRegular by lazy { object: FaImpl(FaDocs.regular), FaRegular {} }
+    val brands: FaBrands by lazy { object: FaImpl(FaDocs.brands), FaBrands {} }
 
     val fa = solid
 
-
 }
 
-val Cls.widthIcon get() = element {
-//    classes += cls.widthEm(1.25)
-    console.dir(this)
-    cls.width125Em
-}
+val defaultIconSizeEm = 1.25
+
+fun Cls.iconSquare(times: Double = 1.0) = squareEm(defaultIconSizeEm * times)
+fun Cls.iconWidth(times: Double = 1.0) = widthEm(defaultIconSizeEm * times)
+
+val Cls.iconWidth get() = iconWidth()
+val Cls.iconSquare get() = iconSquare()

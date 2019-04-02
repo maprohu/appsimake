@@ -1,5 +1,7 @@
 package svgx
 
+import domx.Cls
+import domx.SvgClasses
 import domx.tagNS
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLDivElement
@@ -24,6 +26,8 @@ val Node.rect by svg<SVGRectElement>()
 val Node.circle by svg<SVGCircleElement>()
 val Node.a by svg<SVGAElement>()
 val Node.g by svg<SVGGElement>()
+val Node.defs by svg<SVGDefsElement>()
+val Node.symbol by svg<SVGSymbolElement>()
 
 val SVGElement.owner
     get() = ownerSVGElement ?: this as SVGSVGElement
@@ -37,3 +41,10 @@ fun SVGGraphicsElement.transform(fn: SVGTransform.() -> Unit) : SVGTransform {
 fun Element.viewBox(x: Double, y: Double, w: Double, h: Double) {
     setAttribute("viewBox", "$x $y $w $h")
 }
+
+inline val SVGElement.classes
+    get() = SvgClasses(this)
+
+val SVGElement.cls
+    get() = Cls { classes.apply(it) }
+

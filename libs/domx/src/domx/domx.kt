@@ -41,28 +41,26 @@ fun <T: Element> Node.tagNS(ns: String, name: String, fn: T.() -> Unit = {}): T 
 
 
 inline val Element.classes
-    get() = Classes(this)
+    get() = HtmlClasses(this)
 
-class Classes(private val element: Element) {
-    operator fun plusAssign(cls: String?) {
-        cls?.let { c ->
-            TODO("classname is an animated property in svg, library addClass fails!")
+//class Classes(private val element: Element) {
+//    operator fun plusAssign(cls: String?) {
+//        cls?.let { c ->
 //            console.dir(element)
-//            println(c)
-            c.trim().split(Regex("\\s")).forEach {
-                element.addClass(it)
-            }
-        }
-    }
-
-    operator fun minusAssign(cls: String?) {
-        cls?.let {
-            c -> c.trim().split(Regex("\\s")).forEach {
-                element.removeClass(it)
-            }
-        }
-    }
-}
+//            c.trim().split(Regex("\\s")).forEach {
+//                element.addClass(it)
+//            }
+//        }
+//    }
+//
+//    operator fun minusAssign(cls: String?) {
+//        cls?.let {
+//            c -> c.trim().split(Regex("\\s")).forEach {
+//                element.removeClass(it)
+//            }
+//        }
+//    }
+//}
 
 operator fun NamedNodeMap.set(key: String, value: String) {
     document
@@ -242,7 +240,7 @@ fun HTMLAudioElement.replay() {
 
 class CssClass(val name: String) : ReadOnlyProperty<Cls, String> {
     override fun getValue(thisRef: Cls, property: KProperty<*>) : String {
-        thisRef.element { classes += name }
+        thisRef.element { this += name }
         return name
     }
 }
@@ -258,11 +256,11 @@ class CssClassProvider {
     ) = CssClass(prop.name.toCss())
 }
 
-open class Cls(val element: (Element.() -> Unit) -> Unit = {}): InvokeApply {
+open class Cls(val element: (Classes.() -> Unit) -> Unit = {}): InvokeApply {
     companion object : Cls()
 }
 val Element.cls
-    get() = Cls { this.apply(it) }
+    get() = Cls { classes.apply(it) }
 
 fun css(name: String) = CssClass(name)
 fun css() = CssClassProvider()

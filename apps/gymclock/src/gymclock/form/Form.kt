@@ -23,7 +23,7 @@ class Form(
     body: Body,
     override val linkage: Linkage,
     links: Links
-): ForwardBase<HTMLElement>(body), FormPath, LinksPath by links, KillsUixApi, BindKillsApi, LinkApi<Form>  {
+): ForwardBase<ScreenElement>(body), FormPath, LinksPath by links, KillsUixApi, BindKillsApi, LinkApi<Form>  {
 
     override val form = this
 

@@ -5,12 +5,11 @@ import common.removeFromParent
 import common.replaceWith
 import commonshr.*
 import domx.cls
-//import killable.KillSet
-//import killable.wrap
-import kotlinx.coroutines.channels.SendChannel
+import svgx.cls
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.Node
+import org.w3c.dom.svg.SVGElement
 import rx.Rx
 import rx.RxIface
 import rx.rxClass
@@ -198,6 +197,10 @@ interface HasElement: HasNode {
 
 interface HasHTMLElement: HasElement {
     override val node: HTMLElement
+}
+interface HasSVGElement: HasElement {
+    override val node: SVGElement
+    override val cls get() = node.cls
 }
 fun <T: HasNode> T.appendTo(parent: Node) = apply {
     parent.appendChild(node)

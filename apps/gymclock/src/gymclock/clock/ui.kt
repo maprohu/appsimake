@@ -17,20 +17,22 @@ fun Clock.ui() = factory.screen {
 
     topbar {
         left.backButton {
-            fa.x3
+            icon.x3
         }
         title %= "Workout"
         right {
             button {
                 m1p2
                 secondary
-                fa.x3
-                icon.rxClass {
-                    if (model.sounds()) {
-                        Fa.volumeUp
-                    } else {
-                        Fa.volumeMute
-                    }
+                insert.icon {
+                    x3
+                    fa.volumeUp
+                    svg.visible { model.sounds() }
+                }
+                insert.icon {
+                    x3
+                    fa.volumeMute
+                    svg.visible { !model.sounds() }
                 }
 
                 click {

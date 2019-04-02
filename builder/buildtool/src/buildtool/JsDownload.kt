@@ -163,12 +163,16 @@ open class JsDownload(
         }
     )
 
+    val extractedJsFiles by task {
+        extract!!.jsPath.map { extracted.resolve(it) }
+    }
+
     override val jsFile by
         if (extract == null) {
             task { listOf(downloaded) }
         } else {
             task {
-                testResmapFile + extract.jsPath.map { extracted.resolve(it) }
+                testResmapFile + extractedJsFiles
             }
         }
 
@@ -177,15 +181,19 @@ open class JsDownload(
     override val publicJsFile by
         if (extract == null) publicTask { jsFileValue }
         else task {
-            publicResmapFile + jsFileValue.map { it.publicFile() }
+            publicResmapFile + extractedJsFiles.map { it.fileValue.publicFile() }
         }
 
     val testResmapFileLocation by lazy { ProdOutDir.resolve(extract!!.name).resolve("${extract!!.name}.resmap.js") }
+    val testResFiles by task {
+        extract!!.resPath.map {
+            it.first to
+                    extracted.resolve(it.second)
+        }
+    }
     val testResmapFile by task {
         resmapFileContent(
-            extract!!.resPath.map {
-                it.first to
-                    extracted.resolve(it.second).relativeTo(TestingDir).fromApp().invariantSeparatorsPath
+            testResFiles.map { it.first to it.second.relativeTo(TestingDir).fromApp().invariantSeparatorsPath
             }
         ).map {
             testResmapFileLocation.parentFile.mkdirs()
@@ -202,7 +210,7 @@ open class JsDownload(
         resmapFileContent(
             publicResFiles.map {
                 it.first to
-                        it.second.relativeTo(TestingDir).fromApp().invariantSeparatorsPath
+                        it.second.relativeTo(PublicDir).fromApp().invariantSeparatorsPath
             }
         ).map {
             publicTextFile("${extract!!.name}.resmap", "js", it)
@@ -288,14 +296,11 @@ open class JsDownload(
             { listOf<File>() }
         } else {
             {
-                extract
-                    .cssPath
-                    .map { extracted.resolve(it) }
-                    .plus(
-                        extract.dirResources.flatMap { dr ->
-                            extracted.resolve(dr.pathToDir).walk().filter { it.isFile }.toList()
-                        }
-                    )
+                extract.cssPath.map { extracted.resolve(it) } +
+                    extract.dirResources.flatMap { dr ->
+                        extracted.resolve(dr.pathToDir).walk().filter { it.isFile }.toList()
+                    } +
+                        testResFiles.map { it.second }
             }
         }
     )
@@ -306,7 +311,8 @@ open class JsDownload(
         } else {
             {
                 publicDirs.values.flatMap { d -> d.walk().filter { it.isFile }.toList() } +
-                        publicCssFiles.values
+                        publicCssFiles.values +
+                        publicResFiles.map { it.second }
             }
         }
     )

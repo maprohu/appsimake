@@ -271,13 +271,16 @@ class BackPersistDiscard(
             cls {
                 p2
                 btnSuccess
+                row()
             }
             insert.icon {
+                fw
                 fa {
                     chevronLeft
                 }
             }
             insert.icon {
+                fw
                 fa {
                     save
                 }
@@ -370,11 +373,13 @@ class BackSaveDiscard(
                 btnSuccess
             }
             insert.icon {
+                fw
                 fa {
                     chevronLeft
                 }
             }
             insert.icon {
+                fw
                 fa {
                     save
                 }

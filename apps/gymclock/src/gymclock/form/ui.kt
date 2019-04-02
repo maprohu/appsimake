@@ -16,14 +16,16 @@ fun Form.ui() = factory.screen {
         }
         right.button {
             m1p2
-            fa
             secondary
-            icon.rxClass {
-                if (model.sounds()) {
-                    Fa.volumeUp
-                } else {
-                    Fa.volumeMute
-                }
+            insert.icon {
+                fw
+                fa.volumeUp
+                svg.visible { model.sounds() }
+            }
+            insert.icon {
+                fw
+                fa.volumeMute
+                svg.visible { !model.sounds() }
             }
             click {
                 model.sounds.rxv.transform { !it }
@@ -85,10 +87,12 @@ fun Form.ui() = factory.screen {
                     m1
                     flexFixedSize()
                     btnPrimary
+                    row()
+                    justifyContentCenter
                 }
-                icon.cls.fa {
+                icon {
                     x3
-                    running
+                    fa.running
                 }
                 enabled { bindings.canSave() }
                 click {

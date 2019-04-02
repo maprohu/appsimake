@@ -1,9 +1,6 @@
 package styles
 
-import domx.Cls
-import domx.classes
-import domx.styleTag
-import domx.toCss
+import domx.*
 import org.w3c.dom.css.CSSStyleSheet
 import kotlin.browser.document
 import kotlin.properties.ReadOnlyProperty
@@ -36,7 +33,7 @@ private fun def(s: String, action: String? = null) = object : ReadOnlyProperty<C
             name!!
         }
         thisRef.element {
-            this.classes += n
+            this += n
         }
         return n
     }
@@ -58,7 +55,7 @@ private fun <T> defParam(
             }
         }.apply {
             thisRef.element {
-                this.classes += this@apply
+                this += this@apply
             }
         }
     }
@@ -143,10 +140,15 @@ val Cls.gridTemplateColumnsAuto by defParam<Int> { count ->
     "grid-template-columns: ${(1..count).joinToString(" ") { "auto" }};"
 }
 
-val Cls.widthEm by defParam<Double> { w ->
-    "width: ${w}em;"
+val Cls.width by defParam<String> { w ->
+    "width: $w;"
 }
+fun Cls.widthEm(w: Double) = width("${w}em")
+val Cls.width125Em get() = widthEm(1.25)
 
-val Cls.width125Em by def(
-    "width: 1.25em;"
-)
+val Cls.square by defParam<String> { w ->
+    "width: $w; height: $w;"
+}
+fun Cls.squareEm(w: Double) = square("${w}em")
+val Cls.square125Em get() = squareEm(1.25)
+

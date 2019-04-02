@@ -11,12 +11,15 @@ import kotlin.browser.document
 class DropdownMenuItem(): ScreenWrap() {
     override val node = document.button {
         cls {
+            dFlex
+            flexRow
+            alignItemsCenter
             dropdownItem
             p1
         }
     }
     val icon = insert.icon {
-        node.cls.m1
+        cls.m1
         fw
     }
 

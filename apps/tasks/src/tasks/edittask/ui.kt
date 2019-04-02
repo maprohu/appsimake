@@ -126,13 +126,14 @@ fun EditTaskLike.editTaskUi(
                                 val id = e.idOrFail
                                 val contains = rx { id in item.tags() }
                                 factory.listGroupButton {
-                                    left.insert.wraps.div {
+                                    left.insert.icon {
                                         cls {
                                             alignSelfCenter
                                             m1
-                                            fa.fw
-                                            rxClass(Fa.check) { contains() }
                                         }
+                                        fw
+                                        fa.check
+                                        svg.visible { contains() }
                                     }
                                     text %= { e().name() }
                                     click {

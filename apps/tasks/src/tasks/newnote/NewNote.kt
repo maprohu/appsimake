@@ -21,12 +21,7 @@ class NewNote(
 
     val item = from.notes.randomEditable()
 
-    override val creating = rxCreating(
-        item,
-        onPersist {
-            from.editNote(item.id.id, true)
-        }
-    )
+    override val creating = rxCreating(item)
 
     override val rawView = ui()
 }

@@ -1,32 +1,85 @@
 package fontawesome
 
-import common.named
+import common.namedLazy
+import common.res
 import commonshr.InvokeApply
+import commonshr.report
+import commonshr.reportd
 import domx.*
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import org.w3c.dom.*
+import org.w3c.xhr.XMLHttpRequest
+import svgx.svg
+import kotlin.browser.document
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+private val svgDefs by lazy {
+    document.body!!.svg {
+        style.display = "none"
+    }
+}
 
-//val Cls.fas by css()
-//val Cls.fab by css()
-//
-//class FaIcon(
-//    val fn: Cls.() -> Fa
-//) {
-//    companion object {
-//        fun fa(fn: Fa.() -> Unit) = FaIcon { fa.apply(fn) }
-//        fun fa(str: String) = FaIcon { fa.apply { element { classes += str} } }
-//        fun faBrands(fn: FaBrands.() -> Unit) = FaIcon { faBrands.apply(fn) }
-//        fun faBrands(str: String) = FaIcon { faBrands.apply { element { classes += str} } }
-//    }
-//}
-//
-//fun Cls.fa(icon: FaIcon, fn: Fa.() -> Unit = {}): Fa {
-//    return this.run(icon.fn).apply(fn)
-//}
+class FaDoc(
+    val doc: Document
+) {
+    val iconCache = mutableMapOf<String, String>()
+    fun icon(cssName: String) = iconCache.getOrPut(cssName) {
+        document.importNode(
+            doc.getElementById(cssName)!!,
+            true
+        ).unsafeCast<Element>().let { n ->
+            n.id = ""
+            val id = n.ref
+            svgDefs.appendChild(n)
+            id
+        }
+    }
+}
+
+object FaDocs {
+
+    private fun load(sprites: String): Deferred<FaDoc> {
+        val cd = CompletableDeferred<FaDoc>()
+        XMLHttpRequest().apply {
+            overrideMimeType("image/svg+xml")
+            open("GET", res("$sprites.svg"))
+            send()
+            onload = {
+                try {
+                    cd.complete(FaDoc(responseXML!!))
+                } catch (e: dynamic) {
+                    reportd(e)
+                    cd.completeExceptionally(e)
+                }
+            }
+            onerror = {
+                report(it)
+                cd.completeExceptionally(
+                    Throwable(it.toString())
+                )
+            }
+        }
+        return cd
+    }
+
+    private val byNameInternal = mutableMapOf<String, Deferred<FaDoc>>()
+    private fun loader() = namedLazy { name -> load(name).also { byNameInternal[name] = it } }
+
+    val byName : Map<String, Deferred<FaDoc>> = byNameInternal
+
+    val brands by loader()
+    val regular by loader()
+    val solid by loader()
+
+}
+
 
 interface FaBase: InvokeApply {
-    fun of(cssName: String)
+    fun of(cssName: String, cs: CoroutineScope)
 }
 interface Fa: FaBase
 interface FaSolid: Fa
@@ -34,26 +87,10 @@ interface FaRegular: Fa
 interface FaBrands: FaBase
 
 
-//open class Fas(val cls: Cls, faCls: String = Cls.fas): InvokeApply {
-//    init {
-//        cls.element {
-//            classes += faCls
-//        }
-//    }
-//    companion object: Fas(Cls)
-//}
-//open class FaBrands(cls: Cls): Fas(cls, Cls.fab) {
-//    companion object: FaBrands(Cls)
-//}
-//
-//val Cls.fa
-//    get() = Fas(this)
-//val Cls.faBrands
-//    get() = FaBrands(this)
 
-class FaCssClass(val name: String) : ReadOnlyProperty<FaBase, String> {
+class FaCssClass(val name: String, val cs: CoroutineScope = GlobalScope) : ReadOnlyProperty<FaBase, String> {
     override fun getValue(thisRef: FaBase, property: KProperty<*>) : String {
-        thisRef.of(name)
+        thisRef.of(name, cs)
         return name
     }
 }
@@ -64,25 +101,6 @@ class FaCssClassProvider(private val cls: String? = null) {
     ) = FaCssClass(cls ?: prop.name.toCss())
 }
 fun facss(cls: String? = null) = FaCssClassProvider(cls)
-
-//class FaCssClass(val name: String) : ReadOnlyProperty<Fa, String> {
-//    override fun getValue(thisRef: Fa, property: KProperty<*>) : String {
-//        thisRef.cls.element { classes += name }
-//        return name
-//    }
-//}
-//class FaCssClassProvider(private val cls: String? = null) {
-//    operator fun provideDelegate(
-//        thisRef: Nothing?,
-//        prop: KProperty<*>
-//    ) = FaCssClass("fa-${cls ?: prop.name.toCss()}")
-//}
-//fun facss(cls: String? = null) = FaCssClassProvider(cls)
-
-//val Fa.fw by facss()
-//val Fa.xs by facss()
-//val Fa.sm by facss()
-
 
 val Fa.copy by facss()
 val Fa.ban by facss()
@@ -152,7 +170,3 @@ val Fa.info by facss()
 
 val FaBrands.google by facss()
 
-//val Fa.spin by facss()
-//val Fa.x2 by facss("2x")
-//val Fa.x3 by facss("3x")
-//val Fa.x4 by facss("4x")

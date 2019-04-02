@@ -4,8 +4,6 @@ import bootstrap.*
 import commonshr.*
 import commonui.widget.*
 import domx.*
-import fontawesome.*
-import killable.*
 import rx.*
 import styles.*
 
@@ -16,8 +14,8 @@ fun Factory.userIcon(deps: HasKills, imageUrl: RxIface<String?>) = wraps.div {
         p2
         positionRelative
     }
-    span {
-        cls.widthIcon
+    div {
+        cls.iconSquare
     }
     div {
         cls {

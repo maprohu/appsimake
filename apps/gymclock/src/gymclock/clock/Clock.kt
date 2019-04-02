@@ -12,6 +12,7 @@ import commonui.*
 import commonui.links.Linkage
 import gymclock.form.Sounds
 import commonui.view.*
+import commonui.widget.ScreenElement
 
 interface ClockPath: FormPath {
     val clock: Clock
@@ -22,7 +23,7 @@ class Clock(
     linkage: Linkage,
     val sounds: Sounds,
     val keepAwake: KeepAwake
-): SimpleView<HTMLElement>(from), ClockPath, FormPath by from, BackKillsUixApi, HasBack by linkage {
+): SimpleView<ScreenElement>(from), ClockPath, FormPath by from, BackKillsUixApi, HasBack by linkage {
     override val clock = this
 
 

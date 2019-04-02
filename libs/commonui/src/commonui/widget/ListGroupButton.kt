@@ -55,7 +55,6 @@ class ListGroupButton: ScreenWrap() {
     val leftIcon by lazy {
         p1
         left.insert.icon {
-            fa
             fw
             cls {
                 m1
