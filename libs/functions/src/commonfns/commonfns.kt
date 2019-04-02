@@ -46,6 +46,7 @@ object FnsDynamicOps: DynamicOps {
         return when (ts) {
             TS.Server -> admin.FieldValue.serverTimestamp()
             is TS.Value -> admin.Timestamp.fromDate(ts.date)
+            TS.Null -> null
         }
     }
 

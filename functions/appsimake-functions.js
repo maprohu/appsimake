@@ -125,6 +125,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
       tmp$ = get_admin().FieldValue.serverTimestamp();
     else if (Kotlin.isType(ts, TS$Value))
       tmp$ = get_admin().Timestamp.fromDate(ts.date);
+    else if (equals(ts, TS.Null))
+      tmp$ = null;
     else
       tmp$ = Kotlin.noWhenBranchMatched();
     return tmp$;

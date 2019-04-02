@@ -46,6 +46,9 @@ val ServerTimestampPropertyType = PropertyType<TS>(
     compare = { _, _ ->  true },
     writeDynamic = { _, ops ->
         ops.writeTimestamp(TS.Server)
+    },
+    readDynamic = { d, ops ->
+        ops.readTimestamp(d)
     }
 )
 

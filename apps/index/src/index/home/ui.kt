@@ -63,6 +63,7 @@ fun appListUi() = factory.scrollPane {
             header %= "More Work In Progress"
             header.cls.fontWeightBold
             listGroup {
+                app("eventlog", "Event Log")
                 app("tictactoe", "Tic Tac Toe")
                 app("music", "Music Player")
                 app("download", "Download")

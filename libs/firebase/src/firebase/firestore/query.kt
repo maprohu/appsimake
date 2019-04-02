@@ -7,7 +7,8 @@ import firebase.HasDb
 
 data class QuerySettings(
     val order: List<OrderBy> = emptyList(),
-    val where: List<Where> = emptyList()
+    val where: List<Where> = emptyList(),
+    val limit: List<Limit> = emptyList()
 ) {
 
     class Where(
@@ -19,6 +20,10 @@ data class QuerySettings(
     class OrderBy(
         val path: String,
         val dir: OrderDirection = OrderDirection.Asc
+    )
+
+    class Limit(
+        val count: Int
     )
 
     enum class OrderDirection {
@@ -42,9 +47,15 @@ data class QuerySettings(
         where = where + wh
     )
 
+    fun limit(wh: Limit) = copy(
+        limit = limit + wh
+    )
+
     fun where(path: String, op: WhereOp, param: dynamic) = where(
         Where(path, op, param)
     )
+
+    fun limit(count: Int) = limit(Limit(count))
 
     fun eq(path: String, value: dynamic) = where(path, WhereOp.Eq, value)
     fun arrayContains(path: String, value: dynamic) = where(path, WhereOp.ArrayContains, value)
@@ -59,6 +70,9 @@ interface QuerySettingsBuilder<T> {
     }
     infix fun <P> ROProp<T, P>.eq(v: P) {
         settings = settings.eq(name, write(v, FsDynamicOps))
+    }
+    fun limit(count: Int) {
+        settings = settings.limit(count)
     }
     val ROProp<T, *>.asc: Unit get() { settings = settings.asc(name) }
     val ROProp<T, *>.desc: Unit get() { settings = settings.desc(name) }
@@ -93,6 +107,12 @@ fun Query.apply(where: QuerySettings.Where): Query {
     )
 }
 
+fun Query.apply(limit: QuerySettings.Limit): Query {
+    return limit(
+        limit.count
+    )
+}
+
 fun Query.apply(settings: QuerySettings) =
     this
         .let { t ->
@@ -100,6 +120,9 @@ fun Query.apply(settings: QuerySettings) =
         }
         .let { t ->
             settings.where.fold(t) { q, o -> q.apply(o) }
+        }
+        .let { t ->
+            settings.limit.fold(t) { q, o -> q.apply(o) }
         }
 
 typealias TypedQuery<T> = Query

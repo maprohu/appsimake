@@ -40,6 +40,7 @@ fun main() {
         musiclib,
         checklistlib,
         downloadlib,
+        eventloglib,
         mainfns,
 
         index,
@@ -51,6 +52,7 @@ fun main() {
         chat,
         checklist,
         download,
+        eventlog,
         music
     )
 

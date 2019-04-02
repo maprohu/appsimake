@@ -100,11 +100,12 @@ object FsDynamicOps: DynamicOps {
         return when (ts) {
             TS.Server -> FieldValue.serverTimestamp()
             is TS.Value -> Timestamp.fromDate(ts.date)
+            TS.Null -> null
         }
     }
 
     override fun readTimestamp(d: dynamic): TS {
-        return TS.Value(d.unsafeCast<Timestamp>().toDate())
+        return if (d==null) TS.Null else TS.Value(d.unsafeCast<Timestamp>().toDate())
     }
 
 }

@@ -279,7 +279,10 @@ external class FieldValue {
 }
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.Timestamp
-external class Timestamp : firebaseshr.firestore.Timestamp {
+external class Timestamp(
+    nanoseconds: Number,
+    seconds: Number
+) : firebaseshr.firestore.Timestamp, TimestampLike {
 
     override var nanoseconds: Number
     override var seconds: Number
@@ -292,4 +295,9 @@ external class Timestamp : firebaseshr.firestore.Timestamp {
         fun fromMillis(millis: Long) : Timestamp
         fun now() : Timestamp
     }
+}
+
+external interface TimestampLike {
+    var nanoseconds: Number
+    var seconds: Number
 }
