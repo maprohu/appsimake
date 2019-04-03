@@ -2,7 +2,11 @@ package tictactoe
 
 import commonfb.FbLinksDeps
 import commonfb.FbLinksFactory
+import commonui.view.forwarding
 import firebase.DbApi
+import tictactoe.board.Board
+import tictactoe.board.BoardConfig
+import tictactoe.board.SinglePlayerControl
 import tictactoe.loggedin.LoggedIn
 
 interface LinksPath: DbApi {
@@ -23,5 +27,14 @@ class Links(
             deps.hole %= this
         }
     }
+
+    val singlePlayer by home.child { parent, lnk ->
+        Board(
+            parent,
+            lnk,
+            SinglePlayerControl()
+        ).forwarding(parent)
+    }
+
 
 }

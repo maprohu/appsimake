@@ -21,11 +21,11 @@ fun addStyle(name: String, action: String?, rules: String) {
     )
 }
 
-private fun def(s: String, action: String? = null) = object : ReadOnlyProperty<Cls, String> {
+fun def(s: String, action: String? = null, prefix: String = "") = object : ReadOnlyProperty<Cls, String> {
     var name : String? = null
     override fun getValue(thisRef: Cls, property: KProperty<*>): String {
         val n:String = if (name == null) {
-            val n = property.name.toCss()
+            val n = "$prefix${property.name.toCss()}"
             name = n
             addStyle(n, action, s)
             n

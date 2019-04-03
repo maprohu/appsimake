@@ -46,11 +46,7 @@ class Icon: ScreenWrap() {
 
         override fun of(cssName: String, cs: CoroutineScope) {
             cs.launchReport {
-                use.setAttributeNS(
-                    "http://www.w3.org/1999/xlink",
-                    "xlink:href",
-                    "#${doc.await().icon(cssName)}"
-                )
+                use.xlinkHref = "#${doc.await().icon(cssName)}"
             }
         }
     }
@@ -59,7 +55,10 @@ class Icon: ScreenWrap() {
     val regular: FaRegular by lazy { object: FaImpl(FaDocs.regular), FaRegular {} }
     val brands: FaBrands by lazy { object: FaImpl(FaDocs.brands), FaBrands {} }
 
-    val fa = solid
+    val fa by lazy {
+        fw
+        solid
+    }
 
 }
 

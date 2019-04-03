@@ -4,6 +4,7 @@ import commonfb.FBBackApi
 import commonui.*
 import commonui.links.Linkage
 import commonui.topandcontent.ProgressTC
+import commonui.view.ForwardTC
 import commonui.widget.TopAndContent
 import kotlinx.coroutines.launch
 import tictactoe.loggedin.LoggedIn
@@ -19,10 +20,7 @@ class Active(
 ): ForwardTC(from), ActivePath, LoggedInPath by from, FBBackApi, HasBack by linkage {
     override val active: Active = this
 
-    override val rawView: TopAndContent = TopAndContent.hourglass
+    override val rawView: TopAndContent = ui()
 
-    init {
-        this %= ProgressTC(this)
-    }
 }
 

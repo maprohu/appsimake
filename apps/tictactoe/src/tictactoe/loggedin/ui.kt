@@ -13,6 +13,14 @@ fun LoggedIn.ui() = TopAndContent(
         left.dropdown {
             bars
             menu {
+                item {
+                    text %= "Play Against Yourself"
+                    icon.fa.user
+                    click {
+                        singlePlayer()
+
+                    }
+                }
                 signOut {
                     signOut()
                 }

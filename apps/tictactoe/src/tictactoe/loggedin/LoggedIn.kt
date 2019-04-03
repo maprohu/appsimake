@@ -7,6 +7,9 @@ import commonui.*
 import commonui.links.BaseTC
 import commonui.links.LinkApi
 import commonui.links.Linkage
+import commonui.view.ForwardTC
+import commonui.view.HasKillsRouting
+import commonui.view.advance
 import commonui.widget.TopAndContent
 import firebase.User
 import firebase.firestore.privateOf
@@ -27,7 +30,7 @@ class LoggedIn(
     override val linkage: Linkage,
     hole: HasKillsRouting<TopAndContent>,
     user: User
-): ForwardTC(hole), LoggedInTC<LoggedIn>, LoggedInPath, LinksPath by links, FBApi {
+): ForwardTC(hole), LoggedInTC<LoggedIn>, LoggedInPath, LinksPath by links, FBApi  {
     override val loggedIn: LoggedIn = this
 
     val privateDoc = tictactoeLib.privateOf(user)
@@ -38,6 +41,10 @@ class LoggedIn(
     fun signOut() = links.launch {
         links.signOut()
         links.home.load()
+    }
+
+    fun singlePlayer() = advance {
+        links.singlePlayer.fwd()
     }
 
     override val rawView: TopAndContent = ui()

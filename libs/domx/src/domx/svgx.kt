@@ -48,3 +48,24 @@ inline val SVGElement.classes
 val SVGElement.cls
     get() = Cls { classes.apply(it) }
 
+
+var SVGUseElement.xlinkHref: String?
+    get() =
+        getAttributeNS(
+        "http://www.w3.org/1999/xlink",
+        "xlink:href"
+        )
+    set(v) {
+        if (v==null) {
+            removeAttributeNS(
+                "http://www.w3.org/1999/xlink",
+                "xlink:href"
+            )
+        } else {
+            setAttributeNS(
+                "http://www.w3.org/1999/xlink",
+                "xlink:href",
+                v
+            )
+        }
+    }
