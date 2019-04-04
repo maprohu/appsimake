@@ -2,88 +2,128 @@ package tictactoe.board
 
 import common.Emitter
 import commonshr.EmitterFn
-import commonshr.KillsApi
 import commonshr.fn
-import commonui.KillsUixApi
 import killable.HasNoKill
-import killable.NoKill
 import rx.RxIface
 import rx.Var
 import rx.rx
 
-//class BoardControl(board: Board): KillsUixApi by board {
-//
-//    val fields = mutableMapOf<Coords, Var<FieldState>>()
-//    fun state(coords: Coords) = fields.getOrPut(coords) { Var(FieldState.Free) }
-//    fun state(x: Int, y: Int) = state(Coords(x, y))
-//
-//    val ourMark = Var(Mark.X)
-//    val turn = Var(Turn.Check)
-//    val ourTurn = rx { turn() == Turn.Here }
-//
-//}
-
 interface BoardTurns {
     val turnState: RxIface<TurnState>
+    val gameState: RxIface<GameState>
     val thisPlayer: RxIface<Player>
-    fun ourTurn() = turnState() == TurnState.Playing(thisPlayer())
+    val highlights: EmitterFn<Highlight>
+    fun ourTurn() = gameState() == GameState.Ongoing && turnState() == TurnState.Playing(thisPlayer())
 }
 interface BoardControl: BoardTurns {
     val title: String
-    val width: Int
-    val height: Int
+    val dimensions: Dimensions
     val Coords.state: RxIface<FieldState>
-    val highlights: EmitterFn<Highlight>
     fun Coords.click()
-    fun mark(player: Player): Mark
-
 }
 
+
 class BoardState(
-    val control: BoardControl
+    val dimensions: Dimensions,
+    thisPlayer: Player,
+    val winBy: Int
 ): BoardTurns {
-    val fields = mutableMapOf<Coords, Var<FieldState>>()
-    val highlights = Emitter<Highlight>()
+    val fields = mutableMapOf<Coords, Var<FieldState>>().also { f ->
+        dimensions.validCoords.forEach { c -> f[c] = Var<FieldState>(FieldState.Free) }
+    }
+
+    val highlightsEmitter = Emitter<Highlight>()
+    override val highlights = highlightsEmitter.fn
     override val turnState = Var<TurnState>(TurnState.Waiting)
-    override val thisPlayer = Var(0)
+    override val gameState = Var<GameState>(GameState.Ongoing)
+    override val thisPlayer = Var(thisPlayer)
+
     val ourTurnRx = rx(HasNoKill) { ourTurn() }
 
     fun state(coords: Coords) = fields.getValue(coords)
-    fun click(coords: Coords) {
-        state(coords) %= FieldState.Taken(thisPlayer.now)
-    }
-
-    init {
-        validCoords(control.width, control.height).forEach { c -> fields[c] = Var<FieldState>(FieldState.Free) }
-    }
-}
-
-class SinglePlayerControl(
-    override val width: Int = 3,
-    override val height: Int = 3,
-    val winBy: Int = 3,
-    val marks: List<Mark> = standardMarks
-): BoardControl {
-    val numPlayers = marks.size
-    override val title = "Single Player"
-    val states = BoardState(this)
-
-    override val Coords.state: RxIface<FieldState> get() = states.state(this)
-    override val highlights = states.highlights.fn
-    override val turnState: RxIface<TurnState> = states.turnState
-
-    override val thisPlayer: RxIface<Player> = states.thisPlayer
-
-    override fun Coords.click() = with(states) {
-        if (ourTurnRx.now) {
-            click(this@click)
-            thisPlayer.transform { (it + 1) % numPlayers }
-            turnState %= TurnState.Playing(thisPlayer.now)
+    fun click(coords: Coords, fn: () -> Unit) {
+        if (ourTurnRx.now && state(coords).now == FieldState.Free) {
+            fn()
         }
     }
 
-    override fun mark(player: Player) = marks[player.unsafeCast<Int>()]
+    val Coords.withinBoard
+        get() = x >= 0 && y >= 0 && x < dimensions.width && y < dimensions.height
 
+    val hasFree = rx(HasNoKill) {
+        fields.values.any { it() == FieldState.Free }
+    }
+
+    fun Coords.checkGameOver() : Boolean {
+        val winner = state(this).now
+
+        if (winner == FieldState.Free) return false
+
+        fun Dir.reach() =
+            listOf(this@checkGameOver) +
+                    sequenceExcluding(this@checkGameOver)
+                        .takeWhile { c ->
+                            c.withinBoard && state(c).now == winner
+                        }
+                        .toList()
+
+        val hs = dirs.mapNotNull { d ->
+            val s1 = d.reach()
+            val s2 = d.opposite().reach()
+
+            if (s1.size + s2.size - 1 >= winBy) {
+                Highlight(s1.last(), s2.last())
+            } else {
+                null
+            }
+        }
+
+        hs.forEach { highlightsEmitter.emit(it) }
+
+        return hs.isNotEmpty()
+    }
+
+    fun take(coords: Coords, player: Player) {
+        state(coords) %= FieldState.Taken(player)
+
+        if (coords.checkGameOver()) {
+            gameState %= GameState.GameOver(player)
+        } else if (!hasFree.now) {
+            gameState %= GameState.Draw
+        }
+    }
+}
+
+abstract class BoardTurnsDelegate(
+    val states: BoardState
+): BoardTurns by states
+
+abstract class BoardControlBase(
+    override val title: String,
+    thisPlayerIndex: Int,
+    val players: List<Player> = standardMarks.mapIndexed { index, s ->  PlayerImpl(index, s) } ,
+    override val dimensions: Dimensions = Dimensions(3, 3),
+    winBy: Int = 3
+): BoardTurnsDelegate(BoardState(dimensions, players[thisPlayerIndex], winBy)), BoardControl {
+    val numPlayers = players.size
+
+    override val Coords.state: RxIface<FieldState> get() = states.state(this)
+}
+
+class SinglePlayerControl: BoardControlBase("Single Player", 0) {
+    override fun Coords.click() = states.click(this) {
+        with (states) {
+            take(this@click, thisPlayer.now)
+            if (gameState.now == GameState.Ongoing) {
+                thisPlayer.transform { players[(it.index + 1) % numPlayers] }
+                turnState %= TurnState.Playing(thisPlayer.now)
+            }
+        }
+    }
+
+    init {
+        states.turnState %= TurnState.Playing(players[0])
+    }
 }
 
 

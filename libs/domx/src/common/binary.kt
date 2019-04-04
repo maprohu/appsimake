@@ -18,10 +18,6 @@ suspend fun ArrayBuffer.hash(): String {
     val uint8 = Uint8Array(hashBuffer)
 
     return js("String").fromCharCode.apply(null, uint8).unsafeCast<String>().escape
-
-//    return Uint8Array(hashBuffer)
-//        .asList()
-//        .joinToString("") { (it + 256).toString(16).substring(1) }
 }
 
 val String.escape get() = window.btoa(this).replace('/', '-')

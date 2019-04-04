@@ -4,7 +4,9 @@ import commonfb.FBBackApi
 import commonui.*
 import commonui.links.Linkage
 import commonui.view.ForwardTC
+import commonui.view.HasKillsRoutingTC
 import commonui.widget.TopAndContent
+import tictactoe.loggedin.LoggedIn
 import tictactoe.loggedin.LoggedInPath
 import tictactoe.loggedin.LoggedInTC
 
@@ -13,23 +15,14 @@ interface BoardPath: LoggedInPath {
 }
 
 class Board(
-    from: LoggedInTC<*>,
+    from: HasKillsRoutingTC,
     linkage: Linkage,
-    val control: BoardControl
-): ForwardTC(from), BoardPath, LoggedInPath by from, FBBackApi, HasBack by linkage {
+    loggedIn: LoggedIn,
+    val control: BoardControl,
+    val restart: () -> Unit
+): ForwardTC(from), BoardPath, LoggedInPath by loggedIn, FBBackApi, HasBack by linkage {
     override val board: Board = this
 
     override val rawView: TopAndContent = ui()
 }
-
-class BoardConfig(
-    val title: String
-) {
-    companion object {
-        fun singlePlayer() = BoardConfig(
-            title = "Single Player"
-        )
-    }
-}
-
 

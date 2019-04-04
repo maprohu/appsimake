@@ -13,7 +13,7 @@ fun main() {
     val modules = listOf(
         buildenv,
         commonshr,
-        common,
+//        common,
         indexeddb,
         domx,
         bootstrap,

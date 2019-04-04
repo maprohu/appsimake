@@ -1,7 +1,9 @@
 package domx
 
+import common.attached
 import commonshr.KillsApi
 import commonshr.api
+import org.w3c.dom.Node
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.EventTarget
 import org.w3c.dom.events.InputEvent
@@ -14,5 +16,7 @@ interface KillsApiDomx: KillsApi {
     fun EventTarget.onClick(action: (MouseEvent) -> Unit ) = onClick(api, action)
     fun EventTarget.onInput(action: (InputEvent) -> Unit ) = onInput(api, action)
     fun EventTarget.onChange(action: (Event) -> Unit ) = onChange(api, action)
+
+    fun Node.attached(fn: () -> Boolean) = attached(api, fn)
 
 }

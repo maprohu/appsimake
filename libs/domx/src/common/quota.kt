@@ -1,6 +1,5 @@
 package common
 
-import commonshr.Exec
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel

@@ -1,6 +1,5 @@
 package firebase
 
-import common.CsKillsApiCommon
 import common.dyn
 import commonshr.*
 import commonshr.properties.RxBase
@@ -48,11 +47,11 @@ interface CsApiFirebase: CsApi {
 
 }
 
-interface CsKillsApiFirebase: CsKillsApiCommon, CsApiFirebase {
+interface CsKillsApiFirebase: CsKillsApi, CsApiFirebase {
 //    fun <T: HasFBProps<*>> QueryWrap<T>.listEvents(create: () -> T) = listEvents(api, create)
 }
 
-interface CsDbKillsApi: HasCsDbKills, CsKillsApiFirebase, DbApi, KillsApiFirebase, CsKillsApiCommon, DbKillsApi {
+interface CsDbKillsApi: HasCsDbKills, CsKillsApiFirebase, DbApi, KillsApiFirebase, CsKillsApi, DbKillsApi {
 
     fun Query.documentChanges() = documentChanges(api)
 

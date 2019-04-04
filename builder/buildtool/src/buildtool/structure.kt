@@ -126,18 +126,18 @@ object indexeddb : JsModule(
     )
 )
 
-object common : JsModule(
-    "libs/common",
-    listOf(
-        commonshr,
-        buildenv
-    )
-)
+//object common : JsModule(
+//    "libs/common",
+//    listOf(
+//        commonshr,
+//        buildenv
+//    )
+//)
 
 object domx : JsModule(
     "libs/domx",
     listOf(
-        common
+        commonshr
     )
 )
 
@@ -162,7 +162,8 @@ object commonui : JsModule(
     listOf(
         bootstrap,
         fontawesome,
-        domx
+        domx,
+        buildenv
     )
 )
 
@@ -272,7 +273,7 @@ object firebaseui : JsModule(
 object firebase : JsModule(
     "libs/firebase",
     listOf(
-        common,
+        commonshr,
         commonlib,
         firebasektjs,
         firebaseshr

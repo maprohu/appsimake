@@ -11,5 +11,6 @@
     <orderEntry exported="" type="module" module-name="bootstrap"/>
     <orderEntry exported="" type="module" module-name="fontawesome"/>
     <orderEntry exported="" type="module" module-name="domx"/>
+    <orderEntry exported="" type="module" module-name="buildenv"/>
   </component>
 </module>

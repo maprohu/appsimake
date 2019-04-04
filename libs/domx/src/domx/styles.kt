@@ -62,6 +62,9 @@ private fun <T> defParam(
 
 }
 
+val Cls.minWidth0 by def(
+    "min-width: 0;"
+)
 val Cls.height0 by def(
     "height: 0px;"
 )

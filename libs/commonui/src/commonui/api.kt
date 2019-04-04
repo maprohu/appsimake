@@ -1,6 +1,5 @@
 package commonui
 
-import common.CsKillsApiCommon
 import commonshr.*
 import commonui.widget.*
 import commonshr.KillsApi
@@ -76,7 +75,7 @@ interface CsApiCommonui: CsApi {
 
 }
 
-interface CsKillsApiCommonui: CsApiCommonui, KillsApiCommonui, CsKillsApiCommon
+interface CsKillsApiCommonui: CsApiCommonui, KillsApiCommonui, CsKillsApi
 
 interface BindKillsApi: HasBindKills, KillsApiCommonui {
 

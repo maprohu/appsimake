@@ -11,6 +11,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import org.w3c.dom.Element
 import org.w3c.dom.GlobalEventHandlers
+import org.w3c.dom.Node
 import rx.RxCalc.Companion.KillFirst
 import rx.RxCalc.Companion.KillLast
 import kotlin.dom.addClass
@@ -531,3 +532,4 @@ fun <T: HasKill, V: RxIface<T?>> V.oldKilledOpt(deps: HasKills) = apply {
     val kseq = deps.kills.seq()
     forEach(deps) { kseq %= it?.kill ?: Noop }
 }
+

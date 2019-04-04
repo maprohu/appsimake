@@ -6,7 +6,7 @@ import buildtool.runTask
 import buildtool.tictactoe
 import kotlinx.coroutines.channels.ticker
 
-fun main(args: Array<String>) {
+fun main() {
     fns.indexJs
     tictactoe.publicHtml
     tictactoe.publicSW

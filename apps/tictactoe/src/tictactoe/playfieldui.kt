@@ -67,24 +67,6 @@ import kotlin.browser.document
 //
 //
 //
-    fun HTMLDivElement.board() {
-        svg {
-            style.apply {
-                position = "absolute"
-                left = "0"
-                right = "0"
-                top = "0"
-                bottom = "0"
-                minHeight = "0"
-                minWidth = "0"
-            }
-            setAttribute("preserve-aspect-ratio", "none")
-            setAttribute("viewBox", "0 0 3 3")
-
-
-
-        }
-    }
 //
 //    ui.root.newRoot {
 //        padding1()
@@ -198,52 +180,10 @@ import kotlin.browser.document
 //    fun Move<*>.isOurs() = player.initial.now.any { it == playerIndex }
 //    fun Move<*>.party() = if (isOurs()) Party.This else Party.That
 //
-//    data class Dir(
-//        val dx: Int,
-//        val dy: Int
-//    )
-//    val dirs = listOf(
-//        Dir(1, -1),
-//        Dir(1, 0),
-//        Dir(1, 1),
-//        Dir(0, 1)
-//    )
 //
-//    operator fun Coords.plus(dir: Dir) = Coords(x + dir.dx, y + dir.dy)
-//
-//    fun Dir.sequenceExcluding(from: Coords) = generateSequence(from + this) { it + this }
-//
-//
-//    operator fun Dir.unaryMinus() = Dir(-dx, -dy)
-//    fun Dir.opposite() = unaryMinus()
 //
 //    val winBy = 3
-//    fun Coords.checkGameOver() : Boolean {
-//        val winner = state(this).now
-//
-//        if (winner == FieldState.Free) return false
-//
-//        fun Dir.reach() =
-//            listOf(this@checkGameOver) +
-//                    sequenceExcluding(this@checkGameOver)
-//                        .takeWhile { state(it).now == winner }
-//                        .toList()
-//
-//        val hs = dirs.mapNotNull { d ->
-//            val s1 = d.reach()
-//            val s2 = d.opposite().reach()
-//
-//            if (s1.size + s2.size - 1 >= winBy) {
-//                Highlight(s1.last(), s2.last())
-//            } else {
-//                null
-//            }
-//        }
-//
-//        hs.forEach { highlights.emit(it) }
-//
-//        return hs.isNotEmpty()
-//    }
+
 //
 //    fun Move<*>.process() {
 //        if (sequence.iv < expectingSequence) return
