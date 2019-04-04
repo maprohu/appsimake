@@ -5,6 +5,7 @@ import commonshr.*
 import commonui.widget.*
 import domx.*
 import fontawesome.*
+import tictactoelib.GameStatus
 import kotlin.browser.document
 
 fun LoggedIn.ui() = TopAndContent(
@@ -18,7 +19,6 @@ fun LoggedIn.ui() = TopAndContent(
                     icon.fa.user
                     click {
                         singlePlayer()
-
                     }
                 }
                 signOut {
@@ -27,5 +27,25 @@ fun LoggedIn.ui() = TopAndContent(
             }
         }
     }.node,
-    content = null
+    content = document.div {
+        cls {
+            flexGrow1
+            flexCenter()
+        }
+        insert.button {
+            primary
+            text %= {
+                gameStatus().let { gs ->
+                    when (gs) {
+                        null -> "Go Online"
+                        is GameStatus.None, is GameStatus.InGame.Waiting ->  "Enter Waiting Room"
+                        is GameStatus.InGame.Playing -> "Show Ongoing Game"
+                    }
+                }
+            }
+            click {
+                goOnline()
+            }
+        }
+    }
 )

@@ -6,15 +6,17 @@ import commonui.*
 import commonui.progress.progressUI
 import commonui.view.*
 import commonui.widget.TopAndContent
+import commonui.widget.Topbar
 import commonui.widget.factory
 
 open class ProgressBackTC(
-    parent: HasKillsRouting<TopAndContent>,
-    override val back: Trigger
-): SimpleView<TopAndContent>(parent), BackKillsUixApi {
+    parent: HasBackKillsRoutingTC,
+    val topbar: ProgressBackTC.(Topbar) -> Unit = {}
+): ViewTC(parent), BackKillsUixApi, HasBack by parent {
     override val rawView = TopAndContent(
-        topbar = factory.topbar.invoke {
+        topbar = factory.topbar {
             left.backButton
+            topbar(this)
         }.node,
         content = progressUI()
     )

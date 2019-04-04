@@ -2,6 +2,7 @@ package tictactoe.loggedin
 
 import tictactoe.*
 import commonfb.FBApi
+import commonshr.publish
 import commonshr.singletons
 import commonui.*
 import commonui.links.BaseTC
@@ -34,6 +35,7 @@ class LoggedIn(
     override val loggedIn: LoggedIn = this
 
     val privateDoc = tictactoeLib.privateOf(user)
+    val publishColl = tictactoeLib.app.publish
     val statusDoc = privateDoc.singletons.status
 
     val gameStatus = Var<GameStatus<*>?>(null)
@@ -48,6 +50,10 @@ class LoggedIn(
     }
 
     override val rawView: TopAndContent = ui()
+
+    fun goOnline() = advance {
+        links.online.fwd()
+    }
 
     init {
         launch {

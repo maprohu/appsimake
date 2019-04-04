@@ -4,6 +4,7 @@ import common.dyn
 import common.named
 import commonshr.properties.DynamicOps
 import commonshr.properties.RxBase
+import commonshr.properties.RxRoot
 import commonshr.properties.readDynamic
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
@@ -121,13 +122,21 @@ interface AppDoc
 
 val <D: AppDoc> DocWrap<D>.admin by coll<AdminDoc>()
 val <D: AppDoc> DocWrap<D>.private by coll<Private>()
+val <D: AppDoc> DocWrap<D>.publish by coll<Publish<*>>()
 val <D: AppDoc> DocWrap<D>.singletons by coll<Singleton>()
 val <P: Private> DocWrap<P>.singletons by coll<PrivateSingleton>()
+
+val <D: AppDoc> DocWrap<D>.inbox by coll<Inbox>()
 
 interface Singleton
 interface PrivateSingleton
 interface Private
 interface AdminDoc
+interface Inbox
+
+abstract class Publish<T: Publish<T>>: RxRoot<T>() {
+    val from by o.string()
+}
 
 val DocWrap<Private>.fcmtokens by coll<FcmToken>()
 

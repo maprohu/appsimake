@@ -34,7 +34,7 @@ class SinglePlayer(
             }
         )
 
-    override val currentView = Var<IViewTC>(createBoard())
+    override val currentView = Var<IViewTC>(createBoard()).oldKilled
 
 }
 

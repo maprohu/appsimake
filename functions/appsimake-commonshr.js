@@ -105,6 +105,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   CollectionSource.prototype.constructor = CollectionSource;
   apps.prototype = Object.create(CollectionWrap.prototype);
   apps.prototype.constructor = apps;
+  RxRoot.prototype = Object.create(RxBase.prototype);
+  RxRoot.prototype.constructor = RxRoot;
+  Publish.prototype = Object.create(RxRoot.prototype);
+  Publish.prototype.constructor = Publish;
   SetAdded.prototype = Object.create(SetMove.prototype);
   SetAdded.prototype.constructor = SetAdded;
   SetRemoved.prototype = Object.create(SetMove.prototype);
@@ -131,8 +135,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   ROArrayProp.prototype.constructor = ROArrayProp;
   RWArrayProp.prototype = Object.create(RWProp.prototype);
   RWArrayProp.prototype.constructor = RWArrayProp;
-  RxRoot.prototype = Object.create(RxBase.prototype);
-  RxRoot.prototype.constructor = RxRoot;
   RxRoot$Companion.prototype = Object.create(RxRoot.prototype);
   RxRoot$Companion.prototype.constructor = RxRoot$Companion;
   SnapshotEvent$Added.prototype = Object.create(SnapshotEvent.prototype);
@@ -1852,6 +1854,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function get_private($receiver) {
     return private_0.getValue_lrcp0p$($receiver, private_metadata);
   }
+  var publish;
+  var publish_metadata = new PropertyMetadata('publish');
+  function get_publish($receiver) {
+    return publish.getValue_lrcp0p$($receiver, publish_metadata);
+  }
   var singletons;
   var singletons_metadata = new PropertyMetadata('singletons');
   function get_singletons($receiver) {
@@ -1861,6 +1868,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var singletons_metadata_0 = new PropertyMetadata('singletons');
   function get_singletons_0($receiver) {
     return singletons_0.getValue_lrcp0p$($receiver, singletons_metadata_0);
+  }
+  var inbox;
+  var inbox_metadata = new PropertyMetadata('inbox');
+  function get_inbox($receiver) {
+    return inbox.getValue_lrcp0p$($receiver, inbox_metadata);
   }
   function Singleton() {
   }
@@ -1889,6 +1901,28 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     kind: Kind_INTERFACE,
     simpleName: 'AdminDoc',
     interfaces: []
+  };
+  function Inbox() {
+  }
+  Inbox.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'Inbox',
+    interfaces: []
+  };
+  function Publish() {
+    RxRoot.call(this);
+    this.from_xodcrv$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Publish$from_metadata);
+  }
+  var Publish$from_metadata = new PropertyMetadata('from');
+  Object.defineProperty(Publish.prototype, 'from', {
+    get: function () {
+      return this.from_xodcrv$_0.getValue_lrcp0p$(this, Publish$from_metadata);
+    }
+  });
+  Publish.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Publish',
+    interfaces: [RxRoot]
   };
   var fcmtokens;
   var fcmtokens_metadata = new PropertyMetadata('fcmtokens');
@@ -8418,12 +8452,16 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.AppDoc = AppDoc;
   package$commonshr.get_admin_py8usb$ = get_admin;
   package$commonshr.get_private_py8usb$ = get_private;
+  package$commonshr.get_publish_py8usb$ = get_publish;
   package$commonshr.get_singletons_py8usb$ = get_singletons;
   package$commonshr.get_singletons_v34c5b$ = get_singletons_0;
+  package$commonshr.get_inbox_py8usb$ = get_inbox;
   package$commonshr.Singleton = Singleton;
   package$commonshr.PrivateSingleton = PrivateSingleton;
   package$commonshr.Private = Private;
   package$commonshr.AdminDoc = AdminDoc;
+  package$commonshr.Inbox = Inbox;
+  package$commonshr.Publish = Publish;
   package$commonshr.get_fcmtokens_x4imip$ = get_fcmtokens;
   package$commonshr.FcmToken = FcmToken;
   package$commonshr.privateOf_rzp46g$ = privateOf;
@@ -8911,8 +8949,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Object.defineProperty(RxMutableSet.prototype, 'diffsAll', Object.getOwnPropertyDescriptor(RxSet.prototype, 'diffsAll'));
   admin = coll();
   private_0 = coll();
+  publish = coll();
   singletons = coll();
   singletons_0 = coll();
+  inbox = coll();
   fcmtokens = coll();
   Identity = Identity$lambda;
   SuspendIdentity = SuspendIdentity$lambda;

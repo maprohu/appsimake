@@ -7,22 +7,34 @@ import commonshr.properties.wrapper
 
 val tictactoeLib = Lib("tictactoe")
 
+val <D: AppDoc> DocWrap<D>.lounge by coll<Game>()
+
 val <D: AppDoc> DocWrap<D>.games by coll<Game>()
 val <D: AppDoc> DocWrap<D>.players by coll<Player>()
 val DocWrap<Game>.moves by coll<Move<*>>()
 
 val CollectionWrap<PrivateSingleton>.status by doc(GameStatus.of)
 
+class LoungeItem: RxBase<LoungeItem>() {
+    val available by o.boolean(true)
+    val gameId by o.prop<String?>(null)
+}
+
 sealed class GameStatus<T: GameStatus<T>>: RxRoot<T>(), PrivateSingleton {
     class None: GameStatus<None>()
-    class Waiting: GameStatus<Waiting>()
-    class Playing: GameStatus<Playing>()
+
+    sealed class InGame<T: InGame<T>>: GameStatus<T>() {
+        val gameId by o.prop<String?>(null)
+
+        class Waiting: InGame<Waiting>()
+        class Playing: InGame<Playing>()
+    }
 
     companion object {
         val of = wrapper(
             { None() },
-            { Waiting() },
-            { Playing() }
+            { InGame.Waiting() },
+            { InGame.Playing() }
         )
     }
 }
@@ -66,3 +78,5 @@ class Placement : Move<Placement>() {
 }
 
 class Leave : Move<Leave>()
+
+class PublicGame: Publish<PublicGame>()

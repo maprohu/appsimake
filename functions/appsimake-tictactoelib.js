@@ -18,20 +18,25 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   var coll = $module$appsimake_commonshr.commonshr.coll_287e2$;
   var PropertyMetadata = Kotlin.PropertyMetadata;
   var doc = $module$appsimake_commonshr.commonshr.doc_68r5d9$;
+  var RxBase = $module$appsimake_commonshr.commonshr.properties.RxBase;
   var Kind_CLASS = Kotlin.Kind.CLASS;
   var wrapper = $module$appsimake_commonshr.commonshr.properties.wrapper_3yfn2g$;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var RxRoot = $module$appsimake_commonshr.commonshr.properties.RxRoot;
   var PrivateSingleton = $module$appsimake_commonshr.commonshr.PrivateSingleton;
-  var RxBase = $module$appsimake_commonshr.commonshr.properties.RxBase;
+  var Publish = $module$appsimake_commonshr.commonshr.Publish;
+  LoungeItem.prototype = Object.create(RxBase.prototype);
+  LoungeItem.prototype.constructor = LoungeItem;
   GameStatus.prototype = Object.create(RxRoot.prototype);
   GameStatus.prototype.constructor = GameStatus;
   GameStatus$None.prototype = Object.create(GameStatus.prototype);
   GameStatus$None.prototype.constructor = GameStatus$None;
-  GameStatus$Waiting.prototype = Object.create(GameStatus.prototype);
-  GameStatus$Waiting.prototype.constructor = GameStatus$Waiting;
-  GameStatus$Playing.prototype = Object.create(GameStatus.prototype);
-  GameStatus$Playing.prototype.constructor = GameStatus$Playing;
+  GameStatus$InGame.prototype = Object.create(GameStatus.prototype);
+  GameStatus$InGame.prototype.constructor = GameStatus$InGame;
+  GameStatus$InGame$Waiting.prototype = Object.create(GameStatus$InGame.prototype);
+  GameStatus$InGame$Waiting.prototype.constructor = GameStatus$InGame$Waiting;
+  GameStatus$InGame$Playing.prototype = Object.create(GameStatus$InGame.prototype);
+  GameStatus$InGame$Playing.prototype.constructor = GameStatus$InGame$Playing;
   Player.prototype = Object.create(RxBase.prototype);
   Player.prototype.constructor = Player;
   Game.prototype = Object.create(RxBase.prototype);
@@ -46,7 +51,14 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   Placement.prototype.constructor = Placement;
   Leave.prototype = Object.create(Move.prototype);
   Leave.prototype.constructor = Leave;
+  PublicGame.prototype = Object.create(Publish.prototype);
+  PublicGame.prototype.constructor = PublicGame;
   var tictactoeLib;
+  var lounge;
+  var lounge_metadata = new PropertyMetadata('lounge');
+  function get_lounge($receiver) {
+    return lounge.getValue_lrcp0p$($receiver, lounge_metadata);
+  }
   var games;
   var games_metadata = new PropertyMetadata('games');
   function get_games($receiver) {
@@ -67,6 +79,28 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   function get_status($receiver) {
     return status.getValue_lrcp0p$($receiver, status_metadata);
   }
+  function LoungeItem() {
+    RxBase.call(this);
+    this.available_1tkes9$_0 = this.o.boolean_6taknv$(true).provideDelegate_n5byny$(this, LoungeItem$available_metadata);
+    this.gameId_4lfmfr$_0 = this.o.prop_z4bjo6$(null).provideDelegate_n5byny$(this, LoungeItem$gameId_metadata);
+  }
+  var LoungeItem$available_metadata = new PropertyMetadata('available');
+  Object.defineProperty(LoungeItem.prototype, 'available', {
+    get: function () {
+      return this.available_1tkes9$_0.getValue_lrcp0p$(this, LoungeItem$available_metadata);
+    }
+  });
+  var LoungeItem$gameId_metadata = new PropertyMetadata('gameId');
+  Object.defineProperty(LoungeItem.prototype, 'gameId', {
+    get: function () {
+      return this.gameId_4lfmfr$_0.getValue_lrcp0p$(this, LoungeItem$gameId_metadata);
+    }
+  });
+  LoungeItem.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'LoungeItem',
+    interfaces: [RxBase]
+  };
   function GameStatus() {
     GameStatus$Companion_getInstance();
     RxRoot.call(this);
@@ -79,20 +113,35 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     simpleName: 'None',
     interfaces: [GameStatus]
   };
-  function GameStatus$Waiting() {
+  function GameStatus$InGame() {
     GameStatus.call(this);
+    this.gameId_c3cpxn$_0 = this.o.prop_z4bjo6$(null).provideDelegate_n5byny$(this, GameStatus$InGame$gameId_metadata);
   }
-  GameStatus$Waiting.$metadata$ = {
+  var GameStatus$InGame$gameId_metadata = new PropertyMetadata('gameId');
+  Object.defineProperty(GameStatus$InGame.prototype, 'gameId', {
+    get: function () {
+      return this.gameId_c3cpxn$_0.getValue_lrcp0p$(this, GameStatus$InGame$gameId_metadata);
+    }
+  });
+  function GameStatus$InGame$Waiting() {
+    GameStatus$InGame.call(this);
+  }
+  GameStatus$InGame$Waiting.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Waiting',
-    interfaces: [GameStatus]
+    interfaces: [GameStatus$InGame]
   };
-  function GameStatus$Playing() {
-    GameStatus.call(this);
+  function GameStatus$InGame$Playing() {
+    GameStatus$InGame.call(this);
   }
-  GameStatus$Playing.$metadata$ = {
+  GameStatus$InGame$Playing.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Playing',
+    interfaces: [GameStatus$InGame]
+  };
+  GameStatus$InGame.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'InGame',
     interfaces: [GameStatus]
   };
   function GameStatus$Companion() {
@@ -103,10 +152,10 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     return new GameStatus$None();
   }
   function GameStatus$Companion$of$lambda_0() {
-    return new GameStatus$Waiting();
+    return new GameStatus$InGame$Waiting();
   }
   function GameStatus$Companion$of$lambda_1() {
-    return new GameStatus$Playing();
+    return new GameStatus$InGame$Playing();
   }
   GameStatus$Companion.$metadata$ = {
     kind: Kind_OBJECT,
@@ -263,19 +312,30 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     simpleName: 'Leave',
     interfaces: [Move]
   };
+  function PublicGame() {
+    Publish.call(this);
+  }
+  PublicGame.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PublicGame',
+    interfaces: [Publish]
+  };
   var package$tictactoelib = _.tictactoelib || (_.tictactoelib = {});
   Object.defineProperty(package$tictactoelib, 'tictactoeLib', {
     get: function () {
       return tictactoeLib;
     }
   });
+  package$tictactoelib.get_lounge_py8usb$ = get_lounge;
   package$tictactoelib.get_games_py8usb$ = get_games;
   package$tictactoelib.get_players_py8usb$ = get_players;
   package$tictactoelib.get_moves_9zet87$ = get_moves;
   package$tictactoelib.get_status_f98aja$ = get_status;
+  package$tictactoelib.LoungeItem = LoungeItem;
   GameStatus.None = GameStatus$None;
-  GameStatus.Waiting = GameStatus$Waiting;
-  GameStatus.Playing = GameStatus$Playing;
+  GameStatus$InGame.Waiting = GameStatus$InGame$Waiting;
+  GameStatus$InGame.Playing = GameStatus$InGame$Playing;
+  GameStatus.InGame = GameStatus$InGame;
   Object.defineProperty(GameStatus, 'Companion', {
     get: GameStatus$Companion_getInstance
   });
@@ -289,7 +349,9 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   package$tictactoelib.Start = Start;
   package$tictactoelib.Placement = Placement;
   package$tictactoelib.Leave = Leave;
+  package$tictactoelib.PublicGame = PublicGame;
   tictactoeLib = new Lib('tictactoe');
+  lounge = coll();
   games = coll();
   players = coll();
   moves = coll();

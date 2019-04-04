@@ -71,5 +71,5 @@ class FwdLogin(
                 }
             }
         }
-    }
+    }.oldKilled
 }

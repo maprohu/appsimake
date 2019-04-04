@@ -16,10 +16,12 @@ interface HasRouting<V> {
     val activeView: RxIface<ViewItem<V>>
 }
 interface HasKillsRouting<V>: HasKills, HasRouting<V>
+interface HasBackKillsRouting<V>: HasBack, HasKillsRouting<V>
 interface HasCsKillsRouting<V>: HasKillsRouting<V>, HasCsKills
 interface HasKilledKillsRouting<V>: HasKilledKills, HasRouting<V>, HasKillsRouting<V>
 typealias HasRoutingTC = HasRouting<TopAndContent>
 typealias HasKillsRoutingTC = HasKillsRouting<TopAndContent>
+typealias HasBackKillsRoutingTC = HasBackKillsRouting<TopAndContent>
 typealias HasCsKillsRoutingTC = HasCsKillsRouting<TopAndContent>
 
 typealias SimpleRoutingHoleTC = SimpleRoutingHole<TopAndContent>

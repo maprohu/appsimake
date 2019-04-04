@@ -4,6 +4,7 @@ import commonfb.FbLinksDeps
 import commonfb.FbLinksFactory
 import commonui.view.forwarding
 import firebase.DbApi
+import tictactoe.active.Active
 import tictactoe.loggedin.LoggedIn
 import tictactoe.singleplayer.SinglePlayer
 
@@ -28,6 +29,13 @@ class Links(
 
     val singlePlayer by home.child { parent, lnk ->
         SinglePlayer(
+            parent,
+            lnk
+        ).forwarding(parent)
+    }
+
+    val online by home.child { parent, lnk ->
+        Active(
             parent,
             lnk
         ).forwarding(parent)
