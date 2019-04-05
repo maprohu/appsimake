@@ -87,6 +87,12 @@ class Active(
                 }
             }
         }
+
+        launchReport {
+            loggedIn.publicColl
+
+
+        }
     }
 
 

@@ -60,8 +60,6 @@ open class Waiting(
                     }
                 }
             }
-
-
         }
     )
 }
