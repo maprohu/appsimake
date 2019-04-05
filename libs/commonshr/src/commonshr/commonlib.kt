@@ -111,9 +111,13 @@ fun <D2> doc() = object : ReadOnlyProperty<CollectionWrap<D2>, DocWrap<D2>> {
         DocWrapImpl(property.name, thisRef)
 }
 
-fun <D2: RxBase<*>> doc(fn: DynamicFactory<D2>) = object : ReadOnlyProperty<CollectionWrap<D2>, DocSource<D2>> {
+fun <D2> docRoot(fn: DynamicFactory<D2>) = object : ReadOnlyProperty<CollectionWrap<D2>, DocSource<D2>> {
     override fun getValue(thisRef: CollectionWrap<D2>, property: KProperty<*>) =
         DocSource(property.name, thisRef, fn)
+}
+
+fun <D2: RxBase<*>> doc(fn: () -> D2) = docRoot { d, ops ->
+    fn().apply { readDynamic(d, ops) }
 }
 
 
@@ -125,16 +129,20 @@ val <D: AppDoc> DocWrap<D>.admin by coll<AdminDoc>()
 val <D: AppDoc> DocWrap<D>.private by coll<Private>()
 val <D: AppDoc> DocWrap<D>.publish by coll<Publish<*>>()
 val <D: AppDoc> DocWrap<D>.locks by coll<Lock<*>>()
+val <D: AppDoc> DocWrap<D>.tmp by coll<Tmp>()
 val <D: AppDoc> DocWrap<D>.singletons by coll<Singleton>()
 val <P: Private> DocWrap<P>.singletons by coll<PrivateSingleton>()
 
 val <D: AppDoc> DocWrap<D>.inbox by coll<Inbox>()
+val <D: Inbox> DocWrap<D>.public by coll<InboxPublic>()
 
 interface Singleton
 interface PrivateSingleton
 interface Private
 interface AdminDoc
 interface Inbox
+interface InboxPublic
+interface Tmp
 
 abstract class Lock<T: Lock<T>>: RxRoot<T>() {
     val from by o.string()
@@ -150,5 +158,6 @@ val DocWrap<Private>.fcmtokens by coll<FcmToken>()
 interface FcmToken
 
 fun Lib.privateOf(uid: String) = app.private.doc(uid)
+fun Lib.inboxOf(uid: String) = app.inbox.doc(uid)
 
 

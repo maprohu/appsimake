@@ -13,13 +13,11 @@ import commonui.view.advance
 import commonui.widget.TopAndContent
 import firebase.HasUser
 import firebase.User
+import firebase.firestore.inboxOf
 import firebase.firestore.privateOf
 import kotlinx.coroutines.launch
 import rx.Var
-import tictactoelib.GameStatus
-import tictactoelib.PublicGame
-import tictactoelib.status
-import tictactoelib.tictactoeLib
+import tictactoelib.*
 
 interface LoggedInTC<T: LoggedInTC<T>>: BaseTC, LoggedInPath, LinkApi<T>
 
@@ -36,10 +34,12 @@ class LoggedIn(
     override val loggedIn: LoggedIn = this
 
     val privateDoc = tictactoeLib.privateOf(user)
-    val gamesColl = tictactoeLib.app.locks.toRxSource { PublicGame() }
+//    val gamesColl = tictactoeLib.app.locks.toRxSource { PublicGame() }
     val statusDoc = privateDoc.singletons.status
+    val lounge = tictactoeLib.app.tmp.lounge
+    val inboxMoves = tictactoeLib.inboxOf(user).public.moves
 
-    val gameStatus = Var<GameStatus<*>?>(null)
+    val gameStatus = statusDoc.docsOrNull.toRx(null)
 
     fun signOut() = links.launch {
         links.signOut()
@@ -50,21 +50,10 @@ class LoggedIn(
         links.singlePlayer.fwd()
     }
 
-    override val rawView: TopAndContent = ui()
-
     fun goOnline() = advance {
         links.online.fwd()
     }
 
-    init {
-        GameStatus.None()
-        launchReport {
-            statusDoc.toFsDoc { GameStatus.None() }.live.rxv.
-
-            for (d in statusDoc.docs()) {
-                gameStatus %= d
-            }
-        }
-    }
+    override val rawView: TopAndContent = ui()
 }
 

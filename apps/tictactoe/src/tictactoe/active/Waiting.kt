@@ -10,14 +10,14 @@ import commonui.view.*
 import commonui.widget.*
 import domx.*
 import firebase.auth.uid
-import firebase.firestore.editableOf
-import firebase.firestore.txTry
+import firebase.firestore.*
 import fontawesome.copy
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.filter
 import kotlinx.coroutines.channels.map
+import kotlinx.coroutines.channels.take
 import tictactoelib.GameStatus
-import tictactoelib.PublicGame
+import tictactoelib.Move
 import kotlin.browser.document
 import kotlin.browser.window
 
@@ -26,72 +26,38 @@ interface WaitingPath: ActivePath {
 }
 @UseExperimental(ObsoleteCoroutinesApi::class)
 class Waiting(
-    parent: Active,
-    val ownGameId: String
+    parent: Active
 ): ViewTC(parent), WaitingPath, ActivePath by parent, BackCsDbKillsUixApi, HasBack by parent {
     override val waiting = this
-    val ownGameRef = loggedIn.gamesColl.doc(ownGameId)
-
-
     override val rawView = ui()
 
     init {
-
         launchReport {
-            val events = loggedIn.gamesColl
-                .documentChanges {
-                    PublicGame.owner.eq(null)
-                }
-                .toSnapshotEvents()
-                .filterIsInstance<SnapshotEvent.Added>()
-                .map { add ->
-                    loggedIn.gamesColl.doc(add.id).editableOf(add.data)
-                }
-                .filter {
-                    it.doc.from.now != loggedIn.user.uid
-                }
+            val e = loggedIn
+                .inboxMoves
+                .listEvents()
+                .filterIsInstance<ListEvent.Add<FsDoc<Move<*>>>>()
+                .receive()
 
-            for (e in events) {
-                txTry {
-                    val game = e.id.getOrFail()
+            txTry {
+                val st = loggedIn.statusDoc.getOrFail()
 
-                    val st = loggedIn.statusDoc.getOrFail()
-                    val waiting = st.doc as GameStatus.InGame.Waiting
-                    require(waiting.gameId.now == ownGameId) { "Obsolete ownGameId" }
-
-
-                    val ownGame = ownGameRef.getOrFail()
-                    require(ownGame.doc.owner.now == null) { "Own game already locked!" }
-
-                    e.id.set(
-                        game.doc.apply {
-                            owner %= uid
-                        }
-                    )
-                    loggedIn.statusDoc.set(
-                        GameStatus.InGame.Playing().apply {
-                            gameId %= game.id.id
-                        }
-                    )
-                    ownGameRef.set(
-                        ownGame.doc.apply {
-                            owner %= uid
-                        }
-                    )
+                when (st.doc) {
+                    is GameStatus.Waiting -> {
+                        loggedIn.statusDoc.set(
+                            GameStatus.Playing().apply {
+                                opponent %= e.item.rxv.now.player.now
+                            }
+                        )
+                    }
+                    else -> {
+                        rollback()
+                    }
                 }
             }
+
+
         }
 
-        launchReport {
-            for (e in ownGameRef.snapshots) {
-                txTry {
-                    val st = loggedIn.statusDoc.getOrFail()
-                    val waiting = st.doc as GameStatus.InGame.Waiting
-                    require(waiting.gameId.now == ownGameId) { "Obsolete ownGameId" }
-
-                }
-
-            }
-        }
     }
 }

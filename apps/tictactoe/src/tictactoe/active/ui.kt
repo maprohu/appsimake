@@ -17,7 +17,7 @@ fun Waiting.ui() = TopAndContent(
     topbar = factory.topbar {
         left.backButton
         title %= "Waiting Room"
-        right.resetButton(this@ui, loggedIn)
+        right.resetButton(this@ui, active)
     }.node,
     content = document.column {
         cls {
@@ -66,17 +66,16 @@ fun Playing.ui() = TopAndContent(
     topbar = factory.topbar {
         left.backButton
         title %= "Playing Online"
-        right.resetButton(this@ui, loggedIn)
+        right.resetButton(this@ui, active)
     }.node,
-    content = document.column {
-    }
+    content = document.column {}
 )
 
-fun Factory.resetButton(deps: HasKillsUix, loggedIn: LoggedIn) = button {
+fun Factory.resetButton(deps: HasKillsUix, active: Active) = button {
     m1p2
     fa.redoAlt
     secondary
     click(deps) {
-        loggedIn.statusDoc.delete(loggedIn)
+        active.reset()
     }
 }

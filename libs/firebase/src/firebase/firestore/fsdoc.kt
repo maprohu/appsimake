@@ -13,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.await
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.map
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.launch
 import kotlin.js.Promise
@@ -75,6 +76,9 @@ fun <D> DocSource<D>.docs(deps: HasCsDbKills): ReceiveChannel<D> = deps.produce(
         }
     }
 }
+
+@UseExperimental(ExperimentalCoroutinesApi::class)
+fun <D: Any> DocSource<D>.docsOrNull(deps: HasCsDbKills): ReceiveChannel<D?> = snapshots(deps).map { read(it) }
 
 fun <D: RxBase<*>> FsDoc<D>.live(deps: HasDbKills) = apply {
     docWrap.snapshotEmitter(deps).listen(deps) {

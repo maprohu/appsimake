@@ -1,29 +1,27 @@
 package tictactoe.active
 
-import commonfb.FBBackApi
-import commonshr.*
 import commonui.*
 import commonui.links.LinkPointItem
 import commonui.links.Linkage
 import commonui.topandcontent.ProgressBackTC
-import commonui.topandcontent.ProgressTC
 import commonui.view.*
-import commonui.widget.TopAndContent
 import domx.remAssign
 import firebase.CsDbKillsApi
 import firebase.auth.uid
 import firebase.firestore.*
-import kotlinx.coroutines.channels.map
-import kotlinx.coroutines.launch
-import rx.RxIface
-import rx.mapAsync
 import tictactoe.loggedin.LoggedIn
 import tictactoe.loggedin.LoggedInPath
 import tictactoelib.GameStatus
-import tictactoelib.PublicGame
+import tictactoelib.Lounge
 
 interface ActivePath: LoggedInPath {
     val active: Active
+}
+
+sealed class GS {
+    object None: GS()
+    object Waiting: GS()
+    data class Playing(val opponent: String): GS()
 }
 
 class Active(
@@ -32,25 +30,45 @@ class Active(
 ): MultiViewTC(from), CsDbKillsApi, LinkPointItem, ActivePath, LoggedInPath by from, HasBackKillsRoutingTC, HasRoutingTC by from, HasBack by linkage {
     override val active: Active = this
 
-    override val currentView = rx<IViewTC> {
+    val gState = rx {
         loggedIn.gameStatus().let { gs ->
             when (gs) {
                 null, is GameStatus.None -> {
+                    GS.None
+                }
+                is GameStatus.Waiting -> {
+                    GS.Waiting
+                }
+                is GameStatus.Playing -> {
+                    GS.Playing(gs.opponent.now)
+                }
+            }
+        }
+    }
+
+    override val currentView = rx<IViewTC> {
+        gState().let { gs ->
+            when (gs) {
+                GS.None -> {
                     ProgressBackTC(this@Active) { tb ->
                         tb.title %= "Waiting Room"
                     }
                 }
-                is GameStatus.InGame.Waiting -> {
-                    Waiting(this@Active, gs.gameId.now)
+                GS.Waiting -> {
+                    Waiting(this@Active)
                 }
-                is GameStatus.InGame.Playing -> {
-                    Playing(this@Active)
+                is GS.Playing -> {
+                    Playing(this@Active, gs.opponent)
                 }
             }
 
         }
     }.oldKilled
 
+    fun reset() {
+        // TODO send goodbye message
+        loggedIn.statusDoc.editableOf(GameStatus.None()).save()
+    }
 
     init {
         launchReport {
@@ -62,22 +80,31 @@ class Active(
 
                             when (st.doc) {
                                 is GameStatus.None -> {
-                                    val pub = loggedIn.gamesColl.randomDoc
-                                    val gameId = pub.id
+                                    val lounge = loggedIn.lounge.getOrDefault { Lounge() }
 
-                                    pub.set(
-                                        PublicGame().apply {
-                                            this.from %= uid
-                                        }
-                                    )
+                                    val opponent = lounge.doc.user.now
 
-                                    loggedIn.statusDoc.set(
-                                        GameStatus.InGame.Waiting().apply {
-                                            this.gameId %= gameId
-                                        }
-                                    )
-
-                                    gameId
+                                    if (opponent == null) {
+                                        loggedIn.statusDoc.set(
+                                            GameStatus.Waiting()
+                                        )
+                                        loggedIn.lounge.set(
+                                            lounge.doc.apply {
+                                                user %= uid
+                                            }
+                                        )
+                                    } else {
+                                        loggedIn.statusDoc.set(
+                                            GameStatus.Playing().apply {
+                                                this.opponent %= opponent
+                                            }
+                                        )
+                                        loggedIn.lounge.set(
+                                            lounge.doc.apply {
+                                                user %= null
+                                            }
+                                        )
+                                    }
                                 }
                                 else -> {
                                     rollback()

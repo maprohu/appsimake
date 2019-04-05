@@ -7,7 +7,10 @@ import commonui.progress.*
 import commonui.view.*
 import commonui.widget.*
 import domx.*
+import firebase.firestore.inboxOf
 import fontawesome.copy
+import tictactoelib.moves
+import tictactoelib.tictactoeLib
 import kotlin.browser.document
 
 interface PlayingPath: ActivePath {
@@ -15,8 +18,11 @@ interface PlayingPath: ActivePath {
 }
 
 class Playing(
-    parent: Active
+    parent: Active,
+    val opponent: String
 ): ViewTC(parent), PlayingPath, ActivePath by parent, BackKillsUixApi, HasBack by parent {
     override val playing = this
+
+
     override val rawView = ui()
 }

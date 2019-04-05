@@ -73,6 +73,7 @@ interface CsDbKillsApi: HasCsDbKills, CsKillsApiFirebase, DbApi, KillsApiFirebas
     ) = documentChanges(api, query)
 
     fun <D> DocSource<D>.docs() = docs(api)
+    val <D: Any> DocSource<D>.docsOrNull get() = docsOrNull(api)
 
     fun <T: RxBase<*>> CollectionSource<T>.toList(
         query: QuerySettingsBuilder<T>.() -> Unit = {}

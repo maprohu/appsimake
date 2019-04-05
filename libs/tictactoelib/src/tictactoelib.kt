@@ -7,34 +7,32 @@ import commonshr.properties.wrapper
 
 val tictactoeLib = Lib("tictactoe")
 
-val <D: AppDoc> DocWrap<D>.lounge by coll<Game>()
 
-val <D: AppDoc> DocWrap<D>.games by coll<Game>()
 val <D: AppDoc> DocWrap<D>.players by coll<Player>()
-val DocWrap<Game>.moves by coll<Move<*>>()
 
-val CollectionWrap<PrivateSingleton>.status by doc(GameStatus.of)
+val CollectionWrap<PrivateSingleton>.status by docRoot(GameStatus.of)
 
-class LoungeItem: RxBase<LoungeItem>() {
-    val available by o.boolean(true)
-    val gameId by o.prop<String?>(null)
+val CollectionWrap<Tmp>.lounge by doc { Lounge() }
+
+val CollectionWrap<InboxPublic>.moves get() = toSource(Move.of)
+
+class Lounge: RxBase<Lounge>(), Tmp {
+    val user by o.prop<String?>(null)
 }
 
 sealed class GameStatus<T: GameStatus<T>>: RxRoot<T>(), PrivateSingleton {
     class None: GameStatus<None>()
-
-    sealed class InGame<T: InGame<T>>: GameStatus<T>() {
-        val gameId by o.string()
-
-        class Waiting: InGame<Waiting>()
-        class Playing: InGame<Playing>()
+    class Waiting: GameStatus<Waiting>()
+    class Playing: GameStatus<Playing>() {
+        val opponent by o.string()
+        val seq by o.int(0)
     }
 
     companion object {
         val of = wrapper(
             { None() },
-            { InGame.Waiting() },
-            { InGame.Playing() }
+            { Waiting() },
+            { Playing() }
         )
     }
 }
@@ -48,18 +46,18 @@ open class Player: RxBase<Player>() {
     val active by o.boolean()
     val game by o.prop<String?>(null)
 }
-class Game: RxBase<Game>() {
-    val players by o.set<String>()
-    val originalPlayers by o.set<String>()
-    val isOver by o.boolean()
-//    var firstPlayer: Int
-//    var lastSequence: Int?
-}
 
 
-sealed class Move<T: Move<T>>: RxRoot<T>() {
-    val sequence by o.int()
-    val player by o.int()
+sealed class Move<T: Move<T>>: RxRoot<T>(), InboxPublic {
+    val seq by o.int()
+    val player by o.string()
+
+    class Start : Move<Start>()
+    class Placement : Move<Placement>() {
+        val x by o.int()
+        val y by o.int()
+    }
+    class Leave : Move<Leave>()
 
     companion object : Move<Nothing>() {
         val of = wrapper(
@@ -68,19 +66,5 @@ sealed class Move<T: Move<T>>: RxRoot<T>() {
             { Leave() }
         )
     }
-}
-
-class Start : Move<Start>()
-
-class Placement : Move<Placement>() {
-    val x by o.int()
-    val y by o.int()
-}
-
-class Leave : Move<Leave>()
-
-open class PublicGame: Lock<PublicGame>() {
-    companion object: PublicGame()
-
 }
 

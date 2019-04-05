@@ -33,6 +33,7 @@ fun getOptionsCache() = obj<GetOptions>().apply {
 }
 
 fun Lib.privateOf(user: User) = privateOf(user.uid)
+fun Lib.inboxOf(user: User) = inboxOf(user.uid)
 
 //fun <T> queryUi(
 //        query: Query,
