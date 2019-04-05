@@ -1,6 +1,7 @@
 package tictactoe.active
 
 import bootstrap.*
+import common.copyToClipboard
 import commonshr.*
 import commonui.*
 import commonui.progress.*
@@ -9,6 +10,7 @@ import commonui.widget.*
 import domx.*
 import fontawesome.copy
 import kotlin.browser.document
+import kotlin.browser.window
 
 open class Waiting(
     parent: HasBackKillsRoutingTC
@@ -16,6 +18,7 @@ open class Waiting(
     override val rawView = TopAndContent(
         topbar = factory.topbar {
             left.backButton
+            title %= "Waiting Room"
         }.node,
         content = document.column {
             cls {
@@ -36,12 +39,14 @@ open class Waiting(
                 cls {
                     flexFixedSize()
                 }
-                input {
+                val url = input {
                     cls {
                         m1
+                        px1
                         flexGrow1
                     }
                     readOnly = true
+                    value = window.location.href
                 }
                 insert.button {
                     cls {
@@ -50,6 +55,9 @@ open class Waiting(
                     }
                     secondary
                     fa.copy
+                    click {
+                        url.value.copyToClipboard()
+                    }
                 }
             }
 

@@ -33,3 +33,9 @@ data class CsKillsDeps(
 ): HasCsKills
 
 
+interface HasPath {
+    val path: String
+}
+
+
+

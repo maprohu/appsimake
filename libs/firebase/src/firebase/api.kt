@@ -12,6 +12,7 @@ interface DbApi: Api, HasDb {
     val <D> CollectionWrap<D>.ref get() = collectionRef(api)
     val <D> DocWrap<D>.ref get() = docRef(api)
     val <D> CollectionWrap<D>.randomDoc: DocWrap<D> get() = randomDoc(api)
+    val <D> CollectionSource<D>.randomDoc get() = randomDoc(api)
 
     fun <D: RxBase<*>> D.toRandomFsDoc(cw: CollectionSource<D>) = toRandomFsDoc(api, cw)
     fun <D> CollectionSource<D>.randomEditable(d: dynamic = dyn()) = randomEditable(api, d)
@@ -78,4 +79,18 @@ interface CsDbKillsApi: HasCsDbKills, CsKillsApiFirebase, DbApi, KillsApiFirebas
     ) = fsCache(api, factory)
 
 }
+
+interface TxApi: Api, HasTx {
+
+}
+
+interface DbTxApi: TxApi, DbApi, HasDbTx {
+    suspend fun <T> DocSource<T>.getOrDefault(fn: () -> T) = getOrDefault(api, fn)
+    fun <T: RxBase<*>> DocSource<T>.set(data: T) = set(api, data)
+}
+
+class DbTxWrap(
+    override val db: Firestore,
+    override val tx: Transaction
+): DbTxApi
 

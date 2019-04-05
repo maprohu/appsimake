@@ -78,22 +78,23 @@ fun <D2: RxBase<*>> coll(fn: () -> D2) = object : ReadOnlyProperty<DocWrap<*>, C
         }
 }
 
-interface HasPath {
-    val path: String
-}
-
 open class CollectionWrap<in D>(
     val id: String,
-    private val parent: DocWrap<*>? = null
+    internal val parent: DocWrap<*>? = null
 ) : HasPath {
     override val path : String = "${parent?.path ?: ""}/$id"
 
     open fun doc(id: String): DocWrap<D> = DocWrapImpl(id, this)
 
-    fun toSource(
-        factory: DynamicFactory<D>
-    ): CollectionSource<@UnsafeVariance D> = CollectionSource(id, parent, factory)
+    fun <D2: D> toSource(
+        factory: DynamicFactory<D2>
+    ): CollectionSource<@UnsafeVariance D2> = CollectionSource(id, parent, factory)
+
 }
+
+fun <D: RxBase<*>, D2: D> CollectionWrap<D>.toRxSource(
+    fn: () -> D2
+): CollectionSource<@UnsafeVariance D2> = CollectionSource(id, parent) { d, ops -> fn().apply { readDynamic(d, ops) } }
 
 class CollectionSource<D>(
     id: String,

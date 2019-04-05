@@ -24,7 +24,7 @@ sealed class GameStatus<T: GameStatus<T>>: RxRoot<T>(), PrivateSingleton {
     class None: GameStatus<None>()
 
     sealed class InGame<T: InGame<T>>: GameStatus<T>() {
-        val gameId by o.prop<String?>(null)
+        val gameId by o.string()
 
         class Waiting: InGame<Waiting>()
         class Playing: InGame<Playing>()

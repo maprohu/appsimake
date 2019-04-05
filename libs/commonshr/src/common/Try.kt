@@ -4,7 +4,7 @@ package common
 sealed class Try<out T> {
 
     companion object {
-        suspend operator fun <T> invoke(body: suspend () -> T): Try<T> {
+        inline operator fun <T> invoke(body: () -> T): Try<T> {
             return try {
                 Success(body())
             } catch (e: Exception) {
@@ -17,7 +17,7 @@ sealed class Try<out T> {
 
     abstract fun isFailure(): Boolean
 
-    suspend fun <U> map(f: suspend (T) -> U): Try<U> {
+    inline fun <U> map(f: (T) -> U): Try<U> {
         @Suppress("UNCHECKED_CAST")
         return when (this) {
             is Success -> Try {

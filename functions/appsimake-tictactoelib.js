@@ -115,7 +115,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   };
   function GameStatus$InGame() {
     GameStatus.call(this);
-    this.gameId_c3cpxn$_0 = this.o.prop_z4bjo6$(null).provideDelegate_n5byny$(this, GameStatus$InGame$gameId_metadata);
+    this.gameId_c3cpxn$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, GameStatus$InGame$gameId_metadata);
   }
   var GameStatus$InGame$gameId_metadata = new PropertyMetadata('gameId');
   Object.defineProperty(GameStatus$InGame.prototype, 'gameId', {

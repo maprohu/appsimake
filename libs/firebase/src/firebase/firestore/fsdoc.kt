@@ -137,6 +137,19 @@ suspend fun <D> DocSource<D>.getOrNull(deps: HasDb, source: GetOptionsSource = G
     }
 }
 
+fun <T> DocSource<T>.extractOrDefault(ds: DocumentSnapshot, fn: () -> T) = if (ds.exists) {
+    FsEditable(
+        this,
+        factory(ds.data(), FsDynamicOps),
+        true
+    )
+} else {
+    FsEditable(
+        this,
+        fn(),
+        false
+    )
+}
 
 
 

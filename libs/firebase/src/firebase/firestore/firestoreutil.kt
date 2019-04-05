@@ -273,6 +273,7 @@ suspend fun <T> Firestore.tx(fn: suspend (Transaction) -> T) : T = txDefer(fn).a
 suspend fun <T> Firestore.txTry(fn: suspend (Transaction) -> T) : Try<T> = Try { tx(fn) }
 
 fun <T> Try<T>.onRollback(fn: () -> T) : T = fold({ if (it is RollbackException) fn() else throw it }, { it })
+inline fun <T> Try<T>.onSuccess(fn: (T) -> Unit) = map { t -> fn(t); t }
 
 class RollbackException : Exception()
 fun rollback() : Nothing = throw RollbackException()

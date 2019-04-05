@@ -41,7 +41,6 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var launch = $module$kotlinx_coroutines_core.kotlinx.coroutines.launch_s496o7$;
   var Exception = Kotlin.kotlin.Exception;
-  var throwCCE = Kotlin.throwCCE;
   var NoSuchElementException_init = Kotlin.kotlin.NoSuchElementException_init;
   var plus_0 = Kotlin.kotlin.collections.plus_xfiyik$;
   var setOf = Kotlin.kotlin.collections.setOf_mh5how$;
@@ -75,6 +74,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var listOf = Kotlin.kotlin.collections.listOf_i5x0yv$;
   var round = Kotlin.kotlin.math.round_14dthe$;
   var Error_init = Kotlin.kotlin.Error_init_pdl1vj$;
+  var throwCCE = Kotlin.throwCCE;
   var throwUPAE = Kotlin.throwUPAE;
   var addClass = Kotlin.kotlin.dom.addClass_hhb33f$;
   var removeClass = Kotlin.kotlin.dom.removeClass_hhb33f$;
@@ -979,73 +979,25 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function Try$Companion() {
     Try$Companion_instance = this;
   }
-  function Coroutine$invoke_lnyleu$($this, body_0, continuation_0) {
-    CoroutineImpl.call(this, continuation_0);
-    this.exceptionState_0 = 4;
-    this.$this = $this;
-    this.local$tmp$ = void 0;
-    this.local$body = body_0;
-  }
-  Coroutine$invoke_lnyleu$.$metadata$ = {
-    kind: Kotlin.Kind.CLASS,
-    simpleName: null,
-    interfaces: [CoroutineImpl]
-  };
-  Coroutine$invoke_lnyleu$.prototype = Object.create(CoroutineImpl.prototype);
-  Coroutine$invoke_lnyleu$.prototype.constructor = Coroutine$invoke_lnyleu$;
-  Coroutine$invoke_lnyleu$.prototype.doResume = function () {
-    do
+  Try$Companion.prototype.invoke_klfg04$ = defineInlineFunction('appsimake-commonshr.common.Try.Companion.invoke_klfg04$', wrapFunction(function () {
+    var Success_init = _.common.Success;
+    var Failure_init = _.common.Failure;
+    var Exception = Kotlin.kotlin.Exception;
+    return function (body) {
+      var tmp$;
       try {
-        switch (this.state_0) {
-          case 0:
-            this.exceptionState_0 = 2;
-            this.state_0 = 1;
-            this.result_0 = this.local$body(this);
-            if (this.result_0 === COROUTINE_SUSPENDED)
-              return COROUTINE_SUSPENDED;
-            continue;
-          case 1:
-            this.local$tmp$ = new Success(this.result_0);
-            this.exceptionState_0 = 4;
-            this.state_0 = 3;
-            continue;
-          case 2:
-            this.exceptionState_0 = 4;
-            var e = this.exception_0;
-            if (Kotlin.isType(e, Exception)) {
-              this.local$tmp$ = new Failure(e);
-            }
-             else
-              throw e;
-            this.state_0 = 3;
-            continue;
-          case 3:
-            return this.local$tmp$;
-          case 4:
-            throw this.exception_0;
-          default:this.state_0 = 4;
-            throw new Error('State Machine Unreachable execution');
-        }
+        tmp$ = new Success_init(body());
       }
        catch (e) {
-        if (this.state_0 === 4) {
-          this.exceptionState_0 = this.state_0;
+        if (Kotlin.isType(e, Exception)) {
+          tmp$ = new Failure_init(e);
+        }
+         else
           throw e;
-        }
-         else {
-          this.state_0 = this.exceptionState_0;
-          this.exception_0 = e;
-        }
       }
-     while (true);
-  };
-  Try$Companion.prototype.invoke_lnyleu$ = function (body_0, continuation_0, suspended) {
-    var instance = new Coroutine$invoke_lnyleu$(this, body_0, continuation_0);
-    if (suspended)
-      return instance;
-    else
-      return instance.doResume(null);
-  };
+      return tmp$;
+    };
+  }));
   Try$Companion.$metadata$ = {
     kind: Kind_OBJECT,
     simpleName: 'Companion',
@@ -1058,125 +1010,34 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     }
     return Try$Companion_instance;
   }
-  function Coroutine$Try$map$lambda(closure$f_0, this$Try_0, continuation_0) {
-    CoroutineImpl.call(this, continuation_0);
-    this.exceptionState_0 = 1;
-    this.local$closure$f = closure$f_0;
-    this.local$this$Try = this$Try_0;
-  }
-  Coroutine$Try$map$lambda.$metadata$ = {
-    kind: Kotlin.Kind.CLASS,
-    simpleName: null,
-    interfaces: [CoroutineImpl]
-  };
-  Coroutine$Try$map$lambda.prototype = Object.create(CoroutineImpl.prototype);
-  Coroutine$Try$map$lambda.prototype.constructor = Coroutine$Try$map$lambda;
-  Coroutine$Try$map$lambda.prototype.doResume = function () {
-    do
-      try {
-        switch (this.state_0) {
-          case 0:
-            this.state_0 = 2;
-            this.result_0 = this.local$closure$f(this.local$this$Try.value, this);
-            if (this.result_0 === COROUTINE_SUSPENDED)
-              return COROUTINE_SUSPENDED;
-            continue;
-          case 1:
-            throw this.exception_0;
-          case 2:
-            return this.result_0;
-          default:this.state_0 = 1;
-            throw new Error('State Machine Unreachable execution');
+  Try.prototype.map_2o04qz$ = defineInlineFunction('appsimake-commonshr.common.Try.map_2o04qz$', wrapFunction(function () {
+    var Success = _.common.Success;
+    var Failure = _.common.Failure;
+    var throwCCE = Kotlin.throwCCE;
+    var Exception = Kotlin.kotlin.Exception;
+    return function (f) {
+      var tmp$, tmp$_0;
+      if (Kotlin.isType(this, Success)) {
+        var tmp$_1;
+        try {
+          tmp$_1 = new Success(f(this.value));
         }
+         catch (e) {
+          if (Kotlin.isType(e, Exception)) {
+            tmp$_1 = new Failure(e);
+          }
+           else
+            throw e;
+        }
+        tmp$_0 = tmp$_1;
       }
-       catch (e) {
-        if (this.state_0 === 1) {
-          this.exceptionState_0 = this.state_0;
-          throw e;
-        }
-         else {
-          this.state_0 = this.exceptionState_0;
-          this.exception_0 = e;
-        }
-      }
-     while (true);
-  };
-  function Try$map$lambda(closure$f_0, this$Try_0) {
-    return function (continuation_0, suspended) {
-      var instance = new Coroutine$Try$map$lambda(closure$f_0, this$Try_0, continuation_0);
-      if (suspended)
-        return instance;
+       else if (Kotlin.isType(this, Failure))
+        tmp$_0 = Kotlin.isType(tmp$ = this, Failure) ? tmp$ : throwCCE();
       else
-        return instance.doResume(null);
+        tmp$_0 = Kotlin.noWhenBranchMatched();
+      return tmp$_0;
     };
-  }
-  function Coroutine$map_v7st1v$($this, f_0, continuation_0) {
-    CoroutineImpl.call(this, continuation_0);
-    this.exceptionState_0 = 1;
-    this.$this = $this;
-    this.local$tmp$_0 = void 0;
-    this.local$f = f_0;
-  }
-  Coroutine$map_v7st1v$.$metadata$ = {
-    kind: Kotlin.Kind.CLASS,
-    simpleName: null,
-    interfaces: [CoroutineImpl]
-  };
-  Coroutine$map_v7st1v$.prototype = Object.create(CoroutineImpl.prototype);
-  Coroutine$map_v7st1v$.prototype.constructor = Coroutine$map_v7st1v$;
-  Coroutine$map_v7st1v$.prototype.doResume = function () {
-    do
-      try {
-        switch (this.state_0) {
-          case 0:
-            var tmp$;
-            if (Kotlin.isType(this.$this, Success)) {
-              this.state_0 = 2;
-              this.result_0 = Try$Companion_getInstance().invoke_lnyleu$(Try$map$lambda(this.local$f, this.$this), this);
-              if (this.result_0 === COROUTINE_SUSPENDED)
-                return COROUTINE_SUSPENDED;
-              continue;
-            }
-             else {
-              if (Kotlin.isType(this.$this, Failure))
-                this.local$tmp$_0 = Kotlin.isType(tmp$ = this.$this, Failure) ? tmp$ : throwCCE();
-              else
-                this.local$tmp$_0 = Kotlin.noWhenBranchMatched();
-              this.state_0 = 3;
-              continue;
-            }
-
-          case 1:
-            throw this.exception_0;
-          case 2:
-            this.local$tmp$_0 = this.result_0;
-            this.state_0 = 3;
-            continue;
-          case 3:
-            return this.local$tmp$_0;
-          default:this.state_0 = 1;
-            throw new Error('State Machine Unreachable execution');
-        }
-      }
-       catch (e) {
-        if (this.state_0 === 1) {
-          this.exceptionState_0 = this.state_0;
-          throw e;
-        }
-         else {
-          this.state_0 = this.exceptionState_0;
-          this.exception_0 = e;
-        }
-      }
-     while (true);
-  };
-  Try.prototype.map_v7st1v$ = function (f_0, continuation_0, suspended) {
-    var instance = new Coroutine$map_v7st1v$(this, f_0, continuation_0);
-    if (suspended)
-      return instance;
-    else
-      return instance.doResume(null);
-  };
+  }));
   Try.prototype.flatMap_fzayo0$ = function (f) {
     var tmp$;
     if (Kotlin.isType(this, Success))
@@ -1573,6 +1434,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   KillsApi.prototype.toChannelLater_z5dyp2$ = function ($receiver) {
     return toChannelLater($receiver, this);
   };
+  KillsApi.prototype.toChannel_z5dyp2$ = function ($receiver) {
+    return toChannel($receiver, this);
+  };
   KillsApi.prototype.mapLive_1mq1ue$ = function ($receiver, fn) {
     return mapLive($receiver, this, fn);
   };
@@ -1751,20 +1615,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function coll_0(fn) {
     return new coll$ObjectLiteral_0(fn);
   }
-  function HasPath() {
-  }
-  HasPath.$metadata$ = {
-    kind: Kind_INTERFACE,
-    simpleName: 'HasPath',
-    interfaces: []
-  };
   function CollectionWrap(id, parent) {
     if (parent === void 0)
       parent = null;
     this.id = id;
-    this.parent_331zei$_0 = parent;
+    this.parent_8be2vx$ = parent;
     var tmp$, tmp$_0;
-    this.path_6soqnf$_0 = ((tmp$_0 = (tmp$ = this.parent_331zei$_0) != null ? tmp$.path : null) != null ? tmp$_0 : '') + '/' + this.id;
+    this.path_6soqnf$_0 = ((tmp$_0 = (tmp$ = this.parent_8be2vx$) != null ? tmp$.path : null) != null ? tmp$_0 : '') + '/' + this.id;
   }
   Object.defineProperty(CollectionWrap.prototype, 'path', {
     get: function () {
@@ -1774,14 +1631,24 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   CollectionWrap.prototype.doc_61zpoe$ = function (id) {
     return new DocWrapImpl(id, this);
   };
-  CollectionWrap.prototype.toSource_3096nq$ = function (factory) {
-    return new CollectionSource(this.id, this.parent_331zei$_0, factory);
+  CollectionWrap.prototype.toSource_sjcvik$ = function (factory) {
+    return new CollectionSource(this.id, this.parent_8be2vx$, factory);
   };
   CollectionWrap.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'CollectionWrap',
     interfaces: [HasPath]
   };
+  function toRxSource$lambda(closure$fn) {
+    return function (d, ops) {
+      var $receiver = closure$fn();
+      readDynamic($receiver, d, ops);
+      return $receiver;
+    };
+  }
+  function toRxSource($receiver, fn) {
+    return new CollectionSource($receiver.id, $receiver.parent_8be2vx$, toRxSource$lambda(fn));
+  }
   function CollectionSource(id, parent, factory) {
     if (parent === void 0)
       parent = null;
@@ -3146,6 +3013,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   CsKillsDeps.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.kills, other.kills) && Kotlin.equals(this.coroutineContext, other.coroutineContext)))));
+  };
+  function HasPath() {
+  }
+  HasPath.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'HasPath',
+    interfaces: []
   };
   function get_fn($receiver) {
     return getCallableRef('add', function ($receiver, listener) {
@@ -6571,6 +6445,24 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function toRx_1($receiver, ks) {
     return Rx_init_0(ks, $receiver);
   }
+  function toChannel$lambda(closure$ch) {
+    return function () {
+      closure$ch.close_dbl4no$();
+      return Unit;
+    };
+  }
+  function toChannel$lambda_0(closure$ch) {
+    return function ($receiver, t) {
+      closure$ch.offer_11rb$(t);
+      return Unit;
+    };
+  }
+  function toChannel($receiver, deps) {
+    var ch = Channel(2147483647);
+    plusAssign_0(deps.kills, toChannel$lambda(ch));
+    forEach($receiver, deps, toChannel$lambda_0(ch));
+    return ch;
+  }
   function toChannelLater$lambda(closure$ch) {
     return function () {
       closure$ch.close_dbl4no$();
@@ -8441,8 +8333,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.DocSource = DocSource;
   package$commonshr.coll_287e2$ = coll;
   package$commonshr.coll_4okrys$ = coll_0;
-  package$commonshr.HasPath = HasPath;
   package$commonshr.CollectionWrap = CollectionWrap;
+  package$commonshr.toRxSource_z5fd7c$ = toRxSource;
   package$commonshr.CollectionSource = CollectionSource;
   package$commonshr.doc_287e2$ = doc;
   package$commonshr.doc_68r5d9$ = doc_0;
@@ -8504,6 +8396,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.KillsDeps = KillsDeps;
   package$commonshr.HasCsKills = HasCsKills;
   package$commonshr.CsKillsDeps = CsKillsDeps;
+  package$commonshr.HasPath = HasPath;
   package$commonshr.get_fn_4b7k9i$ = get_fn;
   package$commonshr.listen_5ge9y1$ = listen;
   package$commonshr.reportd_za3rmp$ = reportd;
@@ -8716,6 +8609,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$rx.rxClass_53u32h$ = rxClass_1;
   package$rx.rxClass_9rzgmr$ = rxClass_2;
   package$rx.toRx_56vwuc$ = toRx_1;
+  package$rx.toChannel_prszu7$ = toChannel;
   package$rx.toChannelLater_prszu7$ = toChannelLater;
   package$rx.rx_50j47u$ = rx_0;
   package$rx.get_asVar_vvk9$ = get_asVar;
@@ -8784,6 +8678,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   CsKillsApi.prototype.containsRx_1w65cx$ = KillsApi.prototype.containsRx_1w65cx$;
   CsKillsApi.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
   CsKillsApi.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  CsKillsApi.prototype.toChannel_z5dyp2$ = KillsApi.prototype.toChannel_z5dyp2$;
   CsKillsApi.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
   CsKillsApi.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
   CsKillsApi.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;
@@ -8817,6 +8712,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   CsKills.prototype.containsRx_1w65cx$ = CsKillsApi.prototype.containsRx_1w65cx$;
   CsKills.prototype.toRxSet_jr4bl4$ = CsKillsApi.prototype.toRxSet_jr4bl4$;
   CsKills.prototype.toChannelLater_z5dyp2$ = CsKillsApi.prototype.toChannelLater_z5dyp2$;
+  CsKills.prototype.toChannel_z5dyp2$ = CsKillsApi.prototype.toChannel_z5dyp2$;
   CsKills.prototype.mapLive_1mq1ue$ = CsKillsApi.prototype.mapLive_1mq1ue$;
   CsKills.prototype.listen_ubid8w$ = CsKillsApi.prototype.listen_ubid8w$;
   CsKills.prototype.plusAssign_ubid8w$ = CsKillsApi.prototype.plusAssign_ubid8w$;
@@ -8844,6 +8740,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   filter$lambda$Item.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
   filter$lambda$Item.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
   filter$lambda$Item.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  filter$lambda$Item.prototype.toChannel_z5dyp2$ = KillsApi.prototype.toChannel_z5dyp2$;
   filter$lambda$Item.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
   filter$lambda$Item.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
   filter$lambda$Item.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;
@@ -8872,6 +8769,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   HasNoKill.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
   HasNoKill.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
   HasNoKill.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  HasNoKill.prototype.toChannel_z5dyp2$ = KillsApi.prototype.toChannel_z5dyp2$;
   HasNoKill.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
   HasNoKill.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
   HasNoKill.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;
@@ -8900,6 +8798,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Killables.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
   Killables.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
   Killables.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  Killables.prototype.toChannel_z5dyp2$ = KillsApi.prototype.toChannel_z5dyp2$;
   Killables.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
   Killables.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
   RxVal.prototype.forEachLater_aaomyj$ = RxIface.prototype.forEachLater_aaomyj$;
@@ -8941,6 +8840,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   sorted$Holder.prototype.process_7xi3v7$ = KillsApi.prototype.process_7xi3v7$;
   sorted$Holder.prototype.toRxSet_jr4bl4$ = KillsApi.prototype.toRxSet_jr4bl4$;
   sorted$Holder.prototype.toChannelLater_z5dyp2$ = KillsApi.prototype.toChannelLater_z5dyp2$;
+  sorted$Holder.prototype.toChannel_z5dyp2$ = KillsApi.prototype.toChannel_z5dyp2$;
   sorted$Holder.prototype.mapLive_1mq1ue$ = KillsApi.prototype.mapLive_1mq1ue$;
   sorted$Holder.prototype.listen_ubid8w$ = KillsApi.prototype.listen_ubid8w$;
   sorted$Holder.prototype.plusAssign_ubid8w$ = KillsApi.prototype.plusAssign_ubid8w$;

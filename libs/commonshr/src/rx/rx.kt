@@ -484,6 +484,12 @@ fun Element.rxClass(
 fun <T> (KillsApi.() -> T).toRx(ks: KillSet) = Rx(ks, this)
 
 
+fun <T> RxIface<T>.toChannel(deps: HasKills): ReceiveChannel<T> {
+    val ch = Channel<T>(Channel.UNLIMITED)
+    deps.kills += { ch.close() }
+    forEach(deps) { t -> ch.offer(t) }
+    return ch
+}
 fun <T> RxIface<T>.toChannelLater(deps: HasKills): ReceiveChannel<T> {
     val ch = Channel<T>(Channel.UNLIMITED)
     deps.kills += { ch.close() }

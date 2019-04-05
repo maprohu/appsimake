@@ -4,6 +4,7 @@ import tictactoe.*
 import commonfb.FBApi
 import commonshr.publish
 import commonshr.singletons
+import commonshr.toRxSource
 import commonui.*
 import commonui.links.BaseTC
 import commonui.links.LinkApi
@@ -17,6 +18,7 @@ import firebase.firestore.privateOf
 import kotlinx.coroutines.launch
 import rx.Var
 import tictactoelib.GameStatus
+import tictactoelib.PublicGame
 import tictactoelib.status
 import tictactoelib.tictactoeLib
 
@@ -30,12 +32,12 @@ class LoggedIn(
     links: Links,
     override val linkage: Linkage,
     hole: HasKillsRouting<TopAndContent>,
-    user: User
+    val user: User
 ): ForwardTC(hole), LoggedInTC<LoggedIn>, LoggedInPath, LinksPath by links, FBApi  {
     override val loggedIn: LoggedIn = this
 
     val privateDoc = tictactoeLib.privateOf(user)
-    val publishColl = tictactoeLib.app.publish
+    val publicColl = tictactoeLib.app.publish.toRxSource { PublicGame() }
     val statusDoc = privateDoc.singletons.status
 
     val gameStatus = Var<GameStatus<*>?>(null)
