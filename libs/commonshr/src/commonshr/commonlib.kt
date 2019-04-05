@@ -124,6 +124,7 @@ interface AppDoc
 val <D: AppDoc> DocWrap<D>.admin by coll<AdminDoc>()
 val <D: AppDoc> DocWrap<D>.private by coll<Private>()
 val <D: AppDoc> DocWrap<D>.publish by coll<Publish<*>>()
+val <D: AppDoc> DocWrap<D>.locks by coll<Lock<*>>()
 val <D: AppDoc> DocWrap<D>.singletons by coll<Singleton>()
 val <P: Private> DocWrap<P>.singletons by coll<PrivateSingleton>()
 
@@ -134,6 +135,11 @@ interface PrivateSingleton
 interface Private
 interface AdminDoc
 interface Inbox
+
+abstract class Lock<T: Lock<T>>: RxRoot<T>() {
+    val from by o.string()
+    val owner by o.prop<String?>(null)
+}
 
 abstract class Publish<T: Publish<T>>: RxRoot<T>() {
     val from by o.string()

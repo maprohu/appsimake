@@ -112,6 +112,7 @@ object FsDynamicOps: DynamicOps {
 
 val <D> DocSource<D>.new get() = new()
 fun <D> DocSource<D>.new(d: dynamic = dyn()) = new(d, firebase.firestore.FsDynamicOps)
+fun <D> DocSource<D>.editableOf(d: dynamic = dyn(), exists: Boolean = true) = editableOf(d, exists, firebase.firestore.FsDynamicOps)
 
 
 suspend fun <D> DocSource<D>.getCachedOrServer(deps: HasDb): FsEditable<D> {
@@ -151,6 +152,27 @@ fun <T> DocSource<T>.extractOrDefault(ds: DocumentSnapshot, fn: () -> T) = if (d
     )
 }
 
+fun <T> DocSource<T>.extractOrFail(ds: DocumentSnapshot): FsEditable<T> {
+    require(ds.exists) { "Document does not exist: $path" }
+    return FsEditable(
+        this,
+        factory(ds.data(), FsDynamicOps),
+        true
+    )
+}
+
+
+suspend fun <D> DocSource<D>.toFsDoc(
+    deps: HasDb,
+    source: GetOptionsSource = GetOptionsSource.default,
+    default: () -> D
+): FsDoc<D> = getOrNull(deps, source).let { loaded ->
+    if (loaded == null) {
+        FsDoc(toFsId(false), default())
+    } else {
+        loaded.toFsDoc(toFsId(true))
+    }
+}
 
 
 

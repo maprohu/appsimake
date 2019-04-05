@@ -5,6 +5,7 @@ import commonshr.*
 import commonshr.properties.RxBase
 import firebase.firestore.*
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlin.browser.document
 import kotlin.js.Promise
 
 interface DbApi: Api, HasDb {
@@ -26,6 +27,10 @@ interface DbApi: Api, HasDb {
     suspend fun <D> DocSource<D>.getCachedOrServer() = getCachedOrServer(api)
     suspend fun <D> DocSource<D>.getOrNull(source: GetOptionsSource = GetOptionsSource.default): D? = getOrNull(api, source)
 
+    suspend fun <D> DocSource<D>.toFsDoc(
+        source: GetOptionsSource = GetOptionsSource.default,
+        default: () -> D
+    ) = toFsDoc(api, source, default)
 }
 
 
@@ -58,10 +63,14 @@ interface CsDbKillsApi: HasCsDbKills, CsKillsApiFirebase, DbApi, KillsApiFirebas
 
     val <D : RxBase<*>> DocWrap<D>.snapshots get() = snapshots(api)
 
+
     fun <T: RxBase<*>> CollectionSource<T>.listEvents(
         query: QuerySettingsBuilder<T>.() -> Unit = {}
     ) = listEvents(api, query)
 
+    fun <T: RxBase<*>> CollectionSource<T>.documentChanges(
+        query: QuerySettingsBuilder<T>.() -> Unit = {}
+    ) = documentChanges(api, query)
 
     fun <D> DocSource<D>.docs() = docs(api)
 
@@ -85,8 +94,10 @@ interface TxApi: Api, HasTx {
 }
 
 interface DbTxApi: TxApi, DbApi, HasDbTx {
+    suspend fun <T> DocSource<T>.getOrFail() = getOrFail(api)
     suspend fun <T> DocSource<T>.getOrDefault(fn: () -> T) = getOrDefault(api, fn)
     fun <T: RxBase<*>> DocSource<T>.set(data: T) = set(api, data)
+    fun <T> DocSource<T>.delete() = delete(api)
 }
 
 class DbTxWrap(

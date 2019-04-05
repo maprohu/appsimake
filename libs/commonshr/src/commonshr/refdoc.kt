@@ -80,7 +80,8 @@ fun <D> D.toFsEditable(id: DocSource<D>, exists: Boolean = true) = FsEditable(id
 
 val <T> FsDoc<T>.idOrFail: String get() = (id.state.now as FsIdState.HasId).id
 
-fun <D> DocSource<D>.new(d: dynamic = dyn(), ops: DynamicOps) = factory(d, ops).toFsEditable(this, false)
+fun <D> DocSource<D>.new(d: dynamic = dyn(), ops: DynamicOps) = editableOf(d, false, ops)
+fun <D> DocSource<D>.editableOf(d: dynamic = dyn(), exists: Boolean = true, ops: DynamicOps) = factory(d, ops).toFsEditable(this, exists)
 
 fun <D> FsEditable<D>.toFsDoc() = FsDoc(id.toFsId(exists), doc)
 fun <D> FsDoc<D>.toFsEditable() = FsEditable(id.docWrap, rxv.now, id.state.now.exists)

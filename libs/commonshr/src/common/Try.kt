@@ -1,5 +1,7 @@
 package common
 
+import commonshr.report
+
 // https://github.com/bijukunjummen/kfun/blob/master/src/main/kotlin/io/kfun/Try.kt
 sealed class Try<out T> {
 
@@ -44,6 +46,7 @@ sealed class Try<out T> {
     abstract fun <U> fold(fa: (Throwable) -> U, fb: (T) -> U): U
 
     abstract fun toOptional() : Optional<T>
+
 }
 
 data class Success<out T>(val value: T) : Try<T>() {
@@ -69,6 +72,12 @@ data class Failure<out T>(val e: Throwable) : Try<T>() {
     override fun get(): T = throw e
     override fun orElse(default: Try<@UnsafeVariance T>): Try<T> = default
     override fun <U> fold(fa: (Throwable) -> U, fb: (T) -> U): U = fa(e)
+}
+
+fun <T> Try<T>.reported() = apply {
+    if (this is Failure) {
+        report(e)
+    }
 }
 
 // https://github.com/gojuno/koptional/blob/master/koptional/src/main/kotlin/com/gojuno/koptional/Optional.kt

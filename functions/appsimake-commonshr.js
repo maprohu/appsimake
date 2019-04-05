@@ -107,6 +107,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   apps.prototype.constructor = apps;
   RxRoot.prototype = Object.create(RxBase.prototype);
   RxRoot.prototype.constructor = RxRoot;
+  Lock.prototype = Object.create(RxRoot.prototype);
+  Lock.prototype.constructor = Lock;
   Publish.prototype = Object.create(RxRoot.prototype);
   Publish.prototype.constructor = Publish;
   SetAdded.prototype = Object.create(SetMove.prototype);
@@ -1157,6 +1159,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Failure.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.e, other.e))));
   };
+  function reported($receiver) {
+    if (Kotlin.isType($receiver, Failure)) {
+      report($receiver.e);
+    }
+    return $receiver;
+  }
   function Optional() {
     Optional$Companion_getInstance();
   }
@@ -1726,6 +1734,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function get_publish($receiver) {
     return publish.getValue_lrcp0p$($receiver, publish_metadata);
   }
+  var locks;
+  var locks_metadata = new PropertyMetadata('locks');
+  function get_locks($receiver) {
+    return locks.getValue_lrcp0p$($receiver, locks_metadata);
+  }
   var singletons;
   var singletons_metadata = new PropertyMetadata('singletons');
   function get_singletons($receiver) {
@@ -1775,6 +1788,28 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     kind: Kind_INTERFACE,
     simpleName: 'Inbox',
     interfaces: []
+  };
+  function Lock() {
+    RxRoot.call(this);
+    this.from_c3gtex$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Lock$from_metadata);
+    this.owner_o61uy6$_0 = this.o.prop_z4bjo6$(null).provideDelegate_n5byny$(this, Lock$owner_metadata);
+  }
+  var Lock$from_metadata = new PropertyMetadata('from');
+  Object.defineProperty(Lock.prototype, 'from', {
+    get: function () {
+      return this.from_c3gtex$_0.getValue_lrcp0p$(this, Lock$from_metadata);
+    }
+  });
+  var Lock$owner_metadata = new PropertyMetadata('owner');
+  Object.defineProperty(Lock.prototype, 'owner', {
+    get: function () {
+      return this.owner_o61uy6$_0.getValue_lrcp0p$(this, Lock$owner_metadata);
+    }
+  });
+  Lock.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Lock',
+    interfaces: [RxRoot]
   };
   function Publish() {
     RxRoot.call(this);
@@ -2833,6 +2868,59 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     CsKills_init(parent.kills, $this);
     return $this;
   }
+  var filterIsInstance = defineInlineFunction('appsimake-commonshr.commonshr.filterIsInstance_9bpkrs$', wrapFunction(function () {
+    var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
+    var mapNotNull = _.$$importsForInline$$['kotlinx-coroutines-core'].kotlinx.coroutines.channels.mapNotNull_8vobzo$;
+    function Coroutine$filterIsInstance$lambda(typeClosure$T_0, isT_0, it_0, continuation_0) {
+      CoroutineImpl.call(this, continuation_0);
+      this.exceptionState_0 = 1;
+      this.local$isT = isT_0;
+      this.local$it = it_0;
+    }
+    Coroutine$filterIsInstance$lambda.$metadata$ = {
+      kind: Kotlin.Kind.CLASS,
+      simpleName: null,
+      interfaces: [CoroutineImpl]
+    };
+    Coroutine$filterIsInstance$lambda.prototype = Object.create(CoroutineImpl.prototype);
+    Coroutine$filterIsInstance$lambda.prototype.constructor = Coroutine$filterIsInstance$lambda;
+    Coroutine$filterIsInstance$lambda.prototype.doResume = function () {
+      do
+        try {
+          switch (this.state_0) {
+            case 0:
+              return this.local$isT(this.local$it) ? this.local$it : null;
+            case 1:
+              throw this.exception_0;
+            default:this.state_0 = 1;
+              throw new Error('State Machine Unreachable execution');
+          }
+        }
+         catch (e) {
+          if (this.state_0 === 1) {
+            this.exceptionState_0 = this.state_0;
+            throw e;
+          }
+           else {
+            this.state_0 = this.exceptionState_0;
+            this.exception_0 = e;
+          }
+        }
+       while (true);
+    };
+    function filterIsInstance$lambda(typeClosure$T_0, isT_0) {
+      return function (it_0, continuation_0, suspended) {
+        var instance = new Coroutine$filterIsInstance$lambda(typeClosure$T_0, isT_0, it_0, continuation_0);
+        if (suspended)
+          return instance;
+        else
+          return instance.doResume(null);
+      };
+    }
+    return function (T_0, isT, $receiver) {
+      return mapNotNull($receiver, void 0, filterIsInstance$lambda(T_0, isT));
+    };
+  }));
   function RefCountMap(create) {
     this.create = create;
     this.map_0 = LinkedHashMap_init();
@@ -5262,7 +5350,15 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     if (d === void 0) {
       d = {};
     }
-    return toFsEditable($receiver.factory(d, ops), $receiver, false);
+    return editableOf($receiver, d, false, ops);
+  }
+  function editableOf($receiver, d, exists, ops) {
+    if (d === void 0) {
+      d = {};
+    }
+    if (exists === void 0)
+      exists = true;
+    return toFsEditable($receiver.factory(d, ops), $receiver, exists);
   }
   function toFsDoc_2($receiver) {
     return new RefDoc(toFsId_1($receiver.id, $receiver.exists), $receiver.doc);
@@ -8300,6 +8396,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$common.Try = Try;
   package$common.Success = Success;
   package$common.Failure = Failure;
+  package$common.reported_d5crfe$ = reported;
   Object.defineProperty(Optional, 'Companion', {
     get: Optional$Companion_getInstance
   });
@@ -8345,6 +8442,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.get_admin_py8usb$ = get_admin;
   package$commonshr.get_private_py8usb$ = get_private;
   package$commonshr.get_publish_py8usb$ = get_publish;
+  package$commonshr.get_locks_py8usb$ = get_locks;
   package$commonshr.get_singletons_py8usb$ = get_singletons;
   package$commonshr.get_singletons_v34c5b$ = get_singletons_0;
   package$commonshr.get_inbox_py8usb$ = get_inbox;
@@ -8353,6 +8451,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.Private = Private;
   package$commonshr.AdminDoc = AdminDoc;
   package$commonshr.Inbox = Inbox;
+  package$commonshr.Lock = Lock;
   package$commonshr.Publish = Publish;
   package$commonshr.get_fcmtokens_x4imip$ = get_fcmtokens;
   package$commonshr.FcmToken = FcmToken;
@@ -8385,6 +8484,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.CsKills_init_evkg98$ = CsKills_init;
   package$commonshr.CsKills_init_94o6bb$ = CsKills_init_0;
   package$commonshr.CsKills = CsKills;
+  $$importsForInline$$['kotlinx-coroutines-core'] = $module$kotlinx_coroutines_core;
   package$commonshr.RefCountMap = RefCountMap;
   package$commonshr.RefCount = RefCount;
   package$commonshr.HasKill = HasKill;
@@ -8547,6 +8647,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.toFsEditable_s8vq45$ = toFsEditable;
   package$commonshr.get_idOrFail_2s00w$ = get_idOrFail;
   package$commonshr.new_kizxdt$ = new_0;
+  package$commonshr.editableOf_9d8gjq$ = editableOf;
   package$commonshr.toFsDoc_ihdkly$ = toFsDoc_2;
   package$commonshr.toFsEditable_fvyl56$ = toFsEditable_0;
   Object.defineProperty(package$killable, 'Noop', {
@@ -8850,6 +8951,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   admin = coll();
   private_0 = coll();
   publish = coll();
+  locks = coll();
   singletons = coll();
   singletons_0 = coll();
   inbox = coll();

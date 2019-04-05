@@ -1,8 +1,7 @@
 package tictactoe.active
 
 import commonfb.FBBackApi
-import commonshr.Runner
-import commonshr.toFsEditable
+import commonshr.*
 import commonui.*
 import commonui.links.LinkPointItem
 import commonui.links.Linkage
@@ -11,7 +10,10 @@ import commonui.topandcontent.ProgressTC
 import commonui.view.*
 import commonui.widget.TopAndContent
 import domx.remAssign
+import firebase.CsDbKillsApi
+import firebase.auth.uid
 import firebase.firestore.*
+import kotlinx.coroutines.channels.map
 import kotlinx.coroutines.launch
 import rx.RxIface
 import rx.mapAsync
@@ -27,11 +29,11 @@ interface ActivePath: LoggedInPath {
 class Active(
     from: LoggedIn,
     linkage: Linkage
-): MultiViewTC(from), LinkPointItem, ActivePath, LoggedInPath by from, HasBackKillsRoutingTC, HasRoutingTC by from, HasBack by linkage {
+): MultiViewTC(from), CsDbKillsApi, LinkPointItem, ActivePath, LoggedInPath by from, HasBackKillsRoutingTC, HasRoutingTC by from, HasBack by linkage {
     override val active: Active = this
 
     override val currentView = rx<IViewTC> {
-        from.gameStatus().let { gs ->
+        loggedIn.gameStatus().let { gs ->
             when (gs) {
                 null, is GameStatus.None -> {
                     ProgressBackTC(this@Active) { tb ->
@@ -39,7 +41,7 @@ class Active(
                     }
                 }
                 is GameStatus.InGame.Waiting -> {
-                    Waiting(this@Active)
+                    Waiting(this@Active, gs.gameId.now)
                 }
                 is GameStatus.InGame.Playing -> {
                     Playing(this@Active)
@@ -60,12 +62,12 @@ class Active(
 
                             when (st.doc) {
                                 is GameStatus.None -> {
-                                    val pub = loggedIn.publicColl.randomDoc
+                                    val pub = loggedIn.gamesColl.randomDoc
                                     val gameId = pub.id
 
                                     pub.set(
                                         PublicGame().apply {
-                                            this.from %= loggedIn.user.uid
+                                            this.from %= uid
                                         }
                                     )
 
@@ -88,11 +90,6 @@ class Active(
             }
         }
 
-        launchReport {
-            loggedIn.publicColl
-
-
-        }
     }
 
 

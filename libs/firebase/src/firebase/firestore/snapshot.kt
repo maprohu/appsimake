@@ -77,6 +77,13 @@ fun <D> DocWrap<D>.snapshotEmitter(
     deps: HasDb
 ): EmitterFn<DocumentSnapshot> = docRef(deps).let { ref -> { ref.onSnapshotNext(it)} }
 
+fun <T: RxBase<*>> CollectionSource<T>.documentChanges(
+    deps: HasCsDbKills,
+    query: QuerySettingsBuilder<T>.() -> Unit = {}
+) =
+    query(deps, query)
+        .documentChanges(deps)
+
 fun <T: RxBase<*>> CollectionSource<T>.listEvents(
     deps: HasCsDbKills,
     query: QuerySettingsBuilder<T>.() -> Unit = {}

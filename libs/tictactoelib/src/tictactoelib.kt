@@ -79,4 +79,8 @@ class Placement : Move<Placement>() {
 
 class Leave : Move<Leave>()
 
-class PublicGame: Publish<PublicGame>()
+open class PublicGame: Lock<PublicGame>() {
+    companion object: PublicGame()
+
+}
+

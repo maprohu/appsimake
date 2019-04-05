@@ -24,7 +24,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var RxRoot = $module$appsimake_commonshr.commonshr.properties.RxRoot;
   var PrivateSingleton = $module$appsimake_commonshr.commonshr.PrivateSingleton;
-  var Publish = $module$appsimake_commonshr.commonshr.Publish;
+  var Lock = $module$appsimake_commonshr.commonshr.Lock;
   LoungeItem.prototype = Object.create(RxBase.prototype);
   LoungeItem.prototype.constructor = LoungeItem;
   GameStatus.prototype = Object.create(RxRoot.prototype);
@@ -51,8 +51,10 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   Placement.prototype.constructor = Placement;
   Leave.prototype = Object.create(Move.prototype);
   Leave.prototype.constructor = Leave;
-  PublicGame.prototype = Object.create(Publish.prototype);
+  PublicGame.prototype = Object.create(Lock.prototype);
   PublicGame.prototype.constructor = PublicGame;
+  PublicGame$Companion.prototype = Object.create(PublicGame.prototype);
+  PublicGame$Companion.prototype.constructor = PublicGame$Companion;
   var tictactoeLib;
   var lounge;
   var lounge_metadata = new PropertyMetadata('lounge');
@@ -313,12 +315,29 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     interfaces: [Move]
   };
   function PublicGame() {
-    Publish.call(this);
+    PublicGame$Companion_getInstance();
+    Lock.call(this);
+  }
+  function PublicGame$Companion() {
+    PublicGame$Companion_instance = this;
+    PublicGame.call(this);
+  }
+  PublicGame$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: [PublicGame]
+  };
+  var PublicGame$Companion_instance = null;
+  function PublicGame$Companion_getInstance() {
+    if (PublicGame$Companion_instance === null) {
+      new PublicGame$Companion();
+    }
+    return PublicGame$Companion_instance;
   }
   PublicGame.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'PublicGame',
-    interfaces: [Publish]
+    interfaces: [Lock]
   };
   var package$tictactoelib = _.tictactoelib || (_.tictactoelib = {});
   Object.defineProperty(package$tictactoelib, 'tictactoeLib', {
@@ -349,6 +368,9 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   package$tictactoelib.Start = Start;
   package$tictactoelib.Placement = Placement;
   package$tictactoelib.Leave = Leave;
+  Object.defineProperty(PublicGame, 'Companion', {
+    get: PublicGame$Companion_getInstance
+  });
   package$tictactoelib.PublicGame = PublicGame;
   tictactoeLib = new Lib('tictactoe');
   lounge = coll();

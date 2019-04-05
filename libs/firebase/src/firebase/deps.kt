@@ -32,3 +32,7 @@ interface HasTx {
 }
 
 interface HasDbTx: HasDb, HasTx
+
+interface HasUser {
+    val user: User
+}

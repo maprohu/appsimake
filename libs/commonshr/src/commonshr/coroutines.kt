@@ -4,10 +4,7 @@ import killable.KillSet
 import killable.Killables
 import killable.killables
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ClosedSendChannelException
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.*
 import rx.RxIface
 import rx.Var
 import kotlin.coroutines.CoroutineContext
@@ -98,4 +95,9 @@ open class CsKills(killables: Killables): CsKillsApi, HasKillKilledKills by kill
         kill()
         coroutineContext.join()
     }
+}
+
+@UseExperimental(ObsoleteCoroutinesApi::class)
+inline fun <reified T: Any> ReceiveChannel<*>.filterIsInstance() = mapNotNull {
+    if (it is T) it else null
 }
