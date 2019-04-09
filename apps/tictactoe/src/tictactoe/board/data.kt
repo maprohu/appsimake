@@ -33,14 +33,17 @@ sealed class FieldState {
 }
 
 sealed class TurnState {
-    object Waiting: TurnState()
+    object Starting: TurnState()
     data class Playing(val player: Player): TurnState()
+    data class Waiting(val player: Player): TurnState()
 }
 
 sealed class GameState {
     object Ongoing: GameState()
     object Draw: GameState()
     data class GameOver(val winner: Player): GameState()
+    object Abandoned: GameState()
+    object Corrupted: GameState()
 }
 
 class Highlight(

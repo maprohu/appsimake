@@ -26,7 +26,8 @@ interface WaitingPath: ActivePath {
 }
 @UseExperimental(ObsoleteCoroutinesApi::class)
 class Waiting(
-    parent: Active
+    parent: Active,
+    val gs: GS.Waiting
 ): ViewTC(parent), WaitingPath, ActivePath by parent, BackCsDbKillsUixApi, HasBack by parent {
     override val waiting = this
     override val rawView = ui()
@@ -35,18 +36,22 @@ class Waiting(
         launchReport {
             val e = loggedIn
                 .inboxMoves
-                .listEvents()
+                .listEvents {
+                    Move.game eq gs.game
+                    Move.seq.asc
+                }
                 .filterIsInstance<ListEvent.Add<FsDoc<Move<*>>>>()
                 .receive()
 
             txTry {
-                val st = loggedIn.statusDoc.getOrFail()
+                val st = loggedIn.statusDoc.getOrFail().doc
 
-                when (st.doc) {
-                    is GameStatus.Waiting -> {
+                when  {
+                    st is GameStatus.Waiting && st.game.now == gs.game -> {
                         loggedIn.statusDoc.set(
                             GameStatus.Playing().apply {
-                                opponent %= e.item.rxv.now.player.now
+                                this.opponent %= e.item.rxv.now.player.now
+                                this.game %= e.item.rxv.now.game.now
                             }
                         )
                     }
@@ -55,9 +60,6 @@ class Waiting(
                     }
                 }
             }
-
-
         }
-
     }
 }

@@ -62,14 +62,14 @@ fun Waiting.ui() = TopAndContent(
     }
 )
 
-fun Playing.ui() = TopAndContent(
-    topbar = factory.topbar {
-        left.backButton
-        title %= "Playing Online"
-        right.resetButton(this@ui, active)
-    }.node,
-    content = document.column {}
-)
+//fun Playing.ui() = TopAndContent(
+//    topbar = factory.topbar {
+//        left.backButton
+//        title %= "Playing Online"
+//        right.resetButton(this@ui, active)
+//    }.node,
+//    content = document.column {}
+//)
 
 fun Factory.resetButton(deps: HasKillsUix, active: Active) = button {
     m1p2

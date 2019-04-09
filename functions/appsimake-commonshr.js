@@ -1603,25 +1603,33 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function coll() {
     return new coll$ObjectLiteral();
   }
-  function coll$ObjectLiteral_0(closure$fn) {
+  function collRoot$ObjectLiteral(closure$fn) {
     this.closure$fn = closure$fn;
   }
-  function coll$ObjectLiteral$getValue$lambda(closure$fn) {
+  function collRoot$ObjectLiteral$getValue$lambda(closure$fn) {
+    return function (d, ops) {
+      return closure$fn(d, ops);
+    };
+  }
+  collRoot$ObjectLiteral.prototype.getValue_lrcp0p$ = function (thisRef, property) {
+    return new CollectionSource(property.callableName, thisRef, collRoot$ObjectLiteral$getValue$lambda(this.closure$fn));
+  };
+  collRoot$ObjectLiteral.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [ReadOnlyProperty]
+  };
+  function collRoot(fn) {
+    return new collRoot$ObjectLiteral(fn);
+  }
+  function coll$lambda(closure$fn) {
     return function (d, ops) {
       var $receiver = closure$fn();
       readDynamic($receiver, d, ops);
       return $receiver;
     };
   }
-  coll$ObjectLiteral_0.prototype.getValue_lrcp0p$ = function (thisRef, property) {
-    return new CollectionSource(property.callableName, thisRef, coll$ObjectLiteral$getValue$lambda(this.closure$fn));
-  };
-  coll$ObjectLiteral_0.$metadata$ = {
-    kind: Kind_CLASS,
-    interfaces: [ReadOnlyProperty]
-  };
   function coll_0(fn) {
-    return new coll$ObjectLiteral_0(fn);
+    return collRoot(coll$lambda(fn));
   }
   function CollectionWrap(id, parent) {
     if (parent === void 0)
@@ -1683,18 +1691,28 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function doc() {
     return new doc$ObjectLiteral();
   }
-  function doc$ObjectLiteral_0(closure$fn) {
+  function docRoot$ObjectLiteral(closure$fn) {
     this.closure$fn = closure$fn;
   }
-  doc$ObjectLiteral_0.prototype.getValue_lrcp0p$ = function (thisRef, property) {
+  docRoot$ObjectLiteral.prototype.getValue_lrcp0p$ = function (thisRef, property) {
     return new DocSource(property.callableName, thisRef, this.closure$fn);
   };
-  doc$ObjectLiteral_0.$metadata$ = {
+  docRoot$ObjectLiteral.$metadata$ = {
     kind: Kind_CLASS,
     interfaces: [ReadOnlyProperty]
   };
+  function docRoot(fn) {
+    return new docRoot$ObjectLiteral(fn);
+  }
+  function doc$lambda(closure$fn) {
+    return function (d, ops) {
+      var $receiver = closure$fn();
+      readDynamic($receiver, d, ops);
+      return $receiver;
+    };
+  }
   function doc_0(fn) {
-    return new doc$ObjectLiteral_0(fn);
+    return docRoot(doc$lambda(fn));
   }
   function apps() {
     apps_instance = this;
@@ -1739,6 +1757,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function get_locks($receiver) {
     return locks.getValue_lrcp0p$($receiver, locks_metadata);
   }
+  var tmp;
+  var tmp_metadata = new PropertyMetadata('tmp');
+  function get_tmp($receiver) {
+    return tmp.getValue_lrcp0p$($receiver, tmp_metadata);
+  }
   var singletons;
   var singletons_metadata = new PropertyMetadata('singletons');
   function get_singletons($receiver) {
@@ -1753,6 +1776,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   var inbox_metadata = new PropertyMetadata('inbox');
   function get_inbox($receiver) {
     return inbox.getValue_lrcp0p$($receiver, inbox_metadata);
+  }
+  var public_0;
+  var public_metadata = new PropertyMetadata('public');
+  function get_public($receiver) {
+    return public_0.getValue_lrcp0p$($receiver, public_metadata);
   }
   function Singleton() {
   }
@@ -1787,6 +1815,20 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   Inbox.$metadata$ = {
     kind: Kind_INTERFACE,
     simpleName: 'Inbox',
+    interfaces: []
+  };
+  function InboxPublic() {
+  }
+  InboxPublic.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'InboxPublic',
+    interfaces: []
+  };
+  function Tmp() {
+  }
+  Tmp.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'Tmp',
     interfaces: []
   };
   function Lock() {
@@ -1840,6 +1882,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   };
   function privateOf($receiver, uid) {
     return get_private($receiver.app).doc_61zpoe$(uid);
+  }
+  function inboxOf($receiver, uid) {
+    return get_inbox($receiver.app).doc_61zpoe$(uid);
   }
   function hasOwnProperty(d, prop) {
     return d.hasOwnProperty(prop);
@@ -8429,12 +8474,14 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.DocSource_init_swenej$ = DocSource_init;
   package$commonshr.DocSource = DocSource;
   package$commonshr.coll_287e2$ = coll;
+  package$commonshr.collRoot_th1k7p$ = collRoot;
   package$commonshr.coll_4okrys$ = coll_0;
   package$commonshr.CollectionWrap = CollectionWrap;
   package$commonshr.toRxSource_z5fd7c$ = toRxSource;
   package$commonshr.CollectionSource = CollectionSource;
   package$commonshr.doc_287e2$ = doc;
-  package$commonshr.doc_68r5d9$ = doc_0;
+  package$commonshr.docRoot_th1k7p$ = docRoot;
+  package$commonshr.doc_4okrys$ = doc_0;
   Object.defineProperty(package$commonshr, 'apps', {
     get: apps_getInstance
   });
@@ -8443,19 +8490,24 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.get_private_py8usb$ = get_private;
   package$commonshr.get_publish_py8usb$ = get_publish;
   package$commonshr.get_locks_py8usb$ = get_locks;
+  package$commonshr.get_tmp_py8usb$ = get_tmp;
   package$commonshr.get_singletons_py8usb$ = get_singletons;
   package$commonshr.get_singletons_v34c5b$ = get_singletons_0;
   package$commonshr.get_inbox_py8usb$ = get_inbox;
+  package$commonshr.get_public_csfjwe$ = get_public;
   package$commonshr.Singleton = Singleton;
   package$commonshr.PrivateSingleton = PrivateSingleton;
   package$commonshr.Private = Private;
   package$commonshr.AdminDoc = AdminDoc;
   package$commonshr.Inbox = Inbox;
+  package$commonshr.InboxPublic = InboxPublic;
+  package$commonshr.Tmp = Tmp;
   package$commonshr.Lock = Lock;
   package$commonshr.Publish = Publish;
   package$commonshr.get_fcmtokens_x4imip$ = get_fcmtokens;
   package$commonshr.FcmToken = FcmToken;
   package$commonshr.privateOf_rzp46g$ = privateOf;
+  package$commonshr.inboxOf_rzp46g$ = inboxOf;
   package$commonshr.hasOwnProperty_hwpqgh$ = hasOwnProperty;
   package$commonshr.opt_h8phid$ = opt;
   Object.defineProperty(SetDiff, 'Companion', {
@@ -8952,9 +9004,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   private_0 = coll();
   publish = coll();
   locks = coll();
+  tmp = coll();
   singletons = coll();
   singletons_0 = coll();
   inbox = coll();
+  public_0 = coll();
   fcmtokens = coll();
   Identity = Identity$lambda;
   SuspendIdentity = SuspendIdentity$lambda;

@@ -69,13 +69,18 @@ fun <D2> coll() = object : ReadOnlyProperty<DocWrap<*>, CollectionWrap<D2>> {
         CollectionWrap<D2>(property.name, thisRef)
 }
 
-fun <D2: RxBase<*>> coll(fn: () -> D2) = object : ReadOnlyProperty<DocWrap<*>, CollectionSource<D2>> {
+
+fun <D2> collRoot(fn: DynamicFactory<D2>) = object : ReadOnlyProperty<DocWrap<*>, CollectionSource<D2>> {
     override fun getValue(thisRef: DocWrap<*>, property: KProperty<*>) =
         CollectionSource(property.name, thisRef) { d, ops ->
-            fn().apply {
-                readDynamic(d, ops)
-            }
+            fn(d, ops)
         }
+}
+
+fun <D2: RxBase<*>> coll(fn: () -> D2) = collRoot { d, ops ->
+    fn().apply {
+        readDynamic(d, ops)
+    }
 }
 
 open class CollectionWrap<in D>(

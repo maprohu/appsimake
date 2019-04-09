@@ -39,7 +39,7 @@ val IdentityType = PropertyType<Nothing>()
 @Suppress("NOTHING_TO_INLINE")
 inline fun <V> identityType() = IdentityType.unsafeCast<PropertyType<V>>()
 
-open class ROProp<T, V>(
+open class ROProp<out T, V>(
     val name: String,
     override val rxv: RxIface<V>,
     val write: WriteDynamic<V>

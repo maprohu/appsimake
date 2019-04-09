@@ -17,91 +17,120 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   var Lib = $module$appsimake_commonshr.commonshr.Lib;
   var coll = $module$appsimake_commonshr.commonshr.coll_287e2$;
   var PropertyMetadata = Kotlin.PropertyMetadata;
-  var doc = $module$appsimake_commonshr.commonshr.doc_68r5d9$;
-  var RxBase = $module$appsimake_commonshr.commonshr.properties.RxBase;
+  var docRoot = $module$appsimake_commonshr.commonshr.docRoot_th1k7p$;
   var Kind_CLASS = Kotlin.Kind.CLASS;
   var wrapper = $module$appsimake_commonshr.commonshr.properties.wrapper_3yfn2g$;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var RxRoot = $module$appsimake_commonshr.commonshr.properties.RxRoot;
+  var Tmp = $module$appsimake_commonshr.commonshr.Tmp;
   var PrivateSingleton = $module$appsimake_commonshr.commonshr.PrivateSingleton;
-  var Lock = $module$appsimake_commonshr.commonshr.Lock;
-  LoungeItem.prototype = Object.create(RxBase.prototype);
-  LoungeItem.prototype.constructor = LoungeItem;
+  var RxBase = $module$appsimake_commonshr.commonshr.properties.RxBase;
+  var InboxPublic = $module$appsimake_commonshr.commonshr.InboxPublic;
+  Lounge.prototype = Object.create(RxRoot.prototype);
+  Lounge.prototype.constructor = Lounge;
+  Lounge$Empty.prototype = Object.create(Lounge.prototype);
+  Lounge$Empty.prototype.constructor = Lounge$Empty;
+  Lounge$Waiting.prototype = Object.create(Lounge.prototype);
+  Lounge$Waiting.prototype.constructor = Lounge$Waiting;
   GameStatus.prototype = Object.create(RxRoot.prototype);
   GameStatus.prototype.constructor = GameStatus;
   GameStatus$None.prototype = Object.create(GameStatus.prototype);
   GameStatus$None.prototype.constructor = GameStatus$None;
-  GameStatus$InGame.prototype = Object.create(GameStatus.prototype);
-  GameStatus$InGame.prototype.constructor = GameStatus$InGame;
-  GameStatus$InGame$Waiting.prototype = Object.create(GameStatus$InGame.prototype);
-  GameStatus$InGame$Waiting.prototype.constructor = GameStatus$InGame$Waiting;
-  GameStatus$InGame$Playing.prototype = Object.create(GameStatus$InGame.prototype);
-  GameStatus$InGame$Playing.prototype.constructor = GameStatus$InGame$Playing;
+  GameStatus$Waiting.prototype = Object.create(GameStatus.prototype);
+  GameStatus$Waiting.prototype.constructor = GameStatus$Waiting;
+  GameStatus$Playing.prototype = Object.create(GameStatus.prototype);
+  GameStatus$Playing.prototype.constructor = GameStatus$Playing;
   Player.prototype = Object.create(RxBase.prototype);
   Player.prototype.constructor = Player;
-  Game.prototype = Object.create(RxBase.prototype);
-  Game.prototype.constructor = Game;
   Move.prototype = Object.create(RxRoot.prototype);
   Move.prototype.constructor = Move;
+  Move$Start.prototype = Object.create(Move.prototype);
+  Move$Start.prototype.constructor = Move$Start;
+  Move$Placement.prototype = Object.create(Move.prototype);
+  Move$Placement.prototype.constructor = Move$Placement;
+  Move$Leave.prototype = Object.create(Move.prototype);
+  Move$Leave.prototype.constructor = Move$Leave;
   Move$Companion.prototype = Object.create(Move.prototype);
   Move$Companion.prototype.constructor = Move$Companion;
-  Start.prototype = Object.create(Move.prototype);
-  Start.prototype.constructor = Start;
-  Placement.prototype = Object.create(Move.prototype);
-  Placement.prototype.constructor = Placement;
-  Leave.prototype = Object.create(Move.prototype);
-  Leave.prototype.constructor = Leave;
-  PublicGame.prototype = Object.create(Lock.prototype);
-  PublicGame.prototype.constructor = PublicGame;
-  PublicGame$Companion.prototype = Object.create(PublicGame.prototype);
-  PublicGame$Companion.prototype.constructor = PublicGame$Companion;
   var tictactoeLib;
-  var lounge;
-  var lounge_metadata = new PropertyMetadata('lounge');
-  function get_lounge($receiver) {
-    return lounge.getValue_lrcp0p$($receiver, lounge_metadata);
-  }
-  var games;
-  var games_metadata = new PropertyMetadata('games');
-  function get_games($receiver) {
-    return games.getValue_lrcp0p$($receiver, games_metadata);
-  }
   var players;
   var players_metadata = new PropertyMetadata('players');
   function get_players($receiver) {
     return players.getValue_lrcp0p$($receiver, players_metadata);
-  }
-  var moves;
-  var moves_metadata = new PropertyMetadata('moves');
-  function get_moves($receiver) {
-    return moves.getValue_lrcp0p$($receiver, moves_metadata);
   }
   var status;
   var status_metadata = new PropertyMetadata('status');
   function get_status($receiver) {
     return status.getValue_lrcp0p$($receiver, status_metadata);
   }
-  function LoungeItem() {
-    RxBase.call(this);
-    this.available_1tkes9$_0 = this.o.boolean_6taknv$(true).provideDelegate_n5byny$(this, LoungeItem$available_metadata);
-    this.gameId_4lfmfr$_0 = this.o.prop_z4bjo6$(null).provideDelegate_n5byny$(this, LoungeItem$gameId_metadata);
+  var lounge;
+  var lounge_metadata = new PropertyMetadata('lounge');
+  function get_lounge($receiver) {
+    return lounge.getValue_lrcp0p$($receiver, lounge_metadata);
   }
-  var LoungeItem$available_metadata = new PropertyMetadata('available');
-  Object.defineProperty(LoungeItem.prototype, 'available', {
-    get: function () {
-      return this.available_1tkes9$_0.getValue_lrcp0p$(this, LoungeItem$available_metadata);
-    }
-  });
-  var LoungeItem$gameId_metadata = new PropertyMetadata('gameId');
-  Object.defineProperty(LoungeItem.prototype, 'gameId', {
-    get: function () {
-      return this.gameId_4lfmfr$_0.getValue_lrcp0p$(this, LoungeItem$gameId_metadata);
-    }
-  });
-  LoungeItem.$metadata$ = {
+  function get_moves($receiver) {
+    return $receiver.toSource_sjcvik$(Move$Companion_getInstance().of);
+  }
+  function Lounge() {
+    Lounge$Companion_getInstance();
+    RxRoot.call(this);
+  }
+  function Lounge$Empty() {
+    Lounge.call(this);
+  }
+  Lounge$Empty.$metadata$ = {
     kind: Kind_CLASS,
-    simpleName: 'LoungeItem',
-    interfaces: [RxBase]
+    simpleName: 'Empty',
+    interfaces: [Lounge]
+  };
+  function Lounge$Waiting() {
+    Lounge.call(this);
+    this.user_y6clbv$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Lounge$Waiting$user_metadata);
+    this.game_yed1s2$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Lounge$Waiting$game_metadata);
+  }
+  var Lounge$Waiting$user_metadata = new PropertyMetadata('user');
+  Object.defineProperty(Lounge$Waiting.prototype, 'user', {
+    get: function () {
+      return this.user_y6clbv$_0.getValue_lrcp0p$(this, Lounge$Waiting$user_metadata);
+    }
+  });
+  var Lounge$Waiting$game_metadata = new PropertyMetadata('game');
+  Object.defineProperty(Lounge$Waiting.prototype, 'game', {
+    get: function () {
+      return this.game_yed1s2$_0.getValue_lrcp0p$(this, Lounge$Waiting$game_metadata);
+    }
+  });
+  Lounge$Waiting.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Waiting',
+    interfaces: [Lounge]
+  };
+  function Lounge$Companion() {
+    Lounge$Companion_instance = this;
+    this.of = wrapper([Lounge$Companion$of$lambda, Lounge$Companion$of$lambda_0]);
+  }
+  function Lounge$Companion$of$lambda() {
+    return new Lounge$Empty();
+  }
+  function Lounge$Companion$of$lambda_0() {
+    return new Lounge$Waiting();
+  }
+  Lounge$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
+  var Lounge$Companion_instance = null;
+  function Lounge$Companion_getInstance() {
+    if (Lounge$Companion_instance === null) {
+      new Lounge$Companion();
+    }
+    return Lounge$Companion_instance;
+  }
+  Lounge.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Lounge',
+    interfaces: [Tmp, RxRoot]
   };
   function GameStatus() {
     GameStatus$Companion_getInstance();
@@ -115,35 +144,55 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     simpleName: 'None',
     interfaces: [GameStatus]
   };
-  function GameStatus$InGame() {
+  function GameStatus$Waiting() {
     GameStatus.call(this);
-    this.gameId_c3cpxn$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, GameStatus$InGame$gameId_metadata);
+    this.game_vwrg20$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, GameStatus$Waiting$game_metadata);
   }
-  var GameStatus$InGame$gameId_metadata = new PropertyMetadata('gameId');
-  Object.defineProperty(GameStatus$InGame.prototype, 'gameId', {
+  var GameStatus$Waiting$game_metadata = new PropertyMetadata('game');
+  Object.defineProperty(GameStatus$Waiting.prototype, 'game', {
     get: function () {
-      return this.gameId_c3cpxn$_0.getValue_lrcp0p$(this, GameStatus$InGame$gameId_metadata);
+      return this.game_vwrg20$_0.getValue_lrcp0p$(this, GameStatus$Waiting$game_metadata);
     }
   });
-  function GameStatus$InGame$Waiting() {
-    GameStatus$InGame.call(this);
-  }
-  GameStatus$InGame$Waiting.$metadata$ = {
+  GameStatus$Waiting.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Waiting',
-    interfaces: [GameStatus$InGame]
+    interfaces: [GameStatus]
   };
-  function GameStatus$InGame$Playing() {
-    GameStatus$InGame.call(this);
+  function GameStatus$Playing() {
+    GameStatus.call(this);
+    this.opponent_54wrxe$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, GameStatus$Playing$opponent_metadata);
+    this.game_qqcqi1$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, GameStatus$Playing$game_metadata);
+    this.own_q2k6nn$_0 = this.o.boolean_6taknv$().provideDelegate_n5byny$(this, GameStatus$Playing$own_metadata);
+    this.seq_q2mdbu$_0 = this.o.int_za3lpa$(0).provideDelegate_n5byny$(this, GameStatus$Playing$seq_metadata);
   }
-  GameStatus$InGame$Playing.$metadata$ = {
+  var GameStatus$Playing$opponent_metadata = new PropertyMetadata('opponent');
+  Object.defineProperty(GameStatus$Playing.prototype, 'opponent', {
+    get: function () {
+      return this.opponent_54wrxe$_0.getValue_lrcp0p$(this, GameStatus$Playing$opponent_metadata);
+    }
+  });
+  var GameStatus$Playing$game_metadata = new PropertyMetadata('game');
+  Object.defineProperty(GameStatus$Playing.prototype, 'game', {
+    get: function () {
+      return this.game_qqcqi1$_0.getValue_lrcp0p$(this, GameStatus$Playing$game_metadata);
+    }
+  });
+  var GameStatus$Playing$own_metadata = new PropertyMetadata('own');
+  Object.defineProperty(GameStatus$Playing.prototype, 'own', {
+    get: function () {
+      return this.own_q2k6nn$_0.getValue_lrcp0p$(this, GameStatus$Playing$own_metadata);
+    }
+  });
+  var GameStatus$Playing$seq_metadata = new PropertyMetadata('seq');
+  Object.defineProperty(GameStatus$Playing.prototype, 'seq', {
+    get: function () {
+      return this.seq_q2mdbu$_0.getValue_lrcp0p$(this, GameStatus$Playing$seq_metadata);
+    }
+  });
+  GameStatus$Playing.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Playing',
-    interfaces: [GameStatus$InGame]
-  };
-  GameStatus$InGame.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'InGame',
     interfaces: [GameStatus]
   };
   function GameStatus$Companion() {
@@ -154,10 +203,10 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     return new GameStatus$None();
   }
   function GameStatus$Companion$of$lambda_0() {
-    return new GameStatus$InGame$Waiting();
+    return new GameStatus$Waiting();
   }
   function GameStatus$Companion$of$lambda_1() {
-    return new GameStatus$InGame$Playing();
+    return new GameStatus$Playing();
   }
   GameStatus$Companion.$metadata$ = {
     kind: Kind_OBJECT,
@@ -198,45 +247,23 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     simpleName: 'Player',
     interfaces: [RxBase]
   };
-  function Game() {
-    RxBase.call(this);
-    this.players_7xo8u1$_0 = this.o.set_287e2$().provideDelegate_n5byny$(this, Game$players_metadata);
-    this.originalPlayers_6ak8tm$_0 = this.o.set_287e2$().provideDelegate_n5byny$(this, Game$originalPlayers_metadata);
-    this.isOver_3nqnrf$_0 = this.o.boolean_6taknv$().provideDelegate_n5byny$(this, Game$isOver_metadata);
-  }
-  var Game$players_metadata = new PropertyMetadata('players');
-  Object.defineProperty(Game.prototype, 'players', {
-    get: function () {
-      return this.players_7xo8u1$_0.getValue_lrcp0p$(this, Game$players_metadata);
-    }
-  });
-  var Game$originalPlayers_metadata = new PropertyMetadata('originalPlayers');
-  Object.defineProperty(Game.prototype, 'originalPlayers', {
-    get: function () {
-      return this.originalPlayers_6ak8tm$_0.getValue_lrcp0p$(this, Game$originalPlayers_metadata);
-    }
-  });
-  var Game$isOver_metadata = new PropertyMetadata('isOver');
-  Object.defineProperty(Game.prototype, 'isOver', {
-    get: function () {
-      return this.isOver_3nqnrf$_0.getValue_lrcp0p$(this, Game$isOver_metadata);
-    }
-  });
-  Game.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'Game',
-    interfaces: [RxBase]
-  };
   function Move() {
     Move$Companion_getInstance();
     RxRoot.call(this);
-    this.sequence_hl9azr$_0 = this.o.int_za3lpa$().provideDelegate_n5byny$(this, Move$sequence_metadata);
-    this.player_q0tkjr$_0 = this.o.int_za3lpa$().provideDelegate_n5byny$(this, Move$player_metadata);
+    this.seq_g4r6p9$_0 = this.o.int_za3lpa$().provideDelegate_n5byny$(this, Move$seq_metadata);
+    this.game_2oy8ye$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Move$game_metadata);
+    this.player_q0tkjr$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Move$player_metadata);
   }
-  var Move$sequence_metadata = new PropertyMetadata('sequence');
-  Object.defineProperty(Move.prototype, 'sequence', {
+  var Move$seq_metadata = new PropertyMetadata('seq');
+  Object.defineProperty(Move.prototype, 'seq', {
     get: function () {
-      return this.sequence_hl9azr$_0.getValue_lrcp0p$(this, Move$sequence_metadata);
+      return this.seq_g4r6p9$_0.getValue_lrcp0p$(this, Move$seq_metadata);
+    }
+  });
+  var Move$game_metadata = new PropertyMetadata('game');
+  Object.defineProperty(Move.prototype, 'game', {
+    get: function () {
+      return this.game_2oy8ye$_0.getValue_lrcp0p$(this, Move$game_metadata);
     }
   });
   var Move$player_metadata = new PropertyMetadata('player');
@@ -245,19 +272,64 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
       return this.player_q0tkjr$_0.getValue_lrcp0p$(this, Move$player_metadata);
     }
   });
+  function Move$Start() {
+    Move.call(this);
+    this.firstPlayer_7xyi7t$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Move$Start$firstPlayer_metadata);
+  }
+  var Move$Start$firstPlayer_metadata = new PropertyMetadata('firstPlayer');
+  Object.defineProperty(Move$Start.prototype, 'firstPlayer', {
+    get: function () {
+      return this.firstPlayer_7xyi7t$_0.getValue_lrcp0p$(this, Move$Start$firstPlayer_metadata);
+    }
+  });
+  Move$Start.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Start',
+    interfaces: [Move]
+  };
+  function Move$Placement() {
+    Move.call(this);
+    this.x_hf6glf$_0 = this.o.int_za3lpa$().provideDelegate_n5byny$(this, Move$Placement$x_metadata);
+    this.y_hf6gkk$_0 = this.o.int_za3lpa$().provideDelegate_n5byny$(this, Move$Placement$y_metadata);
+  }
+  var Move$Placement$x_metadata = new PropertyMetadata('x');
+  Object.defineProperty(Move$Placement.prototype, 'x', {
+    get: function () {
+      return this.x_hf6glf$_0.getValue_lrcp0p$(this, Move$Placement$x_metadata);
+    }
+  });
+  var Move$Placement$y_metadata = new PropertyMetadata('y');
+  Object.defineProperty(Move$Placement.prototype, 'y', {
+    get: function () {
+      return this.y_hf6gkk$_0.getValue_lrcp0p$(this, Move$Placement$y_metadata);
+    }
+  });
+  Move$Placement.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Placement',
+    interfaces: [Move]
+  };
+  function Move$Leave() {
+    Move.call(this);
+  }
+  Move$Leave.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Leave',
+    interfaces: [Move]
+  };
   function Move$Companion() {
     Move$Companion_instance = this;
     Move.call(this);
     this.of = wrapper([Move$Companion$of$lambda, Move$Companion$of$lambda_0, Move$Companion$of$lambda_1]);
   }
   function Move$Companion$of$lambda() {
-    return new Start();
+    return new Move$Start();
   }
   function Move$Companion$of$lambda_0() {
-    return new Placement();
+    return new Move$Placement();
   }
   function Move$Companion$of$lambda_1() {
-    return new Leave();
+    return new Move$Leave();
   }
   Move$Companion.$metadata$ = {
     kind: Kind_OBJECT,
@@ -274,70 +346,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   Move.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Move',
-    interfaces: [RxRoot]
-  };
-  function Start() {
-    Move.call(this);
-  }
-  Start.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'Start',
-    interfaces: [Move]
-  };
-  function Placement() {
-    Move.call(this);
-    this.x_by76mu$_0 = this.o.int_za3lpa$().provideDelegate_n5byny$(this, Placement$x_metadata);
-    this.y_by76np$_0 = this.o.int_za3lpa$().provideDelegate_n5byny$(this, Placement$y_metadata);
-  }
-  var Placement$x_metadata = new PropertyMetadata('x');
-  Object.defineProperty(Placement.prototype, 'x', {
-    get: function () {
-      return this.x_by76mu$_0.getValue_lrcp0p$(this, Placement$x_metadata);
-    }
-  });
-  var Placement$y_metadata = new PropertyMetadata('y');
-  Object.defineProperty(Placement.prototype, 'y', {
-    get: function () {
-      return this.y_by76np$_0.getValue_lrcp0p$(this, Placement$y_metadata);
-    }
-  });
-  Placement.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'Placement',
-    interfaces: [Move]
-  };
-  function Leave() {
-    Move.call(this);
-  }
-  Leave.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'Leave',
-    interfaces: [Move]
-  };
-  function PublicGame() {
-    PublicGame$Companion_getInstance();
-    Lock.call(this);
-  }
-  function PublicGame$Companion() {
-    PublicGame$Companion_instance = this;
-    PublicGame.call(this);
-  }
-  PublicGame$Companion.$metadata$ = {
-    kind: Kind_OBJECT,
-    simpleName: 'Companion',
-    interfaces: [PublicGame]
-  };
-  var PublicGame$Companion_instance = null;
-  function PublicGame$Companion_getInstance() {
-    if (PublicGame$Companion_instance === null) {
-      new PublicGame$Companion();
-    }
-    return PublicGame$Companion_instance;
-  }
-  PublicGame.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'PublicGame',
-    interfaces: [Lock]
+    interfaces: [InboxPublic, RxRoot]
   };
   var package$tictactoelib = _.tictactoelib || (_.tictactoelib = {});
   Object.defineProperty(package$tictactoelib, 'tictactoeLib', {
@@ -345,39 +354,35 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
       return tictactoeLib;
     }
   });
-  package$tictactoelib.get_lounge_py8usb$ = get_lounge;
-  package$tictactoelib.get_games_py8usb$ = get_games;
   package$tictactoelib.get_players_py8usb$ = get_players;
-  package$tictactoelib.get_moves_9zet87$ = get_moves;
   package$tictactoelib.get_status_f98aja$ = get_status;
-  package$tictactoelib.LoungeItem = LoungeItem;
+  package$tictactoelib.get_lounge_cz4ylz$ = get_lounge;
+  package$tictactoelib.get_moves_f80bip$ = get_moves;
+  Lounge.Empty = Lounge$Empty;
+  Lounge.Waiting = Lounge$Waiting;
+  Object.defineProperty(Lounge, 'Companion', {
+    get: Lounge$Companion_getInstance
+  });
+  package$tictactoelib.Lounge = Lounge;
   GameStatus.None = GameStatus$None;
-  GameStatus$InGame.Waiting = GameStatus$InGame$Waiting;
-  GameStatus$InGame.Playing = GameStatus$InGame$Playing;
-  GameStatus.InGame = GameStatus$InGame;
+  GameStatus.Waiting = GameStatus$Waiting;
+  GameStatus.Playing = GameStatus$Playing;
   Object.defineProperty(GameStatus, 'Companion', {
     get: GameStatus$Companion_getInstance
   });
   package$tictactoelib.GameStatus = GameStatus;
   package$tictactoelib.Player = Player;
-  package$tictactoelib.Game = Game;
+  Move.Start = Move$Start;
+  Move.Placement = Move$Placement;
+  Move.Leave = Move$Leave;
   Object.defineProperty(Move, 'Companion', {
     get: Move$Companion_getInstance
   });
   package$tictactoelib.Move = Move;
-  package$tictactoelib.Start = Start;
-  package$tictactoelib.Placement = Placement;
-  package$tictactoelib.Leave = Leave;
-  Object.defineProperty(PublicGame, 'Companion', {
-    get: PublicGame$Companion_getInstance
-  });
-  package$tictactoelib.PublicGame = PublicGame;
   tictactoeLib = new Lib('tictactoe');
-  lounge = coll();
-  games = coll();
   players = coll();
-  moves = coll();
-  status = doc(GameStatus$Companion_getInstance().of);
+  status = docRoot(GameStatus$Companion_getInstance().of);
+  lounge = docRoot(Lounge$Companion_getInstance().of);
   Kotlin.defineModule('appsimake-tictactoelib', _);
   return _;
 });

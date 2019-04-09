@@ -34,9 +34,10 @@ class LoggedIn(
     override val loggedIn: LoggedIn = this
 
     val privateDoc = tictactoeLib.privateOf(user)
-//    val gamesColl = tictactoeLib.app.locks.toRxSource { PublicGame() }
+//    val gamesColl = privateDoc.games
     val statusDoc = privateDoc.singletons.status
     val lounge = tictactoeLib.app.tmp.lounge
+//    val gameMoves = statusDoc.moves
     val inboxMoves = tictactoeLib.inboxOf(user).public.moves
 
     val gameStatus = statusDoc.docsOrNull.toRx(null)

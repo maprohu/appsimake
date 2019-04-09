@@ -3,6 +3,7 @@ package tictactoe.board
 import common.Emitter
 import commonshr.EmitterFn
 import commonshr.fn
+import commonshr.report
 import killable.HasNoKill
 import rx.RxIface
 import rx.Var
@@ -34,15 +35,16 @@ class BoardState(
 
     val highlightsEmitter = Emitter<Highlight>()
     override val highlights = highlightsEmitter.fn
-    override val turnState = Var<TurnState>(TurnState.Waiting)
+    override val turnState = Var<TurnState>(TurnState.Starting)
     override val gameState = Var<GameState>(GameState.Ongoing)
     override val thisPlayer = Var(thisPlayer)
 
     val ourTurnRx = rx(HasNoKill) { ourTurn() }
 
     fun state(coords: Coords) = fields.getValue(coords)
-    fun click(coords: Coords, fn: () -> Unit) {
+    inline fun click(coords: Coords, fn: () -> Unit) {
         if (ourTurnRx.now && state(coords).now == FieldState.Free) {
+            turnState %= TurnState.Waiting(thisPlayer.now)
             fn()
         }
     }
@@ -84,12 +86,19 @@ class BoardState(
     }
 
     fun take(coords: Coords, player: Player) {
-        state(coords) %= FieldState.Taken(player)
+        val st = state(coords)
 
-        if (coords.checkGameOver()) {
-            gameState %= GameState.GameOver(player)
-        } else if (!hasFree.now) {
-            gameState %= GameState.Draw
+        if (st.now != FieldState.Free) {
+            report("Field already taken: $coords")
+            gameState %= GameState.Corrupted
+        } else {
+            st %= FieldState.Taken(player)
+
+            if (coords.checkGameOver()) {
+                gameState %= GameState.GameOver(player)
+            } else if (!hasFree.now) {
+                gameState %= GameState.Draw
+            }
         }
     }
 }
@@ -100,7 +109,7 @@ abstract class BoardTurnsDelegate(
 
 abstract class BoardControlBase(
     override val title: String,
-    thisPlayerIndex: Int,
+    thisPlayerIndex: Int = 0,
     val players: List<Player> = standardMarks.mapIndexed { index, s ->  PlayerImpl(index, s) } ,
     override val dimensions: Dimensions = Dimensions(3, 3),
     winBy: Int = 3

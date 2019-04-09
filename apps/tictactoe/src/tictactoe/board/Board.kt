@@ -18,10 +18,12 @@ class Board(
     from: HasKillsRoutingTC,
     linkage: Linkage,
     loggedIn: LoggedIn,
-    val control: BoardControl,
+    control: Board.() -> BoardControl,
     val restart: () -> Unit
 ): ForwardTC(from), BoardPath, LoggedInPath by loggedIn, FBBackApi, HasBack by linkage {
     override val board: Board = this
+
+    val control = control()
 
     override val rawView: TopAndContent = ui()
 }

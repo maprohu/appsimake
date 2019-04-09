@@ -6,10 +6,7 @@ import fbmessagingsw.messageHandler
 import fbmessagingsw.messageTitle
 import fbmessagingsw.sw
 import org.w3c.notifications.NotificationOptions
-import tictactoelib.Leave
 import tictactoelib.Move
-import tictactoelib.Placement
-import tictactoelib.Start
 
 fun main() {
 
@@ -18,9 +15,9 @@ fun main() {
         val move = Move.of(d, NoDynamicOps)
 
         val msg = when (move) {
-            is Start -> "game started"
-            is Leave -> "opponent left"
-            is Placement -> "opponent moved"
+            is Move.Start -> "game started"
+            is Move.Leave -> "opponent left"
+            is Move.Placement -> "opponent moved"
             else -> throw Error("unexpected move: $move")
         }
 

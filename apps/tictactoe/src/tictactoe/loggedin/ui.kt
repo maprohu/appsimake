@@ -38,8 +38,8 @@ fun LoggedIn.ui() = TopAndContent(
                 gameStatus().let { gs ->
                     when (gs) {
                         null -> "Go Online"
-                        is GameStatus.None, is GameStatus.InGame.Waiting ->  "Enter Waiting Room"
-                        is GameStatus.InGame.Playing -> "Show Ongoing Game"
+                        is GameStatus.None, is GameStatus.Waiting ->  "Enter Waiting Room"
+                        is GameStatus.Playing -> "Show Ongoing Game"
                     }
                 }
             }

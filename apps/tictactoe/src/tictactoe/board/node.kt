@@ -240,7 +240,12 @@ fun Node.boardNode(board: Board) = with(board) {
                             else -> {
                                 turnState().also { ts ->
                                     when (ts) {
-                                        TurnState.Waiting -> this %= "Please wait..."
+                                        TurnState.Starting -> {
+                                            this %= "Flipping coin..."
+                                        }
+                                        is TurnState.Waiting -> {
+                                            this %= "Please wait..."
+                                        }
                                         is TurnState.Playing -> {
                                             if (ts.player == thisPlayer()) {
                                                 appendText("Place your ")
