@@ -9,16 +9,8 @@ import kotlin.browser.document
 
 fun Board.ui() = TopAndContent(
     topbar = factory.topbar {
-        title %= control.title
         left.backButton
-        right.button {
-            m1p2
-            fa.redoAlt
-            warning
-            click {
-                restart()
-            }
-        }
+        control.topbar(this)
     }.node,
     content = document.column {
         cls {

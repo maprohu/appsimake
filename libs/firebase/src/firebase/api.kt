@@ -1,11 +1,11 @@
 package firebase
 
 import common.dyn
+import common.obj
 import commonshr.*
 import commonshr.properties.RxBase
 import firebase.firestore.*
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlin.browser.document
 import kotlin.js.Promise
 
 interface DbApi: Api, HasDb {
@@ -31,6 +31,12 @@ interface DbApi: Api, HasDb {
         source: GetOptionsSource = GetOptionsSource.default,
         default: () -> D
     ) = toFsDoc(api, source, default)
+
+    fun <D: RxBase<D>> DocWrap<D>.set(
+        data: D,
+        options: SetOptions = obj()
+    ) = set(api, data, options)
+
 }
 
 
@@ -97,7 +103,7 @@ interface TxApi: Api, HasTx {
 interface DbTxApi: TxApi, DbApi, HasDbTx {
     suspend fun <T> DocSource<T>.getOrFail() = getOrFail(api)
     suspend fun <T> DocSource<T>.getOrDefault(fn: () -> T) = getOrDefault(api, fn)
-    fun <T: RxBase<*>> DocSource<T>.set(data: T) = set(api, data)
+    fun <T: RxBase<*>> DocSource<T>.txSet(data: T) = txSet(api, data)
     fun <T> DocSource<T>.delete() = delete(api)
 }
 

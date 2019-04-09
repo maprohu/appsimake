@@ -35,7 +35,8 @@ sealed class Lounge<T: Lounge<T>>: RxRoot<T>(), Tmp {
 //}
 
 sealed class GameStatus<T: GameStatus<T>>: RxRoot<T>(), PrivateSingleton {
-    class None: GameStatus<None>()
+    class Offline: GameStatus<Offline>()
+    class Online: GameStatus<Online>()
     class Waiting: GameStatus<Waiting>() {
         val game by o.string()
 
@@ -43,13 +44,17 @@ sealed class GameStatus<T: GameStatus<T>>: RxRoot<T>(), PrivateSingleton {
     class Playing: GameStatus<Playing>() {
         val opponent by o.string()
         val game by o.string()
-        val own by o.boolean()
-        val seq by o.int(0)
+        val seq by o.int(FirstSeq)
+
+        companion object {
+            val FirstSeq = 1
+        }
     }
 
     companion object {
         val of = wrapper(
-            { None() },
+            { Offline() },
+            { Online() },
             { Waiting() },
             { Playing() }
         )
@@ -70,10 +75,11 @@ open class Player: RxBase<Player>() {
 sealed class Move<T: Move<T>>: RxRoot<T>(), InboxPublic {
     val seq by o.int()
     val game by o.string()
-    val player by o.string()
+    override val from by o.string()
 
-    class Start : Move<Start>() {
+    open class Start : Move<Start>() {
         val firstPlayer by o.string()
+        companion object: Start()
     }
 
     class Placement : Move<Placement>() {

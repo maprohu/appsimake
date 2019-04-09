@@ -15,7 +15,7 @@ suspend fun <T> DocSource<T>.getOrDefault(deps: HasDbTx, fn: () -> T) =
 suspend fun <T> DocSource<T>.getOrFail(deps: HasDbTx) =
     extractOrFail(deps.tx.get(docRef(deps.db)).await())
 
-fun <T: RxBase<*>> DocSource<T>.set(deps: HasDbTx, data: T) =
+fun <T: RxBase<*>> DocSource<T>.txSet(deps: HasDbTx, data: T) =
     deps.tx.set(docRef(deps.db), data.writeDynamic(FsDynamicOps))
 
 fun <T: RxBase<*>> DocSource<T>.delete(deps: HasDbTx) =

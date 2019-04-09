@@ -276,8 +276,8 @@ suspend fun <T> Firestore.txTry(fn: suspend (Transaction) -> T) : Try<T> = Try {
 fun <T> Try<T>.onRollback(fn: () -> T) : T = fold({ if (it is RollbackException) fn() else throw it }, { it })
 inline fun <T> Try<T>.onSuccess(fn: (T) -> Unit) = map { t -> fn(t); t }
 
-class RollbackException : Exception()
-fun rollback() : Nothing = throw RollbackException()
+class RollbackException(msg: String? = null) : Exception(msg)
+fun rollback(msg: String? = null) : Nothing = throw RollbackException(msg)
 //fun launch(fn: suspend () -> Unit) {
 //    GlobalScope.launch {
 //        try {

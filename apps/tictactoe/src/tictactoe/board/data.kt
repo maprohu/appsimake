@@ -23,6 +23,21 @@ class PlayerImpl(
     mark: Mark
 ): Player {
     override val mark = Var(mark)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class.js != other::class.js) return false
+
+        other as PlayerImpl
+
+        if (index != other.index) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return index
+    }
 }
 
 typealias Mark = String

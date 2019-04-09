@@ -84,6 +84,9 @@ val Cls.cursorPointer by def(
 val Cls.overflowHidden by def(
     "overflow: hidden;"
 )
+val Cls.overflowVisible by def(
+    "overflow: visible;"
+)
 
 val Cls.scrollVertical by def("overflow-y: auto;" )
 val Cls.scrollHorizontal by def("overflow-x: auto;" )

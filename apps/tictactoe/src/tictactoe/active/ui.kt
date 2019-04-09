@@ -17,7 +17,14 @@ fun Waiting.ui() = TopAndContent(
     topbar = factory.topbar {
         left.backButton
         title %= "Waiting Room"
-        right.resetButton(this@ui, active)
+        right.button {
+            m1p2
+            fa.times
+            secondary
+            click {
+                goOffline()
+            }
+        }
     }.node,
     content = document.column {
         cls {
@@ -70,12 +77,3 @@ fun Waiting.ui() = TopAndContent(
 //    }.node,
 //    content = document.column {}
 //)
-
-fun Factory.resetButton(deps: HasKillsUix, active: Active) = button {
-    m1p2
-    fa.redoAlt
-    secondary
-    click(deps) {
-        active.reset()
-    }
-}

@@ -178,6 +178,17 @@ suspend fun <D> DocSource<D>.toFsDoc(
     }
 }
 
+fun <D: RxBase<D>> DocWrap<D>.set(
+    deps: HasDb,
+    data: D,
+    options: SetOptions = obj()
+): Promise<Unit> {
+    return docRef(deps).set(
+        data.writeDynamic(FsDynamicOps),
+        options
+    )
+}
+
 
 
 

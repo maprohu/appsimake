@@ -71,6 +71,14 @@ class Dropdown(): ScreenWrap() {
         }
     }
 
+    val arrow by lazy {
+        button {
+            m1p2
+            secondary
+            fa.chevronDown
+        }
+    }
+
     val right by lazy {
         menu.right
     }

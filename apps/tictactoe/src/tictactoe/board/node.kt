@@ -9,6 +9,7 @@ import org.w3c.dom.svg.*
 import styles.def
 import styles.height0
 import styles.minWidth0
+import styles.overflowVisible
 import svgx.*
 import svgx.a
 import kotlin.browser.document
@@ -51,7 +52,8 @@ private val defs by lazy {
 
 private val xGraphics by lazy {
     defs.symbol {
-        attributes["overflow"] = "visible"
+        cls.overflowVisible
+//        attributes["overflow"] = "visible"
         g {
             cls.mark
             line {
@@ -72,7 +74,8 @@ private val xGraphics by lazy {
 
 private val oGraphics by lazy {
     defs.symbol {
-        attributes["overflow"] = "visible"
+        cls.overflowVisible
+//        attributes["overflow"] = "visible"
         circle {
             cls.mark
             r.baseVal.value = .5f
@@ -226,6 +229,12 @@ fun Node.boardNode(board: Board) = with(board) {
                     }
                     gameState().also { gs ->
                         when (gs) {
+                            GameState.Corrupted -> {
+                                this %= "Illegal move detected."
+                            }
+                            GameState.Abandoned -> {
+                                this %= "The game has been abandoned."
+                            }
                             GameState.Draw -> {
                                 this %= "It's a draw."
                             }

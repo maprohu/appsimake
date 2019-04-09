@@ -3,10 +3,14 @@ package tictactoe
 import commonfb.FbLinksDeps
 import commonfb.FbLinksFactory
 import commonui.view.forwarding
+import commonui.view.hourglass
 import firebase.DbApi
+import firebase.firestore.rollback
+import firebase.firestore.txTry
 import tictactoe.active.Active
 import tictactoe.loggedin.LoggedIn
 import tictactoe.singleplayer.SinglePlayer
+import tictactoelib.GameStatus
 
 interface LinksPath: DbApi {
     val links: Links
@@ -35,6 +39,18 @@ class Links(
     }
 
     val online by home.child { parent, lnk ->
+        with (parent) {
+            hourglass()
+
+            txTry {
+                val st = loggedIn.statusDoc.getOrDefault { GameStatus.Offline() }.doc
+                if (st is GameStatus.Offline) {
+                    loggedIn.statusDoc.txSet(GameStatus.Online())
+                } else {
+                    rollback("already online.")
+                }
+            }
+        }
         Active(
             parent,
             lnk

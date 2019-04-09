@@ -12,7 +12,7 @@ import commonui.widget.factory
 open class ProgressBackTC(
     parent: HasBackKillsRoutingTC,
     val topbar: ProgressBackTC.(Topbar) -> Unit = {}
-): ViewTC(parent), BackKillsUixApi, HasBack by parent {
+): ViewTC(parent), IViewTC, BackKillsUixApi, HasBack by parent {
     override val rawView = TopAndContent(
         topbar = factory.topbar {
             left.backButton

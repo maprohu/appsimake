@@ -3,7 +3,11 @@ package tictactoe.board
 import common.Emitter
 import commonshr.EmitterFn
 import commonshr.fn
+import commonshr.invoke
 import commonshr.report
+import commonui.widget.Topbar
+import domx.remAssign
+import fontawesome.redoAlt
 import killable.HasNoKill
 import rx.RxIface
 import rx.Var
@@ -17,7 +21,7 @@ interface BoardTurns {
     fun ourTurn() = gameState() == GameState.Ongoing && turnState() == TurnState.Playing(thisPlayer())
 }
 interface BoardControl: BoardTurns {
-    val title: String
+    val topbar: Topbar.() -> Unit
     val dimensions: Dimensions
     val Coords.state: RxIface<FieldState>
     fun Coords.click()
@@ -108,7 +112,6 @@ abstract class BoardTurnsDelegate(
 ): BoardTurns by states
 
 abstract class BoardControlBase(
-    override val title: String,
     thisPlayerIndex: Int = 0,
     val players: List<Player> = standardMarks.mapIndexed { index, s ->  PlayerImpl(index, s) } ,
     override val dimensions: Dimensions = Dimensions(3, 3),
@@ -119,7 +122,10 @@ abstract class BoardControlBase(
     override val Coords.state: RxIface<FieldState> get() = states.state(this)
 }
 
-class SinglePlayerControl: BoardControlBase("Single Player", 0) {
+class SinglePlayerControl(
+    val board: Board,
+    val reset: () -> Unit
+): BoardControlBase() {
     override fun Coords.click() = states.click(this) {
         with (states) {
             take(this@click, thisPlayer.now)
@@ -129,6 +135,22 @@ class SinglePlayerControl: BoardControlBase("Single Player", 0) {
             }
         }
     }
+
+    override val topbar: Topbar.() -> Unit = {
+        with (board) {
+            title %= "Single Player"
+            right.button.invoke {
+                m1p2
+                fa.redoAlt
+                secondary
+                click {
+                    reset()
+                }
+            }
+        }
+    }
+
+
 
     init {
         states.turnState %= TurnState.Playing(players[0])

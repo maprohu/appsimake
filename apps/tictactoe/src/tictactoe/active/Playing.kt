@@ -1,41 +1,63 @@
 package tictactoe.active
 
-import bootstrap.*
 import commonshr.*
 import commonui.*
-import commonui.progress.*
-import commonui.view.*
-import commonui.widget.*
-import domx.*
+import commonui.widget.Topbar
+import domx.remAssign
 import firebase.auth.uid
-import firebase.firestore.inboxOf
-import firebase.firestore.listEvents
+import firebase.firestore.rollback
 import firebase.firestore.txTry
-import fontawesome.copy
+import fontawesome.redoAlt
+import fontawesome.times
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.map
 import tictactoe.board.*
 import tictactoe.loggedin.LoggedInPath
 import tictactoelib.GameStatus
 import tictactoelib.Move
-import tictactoelib.moves
-import tictactoelib.tictactoeLib
-import kotlin.browser.document
-import kotlin.reflect.KMutableProperty
 
 class OnlineBoardControl(
     val board: Board,
-    gs: GS.Playing
-): BoardControlBase(
-    title = "Playing Online"
-), LoggedInPath by board {
+    val gs: GS.Playing,
+    val goOffline: () -> Unit,
+    val restart: () -> Unit
+): BoardControlBase(), LoggedInPath by board {
+
+    override val topbar: Topbar.() -> Unit = {
+        with (board) {
+            title %= "Playing Online"
+            right.buttonGroup {
+                m1
+                button {
+                    p2
+                    secondary
+                    icon.fa.redoAlt
+                    click {
+                        restart()
+                    }
+                }
+                dropdownSplit {
+                    secondary
+                }
+                menu {
+                    right
+                    item {
+                        text %= "Stop Playing Online"
+                        icon.fa.times
+                        click {
+                            goOffline()
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     val playerUids = listOf(
         loggedIn.uid,
         gs.opponent
     )
 
-    val outgoing = tictactoeLib.app.inbox.doc(gs.opponent).public.moves
 
     class MovesItem(
         val seq: Int,
@@ -46,7 +68,7 @@ class OnlineBoardControl(
 
     inner class Moves {
 
-        var head = MovesItem(1)
+        var head = MovesItem(GameStatus.Playing.FirstSeq)
 
         val MovesItem.following get() = next.let { n ->
             n ?: MovesItem(
@@ -67,7 +89,7 @@ class OnlineBoardControl(
                 curr.abandon = true
                 process()
             } else {
-                if (moveSeq <= head.seq) {
+                if (moveSeq < head.seq) {
                     report("Sequence $moveSeq alread porcessed. Current: ${head.seq}")
                     states.gameState %= GameState.Corrupted
                 } else {
@@ -88,43 +110,35 @@ class OnlineBoardControl(
             }
         }
 
+        val isOngoing get() = gameState.now == GameState.Ongoing
+
         private fun ifOngoing(fn: () -> Unit) {
-            if (gameState.now == GameState.Ongoing) {
+            if (isOngoing) {
                 fn()
             }
         }
 
-        private fun process() = ifOngoing {
-            process(head) { head = it }
+        private fun checkAbandon() {
+            if (head.abandon) {
+                states.gameState %= GameState.Abandoned
+            }
         }
 
-        private fun process(item: MovesItem, setter: Assign<MovesItem>) {
-            fun abandonOrElse(fn: () -> Unit) {
-                if (item.abandon) {
-                    states.gameState %= GameState.Abandoned
-                } else {
-                    fn()
-                }
+        private fun process() {
+            while (isOngoing && head.move != null) {
+                process(head.move!!)
+                checkAbandon()
+                head = head.following
             }
 
-            val m = item.move
-
-            if (m == null) {
-                abandonOrElse {}
-            } else {
-                process(m)
-
-                ifOngoing {
-                    abandonOrElse {
-                        val next = item.following
-                        setter(item.following)
-                        process(next) { next.next = it }
-                    }
-                }
+            ifOngoing {
+                checkAbandon()
             }
         }
 
         private fun process(move: Move<*>) {
+            globalStatus %= "Processing move: ${move.type.now}"
+
             when (move) {
                 is Move.Start -> {
                     if (turnState.now != TurnState.Starting) {
@@ -136,7 +150,7 @@ class OnlineBoardControl(
                     }
                 }
                 is Move.Placement -> {
-                    val playerIndex = playerUids.indexOf(move.player.now)
+                    val playerIndex = playerUids.indexOf(move.from.now)
                     val player = players[playerIndex]
 
                     if (
@@ -177,13 +191,12 @@ class OnlineBoardControl(
                     .inboxMoves
                     .listEvents {
                         Move.game eq gs.game
-                        Move.seq.asc
-                        limit(1)
                     }
                     .filterIsInstance<ListEvent.Add<FsDoc<Move<*>>>>()
                     .map { it.item.rxv.now }
 
                 for (move in moves) {
+                    globalStatus %= "Received move: ${move.type.now}"
                     moveProc.add(move)
                 }
             }
@@ -194,33 +207,45 @@ class OnlineBoardControl(
                 for (click in clicks) {
                     states.click(click) {
                         txTry {
-                            val gameDoc = loggedIn.statusDoc.getOrFail()
-                            val game = gameDoc.doc as GameStatus.Playing
-                            require(
+                            val game = loggedIn.statusDoc.getOrFail().doc
+
+                            if (
+                                game is GameStatus.Playing &&
                                 game.opponent.now == gs.opponent &&
-                                        game.game.now == gs.game
-                            ) { "Obsolete game." }
-                            val newSeq = game.seq.now + 1
-                            val move = Move.Placement().apply {
-                                this.player %= uid
-                                this.game %= gs.game
-                                this.seq %= newSeq
-                                this.x %= click.x
-                                this.y %= click.y
-                            }
+                                game.game.now == gs.game
+                            ) {
 
-                            loggedIn.statusDoc.set(
-                                game.apply {
-                                    this.seq %= newSeq
+                                val newSeq = moveProc.head.seq
+
+                                if (game.seq.now >= newSeq) {
+                                    rollback("move already made.")
                                 }
-                            )
 
-                            outgoing.randomDoc.set(move)
-                            loggedIn.inboxMoves.randomDoc.set(move)
+                                val move = Move.Placement().apply {
+                                    this.x %= click.x
+                                    this.y %= click.y
+                                }
+
+                                loggedIn.statusDoc.txSet(
+                                    game.apply {
+                                        this.seq %= newSeq
+                                    }
+                                )
+
+                                postMove(
+                                    loggedIn,
+                                    gs,
+                                    newSeq,
+                                    move
+                                )
+                            } else {
+                                rollback("obsolete game.")
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 }

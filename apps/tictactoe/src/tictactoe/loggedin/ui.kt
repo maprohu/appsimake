@@ -37,9 +37,9 @@ fun LoggedIn.ui() = TopAndContent(
             text %= {
                 gameStatus().let { gs ->
                     when (gs) {
-                        null -> "Go Online"
-                        is GameStatus.None, is GameStatus.Waiting ->  "Enter Waiting Room"
+                        is GameStatus.Online, is GameStatus.Waiting ->  "Enter Waiting Room"
                         is GameStatus.Playing -> "Show Ongoing Game"
+                        else -> "Go Online"
                     }
                 }
             }

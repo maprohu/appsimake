@@ -28,8 +28,11 @@ class SinglePlayer(
             this,
             linkage,
             loggedIn,
-            control = { SinglePlayerControl() },
-            restart = { currentView %= createBoard() }
+            control = {
+                SinglePlayerControl(this) {
+                    currentView %= createBoard()
+                }
+            }
         )
 
     override val currentView = Var<IViewTC>(createBoard()).oldKilled

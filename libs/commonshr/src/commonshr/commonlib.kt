@@ -2,10 +2,7 @@ package commonshr
 
 import common.dyn
 import common.named
-import commonshr.properties.DynamicOps
-import commonshr.properties.RxBase
-import commonshr.properties.RxRoot
-import commonshr.properties.readDynamic
+import commonshr.properties.*
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -146,7 +143,9 @@ interface PrivateSingleton
 interface Private
 interface AdminDoc
 interface Inbox
-interface InboxPublic
+interface InboxPublic {
+    val from: ROProp<*, String>
+}
 interface Tmp
 
 abstract class Lock<T: Lock<T>>: RxRoot<T>() {

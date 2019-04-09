@@ -18,8 +18,7 @@ class Board(
     from: HasKillsRoutingTC,
     linkage: Linkage,
     loggedIn: LoggedIn,
-    control: Board.() -> BoardControl,
-    val restart: () -> Unit
+    control: Board.() -> BoardControl
 ): ForwardTC(from), BoardPath, LoggedInPath by loggedIn, FBBackApi, HasBack by linkage {
     override val board: Board = this
 

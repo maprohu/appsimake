@@ -8,7 +8,7 @@ import commonui.widget.TopAndContent
 
 open class ProgressTC(
     parent: HasKillsRouting<TopAndContent>
-): SimpleView<TopAndContent>(parent) {
+): ViewTC(parent), IViewTC {
     override val rawView = TopAndContent(
         topbar = null,
         content = progressUI()

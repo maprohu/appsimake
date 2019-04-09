@@ -34,8 +34,10 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   Lounge$Waiting.prototype.constructor = Lounge$Waiting;
   GameStatus.prototype = Object.create(RxRoot.prototype);
   GameStatus.prototype.constructor = GameStatus;
-  GameStatus$None.prototype = Object.create(GameStatus.prototype);
-  GameStatus$None.prototype.constructor = GameStatus$None;
+  GameStatus$Offline.prototype = Object.create(GameStatus.prototype);
+  GameStatus$Offline.prototype.constructor = GameStatus$Offline;
+  GameStatus$Online.prototype = Object.create(GameStatus.prototype);
+  GameStatus$Online.prototype.constructor = GameStatus$Online;
   GameStatus$Waiting.prototype = Object.create(GameStatus.prototype);
   GameStatus$Waiting.prototype.constructor = GameStatus$Waiting;
   GameStatus$Playing.prototype = Object.create(GameStatus.prototype);
@@ -46,6 +48,8 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   Move.prototype.constructor = Move;
   Move$Start.prototype = Object.create(Move.prototype);
   Move$Start.prototype.constructor = Move$Start;
+  Move$Start$Companion.prototype = Object.create(Move$Start.prototype);
+  Move$Start$Companion.prototype.constructor = Move$Start$Companion;
   Move$Placement.prototype = Object.create(Move.prototype);
   Move$Placement.prototype.constructor = Move$Placement;
   Move$Leave.prototype = Object.create(Move.prototype);
@@ -136,12 +140,20 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     GameStatus$Companion_getInstance();
     RxRoot.call(this);
   }
-  function GameStatus$None() {
+  function GameStatus$Offline() {
     GameStatus.call(this);
   }
-  GameStatus$None.$metadata$ = {
+  GameStatus$Offline.$metadata$ = {
     kind: Kind_CLASS,
-    simpleName: 'None',
+    simpleName: 'Offline',
+    interfaces: [GameStatus]
+  };
+  function GameStatus$Online() {
+    GameStatus.call(this);
+  }
+  GameStatus$Online.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Online',
     interfaces: [GameStatus]
   };
   function GameStatus$Waiting() {
@@ -160,11 +172,11 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     interfaces: [GameStatus]
   };
   function GameStatus$Playing() {
+    GameStatus$Playing$Companion_getInstance();
     GameStatus.call(this);
     this.opponent_54wrxe$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, GameStatus$Playing$opponent_metadata);
     this.game_qqcqi1$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, GameStatus$Playing$game_metadata);
-    this.own_q2k6nn$_0 = this.o.boolean_6taknv$().provideDelegate_n5byny$(this, GameStatus$Playing$own_metadata);
-    this.seq_q2mdbu$_0 = this.o.int_za3lpa$(0).provideDelegate_n5byny$(this, GameStatus$Playing$seq_metadata);
+    this.seq_q2mdbu$_0 = this.o.int_za3lpa$(GameStatus$Playing$Companion_getInstance().FirstSeq).provideDelegate_n5byny$(this, GameStatus$Playing$seq_metadata);
   }
   var GameStatus$Playing$opponent_metadata = new PropertyMetadata('opponent');
   Object.defineProperty(GameStatus$Playing.prototype, 'opponent', {
@@ -178,18 +190,28 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
       return this.game_qqcqi1$_0.getValue_lrcp0p$(this, GameStatus$Playing$game_metadata);
     }
   });
-  var GameStatus$Playing$own_metadata = new PropertyMetadata('own');
-  Object.defineProperty(GameStatus$Playing.prototype, 'own', {
-    get: function () {
-      return this.own_q2k6nn$_0.getValue_lrcp0p$(this, GameStatus$Playing$own_metadata);
-    }
-  });
   var GameStatus$Playing$seq_metadata = new PropertyMetadata('seq');
   Object.defineProperty(GameStatus$Playing.prototype, 'seq', {
     get: function () {
       return this.seq_q2mdbu$_0.getValue_lrcp0p$(this, GameStatus$Playing$seq_metadata);
     }
   });
+  function GameStatus$Playing$Companion() {
+    GameStatus$Playing$Companion_instance = this;
+    this.FirstSeq = 1;
+  }
+  GameStatus$Playing$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
+  var GameStatus$Playing$Companion_instance = null;
+  function GameStatus$Playing$Companion_getInstance() {
+    if (GameStatus$Playing$Companion_instance === null) {
+      new GameStatus$Playing$Companion();
+    }
+    return GameStatus$Playing$Companion_instance;
+  }
   GameStatus$Playing.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Playing',
@@ -197,15 +219,18 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   };
   function GameStatus$Companion() {
     GameStatus$Companion_instance = this;
-    this.of = wrapper([GameStatus$Companion$of$lambda, GameStatus$Companion$of$lambda_0, GameStatus$Companion$of$lambda_1]);
+    this.of = wrapper([GameStatus$Companion$of$lambda, GameStatus$Companion$of$lambda_0, GameStatus$Companion$of$lambda_1, GameStatus$Companion$of$lambda_2]);
   }
   function GameStatus$Companion$of$lambda() {
-    return new GameStatus$None();
+    return new GameStatus$Offline();
   }
   function GameStatus$Companion$of$lambda_0() {
-    return new GameStatus$Waiting();
+    return new GameStatus$Online();
   }
   function GameStatus$Companion$of$lambda_1() {
+    return new GameStatus$Waiting();
+  }
+  function GameStatus$Companion$of$lambda_2() {
     return new GameStatus$Playing();
   }
   GameStatus$Companion.$metadata$ = {
@@ -252,7 +277,7 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     RxRoot.call(this);
     this.seq_g4r6p9$_0 = this.o.int_za3lpa$().provideDelegate_n5byny$(this, Move$seq_metadata);
     this.game_2oy8ye$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Move$game_metadata);
-    this.player_q0tkjr$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Move$player_metadata);
+    this.from_2opcta$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Move$from_metadata);
   }
   var Move$seq_metadata = new PropertyMetadata('seq');
   Object.defineProperty(Move.prototype, 'seq', {
@@ -266,13 +291,14 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
       return this.game_2oy8ye$_0.getValue_lrcp0p$(this, Move$game_metadata);
     }
   });
-  var Move$player_metadata = new PropertyMetadata('player');
-  Object.defineProperty(Move.prototype, 'player', {
+  var Move$from_metadata = new PropertyMetadata('from');
+  Object.defineProperty(Move.prototype, 'from', {
     get: function () {
-      return this.player_q0tkjr$_0.getValue_lrcp0p$(this, Move$player_metadata);
+      return this.from_2opcta$_0.getValue_lrcp0p$(this, Move$from_metadata);
     }
   });
   function Move$Start() {
+    Move$Start$Companion_getInstance();
     Move.call(this);
     this.firstPlayer_7xyi7t$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, Move$Start$firstPlayer_metadata);
   }
@@ -282,6 +308,22 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
       return this.firstPlayer_7xyi7t$_0.getValue_lrcp0p$(this, Move$Start$firstPlayer_metadata);
     }
   });
+  function Move$Start$Companion() {
+    Move$Start$Companion_instance = this;
+    Move$Start.call(this);
+  }
+  Move$Start$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: [Move$Start]
+  };
+  var Move$Start$Companion_instance = null;
+  function Move$Start$Companion_getInstance() {
+    if (Move$Start$Companion_instance === null) {
+      new Move$Start$Companion();
+    }
+    return Move$Start$Companion_instance;
+  }
   Move$Start.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'Start',
@@ -364,14 +406,21 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     get: Lounge$Companion_getInstance
   });
   package$tictactoelib.Lounge = Lounge;
-  GameStatus.None = GameStatus$None;
+  GameStatus.Offline = GameStatus$Offline;
+  GameStatus.Online = GameStatus$Online;
   GameStatus.Waiting = GameStatus$Waiting;
+  Object.defineProperty(GameStatus$Playing, 'Companion', {
+    get: GameStatus$Playing$Companion_getInstance
+  });
   GameStatus.Playing = GameStatus$Playing;
   Object.defineProperty(GameStatus, 'Companion', {
     get: GameStatus$Companion_getInstance
   });
   package$tictactoelib.GameStatus = GameStatus;
   package$tictactoelib.Player = Player;
+  Object.defineProperty(Move$Start, 'Companion', {
+    get: Move$Start$Companion_getInstance
+  });
   Move.Start = Move$Start;
   Move.Placement = Move$Placement;
   Move.Leave = Move$Leave;
