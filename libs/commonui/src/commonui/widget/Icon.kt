@@ -43,7 +43,6 @@ class Icon: ScreenWrap() {
 
 
     abstract inner class FaImpl(val doc: Deferred<FaDoc>): FaBase {
-
         override fun of(cssName: String, cs: CoroutineScope) {
             cs.launchReport {
                 use.xlinkHref = "#${doc.await().icon(cssName)}"

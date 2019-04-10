@@ -20,6 +20,8 @@ inline fun <T> obj() = dyn().unsafeCast<T>()
 inline fun dyn(fn: dynamic.() -> Unit) = dyn().unsafeCast<Any>().apply(fn)
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T> obj(fn: T.() -> Unit) = obj<T>().apply(fn)
+@Suppress("NOTHING_TO_INLINE")
+inline fun dynAlso(fn: (dynamic) -> Unit) = dyn().unsafeCast<Any>().also(fn)
 
 class NamedDelegate<out T>(
     private val init : (String) -> (() -> T)

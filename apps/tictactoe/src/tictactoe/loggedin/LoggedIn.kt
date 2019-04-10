@@ -2,6 +2,7 @@ package tictactoe.loggedin
 
 import tictactoe.*
 import commonfb.FBApi
+import commonfb.isFcmSupported
 import commonshr.*
 import commonui.*
 import commonui.links.BaseTC
@@ -16,6 +17,7 @@ import firebase.User
 import firebase.firestore.inboxOf
 import firebase.firestore.privateOf
 import kotlinx.coroutines.launch
+import org.w3c.notifications.Notification
 import rx.Var
 import tictactoelib.*
 
@@ -41,6 +43,8 @@ class LoggedIn(
     val inboxMoves = tictactoeLib.inboxOf(user).public.moves
 
     val gameStatus = statusDoc.docsOrNull.toRx(null)
+
+
 
     fun signOut() = links.launch {
         links.signOut()

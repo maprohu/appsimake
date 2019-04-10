@@ -10,11 +10,14 @@ class Button(): ScreenWrap() {
     override val node = document.button {
         cls {
             btn
+            dFlex
+            flexRow
         }
     }
 
     inner class Slots {
         val icon = slot
+        val separator = slot
         val text = slot
     }
     val slots = Slots()
@@ -65,7 +68,8 @@ class Button(): ScreenWrap() {
     }
 
     val text by lazy {
-        document.span.setTo(slots.text)
+        document.div {
+        }.setTo(slots.text)
     }
 
     val back by lazy {
@@ -75,6 +79,17 @@ class Button(): ScreenWrap() {
     }
 
     fun enabled(deps: HasKills, fn: KillsApi.() -> Boolean) = node.rxEnabled(deps, fn)
+
+    val separator by lazy {
+        document.div {
+        }.setTo(slots.separator)
+    }
+    val iconAndText by lazy {
+        cls.alignItemsCenter
+        separator {
+            cls.ml1
+        }
+    }
 
 }
 

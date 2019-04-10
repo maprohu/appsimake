@@ -48,8 +48,11 @@ class Active(
 ): MultiViewTC(from), CsDbKillsApi, LinkPointItem, ActivePath, LoggedInPath by from, HasBackKillsRoutingTC, HasRoutingTC by from, HasBack by linkage {
     override val active: Active = this
 
+//    val gameStatus = loggedIn.statusDoc.docsOrNull.toRx(null)
+    val gameStatus = loggedIn.gameStatus
+
     val gState = rx {
-        loggedIn.gameStatus().let { gs ->
+        gameStatus().let { gs ->
             when (gs) {
                 is GameStatus.Waiting -> {
                     GS.Waiting(gs.game.now)
@@ -64,7 +67,6 @@ class Active(
         }
     }
 
-
     override val currentView = Var<IViewTC>(
         ProgressTC(this@Active)
     ).oldKilled
@@ -74,6 +76,12 @@ class Active(
     }
 
     init {
+        gameStatus.forEach { gs ->
+            if (gs is GameStatus.Offline) {
+                back()
+            }
+        }
+
         gState.forEach { gs ->
             currentView.now = when (gs) {
                 GS.None -> {
@@ -131,11 +139,6 @@ class Active(
                         rollback("Leaving obsolete game.")
                     }
                 }
-
-
-                if (!andWait) {
-                    back()
-                }
             }
         }
 
@@ -160,7 +163,7 @@ class Active(
 
     init {
         launchReport {
-            for (gs in loggedIn.gameStatus.toChannel()) {
+            for (gs in gameStatus.toChannel()) {
                 when (gs) {
                     is GameStatus.Online -> {
                         val game = tictactoeLib.app.tmp.randomDoc.id

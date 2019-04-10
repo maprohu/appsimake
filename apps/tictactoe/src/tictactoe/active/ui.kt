@@ -5,6 +5,8 @@ import common.*
 import commonshr.*
 import commonui.HasKillsUix
 import commonui.HasUix
+import commonui.NotificationState
+import commonui.notificationState
 import commonui.widget.*
 import domx.*
 import firebase.firestore.delete
@@ -33,13 +35,19 @@ fun Waiting.ui() = TopAndContent(
         }
         div {
             cls {
-                m1
                 flexGrow1
                 flexCenter()
             }
-            div {
-                this %= "Waiting for Opponent..."
+            column {
+                cls {
+                    alignItemsCenter
+                }
+                div {
+                    cls.m1
+                    this %= "Waiting for Opponent..."
+                }
             }
+
         }
         row {
             cls {

@@ -16,7 +16,11 @@ external interface Messaging {
     fun getToken() : Promise<String>?
 
     // https://firebase.google.com/docs/reference/js/firebase.messaging.Messaging#onTokenRefresh
-    fun onTokenRefresh(fn: () -> Unit) : () -> Unit
+    fun onTokenRefresh(
+        next: () -> Unit,
+        error: (dynamic) -> Unit = definedExternally,
+        completed: () -> Unit = definedExternally
+    ) : () -> Unit
 
     // https://firebase.google.com/docs/reference/js/firebase.messaging.Messaging#onMessage
     fun onMessage(fn: (dynamic) -> Unit) : () -> Unit

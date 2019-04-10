@@ -3,7 +3,6 @@ package tictactoe
 import bootstrap.*
 import common.onResize
 import common.removeFromParent
-import commonui.shouldRequest
 import domx.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

@@ -37,5 +37,7 @@ interface HasPath {
     val path: String
 }
 
-
+interface HasLib {
+    val lib: Lib
+}
 

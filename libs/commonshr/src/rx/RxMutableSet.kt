@@ -16,13 +16,14 @@ interface RxSet<E>: Set<E> {
     val diffs: EmitterIface<SetDiff<E>>
     fun containsRx(ks: KillSet, value: E): RxIface<Boolean>
 
-    fun anyRx(ks: KillSet, fn: KillsApi.(E) -> Boolean): RxIface<Boolean> =
-        Rx(ks) { iterableRx().any { fn(it) } }
 
     val diffsAll get() = diffs.withInitial { listOf(SetDiff(added = this)) }
 
     fun filtered(ks: KillSet, fn: KillsApi.(E) -> Boolean): RxSet<E>
 }
+
+fun <E> RxSet<E>.anyRx(deps: HasKills, fn: KillsApi.(E) -> Boolean): RxIface<Boolean> =
+    rx(deps) { iterableRx().any { fn(it) } }
 
 class RxMutableSet<E>(
     private val delegate: MutableSet<E> = mutableSetOf()
@@ -247,9 +248,8 @@ fun <T> RxSet<T>.process(ks: KillSet, fn: KillsApi.(T) -> Unit) {
 }
 
 
-fun <T> ReceiveChannel<ListEvent<T>>.toRxSet(
-    deps: CoroutineScope
-): RxSet<T> = RxMutableSet<T>().apply {
-    applyTo(deps, this)
-}
+fun <T> ReceiveChannel<ListEvent<T>>.toRxSet(deps: CoroutineScope): RxSet<T> =
+    RxMutableSet<T>().apply {
+        applyTo(deps, this)
+    }
 

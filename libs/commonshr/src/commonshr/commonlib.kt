@@ -138,6 +138,8 @@ val <P: Private> DocWrap<P>.singletons by coll<PrivateSingleton>()
 val <D: AppDoc> DocWrap<D>.inbox by coll<Inbox>()
 val <D: Inbox> DocWrap<D>.public by coll<InboxPublic>()
 
+val <P: Private> DocWrap<P>.fcmTokens by coll { FcmToken() }
+
 interface Singleton
 interface PrivateSingleton
 interface Private
@@ -157,11 +159,14 @@ abstract class Publish<T: Publish<T>>: RxRoot<T>() {
     val from by o.string()
 }
 
-val DocWrap<Private>.fcmtokens by coll<FcmToken>()
+open class FcmToken: RxBase<FcmToken>(), PrivateSingleton {
 
-interface FcmToken
+    val enabled by o.boolean(false)
+    val token by o.prop<String?>(null)
+
+    companion object: FcmToken()
+}
 
 fun Lib.privateOf(uid: String) = app.private.doc(uid)
 fun Lib.inboxOf(uid: String) = app.inbox.doc(uid)
-
 

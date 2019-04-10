@@ -1,5 +1,6 @@
 package commonfb
 
+import commonfb.messaging.MessagingControl
 import commonshr.HasKills
 import commonui.HasCsToast
 import commonui.HasEdit
@@ -19,3 +20,7 @@ interface HasLogin {
 }
 
 interface HasKillsLogin: HasKills, HasLogin
+
+interface HasMessaging {
+    val messaging: MessagingControl
+}

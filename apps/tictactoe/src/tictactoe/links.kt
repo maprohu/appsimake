@@ -7,6 +7,8 @@ import commonui.view.hourglass
 import firebase.DbApi
 import firebase.firestore.rollback
 import firebase.firestore.txTry
+import killable.Killables
+import kotlinx.coroutines.CompletableDeferred
 import tictactoe.active.Active
 import tictactoe.loggedin.LoggedIn
 import tictactoe.singleplayer.SinglePlayer
@@ -39,18 +41,32 @@ class Links(
     }
 
     val online by home.child { parent, lnk ->
+        val cd = CompletableDeferred<Unit>()
+
         with (parent) {
             hourglass()
 
             txTry {
                 val st = loggedIn.statusDoc.getOrDefault { GameStatus.Offline() }.doc
+
                 if (st is GameStatus.Offline) {
                     loggedIn.statusDoc.txSet(GameStatus.Online())
                 } else {
                     rollback("already online.")
                 }
             }
+
+            Killables.context {
+                loggedIn.gameStatus.forEach { gs ->
+                    if (gs !is GameStatus.Offline) {
+                        cd.complete(Unit)
+                    }
+                }
+                cd.await()
+            }
         }
+
+
         Active(
             parent,
             lnk

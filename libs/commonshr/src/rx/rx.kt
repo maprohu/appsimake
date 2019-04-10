@@ -539,3 +539,9 @@ fun <T: HasKill, V: RxIface<T?>> V.oldKilledOpt(deps: HasKills) = apply {
     forEach(deps) { kseq %= it?.kill ?: Noop }
 }
 
+fun RxIface<Boolean>.forEachTrue(deps: HasKills, fn: KillsApi.() -> Unit) =
+    forEach(deps) { if (it) fn() }
+
+fun <T: Any> RxIface<T?>.forEachNonNull(deps: HasKills, fn: KillsApi.(T) -> Unit) =
+    forEach(deps) { if (it != null) fn(it) }
+

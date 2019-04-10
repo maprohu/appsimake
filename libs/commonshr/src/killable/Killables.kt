@@ -71,6 +71,18 @@ class Killables: KillsApi, HasKillKilledKills {
     fun killables() = toKillSet().killables()
     fun seq() = KillableSeq().also { it.onKill += add(it.kill) }
 
+
+    companion object {
+        inline fun context(fn: KillsApi.() -> Unit) {
+            Killables().run {
+                try {
+                    fn()
+                } finally {
+                    kill()
+                }
+            }
+        }
+    }
 }
 
 

@@ -15,6 +15,8 @@ interface KillsApi: Api, HasKills {
     fun <T> rx(fn: KillsApi.() -> T) = Rx(kills, fn)
     fun <T> rx(killFirst: Boolean, fn: KillsApi.() -> T) = Rx(kills, killFirst, fn)
     fun <T> RxIface<T>.forEach(fn: KillsApi.(T) -> Unit) = forEach(kills, fn)
+    fun RxIface<Boolean>.forEachTrue(fn: KillsApi.() -> Unit) = forEachTrue(api, fn)
+    fun <T: Any> RxIface<T?>.forEachNonNull(fn: KillsApi.(T) -> Unit) = forEachNonNull(api, fn)
     fun <T> RxIface<T>.forEachLater(fn: KillsApi.(T) -> Unit) = forEachLater(kills, fn)
     fun <T> RxIface<T>.forEach(killOrder: KillOrder, fn: KillsApi.(T) -> Unit) = forEach(kills, killOrder, fn)
     fun <T, S> RxIface<T>.map(fn: KillsApi.(T) -> S) = map(kills, fn)
@@ -42,6 +44,7 @@ interface KillsApi: Api, HasKills {
 
     fun <E> RxSet<E>.containsRx(value: E) = containsRx(kills, value)
     fun <E> RxSet<E>.process(fn: KillsApi.(E) -> Unit): Unit = process(kills, fn)
+    fun <E> RxSet<E>.anyRx(fn: KillsApi.(E) -> Boolean) = anyRx(api, fn)
 
     fun <T> EmitterIface<SetMove<T>>.toRxSet() = toRxSet(kills)
     fun <T> RxIface<T>.toChannelLater() = toChannelLater(api)
@@ -66,6 +69,7 @@ interface KillsApi: Api, HasKills {
 interface CsApi: Api, CoroutineScope {
 
     fun <T> ReceiveChannel<T>.toRx(initial: T) = toRx(api, initial)
+    fun <T> ReceiveChannel<ListEvent<T>>.toRxSet() = toRxSet(api)
 
 }
 
