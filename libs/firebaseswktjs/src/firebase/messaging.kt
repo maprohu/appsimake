@@ -13,7 +13,7 @@ external interface Messaging {
     fun requestPermission() : Promise<Unit>
 
     // https://firebase.google.com/docs/reference/js/firebase.messaging.Messaging#getToken
-    fun getToken() : Promise<String>?
+    fun getToken() : Promise<String?>?
 
     // https://firebase.google.com/docs/reference/js/firebase.messaging.Messaging#onTokenRefresh
     fun onTokenRefresh(

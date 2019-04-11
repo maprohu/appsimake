@@ -1,5 +1,6 @@
 package tictactoe.active
 
+import commonfb.KillsMessagingUixApi
 import commonshr.*
 import commonui.*
 import commonui.widget.Topbar
@@ -21,7 +22,7 @@ class OnlineBoardControl(
     val gs: GS.Playing,
     val goOffline: () -> Unit,
     val restart: () -> Unit
-): BoardControlBase(), LoggedInPath by board {
+): BoardControlBase(), LoggedInPath by board, KillsMessagingUixApi, HasKillsUix by board {
 
     override val topbar: Topbar.() -> Unit = {
         with (board) {
@@ -48,6 +49,7 @@ class OnlineBoardControl(
                             goOffline()
                         }
                     }
+                    messagingMenu
                 }
             }
         }

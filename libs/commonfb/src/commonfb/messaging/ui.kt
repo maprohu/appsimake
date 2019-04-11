@@ -49,62 +49,50 @@ fun DropdownMenu.messagingMenu(deps: HasKillsMessagingUix) {
 fun Node.messagingButton(deps: HasKillsMessagingUix) = with (deps) {
 
     widget.rx(deps) {
-        fun unsupported() =
-            document.div {
-                cls {
-                    m1
-                    textMuted
-                    textJustify
+        when (messaging.buttonState()) {
+            MessagingControl.State.Unsupported -> {
+                document.div {
+                    cls {
+                        m1
+                        textMuted
+                        textJustify
+                    }
+                    this %= "Notifications are not supported by your browser."
                 }
-                this %= "Notifications are not supported by your browser."
             }
-
-        if (!messaging.fcmSupported) {
-            unsupported()
-        } else {
-            notificationState().let { ns ->
-                when (ns) {
-                    NotificationState.Unsupported -> {
-                        unsupported()
+            MessagingControl.State.Denied -> {
+                document.div {
+                    cls {
+                        m1
+                        textMuted
+                        textJustify
                     }
-                    NotificationState.Denied -> {
-                        document.div {
-                            cls {
-                                m1
-                                textMuted
-                                textJustify
-                            }
-                            this %= "Notifications have been disabled by the user."
-                        }
-                    }
-                    else -> {
-                        messaging.notificationsEnabled().let { enabled ->
-                            if (enabled) {
-                                factory.button {
-                                    m1p2
-                                    secondary
-                                    text %= "Notifications Enabled"
-                                    icon.fa.comment
-                                    iconAndText
-                                    click(deps) {
-                                        messaging.disableNotifications()
-                                    }
-                                }.node
-                            } else {
-                                factory.button {
-                                    m1p2
-                                    secondary
-                                    text %= "Notifications Disabled"
-                                    icon.fa.commentSlash
-                                    iconAndText
-                                    click(deps) {
-                                        messaging.enableNotifications()
-                                    }
-                                }.node
-                            }
-                        }
-                    }
+                    this %= "Notifications have been disabled by the user."
                 }
+            }
+            MessagingControl.State.Enabled -> {
+                factory.button {
+                    m1p2
+                    secondary
+                    text %= "Notifications Enabled"
+                    icon.fa.comment
+                    iconAndText
+                    click(deps) {
+                        messaging.disableNotifications()
+                    }
+                }.node
+            }
+            MessagingControl.State.Disabled -> {
+                factory.button {
+                    m1p2
+                    secondary
+                    text %= "Notifications Disabled"
+                    icon.fa.commentSlash
+                    iconAndText
+                    click(deps) {
+                        messaging.enableNotifications()
+                    }
+                }.node
             }
         }
     }

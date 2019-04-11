@@ -1,8 +1,5 @@
 package commonfb.messaging
 
-import common.dyn
-import common.dynAlso
-import commonfb.isFcmSupported
 import commonshr.*
 import commonui.*
 import domx.LocalStorageValue
@@ -12,8 +9,6 @@ import firebase.messaging.Messaging
 import kotlinx.coroutines.await
 import kotlinx.coroutines.channels.Channel
 import rx.Var
-import rx.toRxSet
-import kotlin.js.Promise
 
 val deviceIdLocalStorageValue = LocalStorageValue.stringOpt("appsimake-device-id")
 
@@ -27,6 +22,38 @@ class MessagingControl(
     val deviceId = deviceIdLocalStorageValue.value ?: run {
         fcmTokensColl.randomDoc.id.also {
             deviceIdLocalStorageValue.value = it
+        }
+    }
+
+    sealed class GrantState {
+        object Unknown: GrantState()
+        object Ask: GrantState()
+        object Granted: GrantState()
+        object Denied: GrantState()
+        object Error: GrantState()
+    }
+
+    val grantState = Var<GrantState>(GrantState.Unknown)
+
+    sealed class State {
+        object Unsupported: State()
+        object Denied: State()
+        object Disabled: State()
+        object Enabled: State()
+    }
+
+    val buttonState = rx {
+        if (!fcmSupported) {
+            State.Unsupported
+        } else {
+            when (grantState()) {
+                GrantState.Denied -> State.Denied
+                GrantState.Granted -> {
+                    if (enabledLocalToken()) State.Enabled
+                    else State.Disabled
+                }
+                else -> State.Disabled
+            }
         }
     }
 
@@ -48,13 +75,9 @@ class MessagingControl(
         ownFcmToken().enabled()
     }
 
-    val enabledNonLocalTokens = rx {
-        enabledTokens().filter { t ->
-            t.idOrFail != deviceId
-        }
+    val isGranted = rx {
+        grantState() == GrantState.Granted
     }
-
-    val isGranted = rx { notificationState() == NotificationState.Granted }
 
     private fun disableNotifications(doc: DocSource<FcmToken>) = launchReport {
         txTry {
@@ -101,28 +124,23 @@ class MessagingControl(
         if (fcm != null) {
             launchReport {
                 try {
-                    try {
-                        fcm.requestPermission().await()
-                    } finally {
-                        updateNotificationState()
-                    }
-
-                    enableNotifications(fcm.getToken()!!.await())
+                    fcm.requestPermission().await()
+                    grantState %= GrantState.Granted
+                    enableNotifications(fcm.getToken()!!.await()!!)
                 } catch (e: dynamic) {
-                    reportd(e)
+                    grantState %= if (e.code == "messaging/permission-blocked") {
+                        GrantState.Denied
+                    } else {
+                        reportd(e)
+                        GrantState.Error
+                    }
                 }
             }
         }
     }
 
-    val notificationsEnabled = rx {
-        isGranted() && enabledLocalToken()
-    }
-
     val canEnable = rx {
-        fcmSupported && notificationState().let { ns ->
-            ns == NotificationState.Supported || ns == NotificationState.Granted
-        } && !enabledLocalToken()
+        buttonState() == State.Disabled
     }
 
     val canDisable = rx {
@@ -135,9 +153,35 @@ class MessagingControl(
 
     init {
         if (fcm != null) {
+            fcm.getToken().let { tokenPromise ->
+                if (tokenPromise == null) {
+                    grantState %= GrantState.Ask
+                } else {
+                    launchReport {
+                        grantState %= try {
+                            val firstToken = tokenPromise.await()
+
+                            if (firstToken != null) {
+                                GrantState.Granted
+                            } else {
+                                GrantState.Ask
+                            }
+                        } catch (e: dynamic) {
+                            if (e.code == "messaging/notifications-blocked") {
+                                GrantState.Denied
+                            } else {
+                                reportd(e)
+                                GrantState.Error
+                            }
+                        }
+
+                    }
+                }
+            }
+
             isGranted.forEachTrue {
                 CsKills(this).launchReport {
-                    val token = fcm.getToken()!!.await()
+                    val token = fcm.getToken()!!.await()!!
 
                     publishOnlineToken(token)
 
@@ -157,18 +201,19 @@ class MessagingControl(
                     )
 
                     for (e in revalidate) {
-                        val newToken = fcm.getToken()!!.await()
+                        val newToken = fcm.getToken()!!.await()!!
 
                         publishOnlineToken(newToken)
                     }
                 }
             }
 
+        } else {
+            rx { enabledLocalToken() }.forEachTrue {
+                disableNotifications()
+            }
         }
 
-        rx { !isGranted() && enabledLocalToken() }.forEachTrue {
-            disableNotifications()
-        }
     }
 
 

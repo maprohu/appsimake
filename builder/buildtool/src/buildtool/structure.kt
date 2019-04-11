@@ -21,7 +21,7 @@ object jquery : JsDownload(
 )
 
 
-val firebaseVersion = "5.8.2"
+val firebaseVersion = "5.9.2"
 val firebaseBaseName = "firebase-bower-$firebaseVersion"
 
 object firebaseSwJs : JsDownload(
