@@ -2,9 +2,11 @@ package tictactoefns
 
 import common.obj
 import commonfns.FnsDynamicOps
+import commonfns.encodeMessage
 import commonshr.*
 import commonshr.properties.readDynamic
 import firebaseadmin.admin
+import firebaseshr.encodeMessageData
 import kotlinx.coroutines.*
 import tictactoelib.*
 
@@ -61,12 +63,10 @@ fun init(exports: dynamic) {
                                             if (t != null) {
                                                 console.log("notifying token: ${qds.id}")
                                                 admin.messaging().send(
-                                                    obj {
-                                                        this.token = t
-                                                        data = obj {
-                                                            json = JSON.stringify(moveData.unsafeCast<Any?>())
-                                                        }
-                                                    }
+                                                    encodeMessage(
+                                                        t,
+                                                        moveData.unsafeCast<Any?>()
+                                                    )
                                                 ).await()
                                             }
                                         }

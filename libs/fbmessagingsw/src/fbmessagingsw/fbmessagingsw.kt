@@ -4,8 +4,9 @@ import common.obj
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asPromise
 import kotlinx.coroutines.async
+import kotlinx.coroutines.await
 import org.w3c.notifications.NotificationOptions
-import org.w3c.workers.ServiceWorkerGlobalScope
+import org.w3c.workers.*
 import kotlin.js.Promise
 
 val sw = js("self").unsafeCast<ServiceWorkerGlobalScope>()
@@ -49,6 +50,7 @@ var messageHandler : (dynamic) -> Promise<Any?> = { msg ->
     )
 }
 
+// https://github.com/firebase/firebase-js-sdk/blob/firebase%405.9.3/packages/messaging/src/controllers/sw-controller.ts
 fun main() {
 
     console.log("Updating service worker...")
@@ -58,3 +60,19 @@ fun main() {
     }
 
 }
+
+suspend fun clientList(): List<WindowClient> {
+    val arr = sw.clients.matchAll(
+        ClientQueryOptions(
+            type = ClientType.WINDOW,
+            includeUncontrolled = true
+        )
+    ).await() as Array<WindowClient>
+
+    return arr.filter { it.url.startsWith(sw.registration.scope) }
+}
+
+suspend fun firstClient() = clientList().firstOrNull()
+
+suspend fun focusOrOpenClient() =
+    firstClient()?.focus()?.await() ?: sw.clients.openWindow(sw.registration.scope).await()!!

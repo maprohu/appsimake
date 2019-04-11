@@ -275,6 +275,12 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function namedThis(fn) {
     return new NamedThisDelegate(fn);
   }
+  function get_varName$lambda(it) {
+    return it;
+  }
+  function get_varName() {
+    return named(get_varName$lambda);
+  }
   var jsNew = defineInlineFunction('appsimake-commonshr.common.jsNew_x7e9z0$', wrapFunction(function () {
     var Any = Object;
     var throwCCE = Kotlin.throwCCE;
@@ -8526,6 +8532,9 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$common.namedFn_z5kd8q$ = namedFn;
   package$common.namedLazy_cq6yhu$ = namedLazy;
   package$common.namedThis_5cxx4g$ = namedThis;
+  Object.defineProperty(package$common, 'varName', {
+    get: get_varName
+  });
   package$common.jsNew_x7e9z0$ = jsNew;
   package$common.jsNew_8jhc6t$ = jsNew_0;
   package$common.Listeners = Listeners;

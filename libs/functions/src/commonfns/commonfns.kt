@@ -5,7 +5,9 @@ import commonshr.Function
 import commonshr.properties.DynamicOps
 import commonshr.properties.TS
 import firebaseadmin.admin
+import firebaseadmin.messaging.Message
 import firebasefunctions.https.CallableContext
+import firebaseshr.encodeMessageData
 import firebaseshr.firestore.Timestamp
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asPromise
@@ -55,4 +57,12 @@ object FnsDynamicOps: DynamicOps {
         return TS.Value(d.unsafeCast<Timestamp>().toDate())
     }
 
+}
+
+fun encodeMessage(
+    token: String,
+    data: Any?
+) : Message = obj {
+    this.token = token
+    this.data = encodeMessageData(data)
 }

@@ -14,9 +14,10 @@ function define(args, fn) {
 
 define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_commonshr) {
   'use strict';
+  var common = $module$appsimake_commonshr.common;
+  var PropertyMetadata = Kotlin.PropertyMetadata;
   var Lib = $module$appsimake_commonshr.commonshr.Lib;
   var coll = $module$appsimake_commonshr.commonshr.coll_287e2$;
-  var PropertyMetadata = Kotlin.PropertyMetadata;
   var docRoot = $module$appsimake_commonshr.commonshr.docRoot_th1k7p$;
   var Kind_CLASS = Kotlin.Kind.CLASS;
   var wrapper = $module$appsimake_commonshr.commonshr.properties.wrapper_3yfn2g$;
@@ -56,6 +57,16 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   Move$Leave.prototype.constructor = Move$Leave;
   Move$Companion.prototype = Object.create(Move.prototype);
   Move$Companion.prototype.constructor = Move$Companion;
+  var GoOnline_metadata = new PropertyMetadata('GoOnline');
+  var GoOnline;
+  function get_GoOnline() {
+    return GoOnline.getValue_lrcp0p$(this, GoOnline_metadata);
+  }
+  var DisableNotifications_metadata = new PropertyMetadata('DisableNotifications');
+  var DisableNotifications;
+  function get_DisableNotifications() {
+    return DisableNotifications.getValue_lrcp0p$(this, DisableNotifications_metadata);
+  }
   var tictactoeLib;
   var players;
   var players_metadata = new PropertyMetadata('players');
@@ -391,6 +402,12 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     interfaces: [InboxPublic, RxRoot]
   };
   var package$tictactoelib = _.tictactoelib || (_.tictactoelib = {});
+  Object.defineProperty(package$tictactoelib, 'GoOnline', {
+    get: get_GoOnline
+  });
+  Object.defineProperty(package$tictactoelib, 'DisableNotifications', {
+    get: get_DisableNotifications
+  });
   Object.defineProperty(package$tictactoelib, 'tictactoeLib', {
     get: function () {
       return tictactoeLib;
@@ -428,6 +445,8 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
     get: Move$Companion_getInstance
   });
   package$tictactoelib.Move = Move;
+  GoOnline = common.varName.provideDelegate_n5byny$(this, GoOnline_metadata);
+  DisableNotifications = common.varName.provideDelegate_n5byny$(this, DisableNotifications_metadata);
   tictactoeLib = new Lib('tictactoe');
   players = coll();
   status = docRoot(GameStatus$Companion_getInstance().of);

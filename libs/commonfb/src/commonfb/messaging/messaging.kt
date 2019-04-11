@@ -153,6 +153,10 @@ class MessagingControl(
 
     init {
         if (fcm != null) {
+            fcm.onMessage {
+                console.dir(it.unsafeCast<Any>())
+            }
+
             fcm.getToken().let { tokenPromise ->
                 if (tokenPromise == null) {
                     grantState %= GrantState.Ask

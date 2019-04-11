@@ -61,6 +61,7 @@ fun <T> namedLazy(fn: (String) -> T) = namedFn { name ->
     }
 }
 fun <O, T> namedThis(fn: (O, String) -> T) = NamedThisDelegate(fn)
+val varName get() = named { it }
 
 //abstract class DynRx<T>(
 //    internal val o: dynamic,

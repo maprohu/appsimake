@@ -191,6 +191,7 @@ object testappsw : JsModule(
 object tictactoesw : JsModule(
     "libs/tictactoesw",
     listOf(
+        cachingsw,
         firebaseMessagingSw,
         tictactoelib
     )

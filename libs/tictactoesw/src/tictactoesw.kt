@@ -1,17 +1,20 @@
 package tictactoesw
 
-import common.obj
 import commonshr.properties.NoDynamicOps
-import fbmessagingsw.messageHandler
-import fbmessagingsw.messageTitle
-import fbmessagingsw.sw
+import fbmessagingsw.*
+import firebaseshr.decodeMessageData
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.w3c.notifications.NotificationAction
 import org.w3c.notifications.NotificationOptions
+import tictactoelib.DisableNotifications
+import tictactoelib.GoOnline
 import tictactoelib.Move
 
 fun main() {
 
     messageTitle = { msgIn ->
-        val d = JSON.parse<dynamic>(msgIn.data.json as String)
+        val d = decodeMessageData(msgIn)
         val move = Move.of(d, NoDynamicOps)
 
         val msg = when (move) {
@@ -30,18 +33,30 @@ fun main() {
             NotificationOptions(
                 tag = "tictactoe",
                 renotify = true,
-                data = obj<dynamic> {
-                    this.FCM_MSG = obj {
-                        this.data = msg
-                        this.notification = obj {
-                            this.click_action = sw.registration.scope
-                        }
-                    }
-                }.unsafeCast<Any?>()
+                actions = arrayOf(
+                    NotificationAction(
+                        "",
+                        "Show"
+                    ),
+                    NotificationAction(
+                        DisableNotifications,
+                        "Mute"
+                    )
+                )
             )
 
         )
     }
 
+    sw.onnotificationclick = { e ->
+        GlobalScope.launch {
+            focusOrOpenClient().let { cl ->
 
+                if (e.action == GoOnline) {
+
+                }
+
+            }
+        }
+    }
 }
