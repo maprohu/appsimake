@@ -23,17 +23,27 @@ object jquery : JsDownload(
 
 val firebaseVersion = "5.8.2"
 val firebaseBaseName = "firebase-bower-$firebaseVersion"
+
+object firebaseSwJs : JsDownload(
+    url = URL("https://codeload.github.com/firebase/firebase-bower/zip/v$firebaseVersion"),
+    fileName = "$firebaseBaseName-sw.zip",
+    extract = ExtractInfo(
+        name = "firebase-dist-sw",
+        jsPath = listOf(
+            "$firebaseBaseName/firebase-app.js",
+            "$firebaseBaseName/firebase-messaging.js"
+        )
+    )
+)
 object firebaseJs : JsDownload(
     url = URL("https://codeload.github.com/firebase/firebase-bower/zip/v$firebaseVersion"),
     fileName = "$firebaseBaseName.zip",
     extract = ExtractInfo(
         name = "firebase-dist",
         jsPath = listOf(
-            "$firebaseBaseName/firebase-app.js",
             "$firebaseBaseName/firebase-auth.js",
             "$firebaseBaseName/firebase-firestore.js",
             "$firebaseBaseName/firebase-functions.js",
-            "$firebaseBaseName/firebase-messaging.js",
             "$firebaseBaseName/firebase-storage.js"
         )
     )
@@ -249,11 +259,18 @@ object firebaseshr : JsModule(
     )
 )
 
+object firebaseswktjs : JsModule(
+    "libs/firebaseswktjs",
+    listOf(
+        firebaseSwJs,
+        firebaseshr
+    )
+)
 object firebasektjs : JsModule(
     "libs/firebasektjs",
     listOf(
-        firebaseJs,
-        firebaseshr
+        firebaseswktjs,
+        firebaseJs
     )
 )
 object firebaseuiktjs : JsModule(
@@ -275,8 +292,7 @@ object firebase : JsModule(
     listOf(
         commonshr,
         commonlib,
-        firebasektjs,
-        firebaseshr
+        firebasektjs
     )
 )
 

@@ -17,6 +17,7 @@ fun main() {
         indexeddb,
         domx,
         bootstrap,
+        firebaseswktjs,
         firebasektjs,
         firebaseuiktjs,
         firebaseui,

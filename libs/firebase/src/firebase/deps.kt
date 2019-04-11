@@ -49,6 +49,7 @@ interface HasDbKillsUser: HasDbKills, HasCsDbUser
 interface HasDbFcmKillsUser: HasDbKillsUser, HasFcm, HasDbFcmUser
 interface HasDbFcmUser: HasDbUser, HasFcm
 interface HasDbFcmKillsLibUser: HasDbFcmKillsUser, HasDbFcmLibUser
+interface HasDbKillsLibUser: HasDbKillsUser, HasDbLibUser
 interface HasDbLibUser: HasDbUser, HasLibUser
 interface HasLibUser: HasUser, HasLib
 interface HasDbFcmLibUser: HasDbFcmUser, HasDbLibUser

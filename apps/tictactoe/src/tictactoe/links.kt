@@ -27,7 +27,8 @@ class Links(
             this,
             lnk,
             deps.hole,
-            requestUser()
+            user = requestUser(),
+            fcm = fcmDeferred.await()
         ).apply {
             deps.hole %= this
         }

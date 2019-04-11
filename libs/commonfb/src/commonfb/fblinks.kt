@@ -17,6 +17,8 @@ import kotlin.coroutines.CoroutineContext
 import commonui.view.*
 import commonui.widget.Toaster
 import commonui.widget.toast
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 
 data class FbLinksDeps(
     val homeName: String,
@@ -111,6 +113,12 @@ abstract class FbLinksFactory(
             deps.auth,
             reporter = { e -> deps.toast { danger(e) } }
         ).forwarding(baseTC)
+    }
+
+    val fcmDeferred by lazy {
+        async {
+            createMessagingDeferred(deps.app)
+        }
     }
 
 

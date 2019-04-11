@@ -8,7 +8,7 @@ object firebaseMessagingSw : JsModule(
         "libs/fbmessagingsw"
     ).copy(
         deps = listOf(
-            firebasektjs
+            firebaseswktjs
         )
     )
 ) {

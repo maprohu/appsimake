@@ -8,6 +8,7 @@ import commonui.*
 import domx.LocalStorageValue
 import firebase.*
 import firebase.firestore.*
+import firebase.messaging.Messaging
 import kotlinx.coroutines.await
 import kotlinx.coroutines.channels.Channel
 import rx.Var
@@ -17,8 +18,11 @@ import kotlin.js.Promise
 val deviceIdLocalStorageValue = LocalStorageValue.stringOpt("appsimake-device-id")
 
 class MessagingControl(
-    deps: HasDbFcmKillsLibUser
-): CsKills(deps), HasDbFcmLibUser by deps, CsDbKillsApi {
+    deps: HasDbKillsLibUser,
+    val fcm: Messaging?
+): CsKills(deps), HasDbLibUser by deps, CsDbKillsApi {
+
+    val fcmSupported = fcm != null
 
     val deviceId = deviceIdLocalStorageValue.value ?: run {
         fcmTokensColl.randomDoc.id.also {
@@ -26,91 +30,116 @@ class MessagingControl(
         }
     }
 
-    val fcmTokens = fcmTokensColl.toList().allRx
-
     val ownFcmTokenDoc = fcmTokensColl.doc(deviceId)
 
     val ownFcmToken = ownFcmTokenDoc.docs().toRx(FcmToken())
 
-    val nonLocalTokens = rx {
-        fcmTokens().filterNot { t -> t.idOrFail != deviceId }
-    }
+    val fcmTokens = fcmTokensColl.toList().allRx
 
-    val onlineLocalToken = rx {
-        localToken()?.takeIf { lt ->
-            lt in allTokens()
+    val enabledTokens = rx {
+        fcmTokens().filter { t ->
+            t().enabled()
         }
     }
 
-    val hasOnlineLocalToken = rx { onlineLocalToken() != null }
-    val hasOnlineNonLocalTokens = rx { nonLocalTokens().isNotEmpty() }
+    val hasEnabledTokens = rx { enabledTokens().isNotEmpty() }
 
+    val enabledLocalToken = rx {
+        ownFcmToken().enabled()
+    }
+
+    val enabledNonLocalTokens = rx {
+        enabledTokens().filter { t ->
+            t.idOrFail != deviceId
+        }
+    }
 
     val isGranted = rx { notificationState() == NotificationState.Granted }
 
-    fun deleteOnlineToken(token: String): Promise<Unit> {
-        return fcmTokensDoc.ref.set(
-            dynAlso {
-                it[FcmTokens.tokens.name] = FieldValue.arrayRemove(token)
-            },
-            setOptionsMerge()
-        )
+    private fun disableNotifications(doc: DocSource<FcmToken>) = launchReport {
+        txTry {
+            doc.txSet(
+                doc.getOrDefault { FcmToken() }.doc.apply {
+                    enabled %= false
+                }
+            )
+        }
     }
 
-    fun publishOnlineToken(token: String): Promise<Unit> {
-        return fcmTokensDoc.ref.set(
-            dynAlso {
-                it[FcmTokens.tokens.name] = FieldValue.arrayUnion(token)
-            },
-            setOptionsMerge()
-        )
+    private suspend fun enableNotifications(token: String) {
+        txTry {
+            ownFcmTokenDoc.txSet(
+                ownFcmTokenDoc.getOrDefault { FcmToken() }.doc.apply {
+                    this.enabled %= true
+                    this.token %= token
+                }
+            )
+        }
     }
 
     fun disableNotifications() {
-        onlineLocalToken.now?.let { lt ->
-            launchReport {
-                deleteOnlineToken(lt)
-                localToken %= null
-            }
+        disableNotifications(ownFcmTokenDoc)
+    }
+
+    private fun publishOnlineToken(token: String) = launchReport {
+        txTry {
+            ownFcmTokenDoc.txSet(
+                ownFcmTokenDoc.getOrDefault { FcmToken() }.doc.apply {
+                    this.token %= token
+                }
+            )
         }
     }
 
-    fun disableAllNotifications(): Promise<Unit> {
-        return fcmTokensDoc.ref.set(
-            dyn()
-        )
+    fun disableAllNotifications() {
+        fcmTokens.now.forEach {
+            disableNotifications(it.docWrap)
+        }
     }
 
     fun enableNotifications() {
-        launchReport {
-            try {
+        if (fcm != null) {
+            launchReport {
                 try {
-                    fcm.requestPermission().await()
-                } finally {
-                    updateNotificationState()
+                    try {
+                        fcm.requestPermission().await()
+                    } finally {
+                        updateNotificationState()
+                    }
+
+                    enableNotifications(fcm.getToken()!!.await())
+                } catch (e: dynamic) {
+                    reportd(e)
                 }
-
-                localToken %= fcm.getToken()!!.await()
-
-            } catch (e: dynamic) {
-                reportd(e)
             }
         }
     }
 
+    val notificationsEnabled = rx {
+        isGranted() && enabledLocalToken()
+    }
+
+    val canEnable = rx {
+        fcmSupported && notificationState().let { ns ->
+            ns == NotificationState.Supported || ns == NotificationState.Granted
+        } && !enabledLocalToken()
+    }
+
+    val canDisable = rx {
+        enabledLocalToken()
+    }
+
+    val hasVisibleMenuItems = rx {
+        canEnable() || canDisable() || hasEnabledTokens()
+    }
+
     init {
-        if (isFcmSupported) {
-            rx {
-                localToken()?.takeIf {
-
-                }
-            }
+        if (fcm != null) {
             isGranted.forEachTrue {
-
-
-
-
                 CsKills(this).launchReport {
+                    val token = fcm.getToken()!!.await()
+
+                    publishOnlineToken(token)
 
                     val revalidate = Channel<Unit>(capacity = Channel.UNLIMITED)
 
@@ -130,30 +159,15 @@ class MessagingControl(
                     for (e in revalidate) {
                         val newToken = fcm.getToken()!!.await()
 
-                        txTry {
-                            val tokens = fcmTokensDoc.getOrDefault { FcmTokens() }.doc
-
-                            tokens.tokens.rxv.transform {
-                                it - currentToken + newToken
-                            }
-
-                            fcmTokensDoc.txSet(tokens)
-                        }
-
-                        localToken %= newToken
+                        publishOnlineToken(newToken)
                     }
                 }
             }
 
         }
 
-        rx {
-            onlineLocalToken()?.takeIf { lt ->
-                notificationState() != NotificationState.Granted
-            }
-        }.forEachNonNull { lt ->
-            globalStatus %= "Deleting FCM token..."
-            deleteOnlineToken(lt)
+        rx { !isGranted() && enabledLocalToken() }.forEachTrue {
+            disableNotifications()
         }
     }
 

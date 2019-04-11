@@ -1,6 +1,8 @@
 package tictactoe.active
 
 import commonfb.BackCsDbKillsUixApi
+import commonfb.HasMessaging
+import commonfb.KillsMessagingUixApi
 import commonshr.*
 import commonui.*
 import commonui.view.*
@@ -19,7 +21,13 @@ interface WaitingPath: ActivePath {
 class Waiting(
     parent: Active,
     val gs: GS.Waiting
-): ViewTC(parent), IViewTC, WaitingPath, ActivePath by parent, BackCsDbKillsUixApi, HasBack by parent {
+): ViewTC(parent),
+    IViewTC,
+    WaitingPath,
+    ActivePath by parent,
+    BackCsDbKillsUixApi, HasBack by parent,
+    KillsMessagingUixApi
+{
     override val waiting = this
     override val rawView = ui()
 

@@ -45,7 +45,15 @@ sealed class GS {
 class Active(
     from: LoggedIn,
     val linkage: Linkage
-): MultiViewTC(from), CsDbKillsApi, LinkPointItem, ActivePath, LoggedInPath by from, HasBackKillsRoutingTC, HasRoutingTC by from, HasBack by linkage {
+): MultiViewTC(from),
+    CsDbKillsApi,
+    LinkPointItem,
+    ActivePath,
+    LoggedInPath by from,
+    HasBackKillsRoutingTC,
+    HasRoutingTC by from,
+    HasBack by linkage
+{
     override val active: Active = this
 
 //    val gameStatus = loggedIn.statusDoc.docsOrNull.toRx(null)

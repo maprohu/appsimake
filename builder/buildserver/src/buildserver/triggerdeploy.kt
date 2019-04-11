@@ -10,6 +10,6 @@ fun run(path: String = "build") {
     ).startProcess()
 }
 
-fun main(args: Array<String>) {
+fun main() {
     run()
 }

@@ -1,15 +1,19 @@
 package commonfb
 
 import commonfb.editing.*
+import commonfb.messaging.*
 import commonfb.login.*
 import commonshr.*
 import commonshr.properties.RxBase
 import commonui.*
 import commonui.editing.CreatingTriggers
 import commonui.editing.EditingTriggers
+import commonui.widget.DropdownMenu
 import commonui.widget.Factory
 import firebase.CsDbKillsApi
 import firebase.DbKillsApi
+import firebase.KillsApiFirebase
+import org.w3c.dom.Node
 
 
 interface DbKillsApiCommonfb: DbKillsApi {
@@ -46,4 +50,9 @@ interface KillsLoginApi: Api, KillsApi, HasKillsLogin {
 
 
 interface KillsLoginUixApi: KillsLoginApi, KillsUixApi {
+}
+
+interface KillsMessagingUixApi: Api, HasKillsMessagingUix, KillsUixApi, KillsApiCommonui, KillsApiFirebase  {
+    val DropdownMenu.messagingMenu get() = messagingMenu(api)
+    val Node.messagingButton get() = messagingButton(api)
 }

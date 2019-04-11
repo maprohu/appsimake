@@ -2,6 +2,7 @@ package tictactoe.active
 
 import bootstrap.*
 import common.*
+import commonfb.isFcmSupported
 import commonshr.*
 import commonui.HasKillsUix
 import commonui.HasUix
@@ -19,12 +20,28 @@ fun Waiting.ui() = TopAndContent(
     topbar = factory.topbar {
         left.backButton
         title %= "Waiting Room"
-        right.button {
-            m1p2
-            fa.times
-            secondary
-            click {
-                goOffline()
+        right.buttonGroup {
+            m1
+            button {
+                p2
+                fa.times
+                secondary
+                click {
+                    goOffline()
+                }
+            }
+            dropdownSplit {
+                visible {
+                    messaging.hasVisibleMenuItems()
+                }
+                secondary
+            }
+            menu {
+                visible {
+                    messaging.hasVisibleMenuItems()
+                }
+                right
+                messagingMenu
             }
         }
     }.node,
@@ -46,6 +63,7 @@ fun Waiting.ui() = TopAndContent(
                     cls.m1
                     this %= "Waiting for Opponent..."
                 }
+                messagingButton
             }
 
         }

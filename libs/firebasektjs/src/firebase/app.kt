@@ -9,15 +9,15 @@ import firebase.messaging.Messaging
 import firebase.storage.Storage
 
 // https://firebase.google.com/docs/reference/js/firebase.app.App
-external interface App {
-    val options: AppOptions
+external interface App: AppSw {
     // https://firebase.google.com/docs/reference/js/firebase.app.App#auth
     fun auth(): Auth
-    fun messaging() : Messaging
     fun functions() : Functions
     fun storage(): Storage
     fun firestore(): Firestore
 }
+
+
 
 
 

@@ -2,9 +2,11 @@ package commonfb
 
 import common.obj
 import commonshr.Function
+import commonshr.reportd
 import commonui.APP
 import commonui.isServiceWorkerSupported
 import firebase.AppOptions
+import firebase.app.App
 import firebase.firestore.*
 import firebase.functions.Functions
 import firebase.functions.HttpsCallableResult
@@ -12,13 +14,30 @@ import firebase.messaging.Messaging
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.await
+import kotlinx.coroutines.launch
 import kotlin.js.Promise
 
 val isFcmSupported by lazy {
     isServiceWorkerSupported
 }
 
+suspend fun createMessagingDeferred(app: App): Messaging? {
+    return try {
+        val msg = app.messaging()
+        msg.apply {
+            APP.registerServiceWorker()?.let { r ->
+                useServiceWorker(r)
+            }
+            usePublicVapidKey("BOgqeELuJyp5wv-HiXzqLsxA2tqGboVZRZdrHTDnrN_DzCCJYuMA_pVBQYB0afOFvtTXSUdHi20NuNGmmtP0fvU")
+        }
+    } catch (e: dynamic) {
+        reportd(e)
+        null
+    }
+}
+
 object FB {
+
 
     val app by lazy {
         firebase.initializeApp(
@@ -30,7 +49,7 @@ object FB {
                 storageBucket = "appsimake.appspot.com"
                 messagingSenderId = "850641545175"
             }
-        )
+        ).unsafeCast<App>()
     }
 
     val db by lazy {
@@ -43,16 +62,11 @@ object FB {
 
     private val messagingDeferred by lazy {
         GlobalScope.async {
-            val msg = app.messaging()
-            APP.registerServiceWorker()?.let { r ->
-                msg.useServiceWorker(r)
-            }
-            msg.usePublicVapidKey("BOgqeELuJyp5wv-HiXzqLsxA2tqGboVZRZdrHTDnrN_DzCCJYuMA_pVBQYB0afOFvtTXSUdHi20NuNGmmtP0fvU")
-            msg
+            createMessagingDeferred(app)
         }
     }
 
-    suspend fun messaging(): Messaging {
+    suspend fun messaging(): Messaging? {
         return messagingDeferred.await()
     }
 
