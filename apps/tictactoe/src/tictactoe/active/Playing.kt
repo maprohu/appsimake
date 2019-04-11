@@ -139,7 +139,7 @@ class OnlineBoardControl(
         }
 
         private fun process(move: Move<*>) {
-            globalStatus %= "Processing move: ${move.type.now}"
+//            globalStatus %= "Processing move: ${move.type.now}"
 
             when (move) {
                 is Move.Start -> {
@@ -198,7 +198,7 @@ class OnlineBoardControl(
                     .map { it.item.rxv.now }
 
                 for (move in moves) {
-                    globalStatus %= "Received move: ${move.type.now}"
+//                    globalStatus %= "Received move: ${move.type.now}"
                     moveProc.add(move)
                 }
             }

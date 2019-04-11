@@ -74,7 +74,7 @@ fun <T> Firestore.txDefer(fn: suspend (Transaction) -> T) : Deferred<T> {
 }
 
 suspend fun <T> Firestore.tx(fn: suspend (Transaction) -> T) : T = txDefer(fn).await()
-suspend fun <T> Firestore.txTry(fn: suspend (Transaction) -> T) : Try<T> = Try { tx(fn) }.reported()
+suspend fun <T> Firestore.txTry(fn: suspend (Transaction) -> T) : Try<T> = Try { tx(fn) }//.reported()
 
 fun <T> Try<T>.onRollback(fn: () -> T) : T = fold({ if (it is RollbackException) fn() else throw it }, { it })
 inline fun <T> Try<T>.onSuccess(fn: (T) -> Unit) = map { t -> fn(t); t }

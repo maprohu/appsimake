@@ -10,27 +10,10 @@ import kotlin.browser.window
 
 fun main() {
 
-    GlobalScope.launch {
-        APP.registerServiceWorker()?.also { sw ->
-            sw.showNotification(
-                "hello",
-                NotificationOptions(
-                    actions = arrayOf(
-                        NotificationAction(
-                            "",
-                            "boo"
-                        ),
-                        NotificationAction(
-                            "boo2",
-                            "boo2"
-                        )
-                    )
 
-                )
-            )
+    FbLinksFactory.start {
+        Links(it).apply {
         }
     }
-
-    FbLinksFactory.start { Links(it) }
 }
 

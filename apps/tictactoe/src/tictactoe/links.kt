@@ -1,5 +1,6 @@
 package tictactoe
 
+import common.listenAs
 import commonfb.FbLinksDeps
 import commonfb.FbLinksFactory
 import commonui.view.forwarding
@@ -9,10 +10,14 @@ import firebase.firestore.rollback
 import firebase.firestore.txTry
 import killable.Killables
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.Channel
+import org.w3c.dom.MessageEvent
 import tictactoe.active.Active
 import tictactoe.loggedin.LoggedIn
 import tictactoe.singleplayer.SinglePlayer
 import tictactoelib.GameStatus
+import tictactoelib.MessageType
+import kotlin.browser.window
 
 interface LinksPath: DbApi {
     val links: Links
@@ -21,6 +26,14 @@ class Links(
     deps: FbLinksDeps
 ): FbLinksFactory(deps), LinksPath {
     override val links = this
+
+    val messages = Channel<MessageType>(Channel.UNLIMITED)
+
+    init {
+        window.navigator.serviceWorker.listenAs<MessageEvent>("message") { e ->
+            messages.offer(e.data as MessageType)
+        }
+    }
 
     override val home = root { lnk ->
         LoggedIn(

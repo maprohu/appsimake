@@ -2,8 +2,11 @@ package tictactoesw
 
 import commonshr.properties.NoDynamicOps
 import fbmessagingsw.*
+import firebaseshr.decodeMessage
 import firebaseshr.decodeMessageData
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.asPromise
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.w3c.notifications.NotificationAction
 import org.w3c.notifications.NotificationOptions
@@ -14,7 +17,7 @@ import tictactoelib.Move
 fun main() {
 
     messageTitle = { msgIn ->
-        val d = decodeMessageData(msgIn)
+        val d = decodeMessage(msgIn)
         val move = Move.of(d, NoDynamicOps)
 
         val msg = when (move) {
@@ -49,14 +52,22 @@ fun main() {
     }
 
     sw.onnotificationclick = { e ->
-        GlobalScope.launch {
-            focusOrOpenClient().let { cl ->
-
-                if (e.action == GoOnline) {
-
+        e.waitUntil(
+            GlobalScope.async {
+                focusOrOpenClient().let { cl ->
+                    when (e.action) {
+                        "" -> {
+                            cl.postMessage(GoOnline)
+                        }
+                        DisableNotifications -> {
+                            cl.postMessage(DisableNotifications)
+                        }
+                        else -> {
+                            console.dir(e)
+                        }
+                    }
                 }
-
-            }
-        }
+            }.asPromise()
+        )
     }
 }

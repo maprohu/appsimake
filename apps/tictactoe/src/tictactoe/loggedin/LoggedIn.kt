@@ -65,5 +65,16 @@ class LoggedIn(
     }
 
     override val rawView: TopAndContent = ui()
+
+    init {
+        launchReport {
+            for (e in links.messages) {
+                when (e) {
+                    GoOnline ->
+                }
+
+            }
+        }
+    }
 }
 
