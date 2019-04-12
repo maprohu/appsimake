@@ -177,12 +177,22 @@ object commonui : JsModule(
     )
 )
 
+object fbmessagingsw : JsModule(
+    JsModuleConfig(
+        "libs/fbmessagingsw"
+    ).copy(
+        deps = listOf(
+//            firebaseshr
+            firebaseswktjs
+        )
+    )
+)
 
 object testappsw : JsModule(
     "libs/testappsw",
     listOf(
         cachingsw,
-        firebaseMessagingSw,
+        fbmessagingsw,
         testapplib
     )
 )
@@ -191,7 +201,7 @@ object tictactoesw : JsModule(
     "libs/tictactoesw",
     listOf(
         cachingsw,
-        firebaseMessagingSw,
+        fbmessagingsw,
         tictactoelib
     )
 )

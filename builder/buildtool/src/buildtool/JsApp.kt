@@ -74,7 +74,7 @@ data class JsAppConfig(
     val title: String,
 //    val css: List<Res>,
 //    val deps: List<JsDep> = listOf(),
-    val serviceWorker: JsModule = firebaseMessagingSw,
+    val serviceWorker: JsModule = fbmessagingsw,
     val icon192: String? = null,
     val icon512: String? = null
 ) {
@@ -84,7 +84,7 @@ data class JsAppConfig(
         title: String,
         css: List<Res>,
         deps: List<JsDep> = listOf(),
-        serviceWorker: JsModule = firebaseMessagingSw
+        serviceWorker: JsModule = fbmessagingsw
     ): this(
         JsModuleConfig(
             path
@@ -100,7 +100,7 @@ data class JsAppConfig(
         path: String,
         title: String,
         deps: List<JsDep> = listOf(),
-        serviceWorker: JsModule = firebaseMessagingSw
+        serviceWorker: JsModule = fbmessagingsw
     ) : this(path, title, listOf(), deps, serviceWorker)
 
 }
@@ -114,7 +114,7 @@ open class JsApp(
         title: String,
         css: List<Res>,
         deps: List<JsDep> = listOf(),
-        serviceWorker: JsModule = firebaseMessagingSw
+        serviceWorker: JsModule = fbmessagingsw
     ): this(
         JsAppConfig(
             JsModuleConfig(
@@ -132,7 +132,7 @@ open class JsApp(
         path: String,
         title: String,
         deps: List<JsDep> = listOf(),
-        serviceWorker: JsModule = firebaseMessagingSw
+        serviceWorker: JsModule = fbmessagingsw
     ) : this(path, title, listOf(), deps, serviceWorker)
 
     val testHtml by task {

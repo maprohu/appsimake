@@ -27,7 +27,7 @@ fun main() {
         commonfb,
         functions,
         cachingsw,
-        firebaseMessagingSw,
+        fbmessagingsw,
         testappsw,
         tictactoesw,
 

@@ -74,7 +74,7 @@ class LoggedIn(
             }
 
             launchReport {
-                for (e in links.messages) {
+                for (e in links.messages.await()) {
                     when (e) {
                         GoOnline -> links.online.load(EmptyHashStruct, 0)?.redisplay?.invoke()
                         DisableNotifications -> messaging.disableNotifications()

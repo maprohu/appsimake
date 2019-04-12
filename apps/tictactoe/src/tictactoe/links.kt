@@ -14,6 +14,7 @@ import firebase.firestore.rollback
 import firebase.firestore.txTry
 import killable.Killables
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import org.w3c.dom.MessageEvent
@@ -34,7 +35,10 @@ class Links(
     override val links = this
 
     val messages by lazy {
-        libMessages<MessageType>()
+        async {
+            libMessages<MessageType>(fcmDeferred.await())
+
+        }
     }
 
     override val home = root { lnk ->

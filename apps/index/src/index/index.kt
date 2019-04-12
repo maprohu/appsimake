@@ -13,6 +13,8 @@ import svgx.*
 import kotlin.browser.document
 
 fun main() {
-
-    FbLinksFactory.start(false) { Links(it) }
+    FbLinksFactory.start(
+        Lib("index"),
+        false
+    ) { Links(it) }
 }

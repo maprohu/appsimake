@@ -249,15 +249,21 @@ class MessagingControl(
 }
 
 
-fun <T> HasKillsLib.libMessages(): ReceiveChannel<T> {
+fun <T> HasKillsLib.libMessages(fcmOpt: Messaging?): ReceiveChannel<T> {
 
     val ch = Channel<T>(Channel.UNLIMITED)
 
-    window.navigator.serviceWorker.on<MessageEvent>(this, "message") { e ->
-        val msgData = e.data.unsafeCast<LibMessageWithData<T>?>()
+    fcmOpt?.let { fcm ->
+        window.navigator.serviceWorker.on<MessageEvent>(this, "message") { e ->
+            val msgData = e.data.unsafeCast<LibMessageWithData<T>?>()
 
-        if (msgData != null && msgData.appsimakeApp == lib.name) {
-            ch.offer(msgData.data)
+            if (msgData != null && msgData.appsimakeApp == lib.name) {
+                ch.offer(msgData.data)
+            }
+        }
+
+        kills += fcm.onMessage {
+            console.dir(it)
         }
     }
 
