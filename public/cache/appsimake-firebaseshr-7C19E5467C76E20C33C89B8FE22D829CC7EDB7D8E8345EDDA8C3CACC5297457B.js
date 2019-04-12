@@ -1,18 +1,10 @@
-function define(args, fn) {
-    fn(
-        ...args.map(function(a) {
-            if (a == 'exports') {
-                return module.exports;
-            } else if (a.startsWith('appsimake-')) {
-                return require('./' + a);
-            } else {
-                return require(a);
-            }
-        })
-    );
+if (typeof kotlin === 'undefined') {
+  throw new Error("Error loading module 'appsimake-firebaseshr'. Its dependency 'kotlin' was not found. Please, check whether 'kotlin' is loaded prior to 'appsimake-firebaseshr'.");
 }
-
-define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_commonshr) {
+if (typeof this['appsimake-commonshr'] === 'undefined') {
+  throw new Error("Error loading module 'appsimake-firebaseshr'. Its dependency 'appsimake-commonshr' was not found. Please, check whether 'appsimake-commonshr' is loaded prior to 'appsimake-firebaseshr'.");
+}
+this['appsimake-firebaseshr'] = function (_, Kotlin, $module$appsimake_commonshr) {
   'use strict';
   var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var Kind_CLASS = Kotlin.Kind.CLASS;
@@ -53,4 +45,4 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   package$firebaseshr.postLibMessage_q9pn7$ = postLibMessage;
   Kotlin.defineModule('appsimake-firebaseshr', _);
   return _;
-});
+}(typeof this['appsimake-firebaseshr'] === 'undefined' ? {} : this['appsimake-firebaseshr'], kotlin, this['appsimake-commonshr']);

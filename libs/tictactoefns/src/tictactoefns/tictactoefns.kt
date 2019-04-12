@@ -64,6 +64,7 @@ fun init(exports: dynamic) {
                                                 console.log("notifying token: ${qds.id}")
                                                 admin.messaging().send(
                                                     encodeMessage(
+                                                        tictactoeLib,
                                                         t,
                                                         moveData.unsafeCast<Any?>()
                                                     )

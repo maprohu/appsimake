@@ -1,7 +1,9 @@
 package commonfb
 
+import common.AsyncListeners
 import commonfb.fwdlogin.FwdLogin
 import commonfb.loginbase.*
+import commonshr.*
 import commonui.*
 import commonui.links.*
 import commonui.widget.BodyTC
@@ -17,10 +19,13 @@ import kotlin.coroutines.CoroutineContext
 import commonui.view.*
 import commonui.widget.Toaster
 import commonui.widget.toast
+import firebase.User
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import rx.Var
 
 data class FbLinksDeps(
+    override val lib: Lib,
     val homeName: String,
     override val kills: KillSet,
     override val coroutineContext: CoroutineContext,
@@ -28,7 +33,7 @@ data class FbLinksDeps(
     override val db: Firestore,
     val hole: SimpleRoutingHole<TopAndContent>,
     override val toaster: Toaster
-): HasCsDbKillsToast {
+): HasCsDbKillsLibToast {
     val auth = app.auth()
 }
 
@@ -42,10 +47,11 @@ interface FbLinksApi: DbApi, HasToast, HasLogin
 
 abstract class FbLinksFactory(
     val deps: FbLinksDeps
-) : LinksFactory(deps.homeName), HasCsDbKillsToast by deps, HasLogin {
+) : LinksFactory(deps.homeName), HasCsDbKillsLibToast by deps, HasLogin {
 
     companion object {
         fun start(
+            lib: Lib,
             persistentDb: Boolean = true,
             homeName: String = "home",
             fn: suspend (FbLinksDeps) -> FbLinksFactory
@@ -56,6 +62,7 @@ abstract class FbLinksFactory(
 
                 val links = fn(
                     FbLinksDeps(
+                        lib,
                         homeName,
                         kills,
                         coroutineContext,
@@ -93,9 +100,14 @@ abstract class FbLinksFactory(
     override val userState: RxIface<UserState> = userProvider.state
     suspend fun requestUser() = userProvider.requireUser()
 
+    val signOutListeners = AsyncListeners()
+
     suspend fun signOut() {
         globalStatus %= "Signing out..."
         deps.hole.hourglass()
+
+        signOutListeners.fire()
+
         deps.auth.signOut().await()
         userProvider.signOut()
     }
@@ -121,9 +133,19 @@ abstract class FbLinksFactory(
         }
     }
 
+    val authState: RxIface<UserState> by lazy {
+        val rxv = Var<UserState>(UserState.Unknown)
 
+        kills += deps.auth.onAuthStateChanged(
+            next = {
+                rxv %= UserState.of(it)
+            },
+            error = {
+                report(it)
+            }
+        )
 
-
-
+        rxv
+    }
 
 }

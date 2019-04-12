@@ -36,7 +36,7 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'appsimake-commonshr', 'f
   var readDynamic = $module$appsimake_commonshr.commonshr.properties.readDynamic_121my8$;
   var Unit = Kotlin.kotlin.Unit;
   var firebaseadmin = $module$appsimake_functions.firebaseadmin;
-  var encodeMessage = $module$appsimake_functions.commonfns.encodeMessage_4w9ihe$;
+  var encodeMessage = $module$appsimake_functions.commonfns.encodeMessage_lvye6n$;
   var COROUTINE_SUSPENDED = Kotlin.kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED;
   var CoroutineImpl = Kotlin.kotlin.coroutines.CoroutineImpl;
   var async = $module$kotlinx_coroutines_core.kotlinx.coroutines.async_pda6u4$;
@@ -131,7 +131,7 @@ define(['exports', 'kotlin', 'appsimake-tictactoelib', 'appsimake-commonshr', 'f
               if (t != null) {
                 console.log('notifying token: ' + qds.id);
                 this.state_0 = 5;
-                this.result_0 = await_0(firebaseadmin.admin.messaging().send(encodeMessage(t, this.local$moveData)), this);
+                this.result_0 = await_0(firebaseadmin.admin.messaging().send(encodeMessage(tictactoelib.tictactoeLib, t, this.local$moveData)), this);
                 if (this.result_0 === COROUTINE_SUSPENDED)
                   return COROUTINE_SUSPENDED;
                 continue;

@@ -57,6 +57,7 @@ interface KillsApi: Api, HasKills {
     fun <T> EmitterFn<T>.listen(callback: (T) -> Unit) = listen(api, callback)
     operator fun <T> EmitterFn<T>.plusAssign(fn: (T) -> Unit) { listen(fn) }
 
+    fun <T> AddRemoveImpl<T>.register(item: T) = register(api, item)
 
 //    operator fun Slot.remAssign(fn: RxIface<Node?>) {
 //        fn.forEach { this@remAssign %= it }

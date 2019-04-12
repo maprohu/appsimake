@@ -4,6 +4,7 @@ import commonshr.properties.NoDynamicOps
 import fbmessagingsw.*
 import firebaseshr.decodeMessage
 import firebaseshr.decodeMessageData
+import firebaseshr.postLibMessage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asPromise
 import kotlinx.coroutines.async
@@ -13,6 +14,7 @@ import org.w3c.notifications.NotificationOptions
 import tictactoelib.DisableNotifications
 import tictactoelib.GoOnline
 import tictactoelib.Move
+import tictactoelib.tictactoeLib
 
 fun main() {
 
@@ -38,7 +40,7 @@ fun main() {
                 renotify = true,
                 actions = arrayOf(
                     NotificationAction(
-                        "",
+                        GoOnline,
                         "Show"
                     ),
                     NotificationAction(
@@ -56,11 +58,11 @@ fun main() {
             GlobalScope.async {
                 focusOrOpenClient().let { cl ->
                     when (e.action) {
-                        "" -> {
-                            cl.postMessage(GoOnline)
+                        "", GoOnline -> {
+                            cl.postLibMessage(tictactoeLib, GoOnline)
                         }
                         DisableNotifications -> {
-                            cl.postMessage(DisableNotifications)
+                            cl.postLibMessage(tictactoeLib, DisableNotifications)
                         }
                         else -> {
                             console.dir(e)

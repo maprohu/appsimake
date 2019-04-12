@@ -2,14 +2,11 @@ package common
 
 import commonshr.*
 import killable.*
+import kotlinx.coroutines.*
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.launch
 import rx.*
 
 @Suppress("NOTHING_TO_INLINE")
@@ -63,165 +60,6 @@ fun <T> namedLazy(fn: (String) -> T) = namedFn { name ->
 fun <O, T> namedThis(fn: (O, String) -> T) = NamedThisDelegate(fn)
 val varName get() = named { it }
 
-//abstract class DynRx<T>(
-//    internal val o: dynamic,
-//    val name: String,
-//    internal val gs: GetSet<T>,
-//    val defaultValue: Optional<T>
-//) : ReadOnlyProperty<Any, T> {
-//    abstract val rxv: RxVal<T>
-//    fun extract(): T = gs.get(o[name])
-//    override fun getValue(thisRef: Any, property: KProperty<*>): T = rxv.now
-//    val original = Var(gs.opt(o, name))
-//    val isDirty by lazy { Rx { rxv() != original() } }
-//    fun clearDirty() { original.now = Some(rxv.now) }
-//}
-//
-//class Dyn<T>(
-//    o: dynamic,
-//    name: String,
-//    gs: GetSet<T>
-//) : DynRx<T>(o, name, gs), ReadWriteProperty<Any, T> {
-//    private var onUpdate : (T) -> Unit = {}
-//    override val rxv : RxVal<T> by lazy {
-//        val v = Var(getValue())
-//        onUpdate = { v.now = it }
-//        v
-//    }
-//
-//    override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
-//        o[property.name] = gs.set(value)
-//        onUpdate(value)
-//    }
-//}
-//
-//
-//class AutoDyn<T>(
-//    o: dynamic,
-//    name: String,
-//    gs: GetSet<T>,
-//    fn: () -> T
-//) : DynRx<T>(o, name, gs) {
-//    override val rxv: RxVal<T> by lazy {
-//        val rxv = Rx { fn() }
-//        rxv.forEach {
-//            o[name] = gs.set(it)
-//        }
-//        rxv
-//    }
-//}
-//
-//class Binder<T>(
-//    private val wrap: Wrap<*>,
-//    private val o: dynamic,
-//    private val getSet: GetSet<T> = GetSet(),
-//    private val init : (String) -> Unit
-//) {
-//    operator fun provideDelegate(
-//        thisRef: Any,
-//        prop: KProperty<*>
-//    ): ReadWriteProperty<Any, T> {
-//        init(prop.name)
-//        return Dyn(o, prop.name, getSet).also { wrap.add(it) }
-//    }
-//}
-//
-//class AutoBinder<T>(
-//    private val wrap: Wrap<*>,
-//    private val o: dynamic,
-//    private val getSet: GetSet<T> = GetSet(),
-//    private val fn : () -> T
-//) {
-//    operator fun provideDelegate(
-//        thisRef: Any,
-//        prop: KProperty<*>
-//    ) = AutoDyn(o, prop.name, getSet, fn).also { wrap.add(it) }
-//}
-//
-//interface GetSet<T> {
-//    fun get(v: dynamic) : T = v.unsafeCast<T>()
-//    fun set(v: T) : dynamic = v.asDynamic()
-//    fun opt(o: dynamic, name: String) = if (hasOwnProperty(o, name)) Some(get(o[name])) else None
-//
-//    companion object : GetSet<Any>
-//}
-//
-//@Suppress("NOTHING_TO_INLINE", "UNCHECKED_CAST", "FunctionName")
-//inline fun <T> GetSet() = GetSet as GetSet<T>
-//
-//inline fun <reified T: Enum<T>> enumGetSet() = object : GetSet<T> {
-//    override fun set(v: T) = v.name
-//    override fun get(v: dynamic) = enumValueOf<T>(v.unsafeCast<String>())
-//}
-//
-//@Suppress("unused")
-//class Prop<in T, out R>(
-//    val name: String
-//)
-//val <T, R> KProperty1<T, R>.cast
-//    get() = Prop<T, R>(name)
-//
-//abstract class Wrap<W: Wrap<W>>(o: dynamic) {
-//
-//    // KProperty.getDelegate is not yet supported in javascript...
-//    internal val props = mutableMapOf<String, DynRx<*>>()
-//    private var isFrozen = false
-//    private fun freeze() {
-//        isFrozen = true
-//    }
-//    private val dyns by lazy {
-//        freeze()
-//        props.values.filterIsInstance<Dyn<*>>()
-//    }
-//    internal fun <T> add(p: DynRx<T>) {
-//        require(!isFrozen)
-//        props[p.name] = p
-//    }
-//
-//    private val w = o ?: obj()
-//
-//    private val propInit : (String, GetSet<Any?>, Any?) -> Unit =
-//        if (o != null) {
-//            { n, gs, v ->
-//                if (w[n] == null) w[n] = gs.set(v)
-//            }
-//        } else {
-//            { n, gs, v ->
-//                w[n] = gs.set(v)
-//            }
-//        }
-//
-//    protected fun <T> dyn(gs: GetSet<T> = GetSet()) = Binder(this, w, gs) {}
-//    protected fun <T> dyn(v: T, gs: GetSet<T> = GetSet()) = Binder(this, w, gs) { propInit(it, gs as GetSet<Any?>, v) }
-//    protected inline fun <reified T: Enum<T>> enum() = dyn<T>(enumGetSet())
-//    protected inline fun <reified T: Enum<T>> enum(v: T) = dyn(v, enumGetSet())
-//    fun <T> auto(gs: GetSet<T> = GetSet(), fn: Wrap<W>.() -> T) = AutoBinder(this, w, gs) { fn(this) }
-//
-//
-//    fun <T> Prop<W, T>.prop() = props.getValue(name) as DynRx<T>
-//    fun <T> KProperty1<W, T>.prop() = cast.prop()
-//    fun <T> KProperty1<W, T>.rxv() = prop().rxv()
-//
-//
-//    val type : String by dyn(this::class.simpleName!!)
-//
-//    val isDirty by lazy {
-//        freeze()
-//        Rx {
-//            dyns.any { it.isDirty() }
-//        }
-//    }
-//
-//    fun clearDirty() {
-//        dyns.forEach { it.clearDirty() }
-//    }
-//
-//}
-//
-//fun <W: Wrap<W>, T> W.prop(p: Prop<W, T>) = props.getValue(p.name) as DynRx<T>
-
-
-
 @Suppress("UNUSED_PARAMETER", "SpellCheckingInspection", "NOTHING_TO_INLINE")
 inline fun <T : Any> jsNew(
     constr: JsClass<T>
@@ -234,30 +72,30 @@ inline fun <T : Any> jsNew(
 ) : T = js("new constr(param)") as T
 
 
-open class Listeners {
+open class Listeners: AddRemoveImpl<Trigger>() {
 
     val trigger : Trigger = { fire() }
 
-    protected var listeners = listOf<() -> Unit>()
-
-    operator fun invoke(listener: () -> Unit) {
-        add(listener)
-    }
-
-    operator fun plusAssign(listener: () -> Unit) {
-        add(listener)
-    }
-
-    open fun add(listener: () -> Unit) : () -> Unit {
-        listeners += listener
-
-        return {
-            listeners -= listener
-        }
-    }
+//    protected var listeners = listOf<() -> Unit>()
+//
+//    operator fun invoke(listener: () -> Unit) {
+//        add(listener)
+//    }
+//
+//    operator fun plusAssign(listener: () -> Unit) {
+//        add(listener)
+//    }
+//
+//    open fun add(listener: () -> Unit) : () -> Unit {
+//        listeners += listener
+//
+//        return {
+//            listeners -= listener
+//        }
+//    }
 
     open fun fire() {
-        listeners.forEach { it() }
+        items.forEach { it() }
     }
 
     val first: Deferred<Unit>
@@ -293,61 +131,6 @@ fun <T> EmitterIface<T>.withInitial(initial: () -> Iterable<T>) = object: Emitte
     }
 }
 
-//interface AsyncEmitter<T> {
-//    fun poll(): T?
-//    suspend fun receive(): T
-//}
-//fun <T> emptyAsyncEmitter() = object : AsyncEmitter<T> {
-//    override fun poll(): T? = null
-//
-//    override suspend fun receive(): T = CompletableDeferred<T>().await()
-//}
-//
-//class DynamicAsyncEmitter<T>(
-//    ks: KillSet,
-//    initial: AsyncEmitter<T>
-//): AsyncEmitter<T> {
-//    override fun poll(): T? {
-//        return current.poll()
-//    }
-//
-//    private val cds = mutableListOf<CompletableDeferred<T>>()
-//
-//    private fun CompletableDeferred<T>.listen() {
-//        val cd = this
-//        val c = current
-//        GlobalScope.launch {
-//            val p = c.receive()
-//            if (!cd.isCompleted) {
-//                cd.complete(p)
-//            }
-//            cds -= cd
-//        }
-//    }
-//    override suspend fun receive(): T {
-//        val cd = CompletableDeferred<T>()
-//        cds += cd
-//        cd.listen()
-//        return cd.await()
-//    }
-//
-//
-//    val kseq = ks.seq()
-//    private var current = initial
-//
-//    fun setCurrent(c: AsyncEmitter<T>, kill: Trigger) {
-//        kseq %= kill
-//        current = c
-//        cds.forEach { it.listen() }
-//    }
-//
-//    init {
-//        ks += {
-//            current = emptyAsyncEmitter()
-//        }
-//    }
-//
-//}
 
 open class Emitter<T>(
     val first: () -> Iterable<T> = ::emptyList
@@ -370,16 +153,6 @@ open class Emitter<T>(
     }
 
 }
-
-//fun <T> Emitter<SetMove<T>>.toSetSource(sfn: () -> Set<T>) = object : SetSource<T> {
-//    override val current: Set<T>
-//        get() = sfn()
-//
-//    override fun listen(ks: KillSet, fn: (SetMove<T>) -> Unit): Set<T> {
-//        ks += (this@toSetSource.add(fn))
-//        return sfn()
-//    }
-//}
 
 class MappedEmitter<T, S>(
     private val emitter: EmitterIface<T>,
@@ -443,116 +216,6 @@ fun <T> EmitterIface<SetMove<T>>.filtered(ks: Killables, rxfn: (T) -> Boolean): 
     return f
 }
 
-//fun <T> combineAnd(
-//    ks: Killables,
-//    e1: EmitterIface<SetMove<T>>,
-//    e2: EmitterIface<SetMove<T>>
-//): EmitterIface<SetMove<T>> = combine(ks, e1, e2, Boolean::and)
-//
-//fun <T> combineN(
-//    ks: Killables,
-//    pairs: Iterable<Pair<EmitterIface<SetMove<T>>, MutableSet<T>>>,
-//    fn: (T) -> Boolean
-//): EmitterIface<SetMove<T>> {
-//    val lks = ks.killables()
-//
-//    val result = mutableSetOf<T>()
-//    val out = Emitter<SetMove<T>> {
-//        result.map { SetAdded(it) }
-//    }
-//
-//    fun connect(emitter: EmitterIface<SetMove<T>>, thisSet: MutableSet<T>) {
-//        lks += emitter.add { m ->
-//            val id = m.value
-//            val before = m.value in result
-//            m.applyTo(thisSet)
-//            val after = fn(id)
-//
-//            when {
-//                before && !after -> {
-//                    result -= id
-//                    out.emit(SetRemoved(id))
-//                }
-//                !before && after -> {
-//                    result += id
-//                    out.emit(SetAdded(id))
-//                }
-//            }
-//        }
-//
-//    }
-//    pairs.forEach { (em, set) ->
-//        connect(em, set)
-//    }
-//
-//    return out
-//
-//}
-//
-//fun <T> combine(
-//    ks: Killables,
-//    e1: EmitterIface<SetMove<T>>,
-//    e2: EmitterIface<SetMove<T>>,
-//    e3: EmitterIface<SetMove<T>>,
-//    fn: (Boolean, Boolean, Boolean) -> Boolean
-//): EmitterIface<SetMove<T>> {
-//    val set1 = mutableSetOf<T>()
-//    val set2 = mutableSetOf<T>()
-//    val set3 = mutableSetOf<T>()
-//
-//    val after = { id: T ->
-//        val v1 = id in set1
-//        val v2 = id in set2
-//        val v3 = id in set3
-//        fn(v1, v2, v3)
-//    }
-//
-//    return combineN(
-//        ks,
-//        listOf(
-//            Pair(e1, set1),
-//            Pair(e2, set2),
-//            Pair(e3, set3)
-//        ),
-//        after
-//    )
-//}
-//
-//fun <T> combine(
-//    ks: Killables,
-//    e1: EmitterIface<SetMove<T>>,
-//    e2: EmitterIface<SetMove<T>>,
-//    fn: (Boolean, Boolean) -> Boolean
-//): EmitterIface<SetMove<T>> {
-//
-//    val set1 = mutableSetOf<T>()
-//    val set2 = mutableSetOf<T>()
-//
-//    val after = { id: T ->
-//        val v1 = id in set1
-//        val v2 = id in set2
-//        fn(v1, v2)
-//    }
-//
-//    return combineN(
-//        ks,
-//        listOf(
-//            Pair(e1, set1),
-//            Pair(e2, set2)
-//        ),
-//        after
-//    )
-//}
-//
-//fun <T> EmitterIface<SetMove<T>>.andIn(other: EmitterIface<SetMove<T>>, ks: Killables): EmitterIface<SetMove<T>> {
-//    return combineAnd(ks, this, other)
-//}
-//
-//fun <T> EmitterIface<SetMove<T>>.feedTo(ks: killable.KillSet, list: MutableList<T>) {
-//    ks += add { m ->
-//        m.applyTo(list)
-//    }
-//}
 fun <T> EmitterIface<SetMove<T>>.feedTo(ks: killable.KillSet, list: MutableSet<T>) {
     ks += add { m ->
         m.applyTo(list)
@@ -813,209 +476,39 @@ fun <T> SetSource<T>.random(ks: KillSet, globalExclude: Set<T>): ReceiveChannel<
     return channel
 }
 
-//fun <T> priorityMerge(
-//    kills: KillSet,
-//    vararg channels: RandomSource<T>
-//): ReceiveChannel<T> {
-//    val channel = Channel<T>(Channel.RENDEZVOUS)
-//
-//    val firstAvailable = Rx {
-//        channels.find { it.available() }
-//    }.addedTo(kills)
-//
-//    val seq = channels.asSequence()
-//    GlobalScope.launch {
-//        suspend fun first(): T {
-//            val fks = Killables()
-//            val cd = CompletableDeferred<T>()
-//
-//            channels.forEach {  ch ->
-//                launch {
-//                    cd.complete(
-//                        ch.receive()
-//                    )
-//                    fks.kill()
-//                }.addedTo(fks.killSet)
-//            }
-//
-//            return cd.await()
-//        }
-//
-//        while (true) {
-//            channel.send(
-//                seq.map { it.poll() }.firstOrNull { it != null } ?: first()
-//            )
-//        }
-//    }.addedTo(kills)
-//
-//
-//
-//    return channel
-//}
+open class AddRemoveImpl<T> {
 
-//interface SetSourceWithKey<T, K>: SetSource<T> {
-//    fun get(k: K): Deferred<T>
-//    suspend fun getOrPut(id: K, fn: suspend (T) -> Unit): T
-//}
-//
-//fun <T, S> SetSource<T>.map(mfn: (T) -> S) = object : SetSource<S> {
-//    override val current: Set<S>
-//        get() = this@map.current.map(mfn).toSet()
-//
-//    override fun listen(ks: KillSet, fn: (SetMove<S>) -> Unit): Set<S> {
-//        return this@map.listen(ks) { m -> fn(m.map(mfn)) }.map(mfn).toSet()
-//    }
-//}
-//
-//fun <T> SetSource<T>.filtered(ks: KillSet, rxfn: (T) -> Boolean): SetSource<T> {
-//
-//    var curr = setOf<T>()
-//    val kills = mutableMapOf<T, Trigger>()
-//
-//    val f = Emitter<SetMove<T>>()
-//
-//    fun add(v: T) {
-//        curr += v
-//        f.emit(SetAdded(v))
-//    }
-//    fun remove(v: T) {
-//        curr -= v
-//        f.emit(SetRemoved(v))
-//    }
-//
-//    fun process(m: SetMove<T>) {
-//        val v = m.value
-//        when (m) {
-//            is SetAdded -> {
-//                val vks = ks.killables()
-//                val rxv = Rx(vks.killSet) { rxfn(v) }
-//                kills[v] = vks.kill
-//                rxv.forEach(vks.killSet) { fv ->
-//                    if (fv) add(v)
-//                    else remove(v)
-//                }
-//            }
-//            is SetRemoved -> {
-//                kills.remove(v)?.invoke()
-//
-//                if (v in curr) {
-//                    remove(v)
-//                }
-//            }
-//        }
-//
-//    }
-//
-//    listen(ks, ::process).also { it.map(::SetAdded).forEach(::process) }
-//
-//    return f.toSetSource { curr }
-//}
-//
-//
-//fun <T> combineN(
-//    ks: KillSet,
-//    pairs: Iterable<Pair<SetSource<T>, MutableSet<T>>>,
-//    fn: (T) -> Boolean
-//): SetSource<T> {
-//
-//    var result = setOf<T>()
-//    val out = Emitter<SetMove<T>>()
-//
-//    fun connect(emitter: SetSource<T>, thisSet: MutableSet<T>) {
-//        fun process(m: SetMove<T>) {
-//            val id = m.value
-//            val before = m.value in result
-//            m.applyTo(thisSet)
-//            val after = fn(id)
-//
-//            when {
-//                before && !after -> {
-//                    result -= id
-//                    out.emit(SetRemoved(id))
-//                }
-//                !before && after -> {
-//                    result += id
-//                    out.emit(SetAdded(id))
-//                }
-//            }
-//        }
-//        emitter.listen(ks, ::process).also { it.map(::SetAdded).forEach(::process) }
-//    }
-//    pairs.forEach { (em, set) ->
-//        connect(em, set)
-//    }
-//
-//    return out.toSetSource { result }
-//
-//}
-//
-//fun <T> combine(
-//    ks: KillSet,
-//    e1: SetSource<T>,
-//    e2: SetSource<T>,
-//    e3: SetSource<T>,
-//    fn: (Boolean, Boolean, Boolean) -> Boolean
-//): SetSource<T> {
-//    val set1 = mutableSetOf<T>()
-//    val set2 = mutableSetOf<T>()
-//    val set3 = mutableSetOf<T>()
-//
-//    val after = { id: T ->
-//        val v1 = id in set1
-//        val v2 = id in set2
-//        val v3 = id in set3
-//        fn(v1, v2, v3)
-//    }
-//
-//    return combineN(
-//        ks,
-//        listOf(
-//            Pair(e1, set1),
-//            Pair(e2, set2),
-//            Pair(e3, set3)
-//        ),
-//        after
-//    )
-//}
-//
-//fun <T> combine(
-//    ks: KillSet,
-//    e1: SetSource<T>,
-//    e2: SetSource<T>,
-//    fn: (Boolean, Boolean) -> Boolean
-//): SetSource<T> {
-//
-//    val set1 = mutableSetOf<T>()
-//    val set2 = mutableSetOf<T>()
-//
-//    val after = { id: T ->
-//        val v1 = id in set1
-//        val v2 = id in set2
-//        fn(v1, v2)
-//    }
-//
-//    return combineN(
-//        ks,
-//        listOf(
-//            Pair(e1, set1),
-//            Pair(e2, set2)
-//        ),
-//        after
-//    )
-//}
-//
-//fun <T> SetSource<T>.toEmitter(): EmitterIface<SetMove<T>> = object : EmitterIface<SetMove<T>> {
-//    override fun add(listener: (SetMove<T>) -> Unit): Trigger {
-//        val ks = Killables()
-//        listen(ks.killSet, listener).also {
-//            it.map(::SetAdded).forEach(listener)
-//        }
-//        return ks.kill
-//    }
-//}
-//
-//fun <T> combineAnd(
-//    ks: KillSet,
-//    e1: SetSource<T>,
-//    e2: SetSource<T>
-//): SetSource<T> = combine(ks, e1, e2, Boolean::and)
+    private val mutableItems = mutableListOf<T>()
+
+    val items: List<T> = mutableItems
+
+    val add: AddRemove<T> = { item ->
+        mutableItems += item
+
+        {
+            mutableItems -= item
+        }
+    }
+
+    operator fun plusAssign(item: T) { add(item) }
+    operator fun invoke(item: T) { add(item) }
+
+}
+
+fun <T> AddRemoveImpl<T>.register(deps: HasKills, item: T) {
+    deps.kills += add(item)
+}
+
+class AsyncListeners: AddRemoveImpl<Action>() {
+
+    suspend fun fire() {
+        coroutineScope {
+            for (action in items) {
+                launch {
+                    action()
+                }
+            }
+        }
+    }
+
+}

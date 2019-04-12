@@ -9,6 +9,7 @@ import commonfb.messaging.MessagingControl
 import commonshr.*
 import commonui.*
 import commonui.links.BaseTC
+import commonui.links.EmptyHashStruct
 import commonui.links.LinkApi
 import commonui.links.Linkage
 import commonui.view.ForwardTC
@@ -67,14 +68,22 @@ class LoggedIn(
     override val rawView: TopAndContent = ui()
 
     init {
-        launchReport {
-            for (e in links.messages) {
-                when (e) {
-                    GoOnline ->
-                }
+        if (messaging.fcmSupported) {
+            links.signOutListeners.register {
+                messaging.removeTokenAndWait()
+            }
 
+            launchReport {
+                for (e in links.messages) {
+                    when (e) {
+                        GoOnline -> links.online.load(EmptyHashStruct, 0)?.redisplay?.invoke()
+                        DisableNotifications -> messaging.disableNotifications()
+                        else -> {}
+                    }
+                }
             }
         }
     }
+
 }
 

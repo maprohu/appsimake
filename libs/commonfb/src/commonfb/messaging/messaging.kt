@@ -3,12 +3,17 @@ package commonfb.messaging
 import commonshr.*
 import commonui.*
 import domx.LocalStorageValue
+import domx.on
 import firebase.*
 import firebase.firestore.*
 import firebase.messaging.Messaging
+import firebaseshr.LibMessageWithData
 import kotlinx.coroutines.await
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import org.w3c.dom.MessageEvent
 import rx.Var
+import kotlin.browser.window
 
 val deviceIdLocalStorageValue = LocalStorageValue.stringOpt("appsimake-device-id")
 
@@ -79,7 +84,7 @@ class MessagingControl(
         grantState() == GrantState.Granted
     }
 
-    private fun disableNotifications(doc: DocSource<FcmToken>) = launchReport {
+    private suspend fun disableNotificationsAndWait(doc: DocSource<FcmToken>) {
         txTry {
             doc.txSet(
                 doc.getOrDefault { FcmToken() }.doc.apply {
@@ -87,6 +92,10 @@ class MessagingControl(
                 }
             )
         }
+    }
+
+    private fun disableNotifications(doc: DocSource<FcmToken>) = launchReport {
+        disableNotificationsAndWait(doc)
     }
 
     private suspend fun enableNotifications(token: String) {
@@ -102,6 +111,25 @@ class MessagingControl(
 
     fun disableNotifications() {
         disableNotifications(ownFcmTokenDoc)
+    }
+
+    suspend fun disableNotificationsAndWait() {
+        disableNotificationsAndWait(ownFcmTokenDoc)
+    }
+
+
+    private suspend fun removeTokenAndWait(doc: DocSource<FcmToken>) {
+        txTry {
+            doc.txSet(
+                doc.getOrDefault { FcmToken() }.doc.apply {
+                    token %= null
+                }
+            )
+        }
+    }
+
+    suspend fun removeTokenAndWait() {
+        disableNotificationsAndWait(ownFcmTokenDoc)
     }
 
     private fun publishOnlineToken(token: String) = launchReport {
@@ -218,4 +246,20 @@ class MessagingControl(
 
 
 
+}
+
+
+fun <T> HasKillsLib.libMessages(): ReceiveChannel<T> {
+
+    val ch = Channel<T>(Channel.UNLIMITED)
+
+    window.navigator.serviceWorker.on<MessageEvent>(this, "message") { e ->
+        val msgData = e.data.unsafeCast<LibMessageWithData<T>?>()
+
+        if (msgData != null && msgData.appsimakeApp == lib.name) {
+            ch.offer(msgData.data)
+        }
+    }
+
+    return ch
 }

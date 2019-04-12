@@ -27,7 +27,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
   var TS$Value = $module$appsimake_commonshr.commonshr.properties.TS.Value;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var DynamicOps = $module$appsimake_commonshr.commonshr.properties.DynamicOps;
-  var encodeMessageData = $module$appsimake_firebaseshr.firebaseshr.encodeMessageData_s8jyv4$;
+  var encodeMessageData = $module$appsimake_firebaseshr.firebaseshr.encodeMessageData_yy61vh$;
   function admin$lambda() {
     return require('firebase-admin');
   }
@@ -147,10 +147,10 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
     }
     return FnsDynamicOps_instance;
   }
-  function encodeMessage(token, data) {
+  function encodeMessage(lib, token, data) {
     var $receiver = {};
     $receiver.token = token;
-    $receiver.data = encodeMessageData(data);
+    $receiver.data = encodeMessageData(lib, data);
     return $receiver;
   }
   function functions$lambda() {
@@ -176,7 +176,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'firebase-functions', 'a
   Object.defineProperty(package$commonfns, 'FnsDynamicOps', {
     get: FnsDynamicOps_getInstance
   });
-  package$commonfns.encodeMessage_4w9ihe$ = encodeMessage;
+  package$commonfns.encodeMessage_lvye6n$ = encodeMessage;
   var package$firebasefunctions = _.firebasefunctions || (_.firebasefunctions = {});
   Object.defineProperty(package$firebasefunctions, 'functions', {
     get: get_functions

@@ -41,3 +41,5 @@ interface HasLib {
     val lib: Lib
 }
 
+interface HasKillsLib: HasKills, HasLib
+

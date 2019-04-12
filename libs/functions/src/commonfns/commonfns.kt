@@ -2,6 +2,7 @@ package commonfns
 
 import common.obj
 import commonshr.Function
+import commonshr.Lib
 import commonshr.properties.DynamicOps
 import commonshr.properties.TS
 import firebaseadmin.admin
@@ -60,9 +61,10 @@ object FnsDynamicOps: DynamicOps {
 }
 
 fun encodeMessage(
+    lib: Lib,
     token: String,
     data: Any?
 ) : Message = obj {
     this.token = token
-    this.data = encodeMessageData(data)
+    this.data = encodeMessageData(lib, data)
 }

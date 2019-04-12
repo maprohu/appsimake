@@ -181,7 +181,6 @@ object commonui : JsModule(
 object testappsw : JsModule(
     "libs/testappsw",
     listOf(
-        firebasektjs,
         cachingsw,
         firebaseMessagingSw,
         testapplib
