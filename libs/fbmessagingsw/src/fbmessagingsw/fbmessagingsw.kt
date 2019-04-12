@@ -102,6 +102,7 @@ fun <D> initMessaging(
             e.waitUntil(
                 GlobalScope.async {
                     click(e)
+                    e.notification.close()
                 }.asPromise()
             )
         }
