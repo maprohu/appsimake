@@ -42,6 +42,7 @@ fun main() {
         checklistlib,
         downloadlib,
         eventloglib,
+        storelib,
         mainfns,
 
         index,
@@ -54,6 +55,7 @@ fun main() {
         checklist,
         download,
         eventlog,
+        store,
         music
     )
 
@@ -92,7 +94,9 @@ fun main() {
     fun JsDep.depEntryAttrs(): Iterable<String> {
         return when (this) {
             is JsModule -> listOf( "type=\"module\" module-name=\"$simpleName\"" )
-            is KotlinJsLib -> listOf( "type=\"library\" name=\"$name\" level=\"project\"" )
+            is KotlinJsLib ->
+                deps.flatMap { it.depEntryAttrs() } +
+                    listOf( "type=\"library\" name=\"$name\" level=\"project\"" )
             else -> listOf()
         }
     }

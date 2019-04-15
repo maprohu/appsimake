@@ -8,7 +8,7 @@
     <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry exported="" type="library" name="kotlin-stdlib" level="project" />
-    <orderEntry exported="" type="library" name="atomicfu-js-0.12.3" level="project"/>
-    <orderEntry exported="" type="library" name="kotlinx-coroutines-core-js-1.2.0" level="project"/>
+    <orderEntry exported="" type="module" module-name="storelib"/>
+    <orderEntry exported="" type="module" module-name="commonfb"/>
   </component>
 </module>

@@ -95,6 +95,24 @@
             "value": "mak-age=0"
           }
         ]
+      },
+      {
+        "source": "/eventlog/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "mak-age=0"
+          }
+        ]
+      },
+      {
+        "source": "/store/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "mak-age=0"
+          }
+        ]
       }
     ]
   }

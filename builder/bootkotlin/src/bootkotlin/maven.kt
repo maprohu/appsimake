@@ -58,7 +58,21 @@ val nanohttpd = Maven(
 )
 
 
-val coroutinesVersion = "1.1.1"
+val atomicfuVersion = "0.12.3"
+val atomicfuCommon = Maven(
+    Central,
+    "org.jetbrains.kotlinx",
+    "atomicfu-common",
+    atomicfuVersion
+)
+val atomicfuJs = Maven(
+    Central,
+    "org.jetbrains.kotlinx",
+    "atomicfu-js",
+    atomicfuVersion
+)
+
+val coroutinesVersion = "1.2.0"
 val kotlinxCoroutinesCore = Maven(
     Central,
     "org.jetbrains.kotlinx",
