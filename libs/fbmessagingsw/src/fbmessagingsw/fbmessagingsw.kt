@@ -101,8 +101,8 @@ fun <D> initMessaging(
             e as NotificationEvent
             e.waitUntil(
                 GlobalScope.async {
-                    click(e)
                     e.notification.close()
+                    click(e)
                 }.asPromise()
             )
         }

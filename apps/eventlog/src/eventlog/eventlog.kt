@@ -6,5 +6,5 @@ import commonshr.properties.ago
 import kotlin.js.Date
 
 fun main() {
-    FbLinksFactory.start { Links(it) }
+    FbLinksFactory.start(eventlogLib) { Links(it) }
 }
