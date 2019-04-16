@@ -55,6 +55,7 @@ fun appListUi() = factory.scrollPane {
                 app("tasks", "Tasks")
                 app("gymclock", "Gym Clock")
                 app("checklist", "Checklist")
+                app("tictactoe", "Tic Tac Toe")
 
             }
         }
@@ -65,7 +66,6 @@ fun appListUi() = factory.scrollPane {
             listGroup {
                 app("store", "Store")
                 app("eventlog", "Event Log")
-                app("tictactoe", "Tic Tac Toe")
                 app("music", "Music Player")
                 app("download", "Download")
 //                app("testapp", "Test App")
