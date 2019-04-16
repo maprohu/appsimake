@@ -5,10 +5,7 @@ import fbmessagingsw.*
 import firebaseshr.decodeMessage
 import firebaseshr.decodeMessageData
 import firebaseshr.postLibMessage
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asPromise
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.w3c.dom.events.Event
 import org.w3c.notifications.NotificationAction
 import org.w3c.notifications.NotificationOptions
@@ -44,17 +41,15 @@ fun main() {
             )
         },
         click = { e ->
-            focusOrOpenClient().let { cl ->
-                when (e.action) {
-                    "", GoOnline -> {
-                        cl.postLibMessage(tictactoeLib, GoOnline)
-                    }
-                    DisableNotifications -> {
-                        cl.postLibMessage(tictactoeLib, DisableNotifications)
-                    }
-                    else -> {
-                        console.dir(e)
-                    }
+            when (e.action) {
+                "", GoOnline -> {
+                    libMessageToClient(tictactoeLib, GoOnline)
+                }
+                DisableNotifications -> {
+                    libMessageToClient(tictactoeLib, DisableNotifications)
+                }
+                else -> {
+                    console.dir(e)
                 }
             }
         }

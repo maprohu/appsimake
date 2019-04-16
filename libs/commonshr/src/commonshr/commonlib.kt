@@ -170,3 +170,5 @@ open class FcmToken: RxBase<FcmToken>(), PrivateSingleton {
 fun Lib.privateOf(uid: String) = app.private.doc(uid)
 fun Lib.inboxOf(uid: String) = app.inbox.doc(uid)
 
+
+val MessageUrlParameter = "message"

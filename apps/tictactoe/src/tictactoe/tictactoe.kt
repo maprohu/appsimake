@@ -10,6 +10,9 @@ import tictactoelib.tictactoeLib
 import kotlin.browser.window
 
 fun main() {
+
+    APP.serviceWorkerMessages
+
     FbLinksFactory.start(tictactoeLib) { Links(it) }
 }
 

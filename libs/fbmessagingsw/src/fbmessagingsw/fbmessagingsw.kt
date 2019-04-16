@@ -2,9 +2,11 @@ package fbmessagingsw
 
 import common.obj
 import commonshr.Lib
+import commonshr.MessageUrlParameter
+import commonshr.encodeURIComponent
 import commonshr.identity
-import firebaseshr.LibMessageWithData
 import firebaseshr.MessageInterface
+import firebaseshr.createLibMessage
 import firebaseshr.decodeMessageData
 import kotlinx.coroutines.*
 import org.w3c.notifications.NotificationEvent
@@ -45,7 +47,7 @@ suspend fun clientList(): List<WindowClient> {
     val arr = self.clients.matchAll(
         ClientQueryOptions(
             type = ClientType.WINDOW,
-            includeUncontrolled = true
+            includeUncontrolled = false
         )
     ).await() as Array<WindowClient>
 
@@ -57,6 +59,22 @@ suspend fun firstClient() = clientList().firstOrNull()
 suspend fun focusOrOpenClient() =
     firstClient()?.focus()?.await() ?: self.clients.openWindow(self.registration.scope).await()!!
 
+suspend fun messageToClient(data: Any?) {
+    val fc = firstClient()
+
+    if (fc != null) {
+        fc.focus().await().postMessage(data)
+    } else {
+        self.clients.openWindow(
+            "${self.registration.scope}?$MessageUrlParameter=${encodeURIComponent(JSON.stringify(data))}"
+        ).await()
+    }
+}
+
+suspend fun <T> libMessageToClient(
+    lib: Lib,
+    data: T
+) = messageToClient(createLibMessage(lib, data))
 
 fun <D> initMessaging(
     lib: Lib,
@@ -78,12 +96,12 @@ fun <D> initMessaging(
                     GlobalScope.async {
                         val clients = clientList()
 
-                        val focusedClient = clients.find { it.focused }
+                        val visibleClient = clients.find { it.visibilityState == "visible" }
 
                         val data = decode(decodeMessageData(msgData).data)
 
-                        if (focusedClient != null) {
-                            focusedClient.foreground(data)
+                        if (visibleClient != null) {
+                            visibleClient.foreground(data)
                         } else {
                             NotificationBuilder(lib).apply {
                                 background(data)

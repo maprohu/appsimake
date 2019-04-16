@@ -42,4 +42,5 @@ interface HasLib {
 }
 
 interface HasKillsLib: HasKills, HasLib
+interface HasCsKillsLib: HasCsKills, HasKillsLib
 

@@ -37,7 +37,6 @@ class Links(
     val messages by lazy {
         async {
             libMessages<MessageType>(fcmDeferred.await())
-
         }
     }
 

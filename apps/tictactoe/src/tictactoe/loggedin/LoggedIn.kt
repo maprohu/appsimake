@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import org.w3c.notifications.Notification
 import rx.Var
 import tictactoelib.*
+import kotlin.browser.window
 
 interface LoggedInTC<T: LoggedInTC<T>>: BaseTC, LoggedInPath, LinkApi<T>
 
@@ -76,7 +77,11 @@ class LoggedIn(
             launchReport {
                 for (e in links.messages.await()) {
                     when (e) {
-                        GoOnline -> links.online.load(EmptyHashStruct, 0)?.redisplay?.invoke()
+                        GoOnline -> {
+//                            links.online.load(EmptyHashStruct, 0)?.redisplay?.invoke()
+                            window.location.hash = "#${links.online.name}"
+
+                        }
                         DisableNotifications -> messaging.disableNotifications()
                         else -> {}
                     }

@@ -41,13 +41,18 @@ fun encodeMessageData(
     this.json = JSON.stringify(data)
 }
 
+
+fun <T> createLibMessage(
+    lib: Lib,
+    data: T
+) = obj<LibMessageWithData<T>> {
+    this.appsimakeApp = lib.name
+    this.data = data
+}
+
 fun <T> Client.postLibMessage(
     lib: Lib,
     data: T
-) = postMessage(
-    obj<LibMessageWithData<T>> {
-        this.appsimakeApp = lib.name
-        this.data = data
-    }
-)
+) = postMessage(createLibMessage(lib, data))
+
 

@@ -11,7 +11,9 @@ import firebaseshr.LibMessageWithData
 import kotlinx.coroutines.await
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import org.w3c.dom.MessageEvent
+import org.w3c.dom.url.URLSearchParams
 import rx.Var
 import kotlin.browser.window
 
@@ -249,16 +251,48 @@ class MessagingControl(
 }
 
 
-fun <T> HasKillsLib.libMessages(fcmOpt: Messaging?): ReceiveChannel<T> {
+fun <T> HasCsKillsLib.libMessages(fcmOpt: Messaging?): ReceiveChannel<T> {
 
     val ch = Channel<T>(Channel.UNLIMITED)
 
-    fcmOpt?.let { fcm ->
-        window.navigator.serviceWorker.on<MessageEvent>(this, "message") { e ->
-            val msgData = e.data.unsafeCast<LibMessageWithData<T>?>()
+    fun process(data: Any?) {
+        val msgData = data.unsafeCast<LibMessageWithData<T>?>()
 
-            if (msgData != null && msgData.appsimakeApp == lib.name) {
-                ch.offer(msgData.data)
+        if (msgData != null && msgData.appsimakeApp == lib.name) {
+            ch.offer(msgData.data)
+        }
+    }
+
+
+    window.location.search.let { s ->
+        if (s.isNotBlank()) {
+            URLSearchParams(s).get(MessageUrlParameter)?.let { msg ->
+                try {
+                    process(JSON.parse(msg))
+                } catch (e: dynamic) {
+                    console.dir(e.unsafeCast<Any>())
+                }
+            }
+
+            window.location.apply {
+                window.history.replaceState(
+                    null,
+                    "",
+                    "$origin$pathname$hash"
+                )
+            }
+        }
+
+    }
+
+    fcmOpt?.let { fcm ->
+        launchReport {
+            try {
+                for (e in APP.serviceWorkerMessages) {
+                    process(e.data)
+                }
+            } finally {
+                ch.close()
             }
         }
 

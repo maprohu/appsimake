@@ -57,6 +57,7 @@ abstract class FbLinksFactory(
             fn: suspend (FbLinksDeps) -> FbLinksFactory
         ) = launchGlobal {
             APP.startRegisteringServiceWorker()
+
             BodyTC().apply {
                 val app = FB.app
 

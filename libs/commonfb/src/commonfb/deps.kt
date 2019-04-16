@@ -1,6 +1,7 @@
 package commonfb
 
 import commonfb.messaging.MessagingControl
+import commonshr.HasCsKillsLib
 import commonshr.HasKills
 import commonshr.HasKillsLib
 import commonui.*
@@ -14,7 +15,7 @@ interface HasDbEdit: HasDb, HasEdit
 interface HasDbEditKills: HasDbEdit, HasKills
 
 interface HasCsDbKillsToast: HasCsDbKills, HasCsToast
-interface HasCsDbKillsLibToast: HasCsDbKillsToast, HasKillsLib
+interface HasCsDbKillsLibToast: HasCsDbKillsToast, HasCsKillsLib
 
 interface HasLogin {
     val userState: RxIface<UserState>
