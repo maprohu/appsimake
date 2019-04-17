@@ -14,6 +14,7 @@ import fontawesome.edit
 import org.w3c.dom.Node
 import pell.*
 import rx.Var
+import styles.height0
 import styles.resizeNone
 import styles.scrollVertical
 import kotlin.browser.document
@@ -37,6 +38,7 @@ fun EditHtml.ui(): TopAndContent {
             flexGrow1
             scrollVertical
             resizeNone
+            border0
         }
         pellChange += { html ->
             value = html
@@ -48,10 +50,14 @@ fun EditHtml.ui(): TopAndContent {
     }
 
 
-    val editorNode = document.div {
+    val editorNode = document.column {
+        cls {
+            flexGrow1
+            height0
+        }
         pell.init(
             obj {
-                this.element = this@div
+                this.element = this@column
                 this.onChange = { html ->
                     pellChange.emit(html)
                 }
@@ -78,8 +84,18 @@ fun EditHtml.ui(): TopAndContent {
                     "link",
                     "image"
                 )
+//                this.classes = obj {
+//
+//                }
             }
         ).apply {
+            content {
+                cls {
+                    hAuto
+                    scrollVertical
+                    flexGrow1
+                }
+            }
             content.innerHTML = editing.current.html.now
             codeChange += { html ->
                 content.innerHTML = html
