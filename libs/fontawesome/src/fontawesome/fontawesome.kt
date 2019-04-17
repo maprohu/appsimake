@@ -168,6 +168,8 @@ val Fa.redoAlt by facss()
 val Fa.tachometerAlt by facss()
 val Fa.spinner by facss()
 val Fa.info by facss()
+val Fa.edit by facss()
+val Fa.code by facss()
 
 val FaBrands.google by facss()
 

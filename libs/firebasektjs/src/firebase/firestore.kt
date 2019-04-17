@@ -102,6 +102,9 @@ external interface DocumentReference {
     // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentReference?authuser=0#path
     val path: String
 
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.DocumentReference?authuser=0#parent
+    val parent: CollectionReference
+
     fun collection(path: String) : CollectionReference
 
     fun get(options: GetOptions = definedExternally) : Promise<DocumentSnapshot>
@@ -175,6 +178,12 @@ open external class Query {
 
 // https://firebase.google.com/docs/reference/js/firebase.firestore.CollectionReference?authuser=0
 external class CollectionReference : Query {
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.CollectionReference?authuser=0#id
+    val id: String
+
+    // https://firebase.google.com/docs/reference/js/firebase.firestore.CollectionReference?authuser=0#parent
+    val parent: DocumentReference?
 
     fun doc(path: String = definedExternally) : DocumentReference
 

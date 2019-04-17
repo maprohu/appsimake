@@ -134,6 +134,13 @@ abstract class FbLinksFactory(
         }
     }
 
+    val functionsDeferred by lazy {
+        async {
+            fcmDeferred.await()
+            deps.app.functions()
+        }
+    }
+
     val authState: RxIface<UserState> by lazy {
         val rxv = Var<UserState>(UserState.Unknown)
 
@@ -149,4 +156,11 @@ abstract class FbLinksFactory(
         rxv
     }
 
+    suspend fun requestCustomToken(
+        user: User
+    ) = requestCustomToken(
+        user,
+        functionsDeferred,
+        deps.auth
+    )
 }

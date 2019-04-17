@@ -15,9 +15,11 @@ fun tokenImpl(exports: dynamic) {
     customToken.implementAsync(exports) { _, ctx ->
         val db = admin.firestore()
         ctx.auth?.let { cca ->
-            val d = shared.app.admin.users.tokens.doc(cca.uid).docRef(db).get().await().data()
+            val d = shared.app.admin.users.tokens.doc(cca.uid).docRef(db).get().await()
             val tdc = TokenDeveloperClaims().apply {
-                readDynamic(d, FnsDynamicOps)
+                if (d.exists) {
+                    readDynamic(d.data(), FnsDynamicOps)
+                }
             }
             admin.auth().createCustomToken(cca.uid, tdc.writeDynamic(FnsDynamicOps))
         }

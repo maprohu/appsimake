@@ -82,9 +82,12 @@ define(['exports', 'kotlin', 'appsimake-functions', 'appsimake-commonshr', 'apps
           case 1:
             throw this.exception_0;
           case 2:
-            var d = this.result_0.data();
+            var d = this.result_0;
             var $receiver = new TokenDeveloperClaims();
-            readDynamic($receiver, d, commonfns.FnsDynamicOps);
+            if (d.exists) {
+              readDynamic($receiver, d.data(), commonfns.FnsDynamicOps);
+            }
+
             var tdc = $receiver;
             this.local$tmp$_0 = firebaseadmin.admin.auth().createCustomToken(this.local$tmp$.uid, writeDynamic(tdc, commonfns.FnsDynamicOps));
             this.state_0 = 3;

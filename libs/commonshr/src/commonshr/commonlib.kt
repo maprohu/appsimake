@@ -33,7 +33,12 @@ interface DocWrap<in D>: HasPath {
     val parent: CollectionWrap<D>?
 }
 
-fun <D> DocWrap<D>.toSource(factory: DynamicFactory<D>) = DocSource(id, parent!!, factory)
+fun <D> DocWrap<D>.toSourceRoot(factory: DynamicFactory<D>) = DocSource(id, parent!!, factory)
+fun <D: RxBase<*>> DocWrap<D>.toSource(fn: () -> D) = toSourceRoot { d, ops ->
+    fn().apply {
+        readDynamic(d, ops)
+    }
+}
 
 class DocWrapImpl<in D>(
     override val id: String,
@@ -128,6 +133,7 @@ object apps : CollectionWrap<AppDoc>("apps", null)
 interface AppDoc
 
 val <D: AppDoc> DocWrap<D>.admin by coll<AdminDoc>()
+val <D: AppDoc> DocWrap<D>.meta by coll<MetaDoc>()
 val <D: AppDoc> DocWrap<D>.private by coll<Private>()
 val <D: AppDoc> DocWrap<D>.publish by coll<Publish<*>>()
 val <D: AppDoc> DocWrap<D>.locks by coll<Lock<*>>()
@@ -144,6 +150,7 @@ interface Singleton
 interface PrivateSingleton
 interface Private
 interface AdminDoc
+interface MetaDoc
 interface Inbox
 interface InboxPublic {
     val from: ROProp<*, String>

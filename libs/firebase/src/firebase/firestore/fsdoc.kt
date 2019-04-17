@@ -15,7 +15,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.map
 import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.launch
 import kotlin.js.Promise
 
 fun DocWrap<*>.docRef(db: Firestore) = db.doc(path)
@@ -142,6 +141,18 @@ suspend fun <D> DocSource<D>.getOrNull(deps: HasDb, source: GetOptionsSource = G
     }
 }
 
+suspend fun <T> DocSource<T>.getOrDefault(
+    deps: HasDb,
+    source: GetOptionsSource = GetOptionsSource.default,
+    fn: () -> T
+) =
+    extractOrDefault(
+        docRef(deps.db).get(
+            obj { this.source = source }
+        ).await(),
+        fn
+    )
+
 fun <T> DocSource<T>.extractOrDefault(ds: DocumentSnapshot, fn: () -> T) = if (ds.exists) {
     FsEditable(
         this,
@@ -178,6 +189,8 @@ suspend fun <D> DocSource<D>.toFsDoc(
     }
 }
 
+fun <D> DocSource<D>.wrapFsDoc(doc: D): FsDoc<D> = FsDoc(toFsId(false), doc)
+
 fun <D: RxBase<D>> DocWrap<D>.set(
     deps: HasDb,
     data: D,
@@ -188,6 +201,18 @@ fun <D: RxBase<D>> DocWrap<D>.set(
         options
     )
 }
+
+fun <T> CollectionReference.wrap(): CollectionWrap<T> =
+    CollectionWrap(
+        id,
+        parent?.wrap<Any>()
+    )
+
+fun <T> DocumentReference.wrap(): DocWrap<T> =
+    DocWrapImpl(
+        id,
+        parent.wrap()
+    )
 
 
 

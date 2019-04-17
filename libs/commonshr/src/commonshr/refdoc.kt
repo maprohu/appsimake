@@ -2,7 +2,6 @@ package commonshr
 
 import common.dyn
 import commonshr.properties.DynamicOps
-import commonshr.properties.RxBase
 import rx.Var
 
 class RefDoc<I, D>(
@@ -56,7 +55,7 @@ val <D> FsId<D>.docWrap
                 throw Error("Doc has no id!")
             }
             is FsIdState.HasId -> {
-                coll.doc(st.id).toSource(factory)
+                coll.doc(st.id).toSourceRoot(factory)
             }
         }
     }

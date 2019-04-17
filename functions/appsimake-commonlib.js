@@ -14,17 +14,45 @@ function define(args, fn) {
 
 define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $module$appsimake_commonshr) {
   'use strict';
-  var Lib = $module$appsimake_commonshr.commonshr.Lib;
-  var named = $module$appsimake_commonshr.common.named_cq6yhu$;
   var PropertyMetadata = Kotlin.PropertyMetadata;
-  var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
-  var AdminDoc = $module$appsimake_commonshr.commonshr.AdminDoc;
   var RxBase = $module$appsimake_commonshr.commonshr.properties.RxBase;
   var Kind_CLASS = Kotlin.Kind.CLASS;
+  var MetaDoc = $module$appsimake_commonshr.commonshr.MetaDoc;
+  var Lib = $module$appsimake_commonshr.commonshr.Lib;
+  var named = $module$appsimake_commonshr.common.named_cq6yhu$;
+  var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
+  var AdminDoc = $module$appsimake_commonshr.commonshr.AdminDoc;
   var doc = $module$appsimake_commonshr.commonshr.doc_287e2$;
   var coll = $module$appsimake_commonshr.commonshr.coll_287e2$;
+  HtmlPageBase.prototype = Object.create(RxBase.prototype);
+  HtmlPageBase.prototype.constructor = HtmlPageBase;
+  HtmlPage.prototype = Object.create(HtmlPageBase.prototype);
+  HtmlPage.prototype.constructor = HtmlPage;
   TokenDeveloperClaims.prototype = Object.create(RxBase.prototype);
   TokenDeveloperClaims.prototype.constructor = TokenDeveloperClaims;
+  function HtmlPageBase() {
+    RxBase.call(this);
+    this.html_p32msg$_0 = this.o.string_61zpoe$().provideDelegate_n5byny$(this, HtmlPageBase$html_metadata);
+  }
+  var HtmlPageBase$html_metadata = new PropertyMetadata('html');
+  Object.defineProperty(HtmlPageBase.prototype, 'html', {
+    get: function () {
+      return this.html_p32msg$_0.getValue_lrcp0p$(this, HtmlPageBase$html_metadata);
+    }
+  });
+  HtmlPageBase.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'HtmlPageBase',
+    interfaces: [MetaDoc, RxBase]
+  };
+  function HtmlPage() {
+    HtmlPageBase.call(this);
+  }
+  HtmlPage.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'HtmlPage',
+    interfaces: [HtmlPageBase]
+  };
   function shared$lambda(it) {
     return new Lib(it);
   }
@@ -72,12 +100,15 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   function get_tokens($receiver) {
     return tokens.getValue_lrcp0p$($receiver, tokens_metadata);
   }
+  var CustomSignInProvider;
   var customToken_metadata = new PropertyMetadata('customToken');
   var customToken;
   function get_customToken() {
     return customToken.getValue_lrcp0p$(this, customToken_metadata);
   }
   var package$commonlib = _.commonlib || (_.commonlib = {});
+  package$commonlib.HtmlPageBase = HtmlPageBase;
+  package$commonlib.HtmlPage = HtmlPage;
   var package$commonlib_0 = package$commonlib.commonlib || (package$commonlib.commonlib = {});
   Object.defineProperty(package$commonlib_0, 'shared', {
     get: get_shared
@@ -86,12 +117,18 @@ define(['exports', 'kotlin', 'appsimake-commonshr'], function (_, Kotlin, $modul
   package$commonlib_0.TokenDeveloperClaims = TokenDeveloperClaims;
   package$commonlib_0.get_users_g4qqrv$ = get_users;
   package$commonlib_0.get_tokens_b1xqfl$ = get_tokens;
+  Object.defineProperty(package$commonlib_0, 'CustomSignInProvider', {
+    get: function () {
+      return CustomSignInProvider;
+    }
+  });
   Object.defineProperty(package$commonlib_0, 'customToken', {
     get: get_customToken
   });
   shared = named(shared$lambda).provideDelegate_n5byny$(this, shared_metadata);
   users = doc();
   tokens = coll();
+  CustomSignInProvider = 'custom';
   customToken = get_shared().function_q3lmfv$().provideDelegate_n5byny$(this, customToken_metadata);
   Kotlin.defineModule('appsimake-commonlib', _);
   return _;

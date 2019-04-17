@@ -16,8 +16,6 @@ external class Auth {
     // https://firebase.google.com/docs/reference/js/firebase.auth.Auth#signInWithCustomToken
     fun signInWithCustomToken(token: String): Promise<UserCredential>
 
-
-
     fun setPersistence(persistence: String) : Promise<Unit>
 
     // https://firebase.google.com/docs/reference/js/firebase.auth.Auth#onAuthStateChanged
@@ -33,7 +31,6 @@ external class Auth {
             error: (Error) -> Unit,
             completed: () -> Unit
     ) : () -> Unit
-
 
     // https://firebase.google.com/docs/reference/js/firebase.auth.Auth#onIdTokenChanged
     fun onIdTokenChanged(

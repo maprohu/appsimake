@@ -27,8 +27,14 @@ external interface User : UserInfo {
 
 }
 
-// https://firebase.google.com/docs/reference/js/firebase.auth.IdTokenResult
+// https://firebase.google.com/docs/reference/js/firebase.auth.IDTokenResult
 external interface IdTokenResult {
+
+    // https://firebase.google.com/docs/reference/js/firebase.auth.IDTokenResult#claims
+    val claims: dynamic
+
+    // https://firebase.google.com/docs/reference/js/firebase.auth.IDTokenResult#signinprovider
+    val signInProvider: String
 
 }
 

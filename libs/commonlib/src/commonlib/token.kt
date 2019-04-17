@@ -16,5 +16,6 @@ class TokenDeveloperClaims: RxBase<TokenDeveloperClaims>() {
 val CollectionWrap<AdminDoc>.users by doc<AdminUsersDoc>()
 val DocWrap<AdminUsersDoc>.tokens by coll<TokenDeveloperClaims>()
 
+val CustomSignInProvider = "custom"
 val customToken by shared.function<Unit, String?>()
 

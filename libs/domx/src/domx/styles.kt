@@ -88,6 +88,7 @@ val Cls.overflowVisible by def(
     "overflow: visible;"
 )
 
+val Cls.resizeNone by def("resize: none;" )
 val Cls.scrollVertical by def("overflow-y: auto;" )
 val Cls.scrollHorizontal by def("overflow-x: auto;" )
 

@@ -22,7 +22,11 @@ fun LoggedIn.ui() = TopAndContent(
             }
         }
         right.badgeAnchor {
-            cls.alignSelfCenter
+            cls {
+                m1
+                row()
+                alignSelfCenter
+            }
             info
             pill
             insert.icon {

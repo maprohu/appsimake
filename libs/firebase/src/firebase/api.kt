@@ -26,6 +26,7 @@ interface DbApi: Api, HasDb {
 
     suspend fun <D> DocSource<D>.getCachedOrServer() = getCachedOrServer(api)
     suspend fun <D> DocSource<D>.getOrNull(source: GetOptionsSource = GetOptionsSource.default): D? = getOrNull(api, source)
+    suspend fun <T> DocSource<T>.getOrDefault(source: GetOptionsSource = GetOptionsSource.default, fn: () -> T) = getOrDefault(api, source, fn)
 
     suspend fun <D> DocSource<D>.toFsDoc(
         source: GetOptionsSource = GetOptionsSource.default,

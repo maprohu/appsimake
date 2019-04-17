@@ -12,8 +12,10 @@ fun main() {
 
     val modules = listOf(
         buildenv,
+
+        pellktjs,
+
         commonshr,
-//        common,
         indexeddb,
         domx,
         bootstrap,
@@ -33,6 +35,7 @@ fun main() {
 
         firebaseshr,
         commonlib,
+        indexlib,
         taskslib,
         testapplib,
         testappfns,
@@ -43,6 +46,7 @@ fun main() {
         downloadlib,
         eventloglib,
         storelib,
+        adminlib,
         mainfns,
 
         index,
@@ -56,6 +60,7 @@ fun main() {
         download,
         eventlog,
         store,
+        admin,
         music
     )
 

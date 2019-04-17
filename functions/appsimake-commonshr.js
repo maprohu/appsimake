@@ -1759,8 +1759,18 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     simpleName: 'DocWrap',
     interfaces: [HasPath]
   };
-  function toSource($receiver, factory) {
+  function toSourceRoot($receiver, factory) {
     return new DocSource($receiver.id, ensureNotNull($receiver.parent), factory);
+  }
+  function toSource$lambda(closure$fn) {
+    return function (d, ops) {
+      var $receiver = closure$fn();
+      readDynamic($receiver, d, ops);
+      return $receiver;
+    };
+  }
+  function toSource($receiver, fn) {
+    return toSourceRoot($receiver, toSource$lambda(fn));
   }
   function DocWrapImpl(id, parent) {
     this.id_hli9nb$_0 = id;
@@ -1970,6 +1980,11 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   function get_admin($receiver) {
     return admin.getValue_lrcp0p$($receiver, admin_metadata);
   }
+  var meta;
+  var meta_metadata = new PropertyMetadata('meta');
+  function get_meta($receiver) {
+    return meta.getValue_lrcp0p$($receiver, meta_metadata);
+  }
   var private_0;
   var private_metadata = new PropertyMetadata('private');
   function get_private($receiver) {
@@ -2044,6 +2059,13 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   AdminDoc.$metadata$ = {
     kind: Kind_INTERFACE,
     simpleName: 'AdminDoc',
+    interfaces: []
+  };
+  function MetaDoc() {
+  }
+  MetaDoc.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'MetaDoc',
     interfaces: []
   };
   function Inbox() {
@@ -5631,7 +5653,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
     if (equals(st, FsIdState$NoId_getInstance()))
       throw Error_init('Doc has no id!');
     else if (Kotlin.isType(st, FsIdState$HasId)) {
-      block$result = toSource($receiver.coll.doc_61zpoe$(st.id), $receiver.factory);
+      block$result = toSourceRoot($receiver.coll.doc_61zpoe$(st.id), $receiver.factory);
     }
      else {
       block$result = Kotlin.noWhenBranchMatched();
@@ -8796,7 +8818,8 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.Lib = Lib;
   package$commonshr.Function = Function;
   package$commonshr.DocWrap = DocWrap;
-  package$commonshr.toSource_5wla0b$ = toSource;
+  package$commonshr.toSourceRoot_5wla0b$ = toSourceRoot;
+  package$commonshr.toSource_6l9r10$ = toSource;
   package$commonshr.DocWrapImpl = DocWrapImpl;
   package$commonshr.DocSource_init_swenej$ = DocSource_init;
   package$commonshr.DocSource = DocSource;
@@ -8814,6 +8837,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   });
   package$commonshr.AppDoc = AppDoc;
   package$commonshr.get_admin_py8usb$ = get_admin;
+  package$commonshr.get_meta_py8usb$ = get_meta;
   package$commonshr.get_private_py8usb$ = get_private;
   package$commonshr.get_publish_py8usb$ = get_publish;
   package$commonshr.get_locks_py8usb$ = get_locks;
@@ -8827,6 +8851,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   package$commonshr.PrivateSingleton = PrivateSingleton;
   package$commonshr.Private = Private;
   package$commonshr.AdminDoc = AdminDoc;
+  package$commonshr.MetaDoc = MetaDoc;
   package$commonshr.Inbox = Inbox;
   package$commonshr.InboxPublic = InboxPublic;
   package$commonshr.Tmp = Tmp;
@@ -9370,6 +9395,7 @@ define(['exports', 'kotlin', 'kotlinx-coroutines-core'], function (_, Kotlin, $m
   RxLookupKills$Holder.prototype.forEachLater_cksb0z$ = RxIface.prototype.forEachLater_cksb0z$;
   Object.defineProperty(RxMutableSet.prototype, 'diffsAll', Object.getOwnPropertyDescriptor(RxSet.prototype, 'diffsAll'));
   admin = coll();
+  meta = coll();
   private_0 = coll();
   publish = coll();
   locks = coll();
