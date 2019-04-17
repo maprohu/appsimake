@@ -15,6 +15,7 @@ fun LoggedInNoAdmin.ui() = TopAndContent(
                 signOut {
                     loggedIn.signOut()
                 }
+                reload
             }
         }
     }.node,
@@ -40,6 +41,7 @@ fun LoggedInAdmin.ui() = TopAndContent(
                 signOut {
                     loggedIn.signOut()
                 }
+                reload
             }
         }
     }.node,

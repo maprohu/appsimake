@@ -49,6 +49,7 @@ interface KillsUixApi: Api, HasKillsUix, KillsApiCommonui {
 
     val Tab.clickActivate get() = clickActivate(api)
     val Tab.clickToggle get() = clickToggle(api)
+    val DropdownMenu.reload get() = reload(api)
 
 }
 
